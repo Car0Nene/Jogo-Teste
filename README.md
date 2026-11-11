@@ -1,8 +1,8 @@
 # Família Fighter — Batalha na Padaria
 
-Jogo de luta arcade em HTML Canvas e JavaScript puro (sem build), com Juraci e Carlos.
+Jogo de luta arcade em HTML Canvas e JavaScript puro (sem build), com a família: Juraci, Carlos, Pedro, Daniel, Franciely e Gabi.
 
-## Novidades da v0.5 e v0.6
+## Novidades da v0.5 a v0.7
 
 - **Animações refeitas:** atlas único e limpo (`assets/fighters.png`, 300 KB) gerado a partir das folhas originais. Remove o brilho roxo atrás dos sprites, normaliza a escala e alinha cada quadro pelos pés — sem tremidas, "flutuações" ou troca de tamanho ao atacar.
 - **Movimentação nova:** simulação em passo fixo (60 Hz, igual em qualquer tela/FPS), pulo com direção, empurrão sem sair da tela, câmera que acompanha a luta com parallax.
@@ -14,6 +14,22 @@ Jogo de luta arcade em HTML Canvas e JavaScript puro (sem build), com Juraci e C
 - **Áudio:** efeitos sintetizados melhores e trilha chiptune por cenário (pode desligar).
 - **Configurações salvas:** som, música, voz, conversa, volume, vibração e exibição dos controles de toque.
 - **v0.6 — Falas:** balões de fala, conversa antes da luta, Carlos comendo bolo/pizza e sendo batizado, voz do navegador (veja abaixo).
+- **v0.7 — Novos lutadores:** Pedro, Daniel, Franciely e Gabi; segundo especial (↓ + L) para todos; Juraci chama o Dadá; cenários **Bar da Simone** e **Praia do Natal**.
+
+## Lutadores e especiais
+
+`L` = especial principal (barra cheia) · `↓ + L` = segundo especial (meia barra).
+
+| Lutador | L (barra cheia) | ↓ + L (meia barra) |
+| --- | --- | --- |
+| **Juraci** | Super Bolo de Cenoura (projétil que derruba) | Chama o **Dadá**: "Já vou, irmã!" — ele lava a louça e a água com sabão escorre pelo chão (pule por cima ou escorrega) |
+| **Carlos** | Alterna **Gordão** (come bolo ou pizza e engorda: +força) e **Modo Fé** (é batizado: +defesa) | — |
+| **Pedro** | Bebe uma **Heineken** e vira o **Monstrão** (+força, +defesa) | **Fumaça de cigarro** (o adversário tosse) |
+| **Daniel** | **Modo Natal Praia**: rápido e imprevisível, dano aleatório + surpresa: bate o carro, pede uma Heineken pra esposa (ela pode deixar e ele recupera vida… ou não) ou faz um show | Dancinha com notas musicais |
+| **Franciely** | Fica **irritada sem motivo**: o Carlos aparece fugindo de medo, ela ganha força e uma **fome sem fim** (vai recuperando vida) | Jato de leite |
+| **Gabi** | **Super L** gigante + chuva de **brigadeiros**; no fim a **Juraci vem buscar a panela** | Canto com notas musicais |
+
+Vitórias: o Pedro foge pro Bar da Simone, o Daniel comemora de biquíni, o Carlos ergue os braços no Modo Fé e a Juraci levanta o bolo.
 
 ## Falas e conversas
 
@@ -42,9 +58,11 @@ Todas as frases ficam em **`js/dialogue.js`** — dá para editar ou acrescentar
 ├── assets/                  tudo que o jogo carrega
 │   ├── sprites/fighters.png gerado: atlas dos lutadores e efeitos
 │   ├── menu/                arte do menu (menu.png original + menu.webp otimizado)
-│   ├── portraits/           retratos juraci.png e carlos.png
+│   ├── portraits/           retratos dos lutadores
 │   └── icons/               ícones do app
 ├── art-source/              artes originais (fonte do atlas; NÃO são publicadas)
+│   └── cutouts/             recortes sem fundo gerados por tools/cutout.py
+├── tools/cutout.py          remove o fundo das folhas opacas (IA local, rembg)
 ├── tools/build_atlas.py     gera o atlas a partir de art-source/
 ├── supabase/schema.sql      banco de dados (opcional)
 └── .github/workflows/       publicação automática no GitHub Pages
@@ -61,6 +79,20 @@ python tools/build_atlas.py
 
 Os quadros de cada animação são definidos no topo de `tools/build_atlas.py`.
 
+### Adicionar a folha de um lutador novo (fundo opaco)
+
+As folhas do Pedro, Daniel, Franciely e Gabi têm cenário no fundo. Para recortá-las:
+
+1. Salve a folha em `art-source/<lutador>-sheet.png` (ex.: `art-source/gabi-sheet.png`).
+2. Confira/ajuste os retângulos de cada quadro em `CUTS` no `tools/cutout.py`.
+3. Rode:
+
+```n   pip install "rembg[cpu]" pillow numpy scipy
+   python tools/cutout.py gabi
+   python tools/build_atlas.py
+   ```n
+O `cutout.py` também gera o retrato em `assets/portraits/`. Na primeira vez ele baixa o modelo de IA (~180 MB); tudo roda no seu computador. O lutador é liberado na seleção automaticamente quando os sprites dele existem no atlas.
+
 ## Executar
 
 Abra `index.html` no navegador. Para testar como no site publicado (service worker, instalação), sirva a pasta:
@@ -76,7 +108,7 @@ e acesse `http://localhost:8080`.
 **1 jogador (teclado):**
 
 - Mover: `A`/`D` ou `←`/`→` · Pular: `W`, `↑` ou `Espaço` (segure uma direção para pular para o lado) · Agachar: `S`/`↓`
-- Soco: `J` · Forte (Juraci) / Chute (Carlos): `K` · Defesa: segure `I` · Especial: `L` (barra cheia)
+- Soco: `J` · Forte/Chute: `K` · Defesa: segure `I` · Especial: `L` (barra cheia) · Segundo especial: segure `↓` + `L` (meia barra)
 - Pausar: `P` ou `Esc`
 
 **2 jogadores (mesmo teclado):**
@@ -86,14 +118,13 @@ e acesse `http://localhost:8080`.
 
 **Gamepad:** analógico/direcional move, `A` pula, `X` soco, `Y` forte, `B` especial, `LB/RB/LT/RT` defesa, `Start` pausa. No modo 2P, o segundo controle é o 2P.
 
-**Celular:** direcional à esquerda (cima = pular, baixo = agachar) e botões à direita. Jogue na horizontal; ao iniciar a luta o jogo tenta entrar em tela cheia.
+**Celular:** direcional à esquerda (cima = pular, baixo = agachar) e botões à direita (segundo especial: direcional para baixo + Especial). Jogue na horizontal; ao iniciar a luta o jogo tenta entrar em tela cheia.
 
 **Dicas:**
 
 - Combo: `J`, `J`, `K` quando os golpes acertam. Carlos tem um 4º golpe: `K` depois do chute vira o **Combo do Chute**, que derruba.
 - Com a barra cheia, apertar `L` no meio de um combo cancela direto para o especial.
-- Juraci: o **Super Bolo de Cenoura** é um projétil que derruba. Pule por cima do bolo do adversário!
-- Carlos: o especial alterna entre **Gordão** (+25% de dano, mais empurrão, mais lento) e **Modo Fé** (recebe 45% menos dano) por 10 s.
+- As formas (Gordão, Modo Fé, Monstrão, Natal Praia, Irritada) duram 10 s.
 - Pulo e agachar: agachado você desvia de socos altos; golpes no ar acertam de cima.
 
 ## Instalar no celular (GitHub Pages)
@@ -118,6 +149,5 @@ Só partidas contra a CPU são registradas. Resultados de lutas sem internet fic
 
 ## Próximas etapas
 
-- Franciely, Gabi, Daniel e Pedro (precisam de folhas de sprite; basta adicioná-las em `tools/build_atlas.py` e em `CHARS` no `js/game.js`).
 - Falas gravadas pela família (com autorização) no lugar dos efeitos sintetizados.
 - Empacotar para a Play Store (por exemplo, com Capacitor) se quiser um APK/AAB.
