@@ -1,5 +1,5 @@
 // O deploy substitui o número da versão pelo ID da execução do GitHub Actions.
-const CACHE_NAME = 'familia-fighter-v16';
+const CACHE_NAME = 'familia-fighter-v17';
 const APP_ASSETS = [
   './',
   './index.html',
