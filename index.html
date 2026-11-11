@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self'; img-src 'self' data: blob:; connect-src 'self' https://*.supabase.co https://cdn.jsdelivr.net; font-src 'self'; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self'; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self' https://*.supabase.co https://cdn.jsdelivr.net; font-src 'self'; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
   <meta name="referrer" content="no-referrer">
   <meta name="theme-color" content="#100d20">
   <meta name="description" content="Família Fighter: luta arcade da família na padaria da Juju.">
@@ -124,7 +124,13 @@
       <p id="menuDialogText"></p>
       <div id="settingsPanel" class="settings" hidden>
         <label class="toggle"><input id="setSound" type="checkbox"> Efeitos sonoros</label>
-        <label class="toggle"><input id="setMusic" type="checkbox"> Música</label>
+        <label class="toggle"><input id="setMusic" type="checkbox"> Música ("Bolo da Juraci")</label>
+        <label class="select-label">Música na luta
+          <select id="setFightMusic">
+            <option value="theme">Bolo da Juraci</option>
+            <option value="stage">Trilha 8-bit de cada cenário</option>
+          </select>
+        </label>
         <label class="toggle"><input id="setVoice" type="checkbox"> Falas em voz alta (voz do navegador)</label>
         <label class="toggle"><input id="setTalk" type="checkbox"> Conversa antes da luta</label>
         <label class="range">Volume <input id="setVolume" type="range" min="0" max="1" step="0.05"></label>
