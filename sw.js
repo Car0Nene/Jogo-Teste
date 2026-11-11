@@ -1,5 +1,5 @@
 // O deploy substitui o número da versão pelo ID da execução do GitHub Actions.
-const CACHE_NAME = 'familia-fighter-v14';
+const CACHE_NAME = 'familia-fighter-v16';
 const APP_ASSETS = [
   './',
   './index.html',
@@ -17,7 +17,11 @@ const APP_ASSETS = [
   './assets/sprites/fighters.png',
   './assets/menu/menu.webp',
   './assets/portraits/juraci.png',
-  './assets/portraits/carlos.png'
+  './assets/portraits/carlos.png',
+  './assets/portraits/pedro.png',
+  './assets/portraits/daniel.png',
+  './assets/portraits/franciely.png',
+  './assets/portraits/gabi.png'
 ];
 
 self.addEventListener('install', event => {
