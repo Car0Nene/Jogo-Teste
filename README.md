@@ -31,6 +31,15 @@ Jogo de luta arcade em HTML Canvas e JavaScript puro (sem build), com a família
 
 Vitórias: o Pedro foge pro Bar da Simone, o Daniel comemora de biquíni, o Carlos ergue os braços no Modo Fé e a Juraci levanta o bolo.
 
+## Música
+
+A música tema **"Bolo da Juraci"** toca nos menus e, por padrão, também durante a luta (um pouco mais baixa, para os golpes e falas aparecerem). Em **Configurações → Música na luta** dá para trocar pela trilha 8-bit de cada cenário.
+
+- Arquivos: `assets/music/bolo-da-juraci.m4a` (original, Opus) e `bolo-da-juraci.mp3` (reserva para navegadores que não tocam Opus, como Safari antigo). O jogo baixa só um dos dois.
+- Os navegadores só deixam tocar som depois do primeiro toque ou tecla — a música começa aí.
+- Depois de tocar uma vez, fica guardada para jogar offline.
+- Para trocar a música, substitua os dois arquivos mantendo os nomes (o MP3 pode ser gerado com `ffmpeg -i musica.m4a -b:a 128k bolo-da-juraci.mp3`).
+
 ## Falas e conversas
 
 - **Conversa antes da luta** no 1º round (balões de quadrinho; qualquer botão ou toque pula).
@@ -59,6 +68,7 @@ Todas as frases ficam em **`js/dialogue.js`** — dá para editar ou acrescentar
 │   ├── sprites/fighters.png gerado: atlas dos lutadores e efeitos
 │   ├── menu/                arte do menu (menu.png original + menu.webp otimizado)
 │   ├── portraits/           retratos dos lutadores
+│   ├── music/               música tema "Bolo da Juraci" (.m4a + .mp3)
 │   └── icons/               ícones do app
 ├── art-source/              artes originais (fonte do atlas; NÃO são publicadas)
 │   └── cutouts/             recortes sem fundo gerados por tools/cutout.py
