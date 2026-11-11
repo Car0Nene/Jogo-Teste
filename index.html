@@ -62,10 +62,10 @@
         <div class="fighter-picks" role="radiogroup" aria-label="Personagem do 1P">
           <button class="pick" type="button" role="radio" data-fighter="juraci" aria-checked="true"><img class="fighter-portrait" src="assets/portraits/juraci.png" alt="" width="137" height="177"><span>JURACI</span></button>
           <button class="pick" type="button" role="radio" data-fighter="carlos" aria-checked="false"><img class="fighter-portrait" src="assets/portraits/carlos.png" alt="" width="135" height="168"><span>CARLOS</span></button>
-          <button class="pick locked" type="button" disabled aria-label="Franciely, em breve"><span class="fighter-avatar" aria-hidden="true">?</span><span>FRANCIELY</span></button>
-          <button class="pick locked" type="button" disabled aria-label="Gabi, em breve"><span class="fighter-avatar" aria-hidden="true">?</span><span>GABI</span></button>
-          <button class="pick locked" type="button" disabled aria-label="Daniel, em breve"><span class="fighter-avatar" aria-hidden="true">?</span><span>DANIEL</span></button>
-          <button class="pick locked" type="button" disabled aria-label="Pedro, em breve"><span class="fighter-avatar" aria-hidden="true">?</span><span>PEDRO</span></button>
+          <button class="pick" type="button" role="radio" data-fighter="pedro" aria-checked="false"><img class="fighter-portrait" src="assets/portraits/pedro.png" alt="" width="137" height="174"><span>PEDRO</span></button>
+          <button class="pick" type="button" role="radio" data-fighter="daniel" aria-checked="false"><img class="fighter-portrait" src="assets/portraits/daniel.png" alt="" width="137" height="168"><span>DANIEL</span></button>
+          <button class="pick" type="button" role="radio" data-fighter="franciely" aria-checked="false"><img class="fighter-portrait" src="assets/portraits/franciely.png" alt="" width="137" height="145"><span>FRANCIELY</span></button>
+          <button class="pick" type="button" role="radio" data-fighter="gabi" aria-checked="false"><img class="fighter-portrait" src="assets/portraits/gabi.png" alt="" width="137" height="128"><span>GABI</span></button>
         </div>
 
         <div class="options">
@@ -75,6 +75,10 @@
               <button type="button" role="radio" data-opponent="auto" aria-checked="true">AUTO</button>
               <button type="button" role="radio" data-opponent="juraci" aria-checked="false">JURACI</button>
               <button type="button" role="radio" data-opponent="carlos" aria-checked="false">CARLOS</button>
+              <button type="button" role="radio" data-opponent="pedro" aria-checked="false">PEDRO</button>
+              <button type="button" role="radio" data-opponent="daniel" aria-checked="false">DANIEL</button>
+              <button type="button" role="radio" data-opponent="franciely" aria-checked="false">FRAN</button>
+              <button type="button" role="radio" data-opponent="gabi" aria-checked="false">GABI</button>
             </div>
           </div>
           <div class="option-row">
@@ -83,6 +87,8 @@
               <button type="button" role="radio" data-stage="padaria" aria-checked="true">PADARIA</button>
               <button type="button" role="radio" data-stage="quintal" aria-checked="false">QUINTAL</button>
               <button type="button" role="radio" data-stage="festa" aria-checked="false">FESTA JUNINA</button>
+              <button type="button" role="radio" data-stage="bar" aria-checked="false">BAR DA SIMONE</button>
+              <button type="button" role="radio" data-stage="praia" aria-checked="false">PRAIA</button>
               <button type="button" role="radio" data-stage="random" aria-checked="false">🎲</button>
             </div>
           </div>
@@ -132,7 +138,7 @@
         </label>
         <div class="controls-help">
           <h3>Teclado</h3>
-          <p><b>1 jogador:</b> mover A/D ou ←/→ · pular W/↑/Espaço · agachar S/↓ · soco J · forte K · defesa I · especial L</p>
+          <p><b>1 jogador:</b> mover A/D ou ←/→ · pular W/↑/Espaço · agachar S/↓ · soco J · forte K · defesa I · especial L (barra cheia) · segundo especial ↓ + L (meia barra)</p>
           <p><b>2 jogadores:</b> 1P = WASD + F soco, G forte, H defesa, T especial · 2P = setas + J, K, I, L (ou Num 1, 2, 3, 0)</p>
           <p><b>Combos:</b> soco → soco → forte encadeiam quando acertam. Controles (gamepad) também funcionam.</p>
         </div>
