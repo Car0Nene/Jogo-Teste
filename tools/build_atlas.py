@@ -33,6 +33,26 @@ ROW5 = 1.28        # linha de dano/queda do Carlos na folha principal
 # O (x, y) identifica o componente detectado (ver tools/analyze em README).
 F = lambda sheet, comps, scale=1.0, thr=128, clip=None: dict(sheet=sheet, comps=comps, scale=scale, thr=thr, clip=clip)
 
+# Lutadores de folhas com fundo opaco: usam os recortes feitos por tools/cutout.py.
+# C(personagem, animação, [índices na ordem desejada], escala)
+S_PEDRO = 0.71    # Pedro na folha dele tem ~184 px de altura → ~130 px como os demais
+S_DANIEL = 0.77   # Daniel ~169 px → ~130 px (linha 1: parado/andar/correr/pular)
+S_DANIEL_R2 = 0.82  # linha 2 (agachar/defesa/socos/chutes) foi desenhada menor
+S_DANIEL_R3 = 0.59  # linha 3 (dança/Natal Praia) foi desenhada maior
+S_DANIEL_R4 = 0.55  # linha 4 (vitória) maior ainda
+S_PEDRO_DRINK = 0.63  # bloco do especial Heineken desenhado maior
+S_PEDRO_SMOKE = 0.68
+C = lambda char, anim, order, scale: [dict(cut=f'{SRC}cutouts/{char}/{anim}_{i}.png', scale=scale) for i in order]
+
+
+def auto_scale(char, mult=1.0, target=130):
+    """Escala para o quadro 'parado' ficar com ~130 px (igual aos demais). mult corrige
+    linhas da folha desenhadas em outro tamanho. Retorna None se o recorte não existe."""
+    path = ROOT / SRC / 'cutouts' / char / 'idle_0.png'
+    if not path.exists():
+        return None
+    return target / Image.open(path).height * mult
+
 FRAMES = {
     'juraci': {
         'idle':   [F(MAIN, [(231, 60)]), F(MAIN, [(325, 60)]), F(MAIN, [(407, 60)]), F(MAIN, [(494, 58)])],
@@ -66,7 +86,68 @@ FRAMES = {
         'crente': [F(SPECIALS, [(599, 662)], S_FORMS, 250), F(SPECIALS, [(707, 611)], S_FORMS, 250, (0, 836)),
                    F(SPECIALS, [(707, 611)], S_FORMS, 250, (836, 9999)), F(SPECIALS, [(1018, 576)], S_FORMS, 250)],
     },
+    'pedro': {
+        'idle':   C('pedro', 'idle', [0, 1], S_PEDRO),
+        'walk':   C('pedro', 'walk', [0, 1, 2, 3], S_PEDRO),
+        'run':    C('pedro', 'run', [0, 1, 2], S_PEDRO),
+        'jump':   C('pedro', 'jump', [0, 1], S_PEDRO),
+        'crouch': C('pedro', 'crouch', [0, 1], S_PEDRO),
+        'guard':  C('pedro', 'guard', [0, 1], S_PEDRO),
+        'light':  C('pedro', 'light', [1, 0], S_PEDRO),     # recolhido → braço esticado
+        'medium': C('pedro', 'medium', [0, 1], S_PEDRO),
+        'heavy':  C('pedro', 'heavy', [2, 0, 1], S_PEDRO),  # base → chute → chute alto
+        'smoke':  C('pedro', 'smoke', [0, 1, 2], S_PEDRO_SMOKE),
+        'drink':  C('pedro', 'drink', [0, 1, 2], S_PEDRO_DRINK),
+        'hulk':   C('pedro', 'hulk', [0], S_PEDRO_DRINK * 1.08),
+        'escape': C('pedro', 'escape', [0, 1, 2, 3], S_PEDRO),
+    },
+    'daniel': {
+        'idle':   C('daniel', 'idle', [0, 1, 2], S_DANIEL),
+        'walk':   C('daniel', 'walk', [0, 1, 2], S_DANIEL),
+        'run':    C('daniel', 'run', [0, 1, 2], S_DANIEL),
+        'jump':   C('daniel', 'jump', [0, 1, 2], S_DANIEL),
+        'crouch': C('daniel', 'crouch', [0, 1], S_DANIEL_R2),
+        'guard':  C('daniel', 'guard', [0, 1], S_DANIEL_R2),
+        'light':  C('daniel', 'light', [0, 1], S_DANIEL_R2),
+        'medium': C('daniel', 'medium', [0, 1], S_DANIEL_R2),
+        'heavy':  C('daniel', 'heavy', [2, 0, 1], S_DANIEL_R2),
+        'dance':  C('daniel', 'dance', [0, 1, 2, 3, 4], S_DANIEL_R3),
+        'praia':  C('daniel', 'praia', [0, 1, 2, 3, 4], S_DANIEL_R3),
+        'win':    C('daniel', 'win', [0, 1, 2, 3], S_DANIEL_R4),
+    },
 }
+
+# Franciely e Gabi entram automaticamente quando os recortes existirem (tools/cutout.py).
+# Se alguma linha ficar maior/menor que as outras, ajuste o multiplicador (2º número).
+_F = auto_scale('franciely')
+if _F:
+    FRAMES['franciely'] = {
+        'idle':   C('franciely', 'idle', [0], _F),
+        'walk':   C('franciely', 'walk', [0, 1], _F),
+        'run':    C('franciely', 'run', [0, 1], _F),
+        'jump':   C('franciely', 'jump', [0, 1, 2], _F),
+        'crouch': C('franciely', 'crouch', [0, 1], _F * 1.15),
+        'guard':  C('franciely', 'guard', [0, 1], _F * 1.15),
+        'light':  C('franciely', 'light', [0, 1], _F * 1.15),
+        'medium': C('franciely', 'medium', [0, 1], _F * 1.15),
+        'heavy':  C('franciely', 'heavy', [2, 0, 1], _F * 1.15),
+        'mama':   C('franciely', 'mama', [1, 1], _F * 0.85),  # só a pose do jato de leite
+        'win':    C('franciely', 'win', [0], _F * 0.75),
+    }
+_G = auto_scale('gabi')
+if _G:
+    FRAMES['gabi'] = {
+        'idle':   C('gabi', 'idle', [0, 1], _G),
+        'walk':   C('gabi', 'walk', [0, 1, 2], _G),
+        'run':    C('gabi', 'run', [0, 1, 2], _G),
+        'jump':   C('gabi', 'jump', [0, 1, 2], _G),
+        'crouch': C('gabi', 'crouch', [0, 1], _G * 1.15),
+        'guard':  C('gabi', 'guard', [0, 1], _G * 1.15),
+        'light':  C('gabi', 'light', [0, 1], _G * 1.15),
+        'medium': C('gabi', 'medium', [0, 1], _G * 1.15),
+        'heavy':  C('gabi', 'heavy', [0, 1, 2], _G * 1.15),
+        'dance':  C('gabi', 'dance', [0, 1, 2, 3], _G * 0.72),
+    }
 
 # Efeitos: componente (sheet, comps) ou recorte com chroma-key do painel roxo (rect).
 FX = {
@@ -77,6 +158,10 @@ FX = {
     'dust':   dict(sheet=MAIN, rect=(925, 902, 170, 108), scale=0.7),
     'star':   dict(sheet=MAIN, rect=(1268, 905, 64, 100), scale=0.6),
     'heart':  dict(sheet=MAIN, rect=(1200, 935, 60, 70), scale=0.6),
+    'heineken': dict(cut=f'{SRC}cutouts/fx/heineken.png', scale=0.32, center=True),
+    'coconut':  dict(cut=f'{SRC}cutouts/fx/coconut.png', scale=0.45, center=True),
+    'mic':      dict(cut=f'{SRC}cutouts/fx/mic.png', scale=0.45, center=True),
+    'shades':   dict(cut=f'{SRC}cutouts/fx/shades.png', scale=0.4, center=True),
 }
 
 _cache = {}
@@ -134,6 +219,27 @@ def extract(spec):
     return finish(crop, anchor_x, foot_y, spec['scale'])
 
 
+def extract_cut(spec):
+    """Recorte pronto (tools/cutout.py): só calcula a âncora dos pés e escala."""
+    arr = np.array(Image.open(ROOT / spec['cut']).convert('RGBA'))
+    arr[:, :, 3] = np.where(arr[:, :, 3] >= 128, 255, 0)
+    if spec.get('center'):
+        return finish(arr, arr.shape[1] / 2, arr.shape[0] / 2, spec['scale'])
+    my, mx = np.nonzero(arr[:, :, 3])
+    foot_y = my.max() + 1
+    lower = mx[my > foot_y - (foot_y - my.min()) * 0.55]
+    anchor_x = float(np.median(mx)) * 0.5 + float(np.median(lower)) * 0.5
+    return finish(arr, anchor_x, foot_y, spec['scale'])
+
+
+def extract_any(spec):
+    if 'cut' in spec:
+        return extract_cut(spec)
+    if 'comps' in spec:
+        return extract(spec)
+    return extract_key(spec)
+
+
 def extract_key(spec):
     rgba = np.array(Image.open(ROOT / spec['sheet']).convert('RGBA'))
     x, y, w, h = spec['rect']
@@ -177,10 +283,10 @@ def main():
     for char, anims in FRAMES.items():
         for anim, frames in anims.items():
             for i, spec in enumerate(frames):
-                img, ax, ay = extract(spec)
+                img, ax, ay = extract_any(spec)
                 items.append((char, anim, i, img, ax, ay))
     for name, spec in FX.items():
-        img, ax, ay = extract(spec) if 'comps' in spec else extract_key(spec)
+        img, ax, ay = extract_any(spec)
         items.append(('fx', name, 0, img, ax, ay))
 
     order = sorted(range(len(items)), key=lambda i: -items[i][3].height)
