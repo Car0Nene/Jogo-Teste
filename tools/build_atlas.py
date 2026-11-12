@@ -160,13 +160,14 @@ for _fighter in ('paula', 'tainara', 'cao'):
     _S = auto_scale(_fighter)
     if not _S:
         continue
+    _seq = lambda anim: sorted(int(p.stem.rsplit('_', 1)[1]) for p in (ROOT / SRC / 'cutouts' / _fighter).glob(f'{anim}_*.png'))
     FRAMES[_fighter] = {
-        'idle': C(_fighter, 'idle', [0], _S),
-        'walk': C(_fighter, 'walk', [0], _S),
-        'run': C(_fighter, 'run', [0], _S),
-        'jump': C(_fighter, 'jump', [0], _S),
-        'crouch': C(_fighter, 'crouch', [0], _S * 1.12),
-        'guard': C(_fighter, 'guard', [0], _S),
+        'idle': C(_fighter, 'idle', _seq('idle'), _S),
+        'walk': C(_fighter, 'walk', _seq('walk'), _S),
+        'run': C(_fighter, 'run', _seq('run'), _S),
+        'jump': C(_fighter, 'jump', _seq('jump'), _S),
+        'crouch': C(_fighter, 'crouch', _seq('crouch'), _S * 1.12),
+        'guard': C(_fighter, 'guard', _seq('guard'), _S),
         'light': C(_fighter, 'light', [0], _S),
         'medium': C(_fighter, 'medium', [0], _S),
         'heavy': C(_fighter, 'heavy', [0], _S),

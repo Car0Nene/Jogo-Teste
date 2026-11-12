@@ -88,7 +88,7 @@ A música tema **"Bolo da Juraci"** toca nos menus e, por padrão, também duran
 - **Pedro** fala ao fazer combo e ao beber a cerveja; **Daniel** anuncia a praia; **Tainara** responde quando ele pede uma bebida; **Gabi** canta no especial.
 - Frases ao derrubar, ser nocauteado e vencer.
 - **Vozes:** o jogo toca gravações humanas disponíveis e mantém as demais falas como legendas. Vozes sintéticas do navegador estão desativadas.
-- **Vozes complementares:** novas amostras de Juraci, Carlos, Pedro, Daniel, Franciely, Gabi, Tainara e Dadá entram em falas correspondentes como variações. As gravações originais continuam disponíveis; um áudio do narrador que reúne falas de momentos diferentes fica arquivado como referência, sem tocar fora de contexto.
+- **Vozes complementares:** novas amostras entram em falas correspondentes; Paula, Tainara e o Cão do Daniel também têm clipes para os dois especiais de cada um. As gravações originais continuam disponíveis. O áudio de narrador que mistura momentos diferentes fica em `art-source/audio/references/`, sem tocar fora de contexto.
 
 Todas as frases ficam em **`js/dialogue.js`** — dá para editar ou acrescentar sem mexer no resto do código.
 
@@ -116,22 +116,24 @@ Os clipes opcionais em `assets/voice/arcade/` vêm do **Voiceover Pack: Fighter*
 │   ├── menu/                arte do menu (menu.png original + menu.webp otimizado)
 │   ├── portraits/           retratos dos lutadores
 │   ├── music/               músicas (.m4a original + .mp3 reserva)
-│   ├── voice/               clipes originais, complementares e locutor arcade CC0
+│   ├── voice/               clipes prontos para o jogo e locutor arcade CC0
 │   ├── stages/              cenários pintados (Bar da Simone, Praia)
 │   └── icons/               ícones do app
 ├── art-source/              artes de origem e arquivos de trabalho
 │   ├── *-sheet.png          folhas originais dos lutadores
-│   ├── audio/               gravações originais e amostras geradas; cópias de jogo ficam em assets/voice/
+│   ├── audio/               gravações originais e áudio de referência (sem duplicatas dos clipes do jogo)
 │   ├── cutouts/             recortes transparentes usados pelo atlas
 │   └── references/          pôsteres e artes de referência
 ├── supabase/schema.sql      banco de dados (opcional)
 └── tools/                   ferramentas locais para preparar arte e sprites
 ```
 
-As artes novas da Paula, Tainara e do Cão do Daniel estão em `art-source/*-sheet.png`.
-Como são fichas de referência com uma pose por movimento, os recortes ficam em
-`art-source/cutouts/{paula,tainara,cao}/`; o jogo usa essas poses nos estados
-correspondentes. Para refazer os recortes após editar as fichas:
+As artes-fonte de Paula e Tainara incluem a ficha de movimentos em
+`art-source/paula-tainara-movement-sheet.png`, com vários quadros para parado,
+andar, correr, pular, defesa e agachado. Os recortes transparentes ficam em
+`art-source/cutouts/{paula,tainara,cao}/` e são usados para animar os lutadores.
+A ficha do cão ainda fornece uma pose por estado. Para refazer os recortes após
+editar as fichas:
 
 ```
 pip install pillow numpy scipy

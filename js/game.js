@@ -674,7 +674,10 @@
     daniel: { praia: [{ clip: 'praia', chance: 1 }, { clip: 'preparativos', chance: 1 }] },
     gabi: { sing: { clip: 'sing', chance: 1 }, win: { clip: 'amor', chance: 1 } },
     juraci: { win: { clip: 'cozinha', chance: 1 } },
-    carlos: { win: { clip: 'pizzaAmor', chance: 1 } }
+    carlos: { win: { clip: 'pizzaAmor', chance: 1 } },
+    paula: { lunch: { clip: 'lunch', chance: 1 }, bar: { clip: 'bar', chance: 1 } },
+    tainara: { rice: { clip: 'rice', chance: 1 }, children: { clip: 'children', chance: 1 } },
+    cao: { lick: { clip: 'lick', chance: 1 }, protect: { clip: 'protect', chance: 1 } }
   };
 
   const opponentOf = f => fighters[1 - f.slot];

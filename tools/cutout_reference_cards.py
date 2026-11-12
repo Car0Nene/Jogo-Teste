@@ -36,8 +36,34 @@ SHEETS = {
     }),
 }
 
+# A nova ficha compartilhada tem sequências de movimento com vários quadros.
+# Os centros separam as figuras dentro de cada faixa do painel.
+MOVEMENT = {
+    'paula': {
+        'idle': [360, 414, 468, 522], 'walk': [570, 620, 671, 721],
+        'run': [784, 856, 923], 'jump': [984, 1050, 1117],
+        'guard': [1182, 1248, 1313], 'crouch': [1380, 1452, 1498],
+        'rows': (38, 163),
+    },
+    'tainara': {
+        'idle': [360, 414, 468, 522], 'walk': [570, 620, 671, 721],
+        'run': [784, 856, 923], 'jump': [984, 1050, 1117],
+        'guard': [1182, 1248, 1313], 'crouch': [1380, 1452, 1498],
+        'rows': (548, 681),
+    },
+}
+MOVEMENT_SHEET = 'art-source/paula-tainara-movement-sheet.png'
+MOVEMENT_REGIONS = {
+    'paula': {'run': [(748, 820), (821, 890), (891, 952)],
+              'crouch': [(1347, 1411), (1416, 1479), (1480, 1531)]},
+    'tainara': {'run': [(748, 820), (821, 890), (891, 952)],
+                'crouch': [(1347, 1411), (1416, 1479), (1480, 1531)]},
+}
+PORTRAIT_BOXES = {'paula': (5, 3, 139, 168), 'tainara': (5, 514, 139, 679)}
 
-def cut_pose(sheet: Image.Image, box: tuple[int, int, int, int], key: str) -> Image.Image:
+
+def cut_pose(sheet: Image.Image, box: tuple[int, int, int, int], key: str,
+             remove_specks: bool = False) -> Image.Image:
     rgba = np.array(sheet.crop(box).convert('RGBA'))
     rgb = rgba[:, :, :3].astype(np.int16)
     r, g, b = (rgb[:, :, i] for i in range(3))
@@ -53,6 +79,13 @@ def cut_pose(sheet: Image.Image, box: tuple[int, int, int, int], key: str) -> Im
     edge[:, [0, -1]] = True
     background = ndimage.binary_propagation(bg_candidate & edge, mask=bg_candidate)
     rgba[:, :, 3] = np.where(background, 0, rgba[:, :, 3])
+    if remove_specks:
+        labels, count = ndimage.label(rgba[:, :, 3] > 8)
+        sizes = np.bincount(labels.ravel(), minlength=count + 1)
+        cutoff = max(16, int(sizes[1:].max(initial=0) * 0.02))
+        keep = sizes >= cutoff
+        keep[0] = False
+        rgba[:, :, 3] = np.where(keep[labels], rgba[:, :, 3], 0)
     ys, xs = np.where(rgba[:, :, 3] > 8)
     if not len(xs):
         raise ValueError(f'Nenhum personagem encontrado no recorte {box}')
@@ -71,21 +104,35 @@ def main() -> None:
         out.mkdir(parents=True, exist_ok=True)
         for animation, box in poses.items():
             cut_pose(sheet, box, key).save(out / f'{animation}_0.png')
-        idle = Image.open(out / 'idle_0.png').convert('RGBA')
-        head = idle.crop((0, 0, idle.width, max(1, int(idle.height * 0.78))))
-        head.thumbnail((470, 575), Image.Resampling.LANCZOS)
-        c0, c1 = portrait_colors[fighter]
-        portrait = Image.new('RGBA', (512, 640))
-        draw = ImageDraw.Draw(portrait)
-        for y in range(640):
-            t = y / 639
-            color = tuple(round(c0[i] * (1 - t) + c1[i] * t) for i in range(3))
-            draw.line((0, y, 511, y), fill=(*color, 255))
-        draw.ellipse((58, 42, 454, 438), fill=(255, 255, 255, 18), outline=(255, 255, 255, 70), width=4)
-        portrait.alpha_composite(head, ((512 - head.width) // 2, 24))
+        if fighter in MOVEMENT:
+            movement_sheet = Image.open(ROOT / MOVEMENT_SHEET)
+            y0, y1 = MOVEMENT[fighter]['rows']
+            for animation, centers in MOVEMENT[fighter].items():
+                if animation == 'rows':
+                    continue
+                for index, center in enumerate(centers):
+                    regions = MOVEMENT_REGIONS.get(fighter, {}).get(animation)
+                    x0, x1 = regions[index] if regions else (center - 28, center + 28)
+                    box = (x0, y0, x1, y1)
+                    cut_pose(movement_sheet, box, 'blue', remove_specks=True).save(out / f'{animation}_{index}.png')
+        if fighter in PORTRAIT_BOXES:
+            portrait = movement_sheet.crop(PORTRAIT_BOXES[fighter]).resize((512, 640), Image.Resampling.LANCZOS)
+        else:
+            idle = Image.open(out / 'idle_0.png').convert('RGBA')
+            head = idle.crop((0, 0, idle.width, max(1, int(idle.height * 0.78))))
+            head.thumbnail((470, 575), Image.Resampling.LANCZOS)
+            c0, c1 = portrait_colors[fighter]
+            portrait = Image.new('RGBA', (512, 640))
+            draw = ImageDraw.Draw(portrait)
+            for y in range(640):
+                t = y / 639
+                color = tuple(round(c0[i] * (1 - t) + c1[i] * t) for i in range(3))
+                draw.line((0, y, 511, y), fill=(*color, 255))
+            draw.ellipse((58, 42, 454, 438), fill=(255, 255, 255, 18), outline=(255, 255, 255, 70), width=4)
+            portrait.alpha_composite(head, ((512 - head.width) // 2, 24))
         (ROOT / 'assets' / 'portraits').mkdir(parents=True, exist_ok=True)
         portrait.save(ROOT / 'assets' / 'portraits' / f'{fighter}.png')
-        print(f'{fighter}: {len(poses)} poses recortadas')
+        print(f'{fighter}: {len(list(out.glob("*.png")))} recortes gerados')
 
 
 if __name__ == '__main__':

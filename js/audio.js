@@ -360,6 +360,18 @@
     carlos: {
       pizzaAmor: { url: 'assets/voice/generated/carlos-pedido-de-pizza-com-amor.mp3', text: 'Foi mal, vó! Te amo! Depois dessa, mereço uma pizza!' }
     },
+    paula: {
+      lunch: { url: 'assets/voice/generated/paula-super-almoco.mp3', text: 'Super almoço! Prato feito, com direito a sobremesa!' },
+      bar: { url: 'assets/voice/generated/paula-bar-simone.mp3', text: 'Pedro! Bar Simone! Pedro? Ah, agora eu fiquei brava!' }
+    },
+    tainara: {
+      rice: { url: 'assets/voice/generated/tainara-poder-do-arroz.mp3', text: 'Poder do arroz! Com arroz eu fico invencível!' },
+      children: { url: 'assets/voice/generated/tainara-cuidado-em-dobro.mp3', text: 'Crianças, comigo! Cuidado em dobro! Agora é bagunça boa!' }
+    },
+    cao: {
+      lick: { url: 'assets/voice/generated/cao-lambida-poderosa.mp3', text: 'Au au! Lambida poderosa! Sai da frente, humano!' },
+      protect: { url: 'assets/voice/generated/cao-amigo-protetor.mp3', text: 'Au! Eu protejo o Daniel! Amigo protetor!' }
+    },
     narrator: {
       victory: { url: 'assets/voice/narrator/vitoria-na-luta.mp3', text: 'Vitória na luta!', duration: 2.7 }
     }
