@@ -288,7 +288,6 @@
     if (!state.music) stopMusic();
     if (!state.voice) {
       stopSpeech();
-      if (clipPlaying) { clipPlaying.pause(); clipPlaying = null; }
     }
   }
 
@@ -297,29 +296,31 @@
     final_round: 'final_round.ogg', time: 'time.ogg',
     you_win: 'you_win.ogg', you_lose: 'you_lose.ogg', tie: 'tie.ogg', combo: 'combo.ogg'
   };
-  const ANNOUNCER_TEXT = {
-    fight: 'Lutem!', round_1: 'Rodada 1.', round_2: 'Rodada 2.', round_3: 'Rodada 3.',
-    final_round: 'Rodada decisiva!', time: 'Tempo!', you_win: 'Você venceu!',
-    you_lose: 'Você perdeu!', tie: 'Empate!', combo: 'Combo!'
-  };
-  const announcerCache = {};
+  const activeVoicePlayers = new Set();
+
+  // Cada fala tem seu próprio player: falas simultâneas não interrompem umas às outras.
+  function playVoicePlayer(player) {
+    if (!state.voice) return false;
+    player.volume = Math.min(1, state.voiceVolume);
+    activeVoicePlayers.add(player);
+    const release = () => {
+      activeVoicePlayers.delete(player);
+      player.onended = null;
+      player.onerror = null;
+    };
+    player.onended = release;
+    player.onerror = release;
+    player.play().catch(release);
+    return true;
+  }
+
   function playAnnouncer(key) {
     const file = ANNOUNCER[key];
     if (!file || !state.voice || !state.arcadeAnnouncer) return false;
     try {
       const url = `assets/voice/arcade/${file}`;
-      const player = announcerCache[url] || (announcerCache[url] = new window.Audio(url));
-      if (clipPlaying) clipPlaying.pause();
-      stopSpeech();
-      player.currentTime = 0;
-      player.volume = Math.min(1, state.voiceVolume);
-      clipPlaying = player;
-      player.onended = () => { if (clipPlaying === player) clipPlaying = null; };
-      player.play().catch(() => {
-        if (clipPlaying === player) clipPlaying = null;
-        if (state.voice && state.arcadeAnnouncer) speak(ANNOUNCER_TEXT[key], 'narrator', true);
-      });
-      return true;
+      const player = new window.Audio(url);
+      return playVoicePlayer(player);
     } catch { return false; }
   }
 
@@ -349,25 +350,15 @@
       victory: { url: 'assets/voice/narrator/vitoria-na-luta.mp3', text: 'Vitória na luta!', duration: 2.7 }
     }
   };
-  const clipCache = {};
-  let clipPlaying = null;
   // Toca o trecho e devolve o texto (para o balão); null se não existir.
   function playClip(who, key) {
     const clip = CLIPS[who] && CLIPS[who][key];
     if (!clip) return null;
     if (state.voice) {
       try {
-        stopSpeech();
-        if (clipPlaying) clipPlaying.pause();
-        const el = clipCache[clip.url] || (clipCache[clip.url] = new window.Audio(clip.url));
-        el.currentTime = 0;
-        el.volume = Math.min(1, state.voiceVolume);
-        clipPlaying = el;
-        el.onended = () => { if (clipPlaying === el) clipPlaying = null; };
-        el.play().catch(() => {
-          if (clipPlaying === el) clipPlaying = null;
-          speak(clip.text, who);
-        });
+        // Um elemento novo permite ocorrências simultâneas do mesmo clipe.
+        const el = new window.Audio(clip.url);
+        playVoicePlayer(el);
       } catch { /* sem áudio */ }
     }
     return clip.text;
@@ -384,7 +375,12 @@
   // As falas continuam legendadas; só os clipes gravados/licenciados produzem voz.
   function speak() {}
   function stopSpeech() {
-    if (clipPlaying) { try { clipPlaying.pause(); } catch { /* ok */ } }
+    for (const player of activeVoicePlayers) {
+      try { player.pause(); player.currentTime = 0; } catch { /* ok */ }
+      player.onended = null;
+      player.onerror = null;
+    }
+    activeVoicePlayers.clear();
   }
 
   window.FFAudio = { play, startMusic, stopMusic, pauseMusic, configure, unlock: ensure, speak, stopSpeech, playClip, hasClip, clipDuration, playAnnouncer, debugMusic };

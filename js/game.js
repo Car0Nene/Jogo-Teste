@@ -1637,7 +1637,6 @@
 
   function beginIntro() {
     for (const f of fighters) f.say = null;
-    Audio.stopSpeech();
     match.narratorClip = false;
     // Franciely na praia: "Na praia a gente só desarma!" (voz real) no 1º round
     const fran = fighters.find(f => f.id === 'franciely');
