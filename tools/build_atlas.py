@@ -254,7 +254,13 @@ def extract_key(spec):
     return finish(out, out.shape[1] / 2, out.shape[0] / 2, spec['scale'])
 
 
+# Resolução do atlas em relação ao tamanho "de jogo" dos quadros. Maior = mais nítido quando
+# a câmera aproxima. O jogo divide por FF_SPRITE_SCALE na hora de desenhar.
+ATLAS_SCALE = 1.4
+
+
 def finish(arr, ax, ay, scale):
+    scale *= ATLAS_SCALE
     binary_alpha = np.isin(arr[:, :, 3], (0, 255)).all()
     img = Image.fromarray(arr, 'RGBA')
     if scale != 1:
@@ -266,7 +272,7 @@ def finish(arr, ax, ay, scale):
     return img, ax * scale, ay * scale
 
 
-def pack(images, width=2048, pad=2):
+def pack(images, width=2048, pad=4):
     x = y = shelf = 0
     places = []
     for img in images:
@@ -306,12 +312,21 @@ def main():
     (ROOT / 'assets' / 'sprites').mkdir(parents=True, exist_ok=True)
     (ROOT / 'assets' / 'menu').mkdir(parents=True, exist_ok=True)
     (ROOT / 'js').mkdir(exist_ok=True)
-    # paleta de 256 cores (pixel art) deixa o arquivo bem menor sem perda visível
+    # WebP (qualidade alta, cores reais) é o principal; PNG de 256 cores é reserva p/ navegadores antigos.
+    webp_path = ROOT / 'assets' / 'sprites' / 'fighters.webp'
+    atlas.save(webp_path, quality=85, method=6, alpha_quality=90)
     atlas.quantize(256, method=Image.Quantize.FASTOCTREE, dither=Image.Dither.NONE).save(
         ROOT / 'assets' / 'sprites' / 'fighters.png', optimize=True)
+    data_json = json.dumps(data, separators=(',', ':'))
+    # versão = impressão digital do conteúdo: o jogo pede fighters.webp?v=... e o cache
+    # nunca mistura a imagem antiga com a tabela nova (causa de sprites "quebrados").
+    import hashlib
+    version = hashlib.sha1(webp_path.read_bytes() + data_json.encode()).hexdigest()[:10]
     js = '// Gerado por tools/build_atlas.py — não edite à mão.\n'
-    js += '// Cada quadro: [x, y, largura, altura, ancoraX, ancoraY(pés)]\n'
-    js += 'window.FF_SPRITES = ' + json.dumps(data, separators=(',', ':')) + ';\n'
+    js += '// Cada quadro: [x, y, largura, altura, ancoraX, ancoraY(pés)] em pixels do atlas.\n'
+    js += f'window.FF_SPRITE_SCALE = {ATLAS_SCALE};\n'
+    js += f'window.FF_SPRITE_VERSION = "{version}";\n'
+    js += 'window.FF_SPRITES = ' + data_json + ';\n'
     (ROOT / 'js' / 'sprite-data.js').write_text(js, encoding='utf-8')
 
     menu = Image.open(ROOT / 'assets' / 'menu' / 'menu.png').convert('RGB')

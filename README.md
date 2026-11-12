@@ -16,6 +16,20 @@ Jogo de luta arcade em HTML Canvas e JavaScript puro (sem build), com a família
 - **v0.6 — Falas:** balões de fala, conversa antes da luta, Carlos comendo bolo/pizza e sendo batizado, voz do navegador (veja abaixo).
 - **v0.7 — Novos lutadores:** Pedro, Daniel, Franciely e Gabi; segundo especial (↓ + L) para todos; Juraci chama o Dadá; cenários **Bar da Simone** e **Praia do Natal**.
 
+## Novidades da v0.8
+
+- **Telas no estilo jogo de luta:** Lutador (grade de retratos, painel grande do 1P e do adversário com os especiais) → Cenário (cartões com prévia) → Dificuldade, rounds e tempo → tela **VS** → luta. Teclado: setas escolhem, Enter confirma, Esc volta. Toque: toque no lutador/cenário para ver, toque de novo para confirmar.
+- **Personagens maiores:** câmera aproximada (cerca de 40% da altura da tela), que sobe quando alguém pula. Sprites em resolução maior e em WebP (mais nítidos).
+- **Funciona em qualquer tela:** a luta se adapta de 4:3 (tablet) a 21:9 (ultrawide) sem faixas pretas; as telas de escolha têm layout para celular deitado, em pé, tablet e monitor grande.
+- **Sprites "quebrados" corrigidos:** o cache offline podia misturar a tabela de sprites nova com a imagem antiga. Agora o atlas tem versão no endereço e o código é sempre buscado na rede primeiro.
+- **Cenários pintados:** Bar da Simone e Praia usam a sua arte (`assets/stages`).
+- **Músicas por cenário:** Padaria = "Bolo da Juraci", Quintal e Praia = música 3, Festa Junina e Bar = música 2 (configurável).
+- **Voz real da Franciely:** "É isso!" (especial), "Ferrinho por ferrinho!" (combo), "Na praia a gente só desarma!" (começo da luta na Praia) e "Aí, essa tem que montar ferrinho por ferrinho!" (vitória).
+- **Lista de golpes** no menu de pausa e regras de luta (1 round, melhor de 3 ou de 5; 45 s, 60 s, 99 s ou sem tempo).
+
+### Artes de referência
+
+`art-source/references/` guarda os pôsteres e a imagem "Selecione seu lutador". Eles **não** são usados como sprites: vários quadros têm nome ou aparência trocados (ex.: no pôster 4 a coluna "Juraci" mostra o Carlos, e Gabi/Franciely estão invertidas) e os bonequinhos são pequenos demais e diferentes dos sprites do jogo. Servem de inspiração e divulgação.
 ## Lutadores e especiais
 
 `L` = especial principal (barra cheia) · `↓ + L` = segundo especial (meia barra).
@@ -68,9 +82,13 @@ Todas as frases ficam em **`js/dialogue.js`** — dá para editar ou acrescentar
 │   ├── sprites/fighters.png gerado: atlas dos lutadores e efeitos
 │   ├── menu/                arte do menu (menu.png original + menu.webp otimizado)
 │   ├── portraits/           retratos dos lutadores
-│   ├── music/               música tema "Bolo da Juraci" (.m4a + .mp3)
+│   ├── music/               músicas (.m4a original + .mp3 reserva)
+│   ├── voice/               trechos da voz real da Franciely
+│   ├── stages/              cenários pintados (Bar da Simone, Praia)
 │   └── icons/               ícones do app
 ├── art-source/              artes originais (fonte do atlas; NÃO são publicadas)
+│   ├── references/          pôsteres e artes de referência
+│   └── audio/               áudio original da Franciely
 │   └── cutouts/             recortes sem fundo gerados por tools/cutout.py
 ├── tools/cutout.py          remove o fundo das folhas opacas (IA local, rembg)
 ├── tools/build_atlas.py     gera o atlas a partir de art-source/

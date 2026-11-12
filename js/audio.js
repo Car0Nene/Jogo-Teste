@@ -1,4 +1,4 @@
-// Áudio sintetizado (sem arquivos): efeitos sonoros e uma trilha chiptune simples.
+// Áudio: efeitos sintetizados, trilhas 8-bit de reserva, músicas gravadas e falas (voz do navegador + trechos gravados).
 (() => {
   'use strict';
 
@@ -11,8 +11,6 @@
   let musicStep = 0;
   let nextNoteTime = 0;
   let currentSong = null;
-  let themeAudio = null;
-  let musicPaused = false;
 
   const state = { sound: true, music: true, voice: true, volume: 0.7 };
 
@@ -152,64 +150,113 @@
     }
   }
 
-  // Música principal real do projeto. O fallback sintetizado permanece disponível
-  // para trilhas de cenário caso o usuário selecione o modo 8-bit.
-  function pickThemeSource() {
-    if (typeof window.Audio !== 'function') return './assets/music/bolo-da-juraci.mp3';
-    const probe = new window.Audio();
-    const canPlay = typeof probe.canPlayType === 'function' ? probe.canPlayType.bind(probe) : () => '';
-    if (canPlay('audio/mp4; codecs="mp4a.40.2"') || canPlay('audio/mp4')) return './assets/music/bolo-da-juraci.m4a';
-    return './assets/music/bolo-da-juraci.mp3';
+  // ---------- Músicas gravadas ----------
+  // Cada faixa tem o original (Opus dentro de .m4a) e um MP3 de reserva para navegadores
+  // que não tocam Opus (ex.: Safari antigo). O arquivo é baixado inteiro via fetch (resposta
+  // normal 200) para o service worker guardar e a música funcionar offline.
+  const TRACKS = {
+    theme: 'assets/music/bolo-da-juraci',   // "Bolo da Juraci"
+    ff2: 'assets/music/family-fighter-2',   // Family Fighter (música 2)
+    ff3: 'assets/music/family-fighter-3'    // Family Fighter (música 3)
+  };
+  const OPUS_MP4 = 'audio/mp4; codecs="opus"';
+  let opusOk = null;
+  function trackUrl(name) {
+    if (opusOk === null) {
+      try { opusOk = Boolean(document.createElement('audio').canPlayType(OPUS_MP4)); } catch { opusOk = false; }
+    }
+    return `${TRACKS[name]}.${opusOk ? 'm4a' : 'mp3'}`;
   }
 
-  function startMusic(song) {
-    stopMusic();
-    if (!state.music) return;
+  const players = {};          // nome → { el, loading }
+  let currentTrack = null;     // faixa gravada tocando agora
+  let trackLevel = 1;          // 1 = menus; menor durante a luta
+  let musicPaused = false;
+
+  function loadTrack(name) {
+    if (players[name]) return players[name].loading;
+    const entry = { el: null, loading: null };
+    players[name] = entry;
+    const tryLoad = url => fetch(url).then(response => {
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return response.blob();
+    });
+    entry.loading = tryLoad(trackUrl(name))
+      .catch(() => tryLoad(`${TRACKS[name]}.mp3`)) // reserva
+      .then(blob => {
+        const el = new window.Audio(URL.createObjectURL(blob));
+        el.loop = true;
+        el.preload = 'auto';
+        entry.el = el;
+        return el;
+      })
+      .catch(error => {
+        console.warn(`Música "${name}" indisponível; usando trilha 8-bit.`, error);
+        return null;
+      });
+    return entry.loading;
+  }
+
+  function applyTrackVolume() {
+    const el = currentTrack && players[currentTrack] && players[currentTrack].el;
+    if (el) el.volume = Math.max(0, Math.min(1, state.volume * 0.75 * trackLevel));
+  }
+
+  function stopChiptune() {
+    clearInterval(musicTimer);
+    musicTimer = 0;
+    currentSong = null;
+  }
+
+  function startChiptune(song) {
+    stopChiptune();
+    if (!SONGS[song]) song = 'padaria';
     try {
-      currentSong = song || 'theme';
-      if (currentSong === 'theme' || currentSong === 'padaria') {
-        themeAudio = new window.Audio(pickThemeSource());
-        themeAudio.loop = true;
-        themeAudio.preload = 'auto';
-        themeAudio.volume = Math.max(0, Math.min(1, state.volume));
-        const promise = themeAudio.play();
-        if (promise && typeof promise.catch === 'function') {
-          promise.catch(error => console.warn('A música precisa ser iniciada após interação do usuário.', error));
-        }
-        return;
-      }
       if (!ensure()) return;
-      if (!SONGS[currentSong]) currentSong = 'padaria';
+      currentSong = song;
       musicStep = 0;
       nextNoteTime = ctx.currentTime + 0.1;
-      musicTimer = setInterval(scheduler, 90);
+      if (!musicPaused) musicTimer = setInterval(scheduler, 90);
     } catch (error) {
       console.warn('Falha ao iniciar a música.', error);
     }
   }
 
-  function stopMusic() {
-    clearInterval(musicTimer);
-    musicTimer = 0;
-    if (themeAudio) {
-      themeAudio.pause();
-      try { themeAudio.currentTime = 0; } catch {}
-      themeAudio.src = '';
-      themeAudio = null;
+  // song: nome de faixa gravada (theme/ff2/ff3) ou de cenário para a trilha 8-bit.
+  // level: volume relativo (1 nos menus, ~0.6 na luta para golpes e falas aparecerem).
+  function startMusic(song = 'theme', level = 1) {
+    trackLevel = level;
+    if (!state.music) { stopMusic(); return; }
+    if (TRACKS[song]) {
+      if (currentTrack === song) { applyTrackVolume(); return; } // já tocando: só ajusta volume
+      stopMusic();
+      currentTrack = song;
+      musicPaused = false;
+      loadTrack(song).then(el => {
+        if (currentTrack !== song) return;
+        if (!el) { currentTrack = null; startChiptune('padaria'); return; }
+        applyTrackVolume();
+        try { el.currentTime = 0; } catch { /* ok */ }
+        if (!musicPaused) el.play().catch(() => { /* aguardando o primeiro toque/tecla */ });
+      });
+      return;
     }
-    currentSong = null;
+    stopMusic();
+    startChiptune(song);
+  }
+
+  function stopMusic() {
+    stopChiptune();
+    if (currentTrack && players[currentTrack] && players[currentTrack].el) players[currentTrack].el.pause();
+    currentTrack = null;
     musicPaused = false;
   }
 
   function pauseMusic(paused) {
     musicPaused = Boolean(paused);
-    if (themeAudio) {
-      if (musicPaused) themeAudio.pause();
-      else {
-        const promise = themeAudio.play();
-        if (promise && typeof promise.catch === 'function') promise.catch(() => {});
-      }
-      return;
+    const el = currentTrack && players[currentTrack] && players[currentTrack].el;
+    if (el) {
+      if (musicPaused) el.pause(); else el.play().catch(() => {});
     }
     if (!ctx || !currentSong) return;
     clearInterval(musicTimer);
@@ -221,13 +268,56 @@
     }
   }
 
+  // Navegadores só deixam tocar som depois de um gesto: retoma no primeiro toque/tecla.
+  function resumeBlocked() {
+    const el = currentTrack && players[currentTrack] && players[currentTrack].el;
+    if (el && el.paused && !musicPaused && state.music) el.play().catch(() => {});
+  }
+  window.addEventListener('pointerdown', resumeBlocked);
+  window.addEventListener('keydown', resumeBlocked);
+
   function configure(options) {
     Object.assign(state, options);
     if (master) master.gain.value = state.volume;
-    if (master) master.gain.value = state.volume;
-    if (themeAudio) themeAudio.volume = Math.max(0, Math.min(1, state.volume));
+    applyTrackVolume();
     if (!state.music) stopMusic();
     if (!state.voice) stopSpeech();
+  }
+
+  // ---------- Falas gravadas (voz real) ----------
+  // Trechos curtos tirados do áudio da Franciely (art-source/audio/voz-franciely.opus).
+  const CLIPS = {
+    franciely: {
+      isso: { url: 'assets/voice/franciely-isso.mp3', text: 'É isso!' },
+      ferrinho: { url: 'assets/voice/franciely-ferrinho.mp3', text: 'Ferrinho por ferrinho!' },
+      desarma: { url: 'assets/voice/franciely-desarma.mp3', text: 'Na praia a gente só desarma!' },
+      montar: { url: 'assets/voice/franciely-montar.mp3', text: 'Aí, essa tem que montar ferrinho por ferrinho!' }
+    }
+  };
+  const clipCache = {};
+  let clipPlaying = null;
+  // Toca o trecho e devolve o texto (para o balão); null se não existir.
+  function playClip(who, key) {
+    const clip = CLIPS[who] && CLIPS[who][key];
+    if (!clip) return null;
+    if (state.voice) {
+      try {
+        stopSpeech();
+        if (clipPlaying) clipPlaying.pause();
+        const el = clipCache[clip.url] || (clipCache[clip.url] = new window.Audio(clip.url));
+        el.currentTime = 0;
+        el.volume = Math.min(1, state.volume + 0.2);
+        el.play().catch(() => {});
+        clipPlaying = el;
+      } catch { /* sem áudio */ }
+    }
+    return clip.text;
+  }
+  const hasClip = (who, key) => Boolean(CLIPS[who] && CLIPS[who][key]);
+
+  function debugMusic() {
+    const el = currentTrack && players[currentTrack] && players[currentTrack].el;
+    return { track: currentTrack, chiptune: currentSong, paused: el ? el.paused : null, time: el ? Math.round(el.currentTime * 10) / 10 : null, volume: el ? Math.round(el.volume * 100) / 100 : null };
   }
 
   // ---------- Falas em voz alta (síntese de voz do próprio navegador) ----------
@@ -276,7 +366,8 @@
   }
   function stopSpeech() {
     try { synth?.cancel(); } catch { /* sem suporte */ }
+    if (clipPlaying) { try { clipPlaying.pause(); } catch { /* ok */ } }
   }
 
-  window.FFAudio = { play, startMusic, stopMusic, pauseMusic, configure, unlock: ensure, speak, stopSpeech };
+  window.FFAudio = { play, startMusic, stopMusic, pauseMusic, configure, unlock: ensure, speak, stopSpeech, playClip, hasClip, debugMusic };
 })();

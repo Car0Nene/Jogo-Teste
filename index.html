@@ -11,7 +11,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="assets/icons/icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
-  <link rel="preload" href="assets/sprites/fighters.png" as="image">
+  
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -39,84 +39,145 @@
     <p id="loadingNote" class="loading-note" role="status">Carregando lutadores…</p>
   </section>
 
-  <!-- SELEÇÃO -->
-  <section id="select" class="screen select-screen" aria-labelledby="selectTitle" hidden>
-    <header class="select-head">
-      <button id="backToMenu" class="chip" type="button">◀ VOLTAR</button>
-      <h1 id="selectTitle">ESCOLHA SEU LUTADOR</h1>
+  <!-- 1) ESCOLHA DO LUTADOR -->
+  <section id="charSelect" class="screen flow-screen" aria-labelledby="charTitle" hidden>
+    <header class="flow-head">
+      <button class="chip flow-back" type="button">◀ VOLTAR</button>
+      <div class="flow-title">
+        <small id="charStep">PASSO 1 DE 3</small>
+        <h1 id="charTitle">ESCOLHA SEU LUTADOR</h1>
+      </div>
       <div class="segmented" role="radiogroup" aria-label="Modo de jogo">
         <button type="button" role="radio" data-mode="cpu" aria-checked="true">1P × CPU</button>
         <button type="button" role="radio" data-mode="versus" aria-checked="false">1P × 2P</button>
       </div>
     </header>
-
-    <div class="select-body">
-      <div class="vs-card" id="p1Card">
-        <span class="slot-tag p1">1P</span>
-        <canvas class="preview" width="200" height="220" aria-hidden="true"></canvas>
-        <strong class="vs-name">JURACI</strong>
-        <small class="vs-desc"></small>
-      </div>
-
-      <div class="select-center">
-        <div class="fighter-picks" role="radiogroup" aria-label="Personagem do 1P">
-          <button class="pick" type="button" role="radio" data-fighter="juraci" aria-checked="true"><img class="fighter-portrait" src="assets/portraits/juraci.png" alt="" width="137" height="177"><span>JURACI</span></button>
-          <button class="pick" type="button" role="radio" data-fighter="carlos" aria-checked="false"><img class="fighter-portrait" src="assets/portraits/carlos.png" alt="" width="135" height="168"><span>CARLOS</span></button>
-          <button class="pick" type="button" role="radio" data-fighter="pedro" aria-checked="false"><img class="fighter-portrait" src="assets/portraits/pedro.png" alt="" width="137" height="174"><span>PEDRO</span></button>
-          <button class="pick" type="button" role="radio" data-fighter="daniel" aria-checked="false"><img class="fighter-portrait" src="assets/portraits/daniel.png" alt="" width="137" height="168"><span>DANIEL</span></button>
-          <button class="pick" type="button" role="radio" data-fighter="franciely" aria-checked="false"><img class="fighter-portrait" src="assets/portraits/franciely.png" alt="" width="137" height="145"><span>FRANCIELY</span></button>
-          <button class="pick" type="button" role="radio" data-fighter="gabi" aria-checked="false"><img class="fighter-portrait" src="assets/portraits/gabi.png" alt="" width="137" height="128"><span>GABI</span></button>
+    <div class="char-layout">
+      <article class="fighter-card" id="p1Card" data-slot="p1">
+        <span class="slot-tag">1P</span>
+        <canvas class="big-preview" width="360" height="400" aria-hidden="true"></canvas>
+        <div class="card-info">
+          <strong class="card-name"></strong>
+          <em class="card-quote"></em>
+          <ul class="card-moves"></ul>
         </div>
-
-        <div class="options">
-          <div class="option-row">
-            <span class="option-label" id="oppLabel">ADVERSÁRIO</span>
-            <div class="segmented" role="radiogroup" aria-labelledby="oppLabel">
-              <button type="button" role="radio" data-opponent="auto" aria-checked="true">AUTO</button>
-              <button type="button" role="radio" data-opponent="juraci" aria-checked="false">JURACI</button>
-              <button type="button" role="radio" data-opponent="carlos" aria-checked="false">CARLOS</button>
-              <button type="button" role="radio" data-opponent="pedro" aria-checked="false">PEDRO</button>
-              <button type="button" role="radio" data-opponent="daniel" aria-checked="false">DANIEL</button>
-              <button type="button" role="radio" data-opponent="franciely" aria-checked="false">FRAN</button>
-              <button type="button" role="radio" data-opponent="gabi" aria-checked="false">GABI</button>
-            </div>
-          </div>
-          <div class="option-row">
-            <span class="option-label" id="stageLabel">CENÁRIO</span>
-            <div class="segmented" role="radiogroup" aria-labelledby="stageLabel">
-              <button type="button" role="radio" data-stage="padaria" aria-checked="true">PADARIA</button>
-              <button type="button" role="radio" data-stage="quintal" aria-checked="false">QUINTAL</button>
-              <button type="button" role="radio" data-stage="festa" aria-checked="false">FESTA JUNINA</button>
-              <button type="button" role="radio" data-stage="bar" aria-checked="false">BAR DA SIMONE</button>
-              <button type="button" role="radio" data-stage="praia" aria-checked="false">PRAIA</button>
-              <button type="button" role="radio" data-stage="random" aria-checked="false">🎲</button>
-            </div>
-          </div>
-          <div class="option-row" id="difficultyRow">
-            <span class="option-label" id="diffLabel">DIFICULDADE</span>
-            <div class="segmented" role="radiogroup" aria-labelledby="diffLabel">
-              <button type="button" role="radio" data-difficulty="easy" aria-checked="false">FÁCIL</button>
-              <button type="button" role="radio" data-difficulty="normal" aria-checked="true">NORMAL</button>
-              <button type="button" role="radio" data-difficulty="hard" aria-checked="false">DIFÍCIL</button>
-            </div>
-          </div>
+      </article>
+      <div id="roster" class="roster" role="listbox" aria-label="Lutadores"></div>
+      <article class="fighter-card" id="p2Card" data-slot="p2">
+        <span class="slot-tag" id="p2Tag">CPU</span>
+        <canvas class="big-preview" width="360" height="400" aria-hidden="true"></canvas>
+        <div class="card-info">
+          <strong class="card-name"></strong>
+          <em class="card-quote"></em>
+          <ul class="card-moves"></ul>
         </div>
-      </div>
-
-      <div class="vs-card" id="p2Card">
-        <span class="slot-tag p2" id="p2Tag">CPU</span>
-        <canvas class="preview" width="200" height="220" aria-hidden="true"></canvas>
-        <strong class="vs-name">CARLOS</strong>
-        <small class="vs-desc"></small>
-      </div>
+      </article>
     </div>
-
-    <footer class="select-foot">
-      <p id="selectControls" class="help"></p>
-      <button id="start" class="primary" type="button">COMEÇAR LUTA ▶</button>
+    <footer class="flow-foot">
+      <p id="charHelp" class="help"></p>
+      <button id="charConfirm" class="primary" type="button">CONFIRMAR ▶</button>
     </footer>
   </section>
 
+  <!-- 2) ESCOLHA DO CENÁRIO -->
+  <section id="stageSelect" class="screen flow-screen" aria-labelledby="stageTitle" hidden>
+    <header class="flow-head">
+      <button class="chip flow-back" type="button">◀ VOLTAR</button>
+      <div class="flow-title">
+        <small>PASSO 2 DE 3</small>
+        <h1 id="stageTitle">ESCOLHA O CENÁRIO</h1>
+      </div>
+      <span class="flow-spacer"></span>
+    </header>
+    <div class="stage-layout">
+      <figure class="stage-preview">
+        <canvas id="stageBig" width="576" height="346" aria-hidden="true"></canvas>
+        <figcaption>
+          <strong id="stageName"></strong>
+          <span id="stageDesc"></span>
+        </figcaption>
+      </figure>
+      <div id="stageList" class="stage-list" role="listbox" aria-label="Cenários"></div>
+    </div>
+    <footer class="flow-foot">
+      <p class="help">Setas ou toque para escolher · Enter para confirmar</p>
+      <button id="stageConfirm" class="primary" type="button">CONFIRMAR ▶</button>
+    </footer>
+  </section>
+
+  <!-- 3) DIFICULDADE E REGRAS -->
+  <section id="optionsSelect" class="screen flow-screen" aria-labelledby="optionsTitle" hidden>
+    <header class="flow-head">
+      <button class="chip flow-back" type="button">◀ VOLTAR</button>
+      <div class="flow-title">
+        <small>PASSO 3 DE 3</small>
+        <h1 id="optionsTitle">DIFICULDADE</h1>
+      </div>
+      <span class="flow-spacer"></span>
+    </header>
+    <div class="options-layout">
+      <div id="diffCards" class="diff-cards" role="radiogroup" aria-label="Dificuldade">
+        <button type="button" role="radio" class="diff-card" data-difficulty="easy" aria-checked="false">
+          <span class="diff-icon">😊</span><strong>FÁCIL</strong><small>A CPU pega leve, defende pouco e demora a reagir.</small>
+        </button>
+        <button type="button" role="radio" class="diff-card" data-difficulty="normal" aria-checked="true">
+          <span class="diff-icon">💪</span><strong>NORMAL</strong><small>Luta equilibrada: defende, faz combos e usa especiais.</small>
+        </button>
+        <button type="button" role="radio" class="diff-card" data-difficulty="hard" aria-checked="false">
+          <span class="diff-icon">🔥</span><strong>DIFÍCIL</strong><small>Reflexo rápido, defesa forte e antiaéreo. Prepare-se!</small>
+        </button>
+      </div>
+      <p id="versusNote" class="versus-note" hidden>Modo 2 jogadores: os dois são controlados por pessoas, sem dificuldade de CPU.</p>
+      <div class="rule-rows">
+        <div class="option-row">
+          <span class="option-label" id="roundsLabel">ROUNDS</span>
+          <div class="segmented" role="radiogroup" aria-labelledby="roundsLabel">
+            <button type="button" role="radio" data-rounds="1" aria-checked="false">1 ROUND</button>
+            <button type="button" role="radio" data-rounds="2" aria-checked="true">MELHOR DE 3</button>
+            <button type="button" role="radio" data-rounds="3" aria-checked="false">MELHOR DE 5</button>
+          </div>
+        </div>
+        <div class="option-row">
+          <span class="option-label" id="timeLabel">TEMPO</span>
+          <div class="segmented" role="radiogroup" aria-labelledby="timeLabel">
+            <button type="button" role="radio" data-time="45" aria-checked="false">45 s</button>
+            <button type="button" role="radio" data-time="60" aria-checked="true">60 s</button>
+            <button type="button" role="radio" data-time="99" aria-checked="false">99 s</button>
+            <button type="button" role="radio" data-time="0" aria-checked="false">∞</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <footer class="flow-foot">
+      <p id="matchSummary" class="help"></p>
+      <button id="fightStart" class="primary fight-button" type="button">LUTAR! ▶</button>
+    </footer>
+  </section>
+
+  <!-- TELA VS -->
+  <section id="vsScreen" class="screen vs-screen" aria-live="polite" hidden>
+    <div class="vs-side vs-left">
+      <canvas width="360" height="400" aria-hidden="true"></canvas>
+      <strong class="vs-name"></strong>
+    </div>
+    <div class="vs-center">
+      <span class="vs-text">VS</span>
+      <small id="vsStage"></small>
+    </div>
+    <div class="vs-side vs-right">
+      <canvas width="360" height="400" aria-hidden="true"></canvas>
+      <strong class="vs-name"></strong>
+    </div>
+  </section>
+
+  <!-- LISTA DE GOLPES (pausa) -->
+  <section id="moveList" class="screen menu-dialog" role="dialog" aria-modal="true" aria-labelledby="moveListTitle" hidden>
+    <div class="dialog-panel">
+      <h2 id="moveListTitle">GOLPES</h2>
+      <ul id="moveListItems" class="move-list"></ul>
+      <button id="closeMoveList" class="primary" type="button">VOLTAR</button>
+    </div>
+  </section>
   <!-- DIÁLOGO GENÉRICO (configurações / créditos / sair) -->
   <section id="menuDialog" class="screen menu-dialog" role="dialog" aria-modal="true" aria-labelledby="menuDialogTitle" hidden>
     <div class="dialog-panel">
@@ -124,11 +185,12 @@
       <p id="menuDialogText"></p>
       <div id="settingsPanel" class="settings" hidden>
         <label class="toggle"><input id="setSound" type="checkbox"> Efeitos sonoros</label>
-        <label class="toggle"><input id="setMusic" type="checkbox"> Música ("Bolo da Juraci")</label>
+        <label class="toggle"><input id="setMusic" type="checkbox"> Música</label>
         <label class="select-label">Música na luta
           <select id="setFightMusic">
-            <option value="theme">Bolo da Juraci</option>
-            <option value="stage">Trilha 8-bit de cada cenário</option>
+            <option value="stage">Uma música para cada cenário</option>
+            <option value="theme">Sempre "Bolo da Juraci"</option>
+            <option value="chip">Trilha 8-bit</option>
           </select>
         </label>
         <label class="toggle"><input id="setVoice" type="checkbox"> Falas em voz alta (voz do navegador)</label>
@@ -197,6 +259,7 @@
       <div class="screen-actions">
         <button id="replay" class="primary" type="button">REVANCHE</button>
         <button id="toSelect" class="secondary" type="button">TROCAR LUTADOR</button>
+        <button id="toStage" class="secondary" type="button">TROCAR CENÁRIO</button>
         <button id="toMenu" class="secondary" type="button">MENU INICIAL</button>
       </div>
     </div>
@@ -209,6 +272,7 @@
       <div class="stack">
         <button id="resume" class="primary" type="button">CONTINUAR</button>
         <button id="restartFight" class="secondary" type="button">REINICIAR LUTA</button>
+        <button id="pauseMoves" class="secondary" type="button">LISTA DE GOLPES</button>
         <button id="pauseSettings" class="secondary" type="button">CONFIGURAÇÕES</button>
         <button id="pauseMenu" class="secondary" type="button">MENU INICIAL</button>
       </div>

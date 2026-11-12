@@ -9,19 +9,22 @@
   // ======================================================================
   const H = 540;
   const BASE_W = 960;
+  const MIN_W = 720; // telas 4:3 (tablets)
   const MAX_W = 1280;
   const STAGE_W = 1600;
   const FLOOR = 450;
   const STEP = 1 / 60;
   const WALL = 46;
-  const MAX_SEPARATION = 820;
-  const ROUND_TIME = 60;
-  const WINS_NEEDED = 2;
-  const MAX_ROUNDS = 5;
+  // Câmera aproximada (personagens grandes, como nos jogos de luta). worldW = largura do
+  // mundo visível; camTop = topo visível (sobe quando alguém pula alto).
+  const ZOOM = 1.4;
+  const CAM_TOP = H - H / ZOOM;
   const MAX_HP = 1400;
   const FAR_W = (STAGE_W + MAX_W) / 2;
 
   const SPR = window.FF_SPRITES || {};
+  const AS = window.FF_SPRITE_SCALE || 1; // resolução do atlas (desenho divide por isso)
+  const SPRITE_VERSION = window.FF_SPRITE_VERSION || '1';
   const DIALOGUE = window.FF_DIALOGUE || { intro: {}, juraci: {}, carlos: {} };
   const TRANSFORM_TIME = 1.5;
   const Audio = window.FFAudio || { play() {}, startMusic() {}, stopMusic() {}, pauseMusic() {}, configure() {}, unlock() {} };
@@ -40,7 +43,8 @@
   // ======================================================================
   const DEFAULTS = {
     sound: true, music: true, voice: true, talk: true, volume: 0.7, vibration: true, touch: 'auto',
-    difficulty: 'normal', stage: 'padaria', mode: 'cpu', fighter: 'juraci', opponent: 'auto', fightMusic: 'theme'
+    difficulty: 'normal', stage: 'padaria', mode: 'cpu', fighter: 'juraci', opponent: 'auto', fightMusic: 'stage',
+    rounds: 2, roundTime: 60
   };
   const ENUMS = {
     touch: ['auto', 'always', 'never'],
@@ -49,7 +53,9 @@
     mode: ['cpu', 'versus'],
     fighter: ['juraci', 'carlos', 'pedro', 'daniel', 'franciely', 'gabi'],
     opponent: ['auto', 'juraci', 'carlos', 'pedro', 'daniel', 'franciely', 'gabi'],
-    fightMusic: ['theme', 'stage']
+    fightMusic: ['stage', 'theme', 'chip'],
+    rounds: [1, 2, 3],
+    roundTime: [45, 60, 99, 0]
   };
   const settings = (() => {
     let stored = {};
@@ -73,7 +79,11 @@
   // ======================================================================
   const loadImage = src => { const img = new Image(); img.decoding = 'async'; img.src = src; return img; };
   const ready = img => img && (img instanceof HTMLCanvasElement || (img.complete && img.naturalWidth > 0));
-  const atlas = loadImage('assets/sprites/fighters.png');
+  // WebP nítido; se o navegador não abrir, usa o PNG. ?v= impede misturar versões no cache.
+  const atlas = loadImage(`assets/sprites/fighters.webp?v=${SPRITE_VERSION}`);
+  atlas.addEventListener('error', () => {
+    if (!atlas.src.includes('.png')) atlas.src = `assets/sprites/fighters.png?v=${SPRITE_VERSION}`;
+  });
   const portraits = { juraci: loadImage('assets/portraits/juraci.png'), carlos: loadImage('assets/portraits/carlos.png'),
     pedro: loadImage('assets/portraits/pedro.png'), daniel: loadImage('assets/portraits/daniel.png'),
     franciely: loadImage('assets/portraits/franciely.png'), gabi: loadImage('assets/portraits/gabi.png') };
@@ -268,6 +278,8 @@
   let shake = 0;
   let camX = (STAGE_W - BASE_W) / 2;
   let viewW = BASE_W;
+  let worldW = BASE_W / ZOOM;
+  let camTop = CAM_TOP;
   let renderScale = 1;
   let offsetX = 0;
   let offsetY = 0;
@@ -322,19 +334,23 @@
   }
 
   function anyDialogOpen() {
-    return !$('#menuDialog').hidden || Account.isOpen();
+    return !$('#menuDialog').hidden || !$('#moveList').hidden || Account.isOpen();
   }
 
   document.addEventListener('keydown', event => {
     if (isTyping(event.target)) return; // nunca roubar teclas de campos de formulário
     if (event.code === 'Escape') {
       if (!$('#menuDialog').hidden) { closeMenuDialog(); return; }
+      if (!$('#moveList').hidden) { $('#moveList').hidden = true; return; }
       if (Account.isOpen()) { Account.close(); return; }
       if (app === 'fight') { event.preventDefault(); togglePause(); }
-      else if (app === 'select') goSplash();
+      else if (FLOW_SCREENS.includes(app)) flowBack();
+      else if (app === 'vs') beginFight();
       return;
     }
     if (anyDialogOpen()) return;
+    if (FLOW_SCREENS.includes(app) && !event.repeat && flowKey(event)) return;
+    if (app === 'vs' && ['Enter', 'Space', 'KeyJ'].includes(event.code)) { beginFight(); return; }
     if (event.code === 'KeyP' && app === 'fight') { togglePause(); return; }
     if (app !== 'fight' || paused) return;
     if (match && match.sub === 'talk' && !event.repeat
@@ -484,12 +500,25 @@
   function say(f, key, { important = false, duration = 0, chance = 1, text = '' } = {}) {
     if (!f) return;
     if (!important && (f.sayCooldown > 0 || Math.random() > chance)) return;
+    // voz real gravada (quando existe trecho para esse momento) no lugar da voz do navegador
+    const clipKey = !text && VOICE_CLIPS[f.id] && VOICE_CLIPS[f.id][key];
+    if (clipKey && Audio.hasClip && Audio.hasClip(f.id, clipKey) && Math.random() < 0.75) {
+      const clipText = Audio.playClip(f.id, clipKey);
+      f.say = { text: clipText, t: 0, life: duration || clamp(1.1 + clipText.length * 0.045, 1.4, 3.2) };
+      f.sayCooldown = important ? 1.2 : 3.5;
+      return;
+    }
     const line = text || pickLine((DIALOGUE[f.id] || {})[key], f);
     if (!line) return;
     f.say = { text: line, t: 0, life: duration || clamp(1.1 + line.length * 0.045, 1.4, 3.2) };
     f.sayCooldown = important ? 1.2 : 3.5;
     Audio.speak(line, f.id);
   }
+
+  // momento da fala → trecho gravado (js/audio.js → CLIPS)
+  const VOICE_CLIPS = {
+    franciely: { angry: 'isso', combo: 'ferrinho', win: 'montar', milk: 'isso' }
+  };
 
   const opponentOf = f => fighters[1 - f.slot];
   const grounded = f => f.y <= 0 && f.vy <= 0;
@@ -650,7 +679,7 @@
       const fromLeft = f.facing > 0;
       spawnProjectile(f, {
         sprite: 'car', speed: 980, damage: 150, w: 150, h: 62, y: 34, life: 3,
-        x: fromLeft ? camX - 140 : camX + viewW + 140
+        x: fromLeft ? camX - 140 : camX + worldW + 140
       });
       Audio.play('horn');
     } else if (roll < 0.67) {
@@ -690,7 +719,7 @@
   let cameos = [];
   function spawnCameo(kind, owner, delay = 0) {
     const dir = owner.facing;
-    const behind = dir > 0 ? camX - 70 : camX + viewW + 70;
+    const behind = dir > 0 ? camX - 70 : camX + worldW + 70;
     cameos.push({
       kind, owner, dir, delay, t: 0, phase: 'enter', hit: false,
       x: kind === 'carlosFlee' ? owner.x - dir * 30 : behind,
@@ -736,7 +765,7 @@
         } else {
           c.walkDir = owner.facing > 0 ? -1 : 1;
           c.x += c.walkDir * 300 * dt;
-          if (c.x < camX - 120 || c.x > camX + viewW + 120) c.done = true;
+          if (c.x < camX - 120 || c.x > camX + worldW + 120) c.done = true;
         }
       } else if (c.kind === 'carlosFlee') {
         if (!c.said) { c.said = true; cameoSay(c, pickLine(DIALOGUE.carlos?.flee, owner), 1.4, 'carlos'); }
@@ -745,7 +774,7 @@
           c.hit = true;
           applyHit(owner, o, { damage: 70, push: 300, hitstun: 0.5, blockstun: 0.25, hitstop: 0.08, heavy: true, knockdown: true }, c.x - c.dir * 40, o.x, 90);
         }
-        if (c.x < camX - 150 || c.x > camX + viewW + 150) c.done = true;
+        if (c.x < camX - 150 || c.x > camX + worldW + 150) c.done = true;
       } else if (c.kind === 'juraciPan') {
         const panX = owner.x - owner.facing * 70;
         if (!c.panX) c.panX = panX;
@@ -770,7 +799,7 @@
         } else {
           c.walkDir = owner.facing > 0 ? -1 : 1;
           c.x += c.walkDir * 280 * dt;
-          if (c.x < camX - 120 || c.x > camX + viewW + 120) c.done = true;
+          if (c.x < camX - 120 || c.x > camX + worldW + 120) c.done = true;
         }
       }
     }
@@ -1232,8 +1261,9 @@
     }
     // os dois sempre cabem na tela
     const sep = b.x - a.x;
-    if (Math.abs(sep) > MAX_SEPARATION) {
-      const excess = Math.abs(sep) - MAX_SEPARATION;
+    const maxSep = worldW - 110; // os dois sempre cabem na câmera aproximada
+    if (Math.abs(sep) > maxSep) {
+      const excess = Math.abs(sep) - maxSep;
       const s = Math.sign(sep);
       const aAway = -s * a.vx > 0;
       const bAway = s * b.vx > 0;
@@ -1397,13 +1427,15 @@
     return others[Math.floor(clock / 1.1) % others.length];
   }
 
-  function startMatch() {
+  // prepareOnly: só monta a luta (usado pela tela VS, que começa a luta depois)
+  function startMatch(prepareOnly = false) {
     const p1 = settings.fighter;
     const p2 = resolveOpponent();
     const mode = settings.mode;
     match = {
       mode, difficulty: settings.difficulty, stage: resolveStage(),
-      wins: [0, 0], round: 1, sub: 'intro', t: 0, timer: ROUND_TIME, roundWinner: -1, resultShown: false
+      wins: [0, 0], round: 1, sub: 'intro', t: 0, roundWinner: -1, resultShown: false,
+      winsNeeded: settings.rounds, roundTime: settings.roundTime || Infinity, timer: settings.roundTime || Infinity
     };
     fighters = [createFighter(0, p1, false, false), createFighter(1, p2, mode === 'cpu', p1 === p2)];
     ensureStage(match.stage);
@@ -1411,10 +1443,19 @@
     $('[data-act="heavy"]').setAttribute('aria-label', CHARS[p1].heavyLabel === 'CHUTE' ? 'Chute' : 'Golpe forte');
     startRound();
     paused = false;
-    setApp('fight');
     Audio.unlock();
-    Audio.startMusic(settings.fightMusic === 'theme' ? 'theme' : match.stage);
+    if (prepareOnly) return;
+    setApp('fight');
+    playFightMusic();
     if (matchMedia('(pointer: coarse)').matches) void enterFullscreen();
+  }
+
+  // Música da luta: uma faixa gravada por cenário (padrão), sempre "Bolo da Juraci" ou 8-bit.
+  const STAGE_MUSIC = { padaria: 'theme', quintal: 'ff3', festa: 'ff2', bar: 'ff2', praia: 'ff3' };
+  function playFightMusic() {
+    if (!match) return;
+    if (settings.fightMusic === 'chip') Audio.startMusic(match.stage);
+    else Audio.startMusic(settings.fightMusic === 'theme' ? 'theme' : STAGE_MUSIC[match.stage] || 'theme', 0.6);
   }
 
   function startRound() {
@@ -1429,10 +1470,11 @@
     shake = 0;
     match.sub = 'intro';
     match.t = 0;
-    match.timer = ROUND_TIME;
+    match.timer = match.roundTime;
     match.roundWinner = -1;
     match.perfect = false;
-    camX = (STAGE_W - viewW) / 2;
+    camX = (STAGE_W - worldW) / 2;
+    camTop = CAM_TOP;
     clearInputs();
     const intros = DIALOGUE.intro || {};
     const options = intros[`${fighters[0].id}>${fighters[1].id}`] || intros['*'];
@@ -1448,6 +1490,12 @@
   function beginIntro() {
     for (const f of fighters) f.say = null;
     Audio.stopSpeech();
+    // Franciely na praia: "Na praia a gente só desarma!" (voz real) no 1º round
+    const fran = fighters.find(f => f.id === 'franciely');
+    if (fran && match.stage === 'praia' && match.round === 1 && Audio.hasClip && Audio.hasClip('franciely', 'desarma')) {
+      const clipText = Audio.playClip('franciely', 'desarma');
+      fran.say = { text: clipText, t: 0, life: 2 };
+    }
     match.sub = 'intro';
     match.t = 0;
     Audio.play('round');
@@ -1532,7 +1580,7 @@
           fighters[w].t = 0;
         }
         if (match.t >= 2.4) {
-          const done = match.wins[0] >= WINS_NEEDED || match.wins[1] >= WINS_NEEDED || match.round >= MAX_ROUNDS;
+          const done = match.wins[0] >= match.winsNeeded || match.wins[1] >= match.winsNeeded || match.round >= match.winsNeeded * 2 + 1;
           if (done) showResult();
           else { match.round += 1; startRound(); }
         }
@@ -1565,7 +1613,11 @@
     resolvePush();
     updateMatch(dt);
     // câmera segue o centro da luta
-    const target = clamp((fighters[0].x + fighters[1].x) / 2 - viewW / 2, 0, STAGE_W - viewW);
+    const target = clamp((fighters[0].x + fighters[1].x) / 2 - worldW / 2, 0, STAGE_W - worldW);
+    // sobe a câmera quando alguém pula alto, para a cabeça não sumir sob o placar
+    const highest = Math.min(...fighters.map(f => FLOOR - f.y - f.ch.height));
+    const topTarget = clamp(Math.min(CAM_TOP, highest - 85), 30, CAM_TOP);
+    camTop += (topTarget - camTop) * Math.min(1, dt * 6);
     camX += (target - camX) * Math.min(1, dt * 7);
     updateSpecialButton();
   }
@@ -1612,7 +1664,7 @@
     }));
     $('#syncStatus').textContent = '';
     setApp('result');
-    Audio.stopMusic();
+    Audio.startMusic('theme');
     if (!versus) void Account.recordMatch(outcome, a.id);
   }
 
@@ -1624,7 +1676,7 @@
     quintal: 'Quintal da Família',
     festa: 'Festa Junina',
     bar: 'Bar da Simone',
-    praia: 'Praia do Natal'
+    praia: 'Praia'
   };
 
   function seeded(seed) {
@@ -1993,7 +2045,7 @@
       animate(g, cam, t) {
         // chamas da fogueira (dinâmicas)
         const x = 800 - cam;
-        if (x < -160 || x > viewW + 160) return;
+        if (x < -160 || x > worldW + 160) return;
         const glow = g.createRadialGradient(x, 330, 10, x, 330, 220);
         glow.addColorStop(0, `rgba(255,170,60,${0.32 + Math.sin(t * 9) * 0.05})`);
         glow.addColorStop(1, 'rgba(255,120,40,0)');
@@ -2188,8 +2240,80 @@
       }
     }
   });
+  // Cenários com arte pintada (assets/stages). ground = linha do chão na imagem (px originais),
+  // que fica alinhada com os pés dos lutadores; scale = ampliação da imagem no mundo.
+  const STAGE_ART = {
+    bar: { src: 'assets/stages/bar.webp', ground: 440, scale: 0.97 },
+    praia: { src: 'assets/stages/praia.webp', ground: 380, scale: 1.05 }
+  };
+  for (const [name, art] of Object.entries(STAGE_ART)) {
+    art.img = loadImage(art.src);
+    art.img.addEventListener('load', () => {
+      if (stageCache && stageCache.name === name) { stageCache = null; ensureStage(name); }
+      stageThumbs.delete(name);
+      if (app === 'stage') refreshStageScreen();
+    });
+    const procedural = STAGES[name];
+    const drawArt = (g, w) => {
+      const { img, ground, scale } = art;
+      const dw = img.naturalWidth * scale;
+      const dh = img.naturalHeight * scale;
+      const dx = (w - dw) / 2;
+      const dy = FLOOR - ground * scale;
+      if (dy > 0) { // completa o céu acima da imagem com a cor do topo
+        g.drawImage(img, 0, 0, img.naturalWidth, 2, 0, 0, w, dy + 2);
+      }
+      g.drawImage(img, dx, dy, dw, dh);
+      if (dy + dh < H) { // completa o chão abaixo com a cor média da base da imagem, escurecendo
+        if (!art.floor) {
+          try {
+            const probe = document.createElement('canvas');
+            probe.width = 64; probe.height = 4;
+            const pg = probe.getContext('2d');
+            pg.drawImage(img, 0, img.naturalHeight - 12, img.naturalWidth, 12, 0, 0, 64, 4);
+            const px = pg.getImageData(0, 0, 64, 4).data;
+            let r = 0, gg = 0, b = 0;
+            for (let i = 0; i < px.length; i += 4) { r += px[i]; gg += px[i + 1]; b += px[i + 2]; }
+            const n = px.length / 4;
+            art.floor = [r / n, gg / n, b / n].map(Math.round);
+          } catch { art.floor = [90, 80, 70]; }
+        }
+        const [r, gg, b] = art.floor;
+        const grad = g.createLinearGradient(0, dy + dh, 0, H);
+        grad.addColorStop(0, `rgb(${r},${gg},${b})`);
+        grad.addColorStop(1, `rgb(${r * 0.55 | 0},${gg * 0.55 | 0},${b * 0.55 | 0})`);
+        g.fillStyle = grad;
+        g.fillRect(0, dy + dh - 1, w, H - dy - dh + 1);
+        g.fillStyle = 'rgba(0,0,0,0.25)';
+        g.fillRect(0, dy + dh - 1, w, 3);
+      }
+    };
+    STAGES[name] = {
+      far: (g, w) => (ready(art.img) ? drawArt(g, w) : procedural.far(g, w)),
+      near: (g, w) => (ready(art.img) ? drawArt(g, w) : procedural.near(g, w)),
+      get animate() { return ready(art.img) ? null : procedural.animate; }
+    };
+  }
+
+  // Miniaturas dos cenários (tela de escolha de cenário)
+  const stageThumbs = new Map();
+  function stageThumb(name) {
+    if (stageThumbs.has(name)) return stageThumbs.get(name);
+    const def = STAGES[name] || STAGES.padaria;
+    const k = 0.32;
+    const view = 900; // pedaço central do cenário
+    const [c, g] = layer(view, k);
+    g.save();
+    g.translate(-(STAGE_W - view) / 2, 0);
+    def.far(g, FAR_W);
+    def.near(g, STAGE_W);
+    g.restore();
+    stageThumbs.set(name, c);
+    return c;
+  }
+
   function ensureStage(name) {
-    const k = clamp(renderScale, 1, 2);
+    const k = clamp(renderScale * ZOOM, 1, 2.4); // resolução do cenário acompanha o zoom
     if (stageCache && stageCache.name === name && stageCache.k === k) return stageCache;
     const def = STAGES[name] || STAGES.padaria;
     const [far, fg] = layer(FAR_W, k);
@@ -2205,8 +2329,9 @@
     if (!s) return;
     const k = s.k;
     const farX = cam * 0.5;
-    ctx.drawImage(s.far, farX * k, 0, viewW * k, H * k, 0, 0, viewW, H);
-    ctx.drawImage(s.near, cam * k, 0, viewW * k, H * k, 0, 0, viewW, H);
+    const w = Math.min(worldW, s.far.width / k - farX);
+    ctx.drawImage(s.far, farX * k, 0, w * k, H * k, 0, 0, w, H);
+    ctx.drawImage(s.near, cam * k, 0, worldW * k, H * k, 0, 0, worldW, H);
     if (s.animate) s.animate(ctx, cam, clock);
   }
 
@@ -2427,7 +2552,7 @@
     const blink = (f.flash > 0 || (f.invuln > 0 && f.state === 'getup') || (f.state === 'idle' && f.invuln > 0))
       && Math.floor(clock * 30) % 2 === 0;
     if (blink) ctx.globalAlpha = 0.55;
-    ctx.drawImage(img, sx, sy, sw, sh, -ax, -ay, sw, sh);
+    ctx.drawImage(img, sx, sy, sw, sh, -ax / AS, -ay / AS, sw / AS, sh / AS);
     ctx.restore();
     if (f.state === 'transform' && f.nextForm === 'gordao' && f.t < 0.85) drawFood(f, x, footY);
     drawHeldItems(f);
@@ -2511,8 +2636,9 @@
     if (line) lines.push(line);
     const w = Math.max(...lines.map(l => ctx.measureText(l).width)) + 26;
     const h = lines.length * 21 + 16;
-    const headX = f.x - camX;
-    const headY = FLOOR - f.y - (form(f).wide ? f.ch.height + 10 : f.ch.height) - 14;
+    // posição da cabeça no mundo → tela (o balão é desenhado sem o zoom, para o texto ficar legível)
+    const headX = (f.x - camX) * ZOOM;
+    const headY = (FLOOR - f.y - (form(f).wide ? f.ch.height + 10 : f.ch.height) - 6 - camTop) * ZOOM;
     const bx = clamp(headX - w / 2 + f.facing * 30, 8, viewW - w - 8);
     const by = Math.max(96, headY - h - 18);
     const pop = 0.85 + appear * 0.15;
@@ -2779,7 +2905,7 @@
       ctx.save();
       ctx.translate(x, FLOOR);
       ctx.scale(dir * s, s);
-      ctx.drawImage(atlas, sx, sy, sw, sh, -ax, -ay, sw, sh);
+      ctx.drawImage(atlas, sx, sy, sw, sh, -ax / AS, -ay / AS, sw / AS, sh / AS);
       ctx.restore();
     };
     if (c.kind === 'carlosFlee') {
@@ -2841,7 +2967,7 @@
     ctx.translate(x, y);
     if (rot) ctx.rotate(rot);
     ctx.scale(scale, scale);
-    ctx.drawImage(atlas, sx, sy, sw, sh, -ax, -ay, sw, sh);
+    ctx.drawImage(atlas, sx, sy, sw, sh, -ax / AS, -ay / AS, sw / AS, sh / AS);
     ctx.restore();
   }
 
@@ -2901,7 +3027,7 @@
     ctx.fillRect(mirror ? barX + barW - hpW : barX, y, hpW, 6);
     // nome + vitórias
     hudText(CHARS[f.id].name, mirror ? barX + barW : barX, y + 46, 22, '#ffffff', mirror ? 'right' : 'left');
-    for (let i = 0; i < WINS_NEEDED; i++) {
+    for (let i = 0; i < match.winsNeeded; i++) {
       const wx = mirror ? barX + 14 + i * 22 : barX + barW - 14 - i * 22;
       ctx.fillStyle = '#170d24';
       ctx.beginPath(); ctx.arc(wx, y + 38, 8, 0, Math.PI * 2); ctx.fill();
@@ -2947,8 +3073,9 @@
     roundRect(ctx, cx - 44, 6, 88, 62, 10); ctx.fill();
     ctx.fillStyle = '#3b1f3f';
     roundRect(ctx, cx - 39, 11, 78, 52, 8); ctx.fill();
-    const time = Math.ceil(match.timer);
-    hudText(String(time).padStart(2, '0'), cx, 52, 38, time <= 10 && Math.floor(clock * 4) % 2 ? '#ff5a5a' : '#fff16b', 'center', '#7f291d', 5);
+    const time = Number.isFinite(match.timer) ? Math.ceil(match.timer) : null;
+    if (time === null) hudText('∞', cx, 52, 40, '#fff16b', 'center', '#7f291d', 5);
+    else hudText(String(time).padStart(2, '0'), cx, 52, 38, time <= 10 && Math.floor(clock * 4) % 2 ? '#ff5a5a' : '#fff16b', 'center', '#7f291d', 5);
     hudText(`ROUND ${match.round}`, cx, 82, 13, '#ffd0e0', 'center', '#170d24', 4);
   }
 
@@ -2972,7 +3099,7 @@
     switch (match.sub) {
       case 'intro':
         if (t < 1.1) {
-          const final = match.wins[0] === WINS_NEEDED - 1 && match.wins[1] === WINS_NEEDED - 1;
+          const final = match.winsNeeded > 1 && match.wins[0] === match.winsNeeded - 1 && match.wins[1] === match.winsNeeded - 1;
           banner(final ? 'ROUND FINAL' : `ROUND ${match.round}`, stageNames[match.stage], t);
         } else {
           banner('LUTEM!', '', t - 1.1, '#ff6b3d');
@@ -3010,12 +3137,15 @@
     ctx.save();
     ctx.beginPath(); ctx.rect(0, 0, viewW, H); ctx.clip();
     if (shake > 0) ctx.translate(rand(-shake, shake), rand(-shake, shake) * 0.6);
-    const cam = app === 'fight' || app === 'result' ? camX : (STAGE_W - viewW) / 2 + Math.sin(clock * 0.2) * 160;
+    const cam = app === 'fight' || app === 'result' ? camX : (STAGE_W - worldW) / 2 + Math.sin(clock * 0.2) * 220;
+    // mundo com zoom: ancorado embaixo, topo = camTop
+    ctx.scale(ZOOM, ZOOM);
+    ctx.translate(0, -(app === 'fight' || app === 'result' ? camTop : CAM_TOP));
     drawStage(cam);
     if (app === 'fight' || app === 'result') {
       if (superFreeze > 0) {
         ctx.fillStyle = `rgba(10,5,30,${Math.min(0.55, superFreeze * 2)})`;
-        ctx.fillRect(0, 0, viewW, H);
+        ctx.fillRect(0, 0, worldW, H);
       }
       for (const f of fighters) drawShadow(f);
       const order = [...fighters].sort((a, b) => (a.state === 'attack') - (b.state === 'attack'));
@@ -3077,7 +3207,12 @@
       accumulator = 0;
       clock += dt;
     }
-    if (app === 'select') drawPreviews();
+    if (app === 'chars') {
+      drawBigFighter($('#p1Card .big-preview'), $('#p1Card').dataset.fighter, false);
+      const p2 = $('#p2Card').dataset.fighter;
+      drawBigFighter($('#p2Card .big-preview'), p2, true, p2 === settings.fighter, !p2);
+    } else if (app === 'stage') drawStagePreview();
+    else if (app === 'vs') drawVersus();
     render();
   }
 
@@ -3085,7 +3220,7 @@
   // Telas, pausa, orientação, tela cheia
   // ======================================================================
   const ui = {
-    splash: $('#splash'), select: $('#select'), result: $('#result'), pause: $('#pause'),
+    splash: $('#splash'), chars: $('#charSelect'), stage: $('#stageSelect'), options: $('#optionsSelect'), vs: $('#vsScreen'), result: $('#result'), pause: $('#pause'),
     rotate: $('#rotateNotice'), controls: $('#controls'), pauseButton: $('#pauseButton')
   };
 
@@ -3102,7 +3237,10 @@
 
   function updateOverlays() {
     ui.splash.hidden = app !== 'splash';
-    ui.select.hidden = app !== 'select';
+    ui.chars.hidden = app !== 'chars';
+    ui.stage.hidden = app !== 'stage';
+    ui.options.hidden = app !== 'options';
+    ui.vs.hidden = app !== 'vs';
     ui.result.hidden = app !== 'result';
     ui.pause.hidden = !(app === 'fight' && paused);
     ui.rotate.hidden = !isBlockedByRotation();
@@ -3115,17 +3253,16 @@
     app = next;
     if (next !== 'fight') paused = false;
     updateOverlays();
-    if (next === 'select') {
-      ensureStage(settings.stage === 'random' ? 'padaria' : settings.stage);
-      refreshSelect();
-      $('#start').focus({ preventScroll: true });
-    }
+    if (next === 'chars') $('#charConfirm').focus({ preventScroll: true });
+    if (next === 'stage') $('#stageConfirm').focus({ preventScroll: true });
+    if (next === 'options') $('#fightStart').focus({ preventScroll: true });
     if (next === 'splash') $('#splashStart').focus({ preventScroll: true });
     if (next === 'result') $('#replay').focus({ preventScroll: true });
   }
 
   function goSplash() {
-    Audio.stopMusic();
+    clearTimeout(vsTimer);
+    Audio.startMusic('theme');
     Audio.stopSpeech();
     setApp('splash');
   }
@@ -3165,7 +3302,8 @@
     const cssH = window.innerHeight;
     canvas.width = Math.max(1, Math.round(cssW * dpr));
     canvas.height = Math.max(1, Math.round(cssH * dpr));
-    viewW = clamp(Math.round(H * (cssW / Math.max(1, cssH))), BASE_W, MAX_W);
+    // largura visível acompanha a proporção da tela (4:3 até 21:9), sem faixas pretas
+    viewW = clamp(Math.round(H * (cssW / Math.max(1, cssH))), MIN_W, MAX_W);
     renderScale = Math.min(canvas.width / viewW, canvas.height / H);
     offsetX = (canvas.width - viewW * renderScale) / 2;
     offsetY = (canvas.height - H * renderScale) / 2;
@@ -3177,7 +3315,8 @@
       ensureStage(name);
     }
     ui.pauseButton.style.top = `${(offsetY + 92 * renderScale) / dpr}px`;
-    camX = clamp(camX, 0, STAGE_W - viewW);
+    worldW = viewW / ZOOM;
+    camX = clamp(camX, 0, STAGE_W - worldW);
     updateOverlays();
     if (isBlockedByRotation() && !paused) pauseGame();
   }
@@ -3195,86 +3334,419 @@
     $$(selector).forEach(button => button.setAttribute('aria-checked', String(button.dataset[attr] === value)));
   }
 
-  function refreshSelect() {
-    const versus = settings.mode === 'versus';
-    setChecked('[data-mode]', 'mode', settings.mode);
-    setChecked('.pick[data-fighter]', 'fighter', settings.fighter);
-    setChecked('[data-opponent]', 'opponent', settings.opponent);
-    setChecked('[data-stage]', 'stage', settings.stage);
-    setChecked('[data-difficulty]', 'difficulty', settings.difficulty);
-    $('#difficultyRow').hidden = versus;
-    $('#oppLabel').textContent = versus ? 'LUTADOR 2P' : 'ADVERSÁRIO';
-    $('#p2Tag').textContent = versus ? '2P' : 'CPU';
-    const p1 = settings.fighter;
-    $('#p1Card .vs-name').textContent = CHARS[p1].name;
-    $('#p1Card .vs-desc').textContent = CHARS[p1].desc;
-    if (settings.opponent === 'auto') {
-      $('#p2Card .vs-name').textContent = 'ALEATÓRIO';
-      $('#p2Card .vs-desc').textContent = 'Um adversário surpresa entre os outros lutadores.';
-    } else {
-      const p2 = settings.opponent;
-      $('#p2Card .vs-name').textContent = CHARS[p2].name + (p1 === p2 ? ' (ALT)' : '');
-      $('#p2Card .vs-desc').textContent = CHARS[p2].desc;
+  // ======================================================================
+  // Telas de escolha (estilo jogo de luta): lutador → cenário → dificuldade → VS → luta
+  // ======================================================================
+  // Frase de efeito e golpes de cada lutador (aparecem no painel grande e na lista de golpes)
+  const PROFILE = {
+    juraci: { quote: '"Bolos são minha vida!"', moves: [['L', 'Super Bolo de Cenoura: bolo voador que derruba'], ['↓ + L', 'Chama o Dadá: "Já vou, irmã!" — chão molhado']] },
+    carlos: { quote: '"Tô firme! Tô forte!"', moves: [['L', 'Gordão (come e engorda: +força) / Modo Fé (batismo: +defesa)'], ['J J K K', 'Combo do Chute: o 4º golpe derruba']] },
+    pedro: { quote: '"Fuma, bebe e vence!"', moves: [['L', 'Bebe uma Heineken e vira o Monstrão'], ['↓ + L', 'Fumaça de cigarro: o adversário tosse']] },
+    daniel: { quote: '"Partiu praia?"', moves: [['L', 'Natal Praia: rápido, imprevisível — carro, esposa ou show'], ['↓ + L', 'Dancinha com notas musicais']] },
+    franciely: { quote: '"Cuidar também é lutar!"', moves: [['L', 'Irritada sem motivo: Carlos foge e bate a fome sem fim'], ['↓ + L', 'Jato de leite']] },
+    gabi: { quote: '"Faz o L, ama o Lula!"', moves: [['L', 'Super L + chuva de brigadeiros (a Juraci busca a panela)'], ['↓ + L', 'Canto com notas musicais']] }
+  };
+  const STAGE_INFO = {
+    padaria: 'A padaria da Juju, com bolos na vitrine.',
+    quintal: 'O quintal da família no pôr do sol, com varal e mangueira.',
+    festa: 'Noite de festa junina, bandeirinhas e fogueira.',
+    bar: 'Aqui a resenha é garantida! Cerveja gelada e futebol na TV.',
+    praia: 'Sol, mar e diversão! Calçadão, guarda-sóis e vôlei.'
+  };
+  const STAGE_IDS = ['padaria', 'quintal', 'festa', 'bar', 'praia'];
+  const FLOW_SCREENS = ['chars', 'stage', 'options'];
+
+  const flow = { phase: 'p1', cursor: 'juraci', stageCursor: 'padaria' };
+  const rosterIds = () => [...FIGHTER_IDS, 'auto'];
+
+  // ---------- montagem (uma vez) ----------
+  function buildRoster() {
+    const roster = $('#roster');
+    roster.replaceChildren(...rosterIds().map(id => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'tile';
+      b.dataset.id = id;
+      b.setAttribute('role', 'option');
+      const label = document.createElement('span');
+      if (id === 'auto') {
+        const q = document.createElement('div');
+        q.className = 'tile-random';
+        q.textContent = '?';
+        b.append(q);
+        label.textContent = 'ALEATÓRIO';
+      } else {
+        const img = document.createElement('img');
+        img.src = `assets/portraits/${id}.png`;
+        img.alt = '';
+        img.decoding = 'async';
+        img.addEventListener('error', () => { img.style.visibility = 'hidden'; });
+        b.append(img);
+        label.textContent = CHARS[id].name;
+        if (!available(id)) { b.disabled = true; b.title = 'Em breve'; }
+      }
+      b.append(label);
+      b.addEventListener('click', () => {
+        if (b.disabled) return;
+        if (flow.cursor === id) confirmChar();
+        else { flow.cursor = id; Audio.play('ui'); refreshChars(); }
+      });
+      return b;
+    }));
+  }
+
+  function buildStageList() {
+    const list = $('#stageList');
+    list.replaceChildren(...[...STAGE_IDS, 'random'].map(id => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'stage-tile';
+      b.dataset.id = id;
+      b.setAttribute('role', 'option');
+      if (id === 'random') {
+        const q = document.createElement('div');
+        q.className = 'tile-random';
+        q.textContent = '🎲';
+        b.append(q);
+      } else {
+        b.append(document.createElement('canvas'));
+      }
+      const label = document.createElement('span');
+      label.textContent = id === 'random' ? 'ALEATÓRIO' : stageNames[id].toUpperCase();
+      b.append(label);
+      b.addEventListener('click', () => {
+        if (flow.stageCursor === id) confirmStage();
+        else { flow.stageCursor = id; Audio.play('ui'); refreshStageScreen(); }
+      });
+      return b;
+    }));
+  }
+
+  // ---------- painéis grandes ----------
+  function fillCard(card, id, { tag, waiting, locked }) {
+    const info = id && id !== 'auto' ? CHARS[id] : null;
+    card.querySelector('.card-name').textContent = info ? info.name : id === 'auto' ? 'ALEATÓRIO' : '???';
+    card.querySelector('.card-quote').textContent = info ? PROFILE[id].quote : 'Um adversário surpresa!';
+    const moves = card.querySelector('.card-moves');
+    moves.replaceChildren(...(info ? PROFILE[id].moves : []).map(([key, text]) => {
+      const li = document.createElement('li');
+      const b = document.createElement('b');
+      b.textContent = `${key}: `;
+      li.append(b, text);
+      return li;
+    }));
+    if (tag) card.querySelector('.slot-tag').textContent = tag;
+    card.classList.toggle('waiting', Boolean(waiting));
+    card.classList.toggle('locked', Boolean(locked));
+    card.dataset.fighter = id || '';
+  }
+
+  // desenha o lutador grande (parado, animado) num canvas de painel
+  function drawBigFighter(cv, id, mirror, alt = false, dim = false) {
+    const g = cv.getContext('2d');
+    g.clearRect(0, 0, cv.width, cv.height);
+    if (!id || !ready(atlas)) return;
+    g.globalAlpha = dim ? 0.35 : 1;
+    let showId = id;
+    if (id === 'auto') { // aleatório: alterna os lutadores como "roleta"
+      const others = PLAYABLE.filter(x => x !== settings.fighter);
+      showId = others[Math.floor(clock * 6) % others.length];
+      g.globalAlpha = 0.45;
     }
-    const heavy = CHARS[p1].heavyLabel.toLowerCase();
-    $('#selectControls').textContent = versus
-      ? '1P: WASD + F soco · G forte · H defesa · T especial — 2P: setas + J · K · I · L'
-      : `Mover A/D ou ←/→ · Pular W/↑ · Agachar S/↓ · J soco · K ${heavy} · I defesa · L especial · ↓+L 2º especial · Combo: J, J, K`;
-    if (settings.stage !== 'random') ensureStage(settings.stage);
+    const S = SPR[showId];
+    if (!S) return;
+    const [sx, sy, sw, sh, ax, ay] = cycle(S.idle, 6, clock + (mirror ? 0.3 : 0));
+    const s = Math.min((cv.height * 0.86) / (sh / AS), (cv.width * 0.9) / (sw / AS)) / AS;
+    g.fillStyle = 'rgba(0,0,0,0.35)';
+    g.beginPath(); g.ellipse(cv.width / 2, cv.height - 18, cv.width * 0.25, 10, 0, 0, Math.PI * 2); g.fill();
+    g.save();
+    g.translate(cv.width / 2, cv.height - 18);
+    g.scale(mirror ? -s : s, s);
+    g.drawImage(alt && altAtlas ? altAtlas : atlas, sx, sy, sw, sh, -ax, -ay, sw, sh);
+    g.restore();
+    g.globalAlpha = 1;
   }
 
-  function drawPreviews() {
-    if (!ready(atlas)) return;
-    const ids = [settings.fighter, resolveOpponent(true)];
-    $$('.vs-card .preview').forEach((cv, i) => {
-      const g = cv.getContext('2d');
-      g.clearRect(0, 0, cv.width, cv.height);
-      if (i === 1 && settings.opponent === 'auto') g.globalAlpha = 0.55; // "silhueta" do sorteio
-      else g.globalAlpha = 1;
-      const id = ids[i];
-      const S = SPR[id];
-      if (!S) return;
-      const fr = cycle(S.idle, 6, clock + i * 0.3);
-      const [sx, sy, sw, sh, ax, ay] = fr;
-      const s = 1.35;
-      const img = i === 1 && ids[0] === ids[1] && altAtlas ? altAtlas : atlas;
-      g.fillStyle = 'rgba(0,0,0,0.35)';
-      g.beginPath(); g.ellipse(100, 208, 50, 8, 0, 0, Math.PI * 2); g.fill();
-      g.save();
-      g.translate(100, 208);
-      g.scale(i === 1 ? -s : s, s);
-      g.drawImage(img, sx, sy, sw, sh, -ax, -ay, sw, sh);
-      g.restore();
-    });
+  // ---------- 1) lutador ----------
+  function openChars(phase = 'p1') {
+    flow.phase = phase;
+    flow.cursor = phase === 'p1' ? settings.fighter : settings.opponent;
+    if (!rosterIds().includes(flow.cursor)) flow.cursor = phase === 'p1' ? 'juraci' : 'auto';
+    setApp('chars');
+    refreshChars();
   }
 
-  // Lutadores cuja folha de sprites ainda não foi processada ficam bloqueados.
-  for (const button of $$('[data-fighter], [data-opponent]')) {
-    const id = button.dataset.fighter || button.dataset.opponent;
-    if (id === 'auto' || available(id)) continue;
-    button.disabled = true;
-    button.classList.add('locked');
-    button.title = 'Em breve: falta processar a folha de sprites';
+  function refreshChars() {
+    const versus = settings.mode === 'versus';
+    const p1Phase = flow.phase === 'p1';
+    setChecked('[data-mode]', 'mode', settings.mode);
+    const p2tag = versus ? '2P' : 'CPU';
+    $('#charStep').textContent = 'PASSO 1 DE 3';
+    $('#charTitle').textContent = p1Phase ? 'ESCOLHA SEU LUTADOR' : versus ? '2P: ESCOLHA SEU LUTADOR' : 'ESCOLHA O ADVERSÁRIO';
+    const p1 = p1Phase ? flow.cursor : settings.fighter;
+    const p2 = p1Phase ? null : flow.cursor;
+    fillCard($('#p1Card'), p1, { tag: '1P', locked: !p1Phase });
+    fillCard($('#p2Card'), p2, { tag: p2tag, waiting: p1Phase });
+    $('#charConfirm').textContent = p1Phase ? 'CONFIRMAR ▶' : 'ESCOLHER CENÁRIO ▶';
+    $('#charHelp').textContent = touchSeen
+      ? 'Toque no lutador para ver · toque de novo (ou em CONFIRMAR) para escolher'
+      : 'Setas para escolher · Enter confirma · Esc volta';
+    for (const tile of $$('#roster .tile')) {
+      const id = tile.dataset.id;
+      tile.classList.toggle('cursor-p1', p1Phase && id === flow.cursor);
+      tile.classList.toggle('cursor-p2', !p1Phase && id === flow.cursor);
+      tile.classList.toggle('pick-p1', !p1Phase && id === settings.fighter);
+      tile.dataset.p2tag = p2tag;
+      tile.disabled = id === 'auto' ? p1Phase : !available(id); // 'aleatório' só vale para o adversário
+      tile.setAttribute('aria-selected', String(id === flow.cursor));
+    }
   }
-  for (const img of $$('.fighter-portrait')) {
-    img.addEventListener('error', () => { img.style.visibility = 'hidden'; });
+
+  function confirmChar() {
+    const id = flow.cursor;
+    if (flow.phase === 'p1') {
+      if (id === 'auto' || !available(id)) return;
+      settings.fighter = id;
+      saveSettings();
+      Audio.play('confirm');
+      flow.phase = 'p2';
+      flow.cursor = settings.opponent && rosterIds().includes(settings.opponent) ? settings.opponent : 'auto';
+      refreshChars();
+      return;
+    }
+    settings.opponent = id;
+    saveSettings();
+    Audio.play('confirm');
+    openStage();
   }
+
+  // ---------- 2) cenário ----------
+  function openStage() {
+    flow.stageCursor = settings.stage;
+    setApp('stage');
+    refreshStageScreen();
+  }
+
+  function refreshStageScreen() {
+    if (app !== 'stage') return;
+    const id = flow.stageCursor;
+    for (const tile of $$('#stageList .stage-tile')) {
+      tile.setAttribute('aria-selected', String(tile.dataset.id === id));
+      const cv = tile.querySelector('canvas');
+      if (cv) {
+        const thumb = stageThumb(tile.dataset.id);
+        cv.width = thumb.width;
+        cv.height = thumb.height;
+        cv.getContext('2d').drawImage(thumb, 0, 0);
+      }
+    }
+    $('#stageName').textContent = id === 'random' ? 'CENÁRIO ALEATÓRIO' : stageNames[id];
+    $('#stageDesc').textContent = id === 'random' ? 'O jogo sorteia um dos cenários.' : STAGE_INFO[id];
+    drawStagePreview();
+  }
+
+  function drawStagePreview() {
+    const cv = $('#stageBig');
+    const g = cv.getContext('2d');
+    const id = flow.stageCursor === 'random' ? STAGE_IDS[Math.floor(clock * 1.5) % STAGE_IDS.length] : flow.stageCursor;
+    const thumb = stageThumb(id);
+    g.drawImage(thumb, 0, 0, cv.width, cv.height);
+    // os dois lutadores escolhidos, de pé no cenário
+    if (ready(atlas)) {
+      const ids = [settings.fighter, settings.opponent === 'auto' ? null : settings.opponent];
+      ids.forEach((fid, i) => {
+        const S = fid && SPR[fid];
+        if (!S) return;
+        const [sx, sy, sw, sh, ax, ay] = cycle(S.idle, 6, clock + i * 0.3);
+        const s = (cv.height / 540) * 1.25 * ZOOM / AS;
+        g.save();
+        g.translate(cv.width * (i ? 0.66 : 0.34), cv.height * ((FLOOR - 40) / 540) + 40 * (cv.height / 540));
+        g.scale(i ? -s : s, s);
+        g.drawImage(i && fid === settings.fighter && altAtlas ? altAtlas : atlas, sx, sy, sw, sh, -ax, -ay, sw, sh);
+        g.restore();
+      });
+    }
+    if (flow.stageCursor === 'random') {
+      g.fillStyle = 'rgba(16,13,32,0.45)';
+      g.fillRect(0, 0, cv.width, cv.height);
+      g.font = '900 120px Impact, "Arial Black", sans-serif';
+      g.textAlign = 'center';
+      g.textBaseline = 'middle';
+      g.fillStyle = '#ffd94a';
+      g.fillText('?', cv.width / 2, cv.height / 2);
+    }
+  }
+
+  function confirmStage() {
+    settings.stage = flow.stageCursor;
+    saveSettings();
+    Audio.play('confirm');
+    openOptions();
+  }
+
+  // ---------- 3) dificuldade e regras ----------
+  function openOptions() {
+    setApp('options');
+    refreshOptions();
+  }
+
+  function refreshOptions() {
+    const versus = settings.mode === 'versus';
+    setChecked('[data-difficulty]', 'difficulty', settings.difficulty);
+    $$('[data-rounds]').forEach(b => b.setAttribute('aria-checked', String(Number(b.dataset.rounds) === settings.rounds)));
+    $$('[data-time]').forEach(b => b.setAttribute('aria-checked', String(Number(b.dataset.time) === settings.roundTime)));
+    $('#diffCards').classList.toggle('disabled', versus);
+    $('#versusNote').hidden = !versus;
+    $('#optionsTitle').textContent = versus ? 'REGRAS DA LUTA' : 'DIFICULDADE';
+    const opp = settings.opponent === 'auto' ? 'ALEATÓRIO' : CHARS[settings.opponent].name;
+    const stage = settings.stage === 'random' ? 'Cenário aleatório' : stageNames[settings.stage];
+    $('#matchSummary').textContent = `${CHARS[settings.fighter].name} × ${opp} · ${stage}`;
+  }
+
+  // ---------- VS ----------
+  let vsTimer = 0;
+  function showVersus() {
+    Audio.play('confirm');
+    startMatch(true); // prepara a luta (lutadores, cenário) sem começar
+    const [a, b] = fighters;
+    const sides = [[$('.vs-left'), a], [$('.vs-right'), b]];
+    for (const [el, f] of sides) {
+      el.querySelector('.vs-name').textContent = CHARS[f.id].name;
+      el.style.animation = 'none';
+      void el.offsetWidth; // reinicia a animação de entrada
+      el.style.animation = '';
+    }
+    $('#vsStage').textContent = stageNames[match.stage];
+    setApp('vs');
+    Audio.play('fight');
+    clearTimeout(vsTimer);
+    vsTimer = setTimeout(beginFight, 2300);
+  }
+  function drawVersus() {
+    if (!fighters.length) return;
+    drawBigFighter($('.vs-left canvas'), fighters[0].id, false);
+    drawBigFighter($('.vs-right canvas'), fighters[1].id, true, fighters[1].alt);
+  }
+  function beginFight() {
+    clearTimeout(vsTimer);
+    if (app !== 'vs') return;
+    setApp('fight');
+    playFightMusic();
+    if (matchMedia('(pointer: coarse)').matches) void enterFullscreen();
+  }
+
+  // ---------- navegação por teclado/controle ----------
+  function moveCursor(dx, dy) {
+    if (app === 'chars') {
+      const ids = rosterIds().filter(id => {
+        const tile = $(`#roster .tile[data-id="${id}"]`);
+        return tile && !tile.disabled;
+      });
+      const cols = getComputedStyle($('#roster')).gridTemplateColumns.split(' ').length || 4;
+      const all = rosterIds();
+      let i = all.indexOf(flow.cursor);
+      for (let n = 0; n < all.length; n++) {
+        i = (i + dx + dy * cols + all.length) % all.length;
+        if (ids.includes(all[i])) break;
+      }
+      flow.cursor = all[i];
+      Audio.play('ui');
+      refreshChars();
+    } else if (app === 'stage') {
+      const all = [...STAGE_IDS, 'random'];
+      const i = all.indexOf(flow.stageCursor);
+      flow.stageCursor = all[(i + dx + dy * 2 + all.length) % all.length];
+      Audio.play('ui');
+      refreshStageScreen();
+    } else if (app === 'options') {
+      if (settings.mode === 'versus') return;
+      const all = ENUMS.difficulty;
+      settings.difficulty = all[(all.indexOf(settings.difficulty) + dx + dy + all.length) % all.length];
+      saveSettings();
+      Audio.play('ui');
+      refreshOptions();
+    }
+  }
+  function flowConfirm() {
+    if (app === 'chars') confirmChar();
+    else if (app === 'stage') confirmStage();
+    else if (app === 'options') showVersus();
+  }
+  function flowBack() {
+    Audio.play('ui');
+    if (app === 'chars') {
+      if (flow.phase === 'p2') { flow.phase = 'p1'; flow.cursor = settings.fighter; refreshChars(); }
+      else goSplash();
+    } else if (app === 'stage') openChars('p2');
+    else if (app === 'options') openStage();
+  }
+  function flowKey(event) {
+    const map = {
+      ArrowLeft: [-1, 0], KeyA: [-1, 0], ArrowRight: [1, 0], KeyD: [1, 0],
+      ArrowUp: [0, -1], KeyW: [0, -1], ArrowDown: [0, 1], KeyS: [0, 1]
+    };
+    if (map[event.code]) { event.preventDefault(); moveCursor(...map[event.code]); return true; }
+    if (['Enter', 'Space', 'KeyJ', 'KeyF'].includes(event.code)) { event.preventDefault(); flowConfirm(); return true; }
+    if (['Backspace', 'KeyK', 'KeyG'].includes(event.code)) { event.preventDefault(); flowBack(); return true; }
+    return false;
+  }
+
+  // ---------- lista de golpes ----------
+  function openMoveList() {
+    const id = fighters[0] ? fighters[0].id : settings.fighter;
+    const heavy = CHARS[id].heavyLabel.toLowerCase();
+    const rows = [
+      ['J', 'Soco'], ['K', heavy.charAt(0).toUpperCase() + heavy.slice(1)], ['I', 'Defesa (segure; só defende de frente)'],
+      ['J J K', 'Combo básico (quando os golpes acertam)'], ['↑ + J/K', 'Golpe no ar'],
+      ...PROFILE[id].moves
+    ];
+    $('#moveListTitle').textContent = `GOLPES — ${CHARS[id].name}`;
+    $('#moveListItems').replaceChildren(...rows.map(([key, text]) => {
+      const li = document.createElement('li');
+      const k = document.createElement('kbd');
+      k.textContent = key;
+      li.append(k, text);
+      return li;
+    }));
+    $('#moveList').hidden = false;
+    $('#closeMoveList').focus({ preventScroll: true });
+  }
+
+  // ---------- ligações ----------
+  buildRoster();
+  buildStageList();
+  $$('[data-mode]').forEach(b => b.addEventListener('click', () => {
+    settings.mode = b.dataset.mode;
+    saveSettings();
+    Audio.play('ui');
+    refreshChars();
+  }));
+  $$('[data-difficulty]').forEach(b => b.addEventListener('click', () => {
+    if (settings.difficulty === b.dataset.difficulty && app === 'options') { showVersus(); return; }
+    settings.difficulty = b.dataset.difficulty;
+    saveSettings();
+    Audio.play('ui');
+    refreshOptions();
+  }));
+  $$('[data-rounds]').forEach(b => b.addEventListener('click', () => {
+    settings.rounds = Number(b.dataset.rounds);
+    saveSettings(); Audio.play('ui'); refreshOptions();
+  }));
+  $$('[data-time]').forEach(b => b.addEventListener('click', () => {
+    settings.roundTime = Number(b.dataset.time);
+    saveSettings(); Audio.play('ui'); refreshOptions();
+  }));
+  $$('.flow-back').forEach(b => b.addEventListener('click', flowBack));
+  $('#charConfirm').addEventListener('click', confirmChar);
+  $('#stageConfirm').addEventListener('click', confirmStage);
+  $('#fightStart').addEventListener('click', showVersus);
+  $('#vsScreen').addEventListener('click', beginFight);
+  $('#closeMoveList').addEventListener('click', () => { $('#moveList').hidden = true; $('#pauseMoves').focus({ preventScroll: true }); });
+  $('#pauseMoves').addEventListener('click', openMoveList);
+
   if (!available(settings.fighter)) settings.fighter = 'juraci';
   if (settings.opponent !== 'auto' && !available(settings.opponent)) settings.opponent = 'auto';
 
-  function bindRadio(selector, key, attr) {
-    $$(selector).forEach(button => button.addEventListener('click', () => {
-      settings[key] = button.dataset[attr];
-      saveSettings();
-      refreshSelect();
-      Audio.play('ui');
-    }));
-  }
-  bindRadio('[data-mode]', 'mode', 'mode');
-  bindRadio('.pick[data-fighter]', 'fighter', 'fighter');
-  bindRadio('[data-opponent]', 'opponent', 'opponent');
-  bindRadio('[data-stage]', 'stage', 'stage');
-  bindRadio('[data-difficulty]', 'difficulty', 'difficulty');
 
   // ======================================================================
   // Diálogos do menu
@@ -3309,7 +3781,7 @@
     settings.music = e.currentTarget.checked;
     saveSettings();
     if (settings.music) {
-      Audio.startMusic(app === 'fight' && match && settings.fightMusic === 'stage' ? match.stage : 'theme');
+      if (app === 'fight' && match) playFightMusic(); else Audio.startMusic('theme');
       if (app === 'fight' && paused) Audio.pauseMusic(true);
     }
   });
@@ -3318,7 +3790,7 @@
     settings.fightMusic = e.currentTarget.value;
     saveSettings();
     if (settings.music && app === 'fight' && match) {
-      Audio.startMusic(settings.fightMusic === 'theme' ? 'theme' : match.stage);
+      playFightMusic();
       if (paused) Audio.pauseMusic(true);
     }
   });
@@ -3342,19 +3814,18 @@
     Audio.unlock();
     Audio.play('confirm');
     Audio.startMusic('theme');
-    setApp('select');
+    openChars('p1');
   });
   $('#menuSettings').addEventListener('click', () => openMenuDialog('CONFIGURAÇÕES', SETTINGS_TEXT, true));
   $('#pauseSettings').addEventListener('click', () => openMenuDialog('CONFIGURAÇÕES', SETTINGS_TEXT, true));
   $('#menuCredits').addEventListener('click', () => openMenuDialog('CRÉDITOS',
-    'Família Fighter é um projeto de Carlos, inspirado em sua família. Juraci e Carlos já estão na arena; Franciely, Gabi, Daniel e Pedro chegam em breve. Efeitos sonoros e música sintetizados pelo próprio navegador.'));
+    'Família Fighter é um projeto de Carlos, inspirado em sua família: Juraci, Carlos, Pedro, Daniel, Franciely e Gabi. Músicas: "Bolo da Juraci" e "Family Fighter". Voz real: Franciely. Efeitos sonoros sintetizados pelo próprio navegador.'));
   $('#menuExit').addEventListener('click', () => openMenuDialog('ATÉ A PRÓXIMA!',
     'Para sair, feche esta aba ou o aplicativo. O navegador não permite que o jogo feche a tela sozinho.'));
   $('#closeMenuDialog').addEventListener('click', closeMenuDialog);
-  $('#backToMenu').addEventListener('click', goSplash);
-  $('#start').addEventListener('click', () => { Audio.play('confirm'); startMatch(); });
   $('#replay').addEventListener('click', startMatch);
-  $('#toSelect').addEventListener('click', () => setApp('select'));
+  $('#toSelect').addEventListener('click', () => { Audio.startMusic('theme'); openChars('p1'); });
+  $('#toStage').addEventListener('click', () => { Audio.startMusic('theme'); openStage(); });
   $('#toMenu').addEventListener('click', goSplash);
   $('#resume').addEventListener('click', resumeGame);
   $('#restartFight').addEventListener('click', startMatch);
@@ -3409,7 +3880,9 @@
       special: (slot, alt) => { if (fighters[slot]) { fighters[slot].held.down = Boolean(alt); trySpecial(fighters[slot], Boolean(alt)); } },
       cameo: (kind, slot) => spawnCameo(kind, fighters[slot || 0]),
       event: slot => praiaEvent(fighters[slot || 0]),
-      ko: slot => { const f = fighters[slot]; if (f) { f.hp = 1; } }
+      ko: slot => { const f = fighters[slot]; if (f) { f.hp = 1; } },
+      music: () => Audio.debugMusic && Audio.debugMusic(),
+      zoom: () => ({ ZOOM, worldW, camTop, viewW })
     };
   }
   resize();
