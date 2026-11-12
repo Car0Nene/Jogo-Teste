@@ -26,6 +26,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
   height: 100vh;
   height: 100dvh;
   touch-action: none;
+  filter: saturate(1.08) contrast(1.035);
 }
 
 /* ---------- Telas ---------- */
@@ -281,6 +282,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
 .settings select { flex: 1; min-height: 38px; border-radius: 8px; border: 1px solid #aaa1c2; background: #100d20; padding: 4px 8px; }
 .controls-help { padding: 10px 12px; border-radius: 10px; background: #0005; font-size: 12.5px; }
 .controls-help h3 { margin: 0 0 6px; color: var(--gold); font-size: 14px; }
+.controls-help h4 { margin: 8px 0 4px; color: #9fe8f2; font-size: 12px; }
 .controls-help p { margin: 4px 0; }
 .binding-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
 .bind-button { min-height: 38px; padding: 6px 9px; border: 1px solid #ffffff38; border-radius: 8px; background: #1a1b2d; color: #f5e8c9; font-weight: 800; text-align: left; }
@@ -288,6 +290,24 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
 .bind-button.is-listening { border-color: #62efff; box-shadow: 0 0 0 2px #62efff50; color: #62efff; animation: bindPulse .8s ease-in-out infinite alternate; }
 @keyframes bindPulse { to { box-shadow: 0 0 0 4px #62efff20; } }
 .bind-reset { justify-self: start; min-height: 36px; padding: 7px 11px; font-size: 12px; }
+
+body[data-high-contrast="true"] .screen:not(#splash) { background: #05060af5; }
+body[data-high-contrast="true"] .dialog-panel,
+body[data-high-contrast="true"] .fighter-card,
+body[data-high-contrast="true"] .stage-tile,
+body[data-high-contrast="true"] .diff-card {
+  border-color: #fff;
+  box-shadow: 0 0 0 2px #000, 0 0 0 4px #fff, 0 12px 40px #000;
+}
+body[data-high-contrast="true"] .screen p,
+body[data-high-contrast="true"] .flow-foot .help,
+body[data-high-contrast="true"] .card-quote { color: #fff; }
+body[data-high-contrast="true"] button:focus-visible,
+body[data-high-contrast="true"] select:focus-visible,
+body[data-high-contrast="true"] input:focus-visible { outline: 4px solid #00f0ff; outline-offset: 3px; }
+body[data-reduced-effects="true"] #splashStart,
+body[data-reduced-effects="true"] .control[data-act="special"].ready,
+body[data-reduced-effects="true"] .fight-button { animation: none; }
 .auth-form { display: grid; width: 100%; gap: 12px; text-align: left; }
 .auth-form label { display: grid; gap: 5px; font-size: 13px; }
 .auth-form input {
@@ -433,6 +453,8 @@ body[data-touch-size="large"] .control { --size: clamp(68px, 14vh, 96px); font-s
   .menu-art { width: 100vw; height: 56.25vw; }
 }
 @media (max-width: 520px) {
+  .binding-grid { grid-template-columns: 1fr; }
+  .controls-help { font-size: 12px; }
   .binding-grid { grid-template-columns: 1fr 1fr; }
   .result-panel { gap: 9px; padding: 12px; }
   .result-fighters { gap: 4px; }
@@ -448,6 +470,8 @@ body[data-touch-size="large"] .control { --size: clamp(68px, 14vh, 96px); font-s
   .option-row { grid-template-columns: 82px 1fr; gap: 6px; }
   .option-label { font-size: 10px; }
   .segmented button { min-height: 30px; padding: 3px 8px; font-size: 11px; }
+  .flow-head > .segmented { max-width: 100%; }
+  .flow-head > .segmented button { padding-inline: 7px; font-size: 10px; }
   .select-foot .help { font-size: 10px; }
   .primary { min-width: 160px; min-height: 42px; font-size: 16px; }
 }
@@ -489,7 +513,7 @@ body[data-touch-size="large"] .control { --size: clamp(68px, 14vh, 96px); font-s
 .flow-title small { color: #ffefad; font-size: 11px; font-weight: 900; letter-spacing: 2px; }
 .flow-title h1 { font-size: clamp(20px, 4vw, 40px); }
 .flow-spacer { width: 90px; }
-.flow-foot { grid-template-columns: 1fr auto; }
+.flow-foot { grid-template-columns: 1fr auto auto; }
 .flow-foot .help { margin: 0; text-align: left; font-size: 12px; color: #cfc4e6; max-width: none; }
 .fight-button { font-size: 22px; min-width: 220px; animation: pulse 1.4s ease-in-out infinite; }
 
@@ -747,6 +771,7 @@ body[data-touch-size="large"] .control { --size: clamp(68px, 14vh, 96px); font-s
 .move-list { display: grid; gap: 8px; width: 100%; margin: 0; padding: 0; list-style: none; text-align: left; font-size: 14px; }
 .move-list li { padding: 8px 10px; border-radius: 10px; background: #0005; }
 .move-list kbd { display: inline-block; min-width: 26px; padding: 1px 6px; margin-right: 6px; border-radius: 6px; background: #ffd94a; color: #2a1040; font-weight: 900; text-align: center; }
+.move-list .move-list-heading { margin-top: 7px; border-color: #f6d78380; color: #f6d783; font: var(--arcade); letter-spacing: 1px; }
 
 /* ---------- telas baixas (celular deitado) ---------- */
 @media (max-height: 470px) {

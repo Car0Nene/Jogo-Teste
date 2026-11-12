@@ -38,6 +38,15 @@ Jogo de luta arcade em HTML Canvas e JavaScript puro (sem build), com a família
 - **HUD e resultado polidos:** vida numérica e colorida, especiais com marca de meia barra, combos em destaque e retratos dos lutadores com confete no resultado.
 - **Ajustes de acessibilidade:** volume separado para efeitos, música e vozes; remapeamento de teclado no modo de 1 jogador; botões de toque em tamanho maior; animações reduzidas quando o aparelho pede menos movimento.
 
+## Novidades da v0.10
+
+- **Modo treino:** escolha um alvo parado, sem cronômetro; ele recupera a vida para você praticar combos e especiais.
+- **Lista de golpes contextual:** disponível antes da luta e na pausa; no versus mostra os comandos e golpes de cada jogador conforme as teclas configuradas.
+- **Teclas remapeáveis no versus:** configure separadamente 1P e 2P; conflitos entre os dois conjuntos são trocados automaticamente.
+- **Acessibilidade:** opção de alto contraste e redução de flashes, tremores e confetes; a redução de movimento do sistema é respeitada por padrão.
+- **Mais acabamento na arena:** iluminação nas bordas, brilho de impacto e sombras nos lutadores ajudam a separar personagens e cenário.
+- **Revanche corrigida:** reiniciar a luta não confunde mais o clique com o modo de pré-carregamento da tela VS.
+
 ### Artes de referência
 
 `art-source/references/` guarda os pôsteres e a imagem "Selecione seu lutador". Eles **não** são usados como sprites: vários quadros têm nome ou aparência trocados (ex.: no pôster 4 a coluna "Juraci" mostra o Carlos, e Gabi/Franciely estão invertidas) e os bonequinhos são pequenos demais e diferentes dos sprites do jogo. Servem de inspiração e divulgação.
@@ -162,14 +171,20 @@ e acesse `http://localhost:8080`.
 - Soco: `J` · Forte/Chute: `K` · Defesa: segure `I` · Especial: `L` (barra cheia) · Segundo especial: segure `↓` + `L` (meia barra)
 - Pausar: `P` ou `Esc`
 
+As teclas de 1 jogador e os conjuntos de 1P/2P podem ser remapeados em **Configurações**. Abra **Ver golpes** na seleção de partida ou **Lista de golpes** durante a pausa para consultar os comandos atuais.
+
 **2 jogadores (mesmo teclado):**
 
 - 1P: `WASD` + `F` soco, `G` forte, `H` defesa, `T` especial
 - 2P: setas + `J` soco, `K` forte, `I` defesa, `L` especial (ou `Num1`, `Num2`, `Num3`, `Num0`)
 
+Os dois conjuntos de teclas podem ser alterados em **Configurações → Teclado (2 jogadores)**.
+
 **Gamepad:** analógico/direcional move, toque duplo para frente corre, `A` pula, `X` soco, `Y` forte, `B` especial, `LB/RB/LT/RT` defesa, `Start` pausa. No modo 2P, o segundo controle é o 2P.
 
 **Celular:** direcional à esquerda (cima = pular, baixo = agachar) e botões à direita (segundo especial: direcional para baixo + Especial). Em Configurações, escolha o tamanho maior dos controles de toque. Jogue na horizontal; ao iniciar a luta o jogo tenta entrar em tela cheia.
+
+**Treino:** na seleção de lutadores, escolha **TREINO**. O alvo fica parado, a luta não termina por tempo ou nocaute e a vida do alvo se recupera após alguns segundos.
 
 **Dicas:**
 

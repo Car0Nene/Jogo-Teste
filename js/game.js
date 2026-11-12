@@ -44,8 +44,11 @@
   const DEFAULTS = {
     sound: true, music: true, voice: true, talk: true, volume: 1,
     effectsVolume: 0.7, musicVolume: 0.7, voiceVolume: 0.85,
-    vibration: true, touch: 'auto', touchSize: 'normal',
+    vibration: true, touch: 'auto', touchSize: 'normal', highContrast: false,
+    reducedEffects: matchMedia('(prefers-reduced-motion: reduce)').matches,
     bindings: { left: 'KeyA', right: 'KeyD', up: 'KeyW', down: 'KeyS', light: 'KeyJ', heavy: 'KeyK', guard: 'KeyI', special: 'KeyL' },
+    bindingsP1: { left: 'KeyA', right: 'KeyD', up: 'KeyW', down: 'KeyS', light: 'KeyF', heavy: 'KeyG', guard: 'KeyH', special: 'KeyT' },
+    bindingsP2: { left: 'ArrowLeft', right: 'ArrowRight', up: 'ArrowUp', down: 'ArrowDown', light: 'KeyJ', heavy: 'KeyK', guard: 'KeyI', special: 'KeyL' },
     difficulty: 'normal', stage: 'padaria', mode: 'cpu', fighter: 'juraci', opponent: 'auto', fightMusic: 'stage',
     rounds: 2, roundTime: 60
   };
@@ -54,7 +57,7 @@
     touchSize: ['normal', 'large'],
     difficulty: ['easy', 'normal', 'hard'],
     stage: ['padaria', 'quintal', 'festa', 'bar', 'praia', 'random'],
-    mode: ['cpu', 'versus'],
+    mode: ['cpu', 'versus', 'training'],
     fighter: ['juraci', 'carlos', 'pedro', 'daniel', 'franciely', 'gabi'],
     opponent: ['auto', 'juraci', 'carlos', 'pedro', 'daniel', 'franciely', 'gabi'],
     fightMusic: ['stage', 'theme', 'chip'],
@@ -75,17 +78,19 @@
       result.voiceVolume = stored.volume;
     }
     const bindingActions = Object.keys(DEFAULTS.bindings);
-    const savedBindings = stored.bindings && typeof stored.bindings === 'object' ? stored.bindings : {};
-    result.bindings = Object.fromEntries(bindingActions.map(action => [action, savedBindings[action] ?? DEFAULTS.bindings[action]]));
-    const bindingCodes = new Set();
-    for (const action of bindingActions) {
-      const code = result.bindings[action];
-      if (typeof code !== 'string' || !/^(Key[A-Z]|Digit[0-9]|Arrow(Left|Right|Up|Down)|Numpad[0-9]|Space)$/.test(code) || bindingCodes.has(code) || code === 'KeyP') {
-        const fallback = [DEFAULTS.bindings[action], ...['KeyQ', 'KeyE', 'KeyR', 'KeyU', 'KeyO', 'Digit1', 'Digit2', 'Digit3', 'Digit4']]
-          .find(candidate => !bindingCodes.has(candidate) && candidate !== 'KeyP');
-        result.bindings[action] = fallback || DEFAULTS.bindings[action];
+    for (const profile of ['bindings', 'bindingsP1', 'bindingsP2']) {
+      const usedBindingCodes = new Set();
+      const saved = stored[profile] && typeof stored[profile] === 'object' ? stored[profile] : {};
+      result[profile] = Object.fromEntries(bindingActions.map(action => [action, saved[action] ?? DEFAULTS[profile][action]]));
+      for (const action of bindingActions) {
+        const code = result[profile][action];
+        if (typeof code !== 'string' || !/^(Key[A-Z]|Digit[0-9]|Arrow(Left|Right|Up|Down)|Numpad[0-9]|Space)$/.test(code) || usedBindingCodes.has(code) || code === 'KeyP') {
+          const fallback = [DEFAULTS[profile][action], ...['KeyQ', 'KeyE', 'KeyR', 'KeyU', 'KeyO', 'Digit1', 'Digit2', 'Digit3', 'Digit4', 'Numpad4', 'Numpad5', 'Numpad6', 'Numpad7']]
+            .find(candidate => !usedBindingCodes.has(candidate) && candidate !== 'KeyP');
+          result[profile][action] = fallback || DEFAULTS[profile][action];
+        }
+        usedBindingCodes.add(result[profile][action]);
       }
-      bindingCodes.add(result.bindings[action]);
     }
     for (const [key, values] of Object.entries(ENUMS)) if (!values.includes(result[key])) result[key] = DEFAULTS[key];
     result.volume = 1;
@@ -318,6 +323,7 @@
   let touchSeen = matchMedia('(pointer: coarse)').matches;
   let installPrompt = null;
   let dialogReturnFocus = null;
+  let moveListReturnFocus = null;
 
   // ======================================================================
   // Entrada (teclado, toque, gamepad, IA) — cada fonte escreve em inputs[slot]
@@ -331,16 +337,10 @@
     KeyF: 'light', KeyG: 'heavy', KeyH: 'guard', KeyT: 'special'
   };
   let bindingTarget = null;
-  const KEYS_P1 = { KeyA: 'left', KeyD: 'right', KeyW: 'up', KeyS: 'down', KeyF: 'light', KeyG: 'heavy', KeyH: 'guard', KeyT: 'special' };
-  const KEYS_P2 = {
-    ArrowLeft: 'left', ArrowRight: 'right', ArrowUp: 'up', ArrowDown: 'down',
-    KeyJ: 'light', KeyK: 'heavy', KeyI: 'guard', KeyL: 'special',
-    Numpad1: 'light', Numpad2: 'heavy', Numpad3: 'guard', Numpad0: 'special'
-  };
-
+  const toKeyMap = bindings => Object.fromEntries(Object.entries(bindings).map(([action, code]) => [code, action]));
   function keyBindings() {
-    if (match && match.mode === 'versus') return [[0, KEYS_P1], [1, KEYS_P2]];
-    return [[0, { ...SOLO_KEY_ALIASES, ...Object.fromEntries(Object.entries(settings.bindings).map(([action, code]) => [code, action])) }]];
+    if (match && match.mode === 'versus') return [[0, toKeyMap(settings.bindingsP1)], [1, toKeyMap(settings.bindingsP2)]];
+    return [[0, { ...SOLO_KEY_ALIASES, ...toKeyMap(settings.bindings) }]];
   }
 
   function bindingLabel(code) {
@@ -350,22 +350,30 @@
 
   function refreshBindingButtons() {
     $$('[data-rebind]').forEach(button => {
-      const action = button.dataset.rebind;
-      button.textContent = `${button.dataset.label}: ${bindingLabel(settings.bindings[action])}`;
-      button.classList.toggle('is-listening', bindingTarget === action);
-      button.setAttribute('aria-pressed', String(bindingTarget === action));
+      const [profile, action] = button.dataset.rebind.split('-');
+      const target = `${profile}-${action}`;
+      const bindings = settings[profile === 'solo' ? 'bindings' : `bindings${profile.toUpperCase()}`];
+      button.textContent = `${button.dataset.label}: ${bindingLabel(bindings[action])}`;
+      button.classList.toggle('is-listening', bindingTarget === target);
+      button.setAttribute('aria-pressed', String(bindingTarget === target));
     });
   }
 
   function setBinding(action, code) {
-    const oldCode = settings.bindings[action];
-    const conflict = Object.entries(settings.bindings).find(([other, assigned]) => other !== action && assigned === code);
-    if (conflict) settings.bindings[conflict[0]] = oldCode;
-    settings.bindings[action] = code;
+    const [profile, key] = action.split('-');
+    const settingName = profile === 'solo' ? 'bindings' : `bindings${profile.toUpperCase()}`;
+    const bindings = settings[settingName];
+    const profiles = profile === 'solo' ? [bindings] : [settings.bindingsP1, settings.bindingsP2];
+    const oldCode = bindings[key];
+    for (const profile of profiles) {
+      const conflict = Object.entries(profile).find(([other, assigned]) => assigned === code && !(profile === bindings && other === key));
+      if (conflict) profile[conflict[0]] = oldCode;
+    }
+    bindings[key] = code;
     bindingTarget = null;
     saveSettings();
     refreshBindingButtons();
-    $('#bindingStatus').textContent = `${$('#bind-' + action).dataset.label}: ${bindingLabel(code)}`;
+    $('#bindingStatus').textContent = `${$(`[data-rebind="${action}"]`).dataset.label}: ${bindingLabel(code)}`;
     Audio.play('confirm');
   }
 
@@ -410,7 +418,7 @@
     if (isTyping(event.target)) return; // nunca roubar teclas de campos de formulário
     if (event.code === 'Escape') {
       if (!$('#menuDialog').hidden) { closeMenuDialog(); return; }
-      if (!$('#moveList').hidden) { $('#moveList').hidden = true; return; }
+      if (!$('#moveList').hidden) { closeMoveList(); return; }
       if (Account.isOpen()) { Account.close(); return; }
       if (app === 'fight') { event.preventDefault(); togglePause(); }
       else if (FLOW_SCREENS.includes(app)) flowBack();
@@ -1250,7 +1258,9 @@
     }
     const scaling = Math.max(0.4, 1 - att.combo * 0.16);
     const damage = Math.max(1, Math.round(m.damage * atkMul * defMul * scaling));
-    def.hp = Math.max(0, def.hp - damage);
+    const trainingTarget = match.mode === 'training' && def.slot === 1;
+    def.hp = Math.max(trainingTarget ? 1 : 0, def.hp - damage);
+    if (trainingTarget) def.trainingRecover = 2.2;
     def.lagDelay = 0.45;
     att.combo += 1;
     att.comboShow = 1.2;
@@ -1350,6 +1360,17 @@
 
   function resolvePush() {
     const [a, b] = fighters;
+    if (match.mode === 'training') {
+      b.x = b.trainingHomeX ?? b.x;
+      b.vx = 0;
+      const minDist = a.ch.width + b.ch.width;
+      if (Math.abs(a.y - b.y) < 90 && Math.abs(b.x - a.x) < minDist && b.state !== 'down') {
+        const side = Math.sign(b.x - a.x) || 1;
+        a.x = clamp(b.x - side * minDist, WALL, STAGE_W - WALL);
+      }
+      a.x = clamp(a.x, WALL, STAGE_W - WALL);
+      return;
+    }
     // corpos não se atravessam (exceto pulando por cima)
     const minDist = a.ch.width + b.ch.width;
     const dx = b.x - a.x;
@@ -1543,13 +1564,15 @@
     match = {
       mode, difficulty: settings.difficulty, stage: resolveStage(),
       wins: [0, 0], round: 1, sub: 'intro', t: 0, roundWinner: -1, resultShown: false,
-      winsNeeded: settings.rounds, roundTime: settings.roundTime || Infinity, timer: settings.roundTime || Infinity
+      winsNeeded: settings.rounds, roundTime: settings.mode === 'training' ? Infinity : settings.roundTime || Infinity,
+      timer: settings.mode === 'training' ? Infinity : settings.roundTime || Infinity
     };
     fighters = [createFighter(0, p1, false, false), createFighter(1, p2, mode === 'cpu', p1 === p2)];
     ensureStage(match.stage);
     $('#heavyLabel').textContent = CHARS[p1].heavyLabel;
     $('[data-act="heavy"]').setAttribute('aria-label', CHARS[p1].heavyLabel === 'CHUTE' ? 'Chute' : 'Golpe forte');
     startRound();
+    if (mode === 'training') fighters[1].trainingHomeX = fighters[1].x;
     paused = false;
     Audio.unlock();
     if (prepareOnly) return;
@@ -1663,6 +1686,19 @@
 
   function updateMatch(dt) {
     match.t += dt;
+    if (match.mode === 'training') {
+      match.timer = Infinity;
+      if (match.sub === 'talk') updateTalk();
+      else if (match.sub === 'intro' && match.t >= 1.9) {
+        match.sub = 'fight';
+        match.t = 0;
+        Audio.play('fight');
+      }
+      const target = fighters[1];
+      target.trainingRecover = Math.max(0, (target.trainingRecover || 0) - dt);
+      if (target.trainingRecover === 0 && target.hp < MAX_HP) target.hp = Math.min(MAX_HP, target.hp + MAX_HP * dt * 0.8);
+      return;
+    }
     switch (match.sub) {
       case 'talk':
         updateTalk();
@@ -1804,7 +1840,7 @@
     setApp('result');
     effects = [];
     particles = [];
-    for (let i = 0; i < 48; i++) {
+    for (let i = 0, total = settings.reducedEffects ? 14 : 48; i < total; i++) {
       const palette = outcome === 'win' ? ['#ffd166', '#ff6b9d', '#62efff', '#8dff85'] : ['#ffd166', '#ff6b6b', '#b6a2ff'];
       particles.push({ kind: 'confetti', x: camX + rand(0, worldW), y: FLOOR - rand(220, 500), vx: rand(-100, 100), vy: rand(-220, -80), life: rand(1.8, 3), max: 3, color: palette[i % palette.length], size: rand(4, 9), spin: rand(-5, 5) });
     }
@@ -2706,7 +2742,12 @@
     const blink = (f.flash > 0 || (f.invuln > 0 && f.state === 'getup') || (f.state === 'idle' && f.invuln > 0))
       && Math.floor(clock * 30) % 2 === 0;
     if (blink) ctx.globalAlpha = 0.55;
+    ctx.shadowColor = f.flash > 0 && !settings.reducedEffects ? '#fff2b8' : '#090712aa';
+    ctx.shadowBlur = f.flash > 0 && !settings.reducedEffects ? 14 : 8;
+    ctx.shadowOffsetY = 3;
     ctx.drawImage(img, sx, sy, sw, sh, -ax / AS, -ay / AS, sw / AS, sh / AS);
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetY = 0;
     ctx.restore();
     if (f.state === 'transform' && f.nextForm === 'gordao' && f.t < 0.85) drawFood(f, x, footY);
     drawHeldItems(f);
@@ -3253,9 +3294,10 @@
     ctx.fillStyle = '#3b1f3f';
     roundRect(ctx, cx - 39, 11, 78, 52, 8); ctx.fill();
     const time = Number.isFinite(match.timer) ? Math.ceil(match.timer) : null;
-    if (time === null) hudText('∞', cx, 52, 40, '#fff16b', 'center', '#7f291d', 5);
+    if (match.mode === 'training') hudText('TREINO', cx, 45, 16, '#fff16b', 'center', '#7f291d', 5);
+    else if (time === null) hudText('∞', cx, 52, 40, '#fff16b', 'center', '#7f291d', 5);
     else hudText(String(time).padStart(2, '0'), cx, 52, 38, time <= 10 && Math.floor(clock * 4) % 2 ? '#ff5a5a' : '#fff16b', 'center', '#7f291d', 5);
-    hudText(`ROUND ${match.round}`, cx, 82, 13, '#ffd0e0', 'center', '#170d24', 4);
+    hudText(match.mode === 'training' ? 'ALVO' : `ROUND ${match.round}`, cx, 82, 13, '#ffd0e0', 'center', '#170d24', 4);
   }
 
   function banner(textValue, sub, progress, color = '#ffd23f') {
@@ -3315,13 +3357,20 @@
     ctx.setTransform(renderScale, 0, 0, renderScale, offsetX, offsetY);
     ctx.save();
     ctx.beginPath(); ctx.rect(0, 0, viewW, H); ctx.clip();
-    if (shake > 0) ctx.translate(rand(-shake, shake), rand(-shake, shake) * 0.6);
+    const visibleShake = settings.reducedEffects ? 0 : shake;
+    if (visibleShake > 0) ctx.translate(rand(-visibleShake, visibleShake), rand(-visibleShake, visibleShake) * 0.6);
     const cam = app === 'fight' || app === 'result' ? camX : (STAGE_W - worldW) / 2 + Math.sin(clock * 0.2) * 220;
     // mundo com zoom: ancorado embaixo, topo = camTop
     ctx.scale(ZOOM, ZOOM);
     ctx.translate(0, -(app === 'fight' || app === 'result' ? camTop : CAM_TOP));
     drawStage(cam);
     if (app === 'fight' || app === 'result') {
+      const arenaShade = ctx.createRadialGradient(worldW / 2, FLOOR * 0.48, worldW * 0.05, worldW / 2, FLOOR * 0.48, worldW * 0.76);
+      arenaShade.addColorStop(0, 'rgba(10,8,22,0)');
+      arenaShade.addColorStop(0.72, 'rgba(10,8,22,0.06)');
+      arenaShade.addColorStop(1, 'rgba(10,8,22,0.3)');
+      ctx.fillStyle = arenaShade;
+      ctx.fillRect(0, 0, worldW, H);
       if (superFreeze > 0) {
         ctx.fillStyle = `rgba(10,5,30,${Math.min(0.55, superFreeze * 2)})`;
         ctx.fillRect(0, 0, worldW, H);
@@ -3362,7 +3411,7 @@
     if ((app === 'fight' || app === 'result') && match) {
       if (impactFlash > 0) {
         ctx.save();
-        ctx.globalAlpha = Math.min(0.2, impactFlash * 0.75);
+        ctx.globalAlpha = Math.min(settings.reducedEffects ? 0.08 : 0.2, impactFlash * (settings.reducedEffects ? 0.3 : 0.75));
         ctx.fillStyle = impactColor;
         ctx.fillRect(0, 0, viewW, H);
         ctx.restore();
@@ -3430,6 +3479,8 @@
 
   function updateOverlays() {
     document.body.dataset.touchSize = settings.touchSize;
+    document.body.dataset.highContrast = String(settings.highContrast);
+    document.body.dataset.reducedEffects = String(settings.reducedEffects);
     ui.splash.hidden = app !== 'splash';
     ui.chars.hidden = app !== 'chars';
     ui.stage.hidden = app !== 'stage';
@@ -3653,6 +3704,12 @@
     g.imageSmoothingEnabled = true;
     g.imageSmoothingQuality = 'high';
     g.clearRect(0, 0, cv.width, cv.height);
+    const accent = mirror ? '#f6d783' : '#ff9fbe';
+    const glow = g.createRadialGradient(cv.width / 2, cv.height * 0.72, 8, cv.width / 2, cv.height * 0.72, cv.width * 0.62);
+    glow.addColorStop(0, `${accent}30`);
+    glow.addColorStop(1, `${accent}00`);
+    g.fillStyle = glow;
+    g.fillRect(0, 0, cv.width, cv.height);
     if (!id || !ready(atlas)) return;
     g.globalAlpha = dim ? 0.35 : 1;
     let showId = id;
@@ -3670,8 +3727,11 @@
       : cycle(S.idle, 6, clock + (mirror ? 0.3 : 0));
     const [sx, sy, sw, sh, ax, ay] = frame;
     const s = Math.min((cv.height * 0.86) / (sh / AS), (cv.width * 0.9) / (sw / AS)) / AS;
-    g.fillStyle = 'rgba(0,0,0,0.35)';
-    g.beginPath(); g.ellipse(cv.width / 2, cv.height - 18, cv.width * 0.25, 10, 0, 0, Math.PI * 2); g.fill();
+    const floorGlow = g.createRadialGradient(cv.width / 2, cv.height - 18, 2, cv.width / 2, cv.height - 18, cv.width * 0.3);
+    floorGlow.addColorStop(0, '#05061199');
+    floorGlow.addColorStop(1, '#05061100');
+    g.fillStyle = floorGlow;
+    g.beginPath(); g.ellipse(cv.width / 2, cv.height - 18, cv.width * 0.3, 18, 0, 0, Math.PI * 2); g.fill();
     g.save();
     g.translate(cv.width / 2, cv.height - 18);
     g.scale(mirror ? -s : s, s);
@@ -3691,11 +3751,12 @@
 
   function refreshChars() {
     const versus = settings.mode === 'versus';
+    const training = settings.mode === 'training';
     const p1Phase = flow.phase === 'p1';
     setChecked('[data-mode]', 'mode', settings.mode);
-    const p2tag = versus ? '2P' : 'CPU';
+    const p2tag = versus ? '2P' : training ? 'ALVO' : 'CPU';
     $('#charStep').textContent = 'PASSO 1 DE 3';
-    $('#charTitle').textContent = p1Phase ? 'ESCOLHA SEU LUTADOR' : versus ? '2P: ESCOLHA SEU LUTADOR' : 'ESCOLHA O ADVERSÁRIO';
+    $('#charTitle').textContent = p1Phase ? 'ESCOLHA SEU LUTADOR' : versus ? '2P: ESCOLHA SEU LUTADOR' : training ? 'ESCOLHA O ALVO DE TREINO' : 'ESCOLHA O ADVERSÁRIO';
     const p1 = p1Phase ? flow.cursor : settings.fighter;
     const p2 = p1Phase ? null : flow.cursor;
     fillCard($('#p1Card'), p1, { tag: '1P', locked: !p1Phase });
@@ -3805,15 +3866,19 @@
 
   function refreshOptions() {
     const versus = settings.mode === 'versus';
+    const training = settings.mode === 'training';
     setChecked('[data-difficulty]', 'difficulty', settings.difficulty);
     $$('[data-rounds]').forEach(b => b.setAttribute('aria-checked', String(Number(b.dataset.rounds) === settings.rounds)));
     $$('[data-time]').forEach(b => b.setAttribute('aria-checked', String(Number(b.dataset.time) === settings.roundTime)));
-    $('#diffCards').classList.toggle('disabled', versus);
-    $('#versusNote').hidden = !versus;
-    $('#optionsTitle').textContent = versus ? 'REGRAS DA LUTA' : 'DIFICULDADE';
+    $$('[data-difficulty]').forEach(b => { b.disabled = versus || training; });
+    $$('[data-rounds], [data-time]').forEach(b => { b.disabled = training; });
+    $('#diffCards').classList.toggle('disabled', versus || training);
+    $('#versusNote').hidden = !(versus || training);
+    $('#versusNote').textContent = training ? 'Treino sem tempo: o alvo fica parado e recupera a vida após alguns segundos.' : 'Modo 2 jogadores: os dois são controlados por pessoas, sem dificuldade de CPU.';
+    $('#optionsTitle').textContent = versus ? 'REGRAS DA LUTA' : training ? 'REGRAS DO TREINO' : 'DIFICULDADE';
     const opp = settings.opponent === 'auto' ? 'ALEATÓRIO' : CHARS[settings.opponent].name;
     const stage = settings.stage === 'random' ? 'Cenário aleatório' : stageNames[settings.stage];
-    $('#matchSummary').textContent = `${CHARS[settings.fighter].name} × ${opp} · ${stage}`;
+    $('#matchSummary').textContent = `${CHARS[settings.fighter].name} × ${opp} · ${training ? 'TREINO · ' : ''}${stage}`;
   }
 
   // ---------- VS ----------
@@ -3906,16 +3971,41 @@
 
   // ---------- lista de golpes ----------
   function openMoveList() {
-    const id = fighters[0] ? fighters[0].id : settings.fighter;
-    const heavy = CHARS[id].heavyLabel.toLowerCase();
-    const rows = [
-      ['J', 'Soco'], ['K', heavy.charAt(0).toUpperCase() + heavy.slice(1)], ['I', 'Defesa (segure; só defende de frente)'],
-      ['J J K', 'Combo básico (quando os golpes acertam)'], ['↑ + J/K', 'Golpe no ar'],
-      ...PROFILE[id].moves
-    ];
+    moveListReturnFocus = document.activeElement;
+    const activeMatch = match && app === 'fight';
+    const id = activeMatch ? fighters[0].id : settings.fighter;
+    const slots = activeMatch && match.mode === 'versus' ? [0, 1] : [0];
+    const rows = [];
+    const formatMoves = (fighterId, binds, label) => {
+      const key = action => bindingLabel(binds[action]);
+      const heavy = CHARS[fighterId].heavyLabel.toLowerCase();
+      rows.push([label, '']);
+      rows.push([`${key('left')} / ${key('right')}`, 'Mover']);
+      rows.push([key('up'), 'Pular']);
+      rows.push([key('down'), 'Agachar']);
+      rows.push([key('light'), 'Soco']);
+      rows.push([key('heavy'), heavy.charAt(0).toUpperCase() + heavy.slice(1)]);
+      rows.push([key('guard'), 'Defesa (segure; defende pela frente)']);
+      rows.push([`${key('light')} ${key('light')} ${key('heavy')}`, 'Combo básico (quando os golpes acertam)']);
+      rows.push([`${key('up')} + ${key('light')} / ${key('heavy')}`, 'Ataque no ar']);
+      for (const [combo, description] of PROFILE[fighterId].moves) {
+        const sequence = combo.split(' ').map(token => ({
+          J: key('light'), K: key('heavy'), L: key('special'), '↓': key('down'), '+': '+'
+        })[token] || token).join(' ');
+        rows.push([sequence, description]);
+      }
+    };
+    for (const slot of slots) {
+      const fighter = fighters[slot];
+      const binds = activeMatch && match.mode === 'versus'
+        ? (slot === 0 ? settings.bindingsP1 : settings.bindingsP2)
+        : settings.bindings;
+      formatMoves(activeMatch && fighter ? fighter.id : settings.fighter, binds, activeMatch && match.mode === 'versus' ? `JOGADOR ${slot + 1}` : 'SEUS GOLPES');
+    }
     $('#moveListTitle').textContent = `GOLPES — ${CHARS[id].name}`;
     $('#moveListItems').replaceChildren(...rows.map(([key, text]) => {
       const li = document.createElement('li');
+      if (!text) { li.className = 'move-list-heading'; li.textContent = key; return li; }
       const k = document.createElement('kbd');
       k.textContent = key;
       li.append(k, text);
@@ -3923,6 +4013,13 @@
     }));
     $('#moveList').hidden = false;
     $('#closeMoveList').focus({ preventScroll: true });
+  }
+  function closeMoveList() {
+    $('#moveList').hidden = true;
+    if (moveListReturnFocus instanceof HTMLElement && moveListReturnFocus.isConnected && !moveListReturnFocus.closest('[hidden]')) {
+      moveListReturnFocus.focus({ preventScroll: true });
+    }
+    moveListReturnFocus = null;
   }
 
   // ---------- ligações ----------
@@ -3954,8 +4051,9 @@
   $('#stageConfirm').addEventListener('click', confirmStage);
   $('#fightStart').addEventListener('click', showVersus);
   $('#vsScreen').addEventListener('click', beginFight);
-  $('#closeMoveList').addEventListener('click', () => { $('#moveList').hidden = true; $('#pauseMoves').focus({ preventScroll: true }); });
+  $('#closeMoveList').addEventListener('click', closeMoveList);
   $('#pauseMoves').addEventListener('click', openMoveList);
+  $('#selectMoves').addEventListener('click', openMoveList);
 
   if (!available(settings.fighter)) settings.fighter = 'juraci';
   if (settings.opponent !== 'auto' && !available(settings.opponent)) settings.opponent = 'auto';
@@ -3982,6 +4080,8 @@
     $('#musicVolumeValue').value = `${Math.round(settings.musicVolume * 100)}%`;
     $('#voiceVolumeValue').value = `${Math.round(settings.voiceVolume * 100)}%`;
     $('#setVibration').checked = settings.vibration;
+    $('#setHighContrast').checked = settings.highContrast;
+    $('#setReducedEffects').checked = settings.reducedEffects;
     $('#setTouch').value = settings.touch;
     $('#setTouchSize').value = settings.touchSize;
     bindingTarget = null;
@@ -4031,6 +4131,8 @@
     $(selector).addEventListener('change', () => Audio.play('ui'));
   }
   $('#setVibration').addEventListener('change', e => { settings.vibration = e.currentTarget.checked; saveSettings(); });
+  $('#setHighContrast').addEventListener('change', e => { settings.highContrast = e.currentTarget.checked; saveSettings(); updateOverlays(); });
+  $('#setReducedEffects').addEventListener('change', e => { settings.reducedEffects = e.currentTarget.checked; saveSettings(); updateOverlays(); });
   $('#setTalk').addEventListener('change', e => { settings.talk = e.currentTarget.checked; saveSettings(); });
   $('#setVoice').addEventListener('change', e => {
     settings.voice = e.currentTarget.checked;
@@ -4056,6 +4158,8 @@
   }));
   $('#resetBindings').addEventListener('click', () => {
     settings.bindings = { ...DEFAULTS.bindings };
+    settings.bindingsP1 = { ...DEFAULTS.bindingsP1 };
+    settings.bindingsP2 = { ...DEFAULTS.bindingsP2 };
     bindingTarget = null;
     saveSettings();
     refreshBindingButtons();
@@ -4077,12 +4181,12 @@
   $('#menuExit').addEventListener('click', () => openMenuDialog('ATÉ A PRÓXIMA!',
     'Para sair, feche esta aba ou o aplicativo. O navegador não permite que o jogo feche a tela sozinho.'));
   $('#closeMenuDialog').addEventListener('click', closeMenuDialog);
-  $('#replay').addEventListener('click', startMatch);
+  $('#replay').addEventListener('click', () => startMatch());
   $('#toSelect').addEventListener('click', () => { Audio.startMusic('theme'); openChars('p1'); });
   $('#toStage').addEventListener('click', () => { Audio.startMusic('theme'); openStage(); });
   $('#toMenu').addEventListener('click', goSplash);
   $('#resume').addEventListener('click', resumeGame);
-  $('#restartFight').addEventListener('click', startMatch);
+  $('#restartFight').addEventListener('click', () => startMatch());
   $('#pauseMenu').addEventListener('click', goSplash);
   ui.pauseButton.addEventListener('click', pauseGame);
   $('#fullscreenButton').addEventListener('click', () => {
@@ -4117,6 +4221,7 @@
   document.addEventListener('visibilitychange', () => { if (document.hidden) pauseGame(); });
   window.addEventListener('resize', queueResize);
   window.addEventListener('orientationchange', queueResize);
+  window.visualViewport?.addEventListener('resize', queueResize);
   canvas.addEventListener('contextmenu', event => event.preventDefault());
   canvas.addEventListener('pointerdown', () => {
     if (app === 'fight' && !paused && match && match.sub === 'talk') match.skipTalk = true;
