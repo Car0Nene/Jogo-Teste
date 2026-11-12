@@ -592,9 +592,14 @@
     if (!important && (f.sayCooldown > 0 || Math.random() > chance)) return;
     // Usa gravação humana quando existe; sem clipe, mantém apenas a legenda.
     const clipEntry = !text && VOICE_CLIPS[f.id] && VOICE_CLIPS[f.id][key];
-    const clipKey = typeof clipEntry === 'string' ? clipEntry : clipEntry && clipEntry.clip;
-    const clipChance = clipEntry && typeof clipEntry === 'object' ? clipEntry.chance : 0.75;
-    if (clipKey && Audio.hasClip && Audio.hasClip(f.id, clipKey) && Math.random() < clipChance) {
+    const clipOptions = (Array.isArray(clipEntry) ? clipEntry : clipEntry ? [clipEntry] : [])
+      .map(entry => ({
+        key: typeof entry === 'string' ? entry : entry.clip,
+        chance: typeof entry === 'object' ? entry.chance ?? 0.75 : 0.75
+      }))
+      .filter(entry => entry.key && Audio.hasClip && Audio.hasClip(f.id, entry.key) && Math.random() < entry.chance);
+    if (clipOptions.length) {
+      const clipKey = clipOptions[Math.floor(Math.random() * clipOptions.length)].key;
       const clipText = Audio.playClip(f.id, clipKey);
       const clipLife = Audio.clipDuration ? Audio.clipDuration(f.id, clipKey) : 0;
       f.say = { text: clipText, t: 0, life: Math.max(duration, clipLife, dialogueLife(clipText)) };
@@ -610,13 +615,19 @@
 
   // momento da fala → trecho gravado (js/audio.js → CLIPS)
   const VOICE_CLIPS = {
-    franciely: { angry: 'isso', combo: 'ferrinho', win: 'montar', milk: 'isso' },
+    franciely: {
+      angry: 'isso', combo: 'ferrinho', milk: 'isso',
+      win: [{ clip: 'montar', chance: 1 }, { clip: 'cuidar', chance: 1 }]
+    },
     pedro: {
       combo: { clip: 'combo', chance: 1 },
-      drink: { clip: 'drink', chance: 1 }
+      drink: { clip: 'drink', chance: 1 },
+      win: { clip: 'fumaBebe', chance: 1 }
     },
-    daniel: { praia: { clip: 'praia', chance: 1 } },
-    gabi: { sing: { clip: 'sing', chance: 1 } }
+    daniel: { praia: [{ clip: 'praia', chance: 1 }, { clip: 'preparativos', chance: 1 }] },
+    gabi: { sing: { clip: 'sing', chance: 1 }, win: { clip: 'amor', chance: 1 } },
+    juraci: { win: { clip: 'cozinha', chance: 1 } },
+    carlos: { win: { clip: 'pizzaAmor', chance: 1 } }
   };
 
   const opponentOf = f => fighters[1 - f.slot];
@@ -843,7 +854,11 @@
       if (c.kind === 'dada') {
         const target = owner.x - owner.facing * 75;
         if (c.phase === 'enter') {
-          if (c.t > 0.35 && !c.replied) { c.replied = true; cameoSay(c, pickLine(DIALOGUE.dada?.reply, owner) || 'Já vou, irmã!', 1.6, 'dada'); }
+          if (c.t > 0.35 && !c.replied) {
+            c.replied = true;
+            const reply = Audio.playClip('dada', 'reply') || pickLine(DIALOGUE.dada?.reply, owner) || 'Já vou, irmã!';
+            cameoSay(c, reply, 1.6);
+          }
           c.walkDir = Math.sign(target - c.x) || 1;
           c.x += c.walkDir * 280 * dt;
           if (Math.abs(target - c.x) < 10) { c.phase = 'wash'; c.t = 0; }
@@ -909,7 +924,10 @@
     const allowed = Math.random() < 0.5;
     const lines = (DIALOGUE.daniel || {})[allowed ? 'wifeYes' : 'wifeNo'];
     const response = pickLine(lines, f) || (allowed ? 'Pode, amor!' : 'NÃO!');
-    announce(response, 'esposa', 'ESPOSA DO DANIEL', allowed ? null : { who: 'esposa', key: 'trabalho' });
+    const wifeClip = allowed ? null : {
+      who: 'esposa', key: Math.random() < 0.5 ? 'trabalho' : 'respostaCompleta'
+    };
+    announce(response, 'esposa', 'ESPOSA DO DANIEL', wifeClip);
     if (allowed) {
       f.hp = Math.min(MAX_HP, f.hp + 150);
       f.drinkT = 1.6;

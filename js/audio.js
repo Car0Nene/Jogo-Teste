@@ -331,20 +331,34 @@
       isso: { url: 'assets/voice/franciely-isso.mp3', text: 'É isso!' },
       ferrinho: { url: 'assets/voice/franciely-ferrinho.mp3', text: 'Ferrinho por ferrinho!' },
       desarma: { url: 'assets/voice/franciely-desarma.mp3', text: 'Na praia a gente só desarma!' },
-      montar: { url: 'assets/voice/franciely-montar.mp3', text: 'Aí, essa tem que montar ferrinho por ferrinho!' }
+      montar: { url: 'assets/voice/franciely-montar.mp3', text: 'Aí, essa tem que montar ferrinho por ferrinho!' },
+      cuidar: { url: 'assets/voice/generated/franciely-cuidar-e-lutar.mp3', text: 'Carlos! Ainda não acabou! Cuidar também é lutar!' }
     },
     pedro: {
       combo: { url: 'assets/voice/pedro-domingo.mp3', text: 'Domingo, domingo! Bora, bora, bora!', duration: 3.64 },
-      drink: { url: 'assets/voice/pedro-cerveja.mp3', text: 'Eu posso tomar cerveja hoje?', duration: 1.85 }
+      drink: { url: 'assets/voice/pedro-cerveja.mp3', text: 'Eu posso tomar cerveja hoje?', duration: 1.85 },
+      fumaBebe: { url: 'assets/voice/generated/pedro-fuma-bebe-vence.mp3', text: 'Fuma, bebe e vence! Simone, desce uma gelada!' }
     },
     daniel: {
-      praia: { url: 'assets/voice/daniel-praia.mp3', text: 'Praia, praia! Eu vou fazer as malas!', duration: 3.86 }
+      praia: { url: 'assets/voice/daniel-praia.mp3', text: 'Praia, praia! Eu vou fazer as malas!', duration: 3.86 },
+      preparativos: { url: 'assets/voice/generated/daniel-preparativos-praia.mp3', text: 'Praia, praia! Eu vou fazer as malas!' }
     },
     esposa: {
-      trabalho: { url: 'assets/voice/tainara-trabalho.mp3', text: 'Daniel deve estar sem internet, foi trabalhar hoje.', duration: 3.74 }
+      trabalho: { url: 'assets/voice/tainara-trabalho.mp3', text: 'Daniel deve estar sem internet, foi trabalhar hoje.', duration: 3.74 },
+      respostaCompleta: { url: 'assets/voice/generated/tainara-daniel-indo-trabalhar.mp3', text: 'Daniel deve estar sem internet, foi trabalhar hoje. Nem pensar, Daniel!' }
     },
     gabi: {
-      sing: { url: 'assets/voice/gabi-canto.mp3', text: '♪ Gabi canta ♪', duration: 3.95 }
+      sing: { url: 'assets/voice/gabi-canto.mp3', text: '♪ Gabi canta ♪', duration: 3.95 },
+      amor: { url: 'assets/voice/generated/gabi-amor-e-luta.mp3', text: 'Porque amor também é luta! Vinícius, eu venci!' }
+    },
+    dada: {
+      reply: { url: 'assets/voice/generated/dada-aviso-chao-molhado.mp3', text: 'Já vou, irmã! Cuidado que o chão tá molhado!' }
+    },
+    juraci: {
+      cozinha: { url: 'assets/voice/generated/juraci-mandando-na-cozinha.mp3', text: 'Quem manda nesta cozinha sou eu! Agora vai lavar a louça!' }
+    },
+    carlos: {
+      pizzaAmor: { url: 'assets/voice/generated/carlos-pedido-de-pizza-com-amor.mp3', text: 'Foi mal, vó! Te amo! Depois dessa, mereço uma pizza!' }
     },
     narrator: {
       victory: { url: 'assets/voice/narrator/vitoria-na-luta.mp3', text: 'Vitória na luta!', duration: 2.7 }

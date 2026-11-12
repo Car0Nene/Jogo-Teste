@@ -88,6 +88,7 @@ A música tema **"Bolo da Juraci"** toca nos menus e, por padrão, também duran
 - **Pedro** fala ao fazer combo e ao beber a cerveja; **Daniel** anuncia a praia; **Tainara** responde quando ele pede uma bebida; **Gabi** canta no especial.
 - Frases ao derrubar, ser nocauteado e vencer.
 - **Vozes:** o jogo toca gravações humanas disponíveis e mantém as demais falas como legendas. Vozes sintéticas do navegador estão desativadas.
+- **Vozes complementares:** novas amostras de Juraci, Carlos, Pedro, Daniel, Franciely, Gabi, Tainara e Dadá entram em falas correspondentes como variações. As gravações originais continuam disponíveis; um áudio do narrador que reúne falas de momentos diferentes fica arquivado como referência, sem tocar fora de contexto.
 
 Todas as frases ficam em **`js/dialogue.js`** — dá para editar ou acrescentar sem mexer no resto do código.
 
@@ -115,12 +116,12 @@ Os clipes opcionais em `assets/voice/arcade/` vêm do **Voiceover Pack: Fighter*
 │   ├── menu/                arte do menu (menu.png original + menu.webp otimizado)
 │   ├── portraits/           retratos dos lutadores
 │   ├── music/               músicas (.m4a original + .mp3 reserva)
-│   ├── voice/               clipes dos personagens e locutor arcade CC0
+│   ├── voice/               clipes originais, complementares e locutor arcade CC0
 │   ├── stages/              cenários pintados (Bar da Simone, Praia)
 │   └── icons/               ícones do app
 ├── art-source/              artes de origem e arquivos de trabalho
 │   ├── *-sheet.png          folhas originais dos lutadores
-│   ├── audio/               gravações originais; cópias de jogo ficam em assets/voice/
+│   ├── audio/               gravações originais e amostras geradas; cópias de jogo ficam em assets/voice/
 │   ├── cutouts/             recortes sem fundo gerados por tools/cutout.py
 │   └── references/          pôsteres e artes de referência
 ├── supabase/schema.sql      banco de dados (opcional)
