@@ -581,24 +581,29 @@
     return String(list[Math.floor(Math.random() * list.length)]).replaceAll('{oponente}', name);
   }
 
+  // Balões permanecem tempo suficiente para leitura; a voz humana gravada não depende deste timer.
+  function dialogueLife(text, minimum = 1.4) {
+    return Math.max(minimum, clamp(1.1 + String(text || '').length * 0.075, 1.8, 5.2));
+  }
+
   // important = ignora o intervalo mínimo entre falas (usado em especiais, K.O., vitória)
   function say(f, key, { important = false, duration = 0, chance = 1, text = '' } = {}) {
     if (!f) return;
     if (!important && (f.sayCooldown > 0 || Math.random() > chance)) return;
-    // voz real gravada (quando existe trecho para esse momento) no lugar da voz do navegador
+    // Usa gravação humana quando existe; sem clipe, mantém apenas a legenda.
     const clipEntry = !text && VOICE_CLIPS[f.id] && VOICE_CLIPS[f.id][key];
     const clipKey = typeof clipEntry === 'string' ? clipEntry : clipEntry && clipEntry.clip;
     const clipChance = clipEntry && typeof clipEntry === 'object' ? clipEntry.chance : 0.75;
     if (clipKey && Audio.hasClip && Audio.hasClip(f.id, clipKey) && Math.random() < clipChance) {
       const clipText = Audio.playClip(f.id, clipKey);
       const clipLife = Audio.clipDuration ? Audio.clipDuration(f.id, clipKey) : 0;
-      f.say = { text: clipText, t: 0, life: Math.max(duration, clipLife, clamp(1.1 + clipText.length * 0.045, 1.4, 3.2)) };
+      f.say = { text: clipText, t: 0, life: Math.max(duration, clipLife, dialogueLife(clipText)) };
       f.sayCooldown = important ? 1.2 : 3.5;
       return;
     }
     const line = text || pickLine((DIALOGUE[f.id] || {})[key], f);
     if (!line) return;
-    f.say = { text: line, t: 0, life: duration || clamp(1.1 + line.length * 0.045, 1.4, 3.2) };
+    f.say = { text: line, t: 0, life: Math.max(duration, dialogueLife(line)) };
     f.sayCooldown = important ? 1.2 : 3.5;
     Audio.speak(line, f.id);
   }
@@ -823,7 +828,7 @@
 
   function cameoSay(c, text, duration = 1.6, voice = '') {
     if (!text) return;
-    c.say = { text, t: 0, life: duration };
+    c.say = { text, t: 0, life: dialogueLife(text, duration) };
     if (c.owner) c.owner.say = null; // evita balões sobrepostos
     if (voice) Audio.speak(text, voice);
   }
@@ -924,7 +929,7 @@
       if (clipText) { text = clipText; usedClip = true; }
     }
     const clipLife = usedClip && Audio.clipDuration ? Audio.clipDuration(clip.who, clip.key) : 0;
-    announcement = { text, label, t: 0, life: Math.max(clipLife, clamp(1.4 + text.length * 0.05, 1.8, 3)) };
+    announcement = { text, label, t: 0, life: Math.max(clipLife, dialogueLife(text, 1.8)) };
     if (!usedClip) Audio.speak(text, voice);
   }
 
@@ -1639,7 +1644,7 @@
     if (fran && match.stage === 'praia' && match.round === 1 && Audio.hasClip && Audio.hasClip('franciely', 'desarma')) {
       const clipText = Audio.playClip('franciely', 'desarma');
       if (clipText) {
-        fran.say = { text: clipText, t: 0, life: 2 };
+        fran.say = { text: clipText, t: 0, life: Math.max(2, Audio.clipDuration?.('franciely', 'desarma') || 0, dialogueLife(clipText)) };
         match.narratorClip = true;
       }
     }
@@ -1662,7 +1667,7 @@
     const [who, text] = talk.lines[talk.i];
     const f = fighters[who === 'p2' ? 1 : 0];
     const line = pickLine([text], f);
-    const duration = clamp(1.3 + line.length * 0.05, 1.7, 3.6);
+    const duration = dialogueLife(line, 1.7);
     for (const other of fighters) if (other !== f) other.say = null;
     say(f, '', { important: true, text: line, duration });
     talk.next = match.t + duration + 0.12;
@@ -4198,7 +4203,6 @@
   $('#setVoice').addEventListener('change', e => {
     settings.voice = e.currentTarget.checked;
     saveSettings();
-    if (settings.voice) Audio.speak('Olá, família!', 'juraci');
   });
   $('#setArcadeAnnouncer').addEventListener('change', e => {
     settings.arcadeAnnouncer = e.currentTarget.checked;

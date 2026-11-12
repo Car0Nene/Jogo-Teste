@@ -1,4 +1,4 @@
-// Áudio: efeitos sintetizados, trilhas 8-bit de reserva, músicas gravadas e falas (voz do navegador + trechos gravados).
+// Áudio: efeitos e trilhas sintetizados, músicas gravadas e vozes humanas licenciadas/gravadas.
 (() => {
   'use strict';
 
@@ -377,56 +377,10 @@
     return { track: currentTrack, chiptune: currentSong, paused: el ? el.paused : null, time: el ? Math.round(el.currentTime * 10) / 10 : null, volume: el ? Math.round(el.volume * 100) / 100 : null };
   }
 
-  // ---------- Falas em voz alta (síntese de voz do próprio navegador) ----------
-  const synth = 'speechSynthesis' in window ? window.speechSynthesis : null;
-  let ptVoices = [];
-  function loadVoices() {
-    if (!synth) return;
-    ptVoices = synth.getVoices().filter(v => /^pt(-|_|$)/i.test(v.lang));
-    ptVoices.sort((a, b) => Number(/BR/i.test(b.lang)) - Number(/BR/i.test(a.lang)));
-  }
-  if (synth) {
-    loadVoices();
-    synth.addEventListener?.('voiceschanged', loadVoices);
-  }
-  const FEMALE = /maria|francisca|thalita|vit[oó]ria|luciana|fernanda|joana|raquel|female|feminina|google/i;
-  const MALE = /daniel|ant[oô]nio|ricardo|donato|felipe|fabio|male|masculina/i;
-  const VOICE_STYLE = {
-    juraci: { pitch: 1.25, rate: 1.08, prefer: FEMALE },
-    carlos: { pitch: 0.85, rate: 1.12, prefer: MALE },
-    pedro: { pitch: 1.05, rate: 1.0, prefer: MALE },
-    daniel: { pitch: 1.1, rate: 1.18, prefer: MALE },
-    franciely: { pitch: 1.15, rate: 1.15, prefer: FEMALE },
-    gabi: { pitch: 1.3, rate: 1.1, prefer: FEMALE },
-    esposa: { pitch: 1.2, rate: 1.05, prefer: FEMALE },
-    dada: { pitch: 0.7, rate: 0.92, prefer: MALE },
-    narrator: { pitch: 0.92, rate: 0.94, prefer: MALE }
-  };
-
-  function speak(text, who, queue = false) {
-    if (!synth || !state.voice || !text) return;
-    try {
-      const style = VOICE_STYLE[who] || { pitch: 1, rate: 1.05, prefer: null };
-      const clean = String(text).replace(/[^\p{L}\p{N}\s!?.,…'-]/gu, ' ').trim();
-      if (!clean) return;
-      const utter = new SpeechSynthesisUtterance(clean);
-      utter.lang = 'pt-BR';
-      const voice = (style.prefer && ptVoices.find(v => style.prefer.test(v.name))) || ptVoices[0];
-      if (voice) utter.voice = voice;
-      utter.pitch = style.pitch;
-      utter.rate = style.rate;
-      utter.volume = Math.min(1, state.voiceVolume);
-      if (clipPlaying) { clipPlaying.pause(); clipPlaying = null; }
-      if (!queue) {
-        synth.cancel(); // falas prioritárias podem entrar na fila
-      }
-      synth.speak(utter);
-    } catch (error) {
-      console.warn('Falha ao falar a frase.', error);
-    }
-  }
+  // Não usar SpeechSynthesis do navegador: a qualidade varia muito e soava robotizada.
+  // As falas continuam legendadas; só os clipes gravados/licenciados produzem voz.
+  function speak() {}
   function stopSpeech() {
-    try { synth?.cancel(); } catch { /* sem suporte */ }
     if (clipPlaying) { try { clipPlaying.pause(); } catch { /* ok */ } }
   }
 

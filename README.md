@@ -13,7 +13,7 @@ Jogo de luta arcade em HTML Canvas e JavaScript puro (sem build), com a família
 - **Controles:** teclado, **gamepad** e, no celular, direcional analógico + botões redondos (o botão Especial mostra a barra carregando).
 - **Áudio:** efeitos sintetizados melhores e trilha chiptune por cenário (pode desligar).
 - **Configurações salvas:** som, música, voz, conversa, volume, vibração e exibição dos controles de toque.
-- **v0.6 — Falas:** balões de fala, conversa antes da luta, Carlos comendo bolo/pizza e sendo batizado, voz do navegador (veja abaixo).
+- **v0.6 — Falas:** balões de fala, conversa antes da luta e cenas do Carlos com bolo/pizza e no batismo.
 - **v0.7 — Novos lutadores:** Pedro, Daniel, Franciely e Gabi; segundo especial (↓ + L) para todos; Juraci chama o Dadá; cenários **Bar da Simone** e **Praia do Natal**.
 
 ## Novidades da v0.8
@@ -32,7 +32,7 @@ Jogo de luta arcade em HTML Canvas e JavaScript puro (sem build), com a família
 - **Nível de poder:** cada lutador recebe uma classificação de 1 a 1000, mostrada na seleção; ela afeta moderadamente o dano.
 - **Pose de apresentação:** cada personagem aparece na seleção com uma pose característica.
 - **Corrida curta:** toque duas vezes para frente para correr por um instante; também funciona com teclado e gamepad.
-- **Narrador por voz:** anuncia rodada, início da luta, K.O., tempo e resultado final. Ative a opção de voz nas configurações.
+- **Locução arcade:** anúncios de rodada, início, combos, tempo e resultado com clipes humanos CC0 em inglês, ativados separadamente nas configurações.
 - **Vozes gravadas dos personagens:** os clipes do Pedro, Daniel, Tainara e Gabi entram nos golpes e cenas correspondentes; as falas aparecem legendadas. Os arquivos foram nivelados, aparados e convertidos para MP3.
 - **Impacto mais claro:** flashes, hitstop, vibração, sons de contagem regressiva e faíscas ajudam a destacar golpes e rounds decisivos.
 - **HUD e resultado polidos:** vida numérica e colorida, especiais com marca de meia barra, combos em destaque e retratos dos lutadores com confete no resultado.
@@ -79,12 +79,12 @@ A música tema **"Bolo da Juraci"** toca nos menus e, por padrão, também duran
 ## Falas e conversas
 
 - **Conversa antes da luta** no 1º round (balões de quadrinho; qualquer botão ou toque pula).
-- **Narrador** anuncia os momentos principais da partida; a voz sintetizada depende das vozes pt-BR disponíveis no aparelho.
+- **Narrador:** os anúncios aparecem como texto; o locutor arcade humano em inglês é opcional nas configurações. A síntese robotizada do navegador foi removida.
 - **Juraci** grita "BOLO DE CENOURA!" no especial, dá bronca nos combos e comemora a vitória.
 - **Carlos** no especial **Gordão** come um bolo ou uma pizza (com mordidas e farelos) e engorda; no **Modo Fé** é batizado com água e luz do céu e grita "Aleluia!".
 - **Pedro** fala ao fazer combo e ao beber a cerveja; **Daniel** anuncia a praia; **Tainara** responde quando ele pede uma bebida; **Gabi** canta no especial.
 - Frases ao derrubar, ser nocauteado e vencer.
-- **Voz:** as falas podem ser lidas em voz alta pela voz do próprio navegador (pt-BR). Liga/desliga em Configurações; a qualidade depende do aparelho.
+- **Vozes:** o jogo toca gravações humanas disponíveis e mantém as demais falas como legendas. Vozes sintéticas do navegador estão desativadas.
 
 Todas as frases ficam em **`js/dialogue.js`** — dá para editar ou acrescentar sem mexer no resto do código.
 
