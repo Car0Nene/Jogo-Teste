@@ -1,0 +1,9 @@
+# Python e ferramentas locais de arte
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Arquivos temporários do sistema/editor
+.DS_Store
+Thumbs.db

@@ -4,7 +4,7 @@ Jogo de luta arcade em HTML Canvas e JavaScript puro (sem build), com a família
 
 ## Novidades da v0.5 a v0.7
 
-- **Animações refeitas:** atlas único e limpo (`assets/fighters.png`, 300 KB) gerado a partir das folhas originais. Remove o brilho roxo atrás dos sprites, normaliza a escala e alinha cada quadro pelos pés — sem tremidas, "flutuações" ou troca de tamanho ao atacar.
+- **Animações refeitas:** atlas único e limpo (`assets/sprites/fighters.webp`, com PNG de reserva) gerado a partir das folhas originais. Remove o brilho roxo atrás dos sprites, normaliza a escala e alinha cada quadro pelos pés — sem tremidas, "flutuações" ou troca de tamanho ao atacar.
 - **Movimentação nova:** simulação em passo fixo (60 Hz, igual em qualquer tela/FPS), pulo com direção, empurrão sem sair da tela, câmera que acompanha a luta com parallax.
 - **Combate:** hitbox/hurtbox reais (agachar desvia de socos altos, pulo desvia de rasteiras), combos encadeados, cancelamento para o especial, defesa só pela frente, dano reduzido na defesa, contador de hits, hitstop e tremor de tela.
 - **Partida:** melhor de 3 rounds, 60 s por round, anúncios (ROUND / LUTEM! / K.O. / TEMPO!), vitória perfeita, pose de vitória, estatísticas no final.
@@ -83,7 +83,7 @@ Todas as frases ficam em **`js/dialogue.js`** — dá para editar ou acrescentar
 ├── index.html               telas do jogo
 ├── manifest.webmanifest     instalação como app (PWA)
 ├── sw.js                    modo offline (service worker)
-├── supabase-config.js       chaves públicas (preenchido no deploy)
+├── supabase-config.js       configuração pública do cliente Supabase
 ├── css/style.css            visual de menus, seleção e controles de toque
 ├── js/
 │   ├── game.js              motor: lutadores, IA, rounds, cenários, HUD
@@ -93,21 +93,20 @@ Todas as frases ficam em **`js/dialogue.js`** — dá para editar ou acrescentar
 │   ├── account.js           conta Supabase e sincronização
 │   └── sprite-data.js       gerado: tabela de quadros do atlas
 ├── assets/                  tudo que o jogo carrega
-│   ├── sprites/fighters.png gerado: atlas dos lutadores e efeitos
+│   ├── sprites/              atlas gerado dos lutadores e efeitos (WebP + PNG)
 │   ├── menu/                arte do menu (menu.png original + menu.webp otimizado)
 │   ├── portraits/           retratos dos lutadores
 │   ├── music/               músicas (.m4a original + .mp3 reserva)
 │   ├── voice/               clipes de voz dos personagens preparados para o jogo
 │   ├── stages/              cenários pintados (Bar da Simone, Praia)
 │   └── icons/               ícones do app
-├── art-source/              artes originais (fonte do atlas; NÃO são publicadas)
-│   ├── references/          pôsteres e artes de referência
-│   └── audio/               gravações originais dos personagens
-│   └── cutouts/             recortes sem fundo gerados por tools/cutout.py
-├── tools/cutout.py          remove o fundo das folhas opacas (IA local, rembg)
-├── tools/build_atlas.py     gera o atlas a partir de art-source/
+├── art-source/              artes de origem e arquivos de trabalho
+│   ├── *-sheet.png          folhas originais dos lutadores
+│   ├── audio/               gravações originais; cópias de jogo ficam em assets/voice/
+│   ├── cutouts/             recortes sem fundo gerados por tools/cutout.py
+│   └── references/          pôsteres e artes de referência
 ├── supabase/schema.sql      banco de dados (opcional)
-└── .github/workflows/       publicação automática no GitHub Pages
+└── tools/                   ferramentas locais para preparar arte e sprites
 ```
 
 ### Regenerar o atlas
@@ -138,10 +137,11 @@ As folhas do Pedro, Daniel, Franciely e Gabi têm cenário no fundo. Para recort
 2. Confira/ajuste os retângulos de cada quadro em `CUTS` no `tools/cutout.py`.
 3. Rode:
 
-```n   pip install "rembg[cpu]" pillow numpy scipy
-   python tools/cutout.py gabi
-   python tools/build_atlas.py
-   ```n
+```
+pip install "rembg[cpu]" pillow numpy scipy
+python tools/cutout.py gabi
+python tools/build_atlas.py
+```
 O `cutout.py` também gera o retrato em `assets/portraits/`. Na primeira vez ele baixa o modelo de IA (~180 MB); tudo roda no seu computador. O lutador é liberado na seleção automaticamente quando os sprites dele existem no atlas.
 
 ## Executar
@@ -180,19 +180,16 @@ e acesse `http://localhost:8080`.
 
 ## Instalar no celular (GitHub Pages)
 
-1. Envie esta pasta para um repositório no GitHub (incluindo `.github`).
-2. Em **Settings → Pages**, escolha **GitHub Actions** como fonte.
-3. Faça um commit em `main` e acompanhe **Actions → Deploy Família Fighter PWA**.
-4. No Android (Chrome): **Instalar app**. No iPhone (Safari): **Compartilhar → Adicionar à Tela de Início**.
+O projeto é um site estático. Para publicar pelo GitHub Pages, abra **Settings → Pages**, selecione **Deploy from a branch**, escolha `main` e a pasta `/ (root)`. Depois de salvar, cada envio para `main` atualiza o site. O repositório não contém atualmente um workflow de GitHub Actions.
 
-O deploy publica só os arquivos necessários (~1 MB em vez de ~14 MB) e cada publicação cria uma nova versão do cache offline.
+No Android (Chrome), use **Instalar app**. No iPhone (Safari), use **Compartilhar → Adicionar à Tela de Início**.
 
 ## Conta e progresso (Supabase, opcional)
 
 1. No Supabase, abra **SQL Editor** e execute `supabase/schema.sql` (pode executar de novo em um projeto já configurado; ele atualiza as funções e permissões).
 2. Em **Authentication → URL Configuration**, use a URL do GitHub Pages como **Site URL** e em **Redirect URLs**.
-3. No GitHub, em **Settings → Secrets and variables → Actions → Variables**, crie `SUPABASE_URL` e `SUPABASE_ANON_KEY` (chave pública *publishable/anon*).
-4. Faça outro commit em `main`. Em **Minha Conta**, crie a conta ou entre; dá para trocar o apelido depois.
+3. Preencha `url` e `anonKey` em `supabase-config.js` com a URL do projeto e a chave pública (*publishable/anon*). O deploy atual não injeta variáveis do GitHub nesse arquivo.
+4. Publique as alterações. Em **Minha Conta**, crie a conta ou entre; dá para trocar o apelido depois.
 
 Só partidas contra a CPU são registradas. Resultados de lutas sem internet ficam numa fila no aparelho e são enviados quando a conexão volta.
 
@@ -200,5 +197,7 @@ Só partidas contra a CPU são registradas. Resultados de lutas sem internet fic
 
 ## Próximas etapas
 
-- Falas gravadas pela família (com autorização) no lugar dos efeitos sintetizados.
+- Gravar mais falas da família e expandir as respostas contextuais dos personagens.
+- Adicionar um workflow de publicação e validação automática no GitHub Actions.
+- Melhorar a navegação por controle e teclado e oferecer opções de acessibilidade visual.
 - Empacotar para a Play Store (por exemplo, com Capacitor) se quiser um APK/AAB.
