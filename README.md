@@ -64,7 +64,7 @@ Jogo de luta arcade em HTML Canvas e JavaScript puro (sem build), com a família
 | --- | --- | --- |
 | **Juraci** | Super Bolo de Cenoura (projétil que derruba) | Chama o **Dadá**: "Já vou, irmã!" — ele lava a louça e a água com sabão escorre pelo chão (pule por cima ou escorrega) |
 | **Carlos** | Alterna **Gordão** (come bolo ou pizza e engorda: +força) e **Modo Fé** (é batizado: +defesa) | — |
-| **Pedro** | Bebe uma **Heineken** e vira o **Monstrão** (+força, +defesa) | **Fumaça de cigarro** (o adversário tosse) |
+| **Pedro** | Bebe uma **Heineken** e vira o **Monstrão** (+força, +defesa); transformado, dispara uma Heineken com aura verde | **Fumaça de cigarro** (o adversário tosse) |
 | **Daniel** | **Modo Natal Praia**: rápido e imprevisível, dano aleatório + surpresa: bate o carro, pede uma Heineken pra esposa (ela pode deixar e ele recupera vida… ou não) ou faz um show | Dancinha com notas musicais |
 | **Franciely** | Fica **irritada sem motivo**: o Carlos aparece fugindo de medo, ela ganha força e uma **fome sem fim** (vai recuperando vida) | Jato de leite |
 | **Gabi** | **Super L** gigante + chuva de **brigadeiros**; no fim a **Juraci vem buscar a panela** | Canto com notas musicais |
@@ -130,6 +130,18 @@ Os clipes opcionais em `assets/voice/arcade/` vêm do **Voiceover Pack: Fighter*
 ├── supabase/schema.sql      banco de dados (opcional)
 └── tools/                   ferramentas locais para preparar arte e sprites
 ```
+
+As folhas novas de fúria muscular e aura verde do Pedro ficam na raiz do
+repositório. Para refazer os recortes transparentes e o atlas, rode:
+
+```
+python tools/cutout_pedro_special.py
+python tools/build_atlas.py
+```
+
+O Monstrão usa os novos quadros durante a transformação e no golpe especial.
+Depois de virar Monstrão, `L` com meia barra dispara a Heineken com aura verde;
+`↓ + L` continua usando a fumaça.
 
 As artes-fonte de Paula e Tainara incluem a ficha de movimentos em
 `art-source/paula-tainara-movement-sheet.png`, com vários quadros para parado,

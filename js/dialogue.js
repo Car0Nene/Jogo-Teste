@@ -117,6 +117,7 @@ window.FF_DIALOGUE = {
     drink: ['Hora da Heineken!', 'Só uma geladinha...'],
     gulp: ['Glub glub glub!'],
     hulk: ['MONSTRÃÃÃO!', 'Agora sim, tô forte!', 'Heineken dá força!'],
+    greenBlast: ['Heineken com aura verde!'],
     combo: ['Fuma, bebe e vence!', 'Arrasei!', 'Sente o salto!'],
     knockdown: ['Ai, meu salto!', 'Quebrou a unha!'],
     win: ['Fui pro Bar da Simone!', 'Fuma, bebe e vence!', 'Simone, desce uma gelada!'],

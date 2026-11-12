@@ -47,6 +47,7 @@ S_DANIEL_R3 = 0.59  # linha 3 (dança/Natal Praia) foi desenhada maior
 S_DANIEL_R4 = 0.55  # linha 4 (vitória) maior ainda
 S_PEDRO_DRINK = 0.63  # bloco do especial Heineken desenhado maior
 S_PEDRO_SMOKE = 0.68
+S_PEDRO_HULK = 0.48
 C = lambda char, anim, order, scale: [dict(cut=f'{SRC}cutouts/{char}/{anim}_{i}.png', scale=scale) for i in order]
 
 
@@ -103,7 +104,9 @@ FRAMES = {
         'heavy':  C('pedro', 'heavy', [2, 0, 1], S_PEDRO),  # base → chute → chute alto
         'smoke':  C('pedro', 'smoke', [0, 1, 2], S_PEDRO_SMOKE),
         'drink':  C('pedro', 'drink', [0, 1, 2], S_PEDRO_DRINK),
-        'hulk':   C('pedro', 'hulk', [0], S_PEDRO_DRINK * 1.08),
+        'hulk':   C('pedro', 'hulk', [0, 1, 2], S_PEDRO_HULK),
+        'hulkPower': C('pedro', 'hulkPower', [0, 1, 2, 3], S_PEDRO_HULK),
+        'hulkBlast': C('pedro', 'hulkBlast', [0], S_PEDRO_HULK),
         'escape': C('pedro', 'escape', [0, 1, 2, 3], S_PEDRO),
     },
     'daniel': {
@@ -185,6 +188,8 @@ FX = {
     'star':   dict(sheet=MAIN, rect=(1268, 905, 64, 100), scale=0.6),
     'heart':  dict(sheet=MAIN, rect=(1200, 935, 60, 70), scale=0.6),
     'heineken': dict(cut=f'{SRC}cutouts/fx/heineken.png', scale=0.32, center=True),
+    'beerBlast': dict(cut=f'{SRC}cutouts/fx/pedro-beer-blast.png', scale=0.28, center=True),
+    'beerBurst': dict(cut=f'{SRC}cutouts/fx/pedro-beer-burst.png', scale=0.28, center=True),
     'coconut':  dict(cut=f'{SRC}cutouts/fx/coconut.png', scale=0.45, center=True),
     'mic':      dict(cut=f'{SRC}cutouts/fx/mic.png', scale=0.45, center=True),
     'shades':   dict(cut=f'{SRC}cutouts/fx/shades.png', scale=0.4, center=True),

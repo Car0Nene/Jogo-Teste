@@ -216,7 +216,7 @@
     },
     pedro: {
       name: 'PEDRO', heavyLabel: 'CHUTE', powerLevel: 950, pose: { animation: 'hulk', frame: 0 },
-      desc: '"Fuma, bebe e vence!" Meia barra: fumaça de cigarro. Barra cheia: Heineken e vira Monstrão.',
+      desc: '"Fuma, bebe e vence!" L: Heineken e vira Monstrão; já transformado, dispara uma Heineken com aura verde. ↓ + L: fumaça de cigarro.',
       scale: 1.2, height: 158, crouchHeight: 98, width: 30,
       walk: 220, back: 172, jumpV: 910, jumpX: 245, gravity: 2520,
       transformTime: 1.3,
@@ -225,7 +225,8 @@
         medium: { anim: 'medium', startup: 0.1, active: 0.09, recovery: 0.18, damage: 60, box: [18, 126, 92, 136], hitstun: 0.32, blockstun: 0.18, push: 280, hitstop: 0.07, chain: { heavy: 'heavy' } },
         heavy:  { anim: 'heavy', startup: 0.15, active: 0.11, recovery: 0.28, damage: 90, box: [18, 160, 70, 150], hitstun: 0.42, blockstun: 0.22, push: 430, hitstop: 0.09, lunge: 120, heavy: true },
         air:    { anim: 'heavy', frame: 2, startup: 0.07, active: 0.2, recovery: 0.1, damage: 56, box: [6, 118, 20, 120], hitstun: 0.32, blockstun: 0.18, push: 220, hitstop: 0.06 },
-        smoke:  { anim: 'smoke', startup: 0.36, active: 0, recovery: 0.3, projectile: { sprite: 'smoke', speed: 300, damage: 70, w: 70, h: 60, y: 122, life: 1.7, knockdown: false, hitstun: 0.85, cough: true } }
+        smoke:  { anim: 'smoke', startup: 0.36, active: 0, recovery: 0.3, projectile: { sprite: 'smoke', speed: 300, damage: 70, w: 70, h: 60, y: 122, life: 1.7, knockdown: false, hitstun: 0.85, cough: true } },
+        greenBlast: { anim: 'hulkBlast', startup: 0.34, active: 0, recovery: 0.34, projectile: { sprite: 'beerBlast', speed: 540, damage: 105, w: 128, h: 82, y: 126, life: 1.9, hitstun: 0.55 } }
       }
     },
     daniel: {
@@ -783,7 +784,12 @@
         say(f, 'drink', { important: true, duration: 0.8 });
         return true;
       }
-      return useHalf(f, 'smoke', 'smoke'); // já é Monstrão: L solta fumaça
+      if (f.form === 'hulk') {
+        if (f.meter < 50) return fizzle(f);
+        Audio.play('special');
+        return useHalf(f, 'greenBlast', 'greenBlast');
+      }
+      return useHalf(f, 'smoke', 'smoke');
     }
     if (f.meter < 100) return fizzle(f);
     if (f.id === 'franciely') {
@@ -1504,7 +1510,7 @@
         continue;
       }
       if (p.sprite === 'smoke') { p.w += dt * 30; p.h += dt * 20; p.vx *= Math.exp(-0.5 * dt); }
-      const trail = { cake: ['#ffb9d1', '#ffe9a8'], smoke: ['#d9d4e6', '#a9a3b8'], car: ['#777', '#bbb'], note: ['#ff6fd8', '#62efff'] }[p.sprite] || ['#fff', '#ddd'];
+      const trail = { cake: ['#ffb9d1', '#ffe9a8'], smoke: ['#d9d4e6', '#a9a3b8'], car: ['#777', '#bbb'], note: ['#ff6fd8', '#62efff'], beerBlast: ['#75ff43', '#d6ff54'] }[p.sprite] || ['#fff', '#ddd'];
       if (Math.random() < 0.6) particles.push({ x: p.x - Math.sign(p.vx) * (p.w / 2), y: FLOOR - p.y + rand(-8, 8), vx: -p.vx * 0.05, vy: rand(-30, 10), life: 0.35, max: 0.35, color: trail[Math.random() < 0.5 ? 0 : 1], size: rand(3, 6) });
       const target = opponentOf(p.owner);
       const box = { x1: p.x - p.w / 2, x2: p.x + p.w / 2, y1: p.y - p.h / 2, y2: p.y + p.h / 2 };
@@ -1512,6 +1518,7 @@
         p.dead = true;
         applyHit(p.owner, target, p.move, p.x - Math.sign(p.vx) * 40, p.x, p.y);
         if (p.sprite === 'cake') addEffect('cakeHit', p.x, FLOOR - p.y, 0.9, 0.35);
+        else if (p.sprite === 'beerBlast') addEffect('beerBurst', p.x, FLOOR - p.y, 0.9, 0.35);
         else if (p.sprite === 'car') { addEffect('burst', p.x, FLOOR - p.y, 1.2, 0.35); Audio.play('crash'); }
         else addEffect('burst', p.x, FLOOR - p.y, 0.6, 0.25);
       }
@@ -1523,7 +1530,8 @@
         const b = projectiles[j];
         if (a.owner !== b.owner && a.sprite !== 'car' && b.sprite !== 'car' && Math.abs(a.x - b.x) < 40 && Math.abs(a.y - b.y) < 40) {
           a.dead = b.dead = true;
-          addEffect('cakeHit', (a.x + b.x) / 2, FLOOR - a.y, 0.9, 0.35);
+          const impact = a.sprite === 'beerBlast' || b.sprite === 'beerBlast' ? 'beerBurst' : 'cakeHit';
+          addEffect(impact, (a.x + b.x) / 2, FLOOR - a.y, 0.9, 0.35);
         }
       }
     }
@@ -1649,8 +1657,10 @@
       ai.timer = L.react + rand(0, 0.25);
       ai.crouch = false;
       const full = f.meter >= 100 && f.form === 'normal';
+      const pedroBlast = f.id === 'pedro' && f.form === 'hulk' && f.meter >= 50 && dist > 180;
       const wantsSpecial = (f.id === 'juraci' && f.meter >= 100 && dist > 180)
         || (['carlos', 'daniel', 'franciely', 'pedro'].includes(f.id) && full)
+        || pedroBlast
         || (f.id === 'gabi' && f.meter >= 100 && dist > 150)
         || (['paula', 'tainara'].includes(f.id) && full && dist > 150);
       // segundo especial (↓ + L) com meia barra, de longe
@@ -2755,6 +2765,11 @@
         case 'hulk':
           // bebe a Heineken e cresce
           if (t < 0.95) lean.frame = pickFrame(S.drink, t < 0.3 ? 0 : t < 0.7 ? 1 : 2);
+          else if (S.hulkPower && S.hulkPower.length) {
+            const power = clamp((t - 0.95) / (total - 0.95), 0, 1);
+            lean.frame = pickFrame(S.hulkPower, Math.floor(power * S.hulkPower.length));
+            lean.sx = lean.sy = 0.82 + power * 0.18;
+          }
           else {
             lean.frame = pickFrame(S.hulk, 0);
             const grow = clamp((t - 0.95) / (total - 0.95), 0, 1);
@@ -2782,14 +2797,16 @@
     if (big && !special) {
       if (f.state === 'attack') {
         const active = f.move && t >= f.move.startup;
-        lean.frame = active ? big.pose : big.windup;
+        const hulkBlast = f.form === 'hulk' && f.moveName === 'greenBlast' ? S.hulkBlast : null;
+        lean.frame = hulkBlast && hulkBlast.length ? attackFrame(hulkBlast, f)
+          : f.move && t >= f.move.startup ? big.pose : big.windup;
         lean.dx = active ? 18 : -6;
         lean.sx = active ? 1.06 : 0.96;
       } else if (f.state === 'hitstun' || f.state === 'blockstun') {
         lean.frame = big.hurt;
         lean.rot = -0.08;
       } else {
-        lean.frame = big.pose;
+        lean.frame = f.form === 'hulk' ? cycle(S.hulk, 5, clock) : big.pose;
         const bounce = f.state === 'walk' ? Math.abs(Math.sin(t * 10)) * 0.05 : Math.sin(clock * 5) * 0.015;
         lean.sy = 1 - bounce;
         lean.sx = 1 + bounce;
@@ -3058,6 +3075,14 @@
       case 'cake':
         ctx.restore();
         drawFx('cake', x, y, 0.9, 1, Math.sin(p.spin) * 0.25);
+        return;
+      case 'beerBlast':
+        ctx.restore();
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.scale(dir, 1);
+        drawFx('beerBlast', 0, 0, 1, clamp(p.life / p.max * 2, 0, 1), Math.sin(p.spin) * 0.04);
+        ctx.restore();
         return;
       case 'smoke': {
         // nuvem de fumaça de cigarro
