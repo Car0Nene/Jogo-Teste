@@ -51,6 +51,8 @@ Jogo de luta arcade em HTML Canvas e JavaScript puro (sem build), com a família
 - **Teclas remapeáveis no versus:** configure separadamente 1P e 2P; conflitos entre os dois conjuntos são trocados automaticamente.
 - **Acessibilidade:** opção de alto contraste e redução de flashes, tremores e confetes; a redução de movimento do sistema é respeitada por padrão.
 - **Mais acabamento na arena:** iluminação nas bordas, brilho de impacto e sombras nos lutadores ajudam a separar personagens e cenário.
+- **Integração com o cenário:** sombras de contato acompanham os saltos, luz ambiente colorida combina com cada arena e passos levantam poeira.
+- **Cenários mais vivos:** parallax no primeiro plano do Bar e da Praia, ondas animadas, brilho de neon, vaga-lumes, poeira no ar e brasas na Festa Junina.
 - **Revanche corrigida:** reiniciar a luta não confunde mais o clique com o modo de pré-carregamento da tela VS.
 
 ### Artes de referência

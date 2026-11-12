@@ -1197,6 +1197,12 @@
     } else if (f.sayQueue.length) {
       showSay(f, f.sayQueue.shift());
     }
+    if (!settings.reducedEffects && grounded(f) && (f.state === 'walk' || f.state === 'run')) {
+      const stepInterval = f.state === 'run' ? 0.22 : 0.34;
+      if (Math.floor(f.t / stepInterval) !== Math.floor((f.t - dt) / stepInterval)) {
+        dust(f.x - f.facing * 12, f.state === 'run' ? 0.55 : 0.4);
+      }
+    }
     if (f.formTime > 0) {
       f.formTime -= dt;
       if (f.formTime <= 0) {
@@ -2256,6 +2262,19 @@
         flowerPot(g, 940, rnd);
         g.fillStyle = '#6b2f22'; g.fillRect(0, FLOOR - 16, w, 16);
         perspectiveFloor(g, w, ['#d48a5a', '#9c5534'], '#7d3f2655');
+      },
+      animate(g, cam, t) {
+        g.save();
+        for (let i = 0; i < 5; i++) {
+          const x = ((i * 170 + t * 9 - cam * 0.25) % (worldW + 80) + worldW + 80) % (worldW + 80) - 40;
+          const y = 185 + (i % 3) * 55 + Math.sin(t * 0.7 + i) * 4;
+          g.globalAlpha = 0.12 + (Math.sin(t * 1.2 + i * 2) + 1) * 0.08;
+          g.fillStyle = '#fff3cf';
+          g.beginPath();
+          g.ellipse(x, y, 2.5, 5, t * 0.2 + i, 0, Math.PI * 2);
+          g.fill();
+        }
+        g.restore();
       }
     },
     quintal: {
@@ -2347,6 +2366,21 @@
           }
         }
         g.fillStyle = '#0003'; g.fillRect(0, FLOOR, w, 6);
+      },
+      animate(g, cam, t) {
+        g.save();
+        for (let i = 0; i < 8; i++) {
+          const x = ((i * 97 + t * 11 - cam * 0.18) % worldW + worldW) % worldW;
+          const y = 255 + (i * 31) % 105 + Math.sin(t * 1.8 + i * 3) * 8;
+          const alpha = 0.22 + (Math.sin(t * 2.5 + i * 4) + 1) * 0.16;
+          g.fillStyle = `rgba(255,220,116,${alpha})`;
+          g.shadowColor = '#ffd36e';
+          g.shadowBlur = 12;
+          g.beginPath();
+          g.arc(x, y, 2 + (i % 2), 0, Math.PI * 2);
+          g.fill();
+        }
+        g.restore();
       }
     },
     festa: {
@@ -2456,6 +2490,16 @@
             g.fill();
           }
         }
+        for (let i = 0; i < 7; i++) {
+          const rise = (t * 26 + i * 17) % 112;
+          const emberX = x + Math.sin(t * 2.4 + i * 2) * (12 + rise * 0.12);
+          g.globalAlpha = (1 - rise / 112) * 0.72;
+          g.fillStyle = i % 2 ? '#ffd36e' : '#ff8b38';
+          g.beginPath();
+          g.arc(emberX, 365 - rise, 1.5 + (i % 2), 0, Math.PI * 2);
+          g.fill();
+        }
+        g.globalAlpha = 1;
       }
     }
   };
@@ -2631,8 +2675,8 @@
   // Cenários com arte pintada (assets/stages). ground = linha do chão na imagem (px originais),
   // que fica alinhada com os pés dos lutadores; scale = ampliação da imagem no mundo.
   const STAGE_ART = {
-    bar: { src: 'assets/stages/bar.webp', ground: 440, scale: 0.97 },
-    praia: { src: 'assets/stages/praia.webp', ground: 380, scale: 1.05 }
+    bar: { src: 'assets/stages/bar.webp', ground: 440, foregroundY: 310, scale: 0.97 },
+    praia: { src: 'assets/stages/praia.webp', ground: 380, foregroundY: 330, scale: 1.05 }
   };
   for (const [name, art] of Object.entries(STAGE_ART)) {
     art.img = loadImage(art.src);
@@ -2646,7 +2690,7 @@
       const { img, ground, scale } = art;
       const dw = img.naturalWidth * scale;
       const dh = img.naturalHeight * scale;
-      const dx = (w - dw) / 2;
+      const dx = (STAGE_W - dw) / 2;
       const dy = FLOOR - ground * scale;
       if (dy > 0) { // completa o céu acima da imagem com a cor do topo
         g.drawImage(img, 0, 0, img.naturalWidth, 2, 0, 0, w, dy + 2);
@@ -2676,10 +2720,64 @@
         g.fillRect(0, dy + dh - 1, w, 3);
       }
     };
+    const drawForeground = (g, w) => {
+      const { img, ground, foregroundY, scale } = art;
+      const dw = img.naturalWidth * scale;
+      const dx = (STAGE_W - dw) / 2;
+      const dy = FLOOR - ground * scale;
+      const sourceY = Math.min(foregroundY, img.naturalHeight - 1);
+      const top = dy + sourceY * scale;
+      const fade = g.createLinearGradient(0, top - 24, 0, top + 24);
+      fade.addColorStop(0, 'rgba(255,255,255,0)');
+      fade.addColorStop(1, 'rgba(255,255,255,1)');
+      g.save();
+      g.drawImage(img, 0, sourceY, img.naturalWidth, img.naturalHeight - sourceY,
+        dx, top, dw, (img.naturalHeight - sourceY) * scale);
+      g.globalCompositeOperation = 'destination-in';
+      g.fillStyle = fade;
+      g.fillRect(0, top - 24, w, H - top + 24);
+      g.restore();
+    };
+    const animateArt = (g, cam, t) => {
+      g.save();
+      if (name === 'bar') {
+        const x = STAGE_W / 2 - cam;
+        if (x > -210 && x < worldW + 210) {
+          const pulse = 0.045 + (Math.sin(t * 2.2) + 1) * 0.025;
+          const glow = g.createRadialGradient(x, 58, 8, x, 58, 190);
+          glow.addColorStop(0, `rgba(255,190,92,${pulse})`);
+          glow.addColorStop(1, 'rgba(255,100,170,0)');
+          g.fillStyle = glow;
+          g.fillRect(x - 190, 0, 380, 150);
+        }
+      } else {
+        const left = Math.max(0, -cam);
+        const right = Math.min(worldW, 1200 - cam);
+        if (right > left) {
+          g.beginPath();
+          g.rect(left, 202, right - left, 136);
+          g.clip();
+          for (let row = 0; row < 4; row++) {
+            const y = 218 + row * 28;
+            g.strokeStyle = `rgba(225,250,255,${0.12 + row * 0.025})`;
+            g.lineWidth = row === 0 ? 2 : 1;
+            g.beginPath();
+            for (let x = left - 12; x <= right + 12; x += 38) {
+              const phase = x * 0.035 + t * (1.3 + row * 0.12) + cam * 0.006;
+              const crestY = y + Math.sin(phase) * 3;
+              if (x === left - 12) g.moveTo(x, crestY);
+              else g.lineTo(x, crestY);
+            }
+            g.stroke();
+          }
+        }
+      }
+      g.restore();
+    };
     STAGES[name] = {
       far: (g, w) => (ready(art.img) ? drawArt(g, w) : procedural.far(g, w)),
-      near: (g, w) => (ready(art.img) ? drawArt(g, w) : procedural.near(g, w)),
-      get animate() { return ready(art.img) ? null : procedural.animate; }
+      near: (g, w) => (ready(art.img) ? drawForeground(g, w) : procedural.near(g, w)),
+      get animate() { return ready(art.img) ? animateArt : procedural.animate; }
     };
   }
 
@@ -2906,10 +3004,45 @@
 
   function drawShadow(f) {
     const x = f.x - camX;
-    const s = clamp(1 - f.y / 300, 0.35, 1);
-    ctx.fillStyle = 'rgba(0,0,0,0.32)';
+    const lift = clamp(f.y / 300, 0, 1);
+    const width = (form(f).wide ? 64 : 44) * (1 + lift * 0.25);
+    const height = 7 + lift * 4;
+    const drift = clamp(-f.vx * 0.025, -12, 12);
+    const shadow = ctx.createRadialGradient(x + drift, FLOOR + 3, 1, x + drift, FLOOR + 3, width);
+    shadow.addColorStop(0, `rgba(0,0,0,${0.38 - lift * 0.18})`);
+    shadow.addColorStop(0.55, `rgba(0,0,0,${0.24 - lift * 0.12})`);
+    shadow.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = shadow;
     ctx.beginPath();
-    ctx.ellipse(x, FLOOR + 2, (form(f).wide ? 64 : 44) * s, 9 * s, 0, 0, Math.PI * 2);
+    ctx.ellipse(x + drift, FLOOR + 3, width, height, 0, 0, Math.PI * 2);
+    ctx.fill();
+    if (lift < 0.08) {
+      ctx.fillStyle = 'rgba(0,0,0,0.22)';
+      ctx.beginPath();
+      ctx.ellipse(x, FLOOR + 2, width * 0.48, 3, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  const STAGE_LIGHTS = {
+    padaria: [255, 190, 112],
+    quintal: [255, 168, 102],
+    festa: [255, 202, 112],
+    bar: [244, 132, 205],
+    praia: [106, 202, 255]
+  };
+
+  function drawStageLight(f, x) {
+    const [r, g, b] = STAGE_LIGHTS[match.stage] || STAGE_LIGHTS.padaria;
+    const energy = f.state === 'attack' || f.state === 'transform' ? 0.2 : 0.13;
+    const pulse = settings.reducedEffects ? 1 : 0.92 + Math.sin(clock * 2.4 + f.slot) * 0.08;
+    const glow = ctx.createRadialGradient(x, FLOOR - 4, 2, x, FLOOR - 4, 100);
+    glow.addColorStop(0, `rgba(${r},${g},${b},${energy * pulse})`);
+    glow.addColorStop(0.55, `rgba(${r},${g},${b},${energy * pulse * 0.38})`);
+    glow.addColorStop(1, `rgba(${r},${g},${b},0)`);
+    ctx.fillStyle = glow;
+    ctx.beginPath();
+    ctx.ellipse(x, FLOOR - 4, 100, 25, 0, 0, Math.PI * 2);
     ctx.fill();
   }
 
@@ -2939,6 +3072,7 @@
     const x = f.x - camX;
     const footY = FLOOR - f.y;
     if (f.state === 'transform' && f.nextForm === 'crente') drawBaptism(f, x, footY);
+    drawStageLight(f, x);
     drawAura(f, x, footY);
     if (!pose || !pose.frame || !ready(atlas)) {
       ctx.fillStyle = f.id === 'juraci' ? '#f21870' : '#181b27';
