@@ -117,7 +117,9 @@
   });
   const portraits = { juraci: loadImage('assets/portraits/juraci.png'), carlos: loadImage('assets/portraits/carlos.png'),
     pedro: loadImage('assets/portraits/pedro.png'), daniel: loadImage('assets/portraits/daniel.png'),
-    franciely: loadImage('assets/portraits/franciely.png'), gabi: loadImage('assets/portraits/gabi.png') };
+    franciely: loadImage('assets/portraits/franciely.png'), gabi: loadImage('assets/portraits/gabi.png'),
+    paula: loadImage('assets/portraits/paula.png'), tainara: loadImage('assets/portraits/tainara.png'),
+    cao: loadImage('assets/portraits/cao.png') };
   let altAtlas = null;
 
   function buildAltAtlas() {
@@ -268,6 +270,48 @@
         dance:  { anim: 'dance', startup: 0.3, active: 0, recovery: 0.3, notes: true },
         superL: { anim: 'dance', frame: 3, startup: 0.4, active: 0, recovery: 0.45, superL: true }
       }
+    },
+    paula: {
+      name: 'PAULA', heavyLabel: 'ESPÁTULA', powerLevel: 890, pose: { animation: 'heavy', frame: 0 },
+      desc: 'Vestido magenta e espátula na mão. L: Super Almoço. ↓ + L: Bar Simone e fúria.',
+      scale: 1.22, height: 152, crouchHeight: 94, width: 32,
+      walk: 215, back: 165, jumpV: 900, jumpX: 238, gravity: 2520,
+      transformTime: 1.25,
+      moves: {
+        light: { anim: 'light', startup: 0.06, active: 0.08, recovery: 0.12, damage: 40, box: [18, 112, 94, 132], hitstun: 0.27, blockstun: 0.16, push: 230, hitstop: 0.05, chain: { light: 'medium', heavy: 'heavy' } },
+        medium: { anim: 'medium', startup: 0.1, active: 0.1, recovery: 0.19, damage: 62, box: [18, 138, 50, 140], hitstun: 0.34, blockstun: 0.18, push: 300, hitstop: 0.07 },
+        heavy: { anim: 'heavy', startup: 0.15, active: 0.11, recovery: 0.3, damage: 92, box: [18, 155, 65, 142], hitstun: 0.43, blockstun: 0.22, push: 430, hitstop: 0.09, lunge: 115, heavy: true },
+        air: { anim: 'medium', startup: 0.07, active: 0.2, recovery: 0.1, damage: 56, box: [6, 116, 22, 122], hitstun: 0.32, blockstun: 0.18, push: 220, hitstop: 0.06 },
+        special: { anim: 'special', startup: 0.32, active: 0, recovery: 0.34 }
+      }
+    },
+    tainara: {
+      name: 'TAINARA', heavyLabel: 'CHUTE', powerLevel: 870, pose: { animation: 'special', frame: 0 },
+      desc: 'Poder do Arroz aumenta sua força. ↓ + L: Cuidado em Dobro, ataque coletivo das crianças.',
+      scale: 1.18, height: 154, crouchHeight: 94, width: 30,
+      walk: 220, back: 170, jumpV: 910, jumpX: 242, gravity: 2520,
+      transformTime: 1.2,
+      moves: {
+        light: { anim: 'light', startup: 0.06, active: 0.08, recovery: 0.12, damage: 39, box: [18, 110, 95, 132], hitstun: 0.27, blockstun: 0.16, push: 230, hitstop: 0.05, chain: { light: 'medium', heavy: 'heavy' } },
+        medium: { anim: 'medium', startup: 0.1, active: 0.1, recovery: 0.19, damage: 60, box: [18, 140, 46, 142], hitstun: 0.34, blockstun: 0.18, push: 300, hitstop: 0.07 },
+        heavy: { anim: 'heavy', startup: 0.15, active: 0.11, recovery: 0.29, damage: 90, box: [18, 160, 56, 145], hitstun: 0.43, blockstun: 0.22, push: 420, hitstop: 0.09, lunge: 110, heavy: true },
+        air: { anim: 'medium', startup: 0.07, active: 0.2, recovery: 0.1, damage: 56, box: [6, 116, 22, 122], hitstun: 0.32, blockstun: 0.18, push: 220, hitstop: 0.06 },
+        special: { anim: 'special', startup: 0.32, active: 0, recovery: 0.32 }
+      }
+    },
+    cao: {
+      name: 'CÃO DO DANIEL', heavyLabel: 'INVESTIDA', powerLevel: 850, pose: { animation: 'special', frame: 0 },
+      desc: 'Companheiro caramelo do Daniel. L: Lambida Poderosa. ↓ + L: Amigo Protetor.',
+      scale: 1.2, height: 128, crouchHeight: 88, width: 42,
+      walk: 250, back: 190, jumpV: 840, jumpX: 275, gravity: 2480,
+      transformTime: 1.1,
+      moves: {
+        light: { anim: 'light', startup: 0.05, active: 0.1, recovery: 0.12, damage: 42, box: [14, 118, 26, 102], hitstun: 0.3, blockstun: 0.16, push: 245, hitstop: 0.05, chain: { light: 'medium', heavy: 'heavy' } },
+        medium: { anim: 'medium', startup: 0.09, active: 0.11, recovery: 0.18, damage: 62, box: [14, 145, 18, 108], hitstun: 0.34, blockstun: 0.18, push: 320, hitstop: 0.07 },
+        heavy: { anim: 'heavy', startup: 0.13, active: 0.12, recovery: 0.27, damage: 90, box: [14, 165, 10, 104], hitstun: 0.45, blockstun: 0.22, push: 440, hitstop: 0.09, lunge: 130, heavy: true, knockdown: true },
+        air: { anim: 'heavy', startup: 0.07, active: 0.2, recovery: 0.1, damage: 54, box: [6, 122, 12, 100], hitstun: 0.32, blockstun: 0.18, push: 225, hitstop: 0.06 },
+        special: { anim: 'special', startup: 0.3, active: 0, recovery: 0.34 }
+      }
     }
   };
   const FIGHTER_IDS = Object.keys(CHARS);
@@ -282,7 +326,10 @@
     crente: { atk: 1, def: 0.55, speed: 1, push: 1, reach: 1, wide: 0, label: 'MODO FÉ +DEFESA', color: '#fff1a3', aura: [255, 244, 170] },
     hulk:   { atk: 1.3, def: 0.8, speed: 0.88, push: 1.3, reach: 1.15, wide: 14, jump: 0.9, label: 'MONSTRÃO HEINEKEN', color: '#7dff8a', aura: [80, 255, 110] },
     praia:  { atk: 1, def: 1, speed: 1.3, push: 1, reach: 1, wide: 0, jump: 1.08, label: 'NATAL PRAIA!', color: '#ff8ad8', aura: [255, 120, 220], wild: true },
-    brava:  { atk: 1.35, def: 0.9, speed: 1.15, push: 1.2, reach: 1, wide: 0, label: 'IRRITADA + FOME', color: '#ff6b6b', aura: [255, 70, 60], hungry: true }
+    brava:  { atk: 1.35, def: 0.9, speed: 1.15, push: 1.2, reach: 1, wide: 0, label: 'IRRITADA + FOME', color: '#ff6b6b', aura: [255, 70, 60], hungry: true },
+    paulaFury: { atk: 1.38, def: 0.82, speed: 1.08, push: 1.25, reach: 1.08, wide: 8, label: 'FÚRIA DO BAR SIMONE', color: '#ff4ca0', aura: [255, 58, 155] },
+    ricePower: { atk: 1.32, def: 0.9, speed: 1.08, push: 1.1, reach: 1.05, wide: 7, label: 'PODER DO ARROZ', color: '#fff4c4', aura: [255, 245, 190] },
+    dogGuard: { atk: 1.08, def: 0.58, speed: 1.04, push: 1.08, reach: 1.05, wide: 5, label: 'AMIGO PROTETOR', color: '#ffce5c', aura: [255, 196, 65] }
   };
   const form = f => FORMS[f.form] || FORMS.normal;
   const FORM_TIME = 10;
@@ -687,8 +734,8 @@
     return false;
   }
 
-  function startTransform(f, nextForm) {
-    f.meter = 0;
+  function startTransform(f, nextForm, meterAfter = 0) {
+    f.meter = meterAfter;
     superFreeze = 0.4;
     superOwner = f;
     f.nextForm = nextForm;
@@ -728,6 +775,19 @@
       if (f.id === 'daniel') return useHalf(f, 'dance', 'dance');
       if (f.id === 'franciely') return useHalf(f, 'milk', 'milk');
       if (f.id === 'gabi') return useHalf(f, 'dance', 'sing');
+      if (f.id === 'paula') {
+        if (f.meter < 50) return fizzle(f);
+        startTransform(f, 'paulaFury', f.meter - 50);
+        say(f, 'bar', { important: true });
+        return true;
+      }
+      if (f.id === 'tainara') return childrenRush(f);
+      if (f.id === 'cao') {
+        if (f.meter < 50) return fizzle(f);
+        startTransform(f, 'dogGuard', f.meter - 50);
+        say(f, 'protect', { important: true });
+        return true;
+      }
     }
     if (f.id === 'pedro') {
       if (f.meter >= 100 && f.form === 'normal') {
@@ -768,6 +828,17 @@
     } else if (f.id === 'daniel') {
       startTransform(f, 'praia');
       say(f, 'praia', { important: true, duration: 1.1 });
+    } else if (f.id === 'paula') {
+      superLunch(f);
+    } else if (f.id === 'tainara') {
+      startTransform(f, 'ricePower');
+      say(f, 'rice', { important: true });
+    } else if (f.id === 'cao') {
+      f.meter = 0;
+      startAttack(f, 'special');
+      say(f, 'lick', { important: true });
+      spawnProjectile(f, { sprite: 'lick', speed: 560, damage: 115, w: 130, h: 78, y: 105, life: 1.8 });
+      Audio.play('special');
     } else {
       f.meter = 0;
       superFreeze = 0.4;
@@ -808,6 +879,36 @@
       spawnProjectile(f, { sprite: 'note', speed: 430, damage: 40, w: 34, h: 40, y: 85 + i * 32, life: 2.2, wave: 18, offset: -i * 60, knockdown: false, hitstun: 0.4 });
     }
     Audio.play('special');
+  }
+
+  function superLunch(f) {
+    f.meter = 0;
+    superFreeze = 0.34;
+    superOwner = f;
+    startAttack(f, 'special');
+    say(f, 'lunch', { important: true });
+    Audio.play('special');
+    // Uma sequência de pratos chega em alturas diferentes, como uma avalanche.
+    for (let i = 0; i < 5; i++) {
+      spawnProjectile(f, {
+        sprite: 'meal', speed: 430 + i * 26, damage: 30, w: 70, h: 52,
+        y: 54 + i * 28, offset: -i * 22, wave: 12, life: 1.75, knockdown: i === 4
+      });
+    }
+  }
+
+  function childrenRush(f) {
+    if (f.meter < 50) return fizzle(f);
+    f.meter -= 50;
+    startAttack(f, 'special');
+    say(f, 'children', { important: true });
+    Audio.play('special');
+    for (let i = 0; i < 4; i++) {
+      spawnProjectile(f, {
+        sprite: 'kids', speed: 390 + i * 45, damage: 26, w: 98, h: 82,
+        y: 42 + i * 35, offset: -i * 35, wave: 22, life: 1.9, knockdown: i === 3
+      });
+    }
   }
 
   // Gabi: um "L" gigante voa e chovem brigadeiros no adversário; no fim a Juraci vem buscar a panela.
@@ -973,6 +1074,12 @@
         particles.push({ kind: 'note', x: f.x + rand(-50, 50), y: headY + rand(0, 40), vx: rand(-60, 60), vy: rand(-220, -120), life: 0.8, max: 0.8, color: ['#ff6fd8', '#62efff', '#ffe066', '#9b5de5'][Math.floor(rand(0, 4))], size: 22 });
         if (Math.random() < 0.5) Audio.play('ui');
       }
+    } else if (f.nextForm === 'paulaFury') {
+      if (Math.random() < 0.75) particles.push({ x: f.x + rand(-36, 36), y: headY + rand(0, 80), vx: rand(-55, 55), vy: rand(-190, -100), life: 0.55, max: 0.55, color: Math.random() < 0.5 ? '#ff3e98' : '#ffd45c', size: rand(5, 9) });
+    } else if (f.nextForm === 'ricePower') {
+      if (Math.random() < 0.8) particles.push({ x: f.x + rand(-32, 32), y: headY + rand(0, 85), vx: rand(-35, 35), vy: rand(-180, -90), life: 0.55, max: 0.55, color: Math.random() < 0.5 ? '#fff8d9' : '#ffe27a', size: rand(3, 7) });
+    } else if (f.nextForm === 'dogGuard') {
+      if (Math.random() < 0.8) particles.push({ x: f.x + rand(-38, 38), y: headY + rand(0, 75), vx: rand(-40, 40), vy: rand(-180, -80), life: 0.6, max: 0.6, color: Math.random() < 0.5 ? '#ffd45c' : '#fff3b0', size: rand(4, 8) });
     } else if (f.nextForm === 'gordao') {
       if (t >= 0.35 && f.transformStage === 0) {
         f.transformStage = 1;
@@ -1008,6 +1115,12 @@
         say(f, f.form === 'gordao' ? 'fat' : 'blessed', { important: true });
       } else if (f.form === 'hulk') {
         say(f, 'hulk', { important: true });
+      } else if (f.form === 'paulaFury') {
+        say(f, 'fury', { important: true });
+      } else if (f.form === 'ricePower') {
+        say(f, 'rice', { important: true });
+      } else if (f.form === 'dogGuard') {
+        say(f, 'protect', { important: true });
       }
       toNeutral(f);
       if (f.form === 'praia') praiaEvent(f);
@@ -1511,7 +1624,8 @@
       const full = f.meter >= 100 && f.form === 'normal';
       const wantsSpecial = (f.id === 'juraci' && f.meter >= 100 && dist > 180)
         || (['carlos', 'daniel', 'franciely', 'pedro'].includes(f.id) && full)
-        || (f.id === 'gabi' && f.meter >= 100 && dist > 150);
+        || (f.id === 'gabi' && f.meter >= 100 && dist > 150)
+        || (['paula', 'tainara', 'cao'].includes(f.id) && full && dist > 150);
       // segundo especial (↓ + L) com meia barra, de longe
       const wantsAlt = !wantsSpecial && f.meter >= 50 && f.id !== 'carlos' && dist > 230 && Math.random() < L.special * 0.35;
       if (wantsAlt) {
@@ -2927,6 +3041,44 @@
         }
         break;
       }
+      case 'meal': {
+        ctx.translate(x, y);
+        ctx.rotate(Math.sin(p.spin) * 0.22);
+        ctx.fillStyle = '#f8f3e9';
+        ctx.strokeStyle = '#a96b3f';
+        ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.ellipse(0, 0, p.w * 0.48, p.h * 0.3, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#d8a93f'; ctx.beginPath(); ctx.ellipse(-8, -4, p.w * 0.24, p.h * 0.18, -0.2, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#5b9c43'; ctx.beginPath(); ctx.arc(12, -5, 8, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#c84a3a'; ctx.beginPath(); ctx.arc(2, 4, 6, 0, Math.PI * 2); ctx.fill();
+        break;
+      }
+      case 'kids': {
+        ctx.translate(x, y);
+        ctx.scale(dir, 1);
+        const kids = [
+          { x: -24, y: 4, c: '#f15b5b' }, { x: 0, y: -8, c: '#4b9be8' }, { x: 24, y: 5, c: '#f4bd45' }
+        ];
+        for (const kid of kids) {
+          ctx.fillStyle = kid.c; roundRect(ctx, kid.x - 9, kid.y + 5, 18, 28, 6); ctx.fill();
+          ctx.fillStyle = '#f2bf91'; ctx.beginPath(); ctx.arc(kid.x, kid.y, 9, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#3a2630'; ctx.beginPath(); ctx.arc(kid.x - 3, kid.y - 1, 1.4, 0, Math.PI * 2); ctx.arc(kid.x + 3, kid.y - 1, 1.4, 0, Math.PI * 2); ctx.fill();
+          ctx.strokeStyle = kid.c; ctx.lineWidth = 4;
+          ctx.beginPath(); ctx.moveTo(kid.x - 6, kid.y + 12); ctx.lineTo(kid.x - 14, kid.y + 3); ctx.moveTo(kid.x + 6, kid.y + 12); ctx.lineTo(kid.x + 13, kid.y + 3); ctx.stroke();
+        }
+        break;
+      }
+      case 'lick': {
+        ctx.translate(x, y);
+        ctx.scale(dir, 1);
+        ctx.shadowColor = '#ff69b4'; ctx.shadowBlur = 18;
+        ctx.fillStyle = '#ff82c8'; ctx.strokeStyle = '#fff0fa'; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.moveTo(-p.w * 0.46, 0); ctx.quadraticCurveTo(-p.w * 0.1, -p.h * 0.62, p.w * 0.46, -p.h * 0.2);
+        ctx.quadraticCurveTo(p.w * 0.2, p.h * 0.58, -p.w * 0.46, 0); ctx.fill(); ctx.stroke();
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = '#fff'; ctx.font = '900 20px Arial'; ctx.textAlign = 'center'; ctx.fillText('♥', p.w * 0.25, -p.h * 0.32);
+        break;
+      }
       case 'car': {
         // carrinho vermelho desgovernado
         ctx.translate(x, y + 6);
@@ -3673,7 +3825,10 @@
     pedro: { quote: '"Fuma, bebe e vence!"', moves: [['L', 'Bebe uma Heineken e vira o Monstrão'], ['↓ + L', 'Fumaça de cigarro: o adversário tosse']] },
     daniel: { quote: '"Partiu praia?"', moves: [['L', 'Natal Praia: rápido, imprevisível — carro, esposa ou show'], ['↓ + L', 'Dancinha com notas musicais']] },
     franciely: { quote: '"Cuidar também é lutar!"', moves: [['L', 'Irritada sem motivo: Carlos foge e bate a fome sem fim'], ['↓ + L', 'Jato de leite']] },
-    gabi: { quote: '"Faz o L, ama o Lula!"', moves: [['L', 'Super L + chuva de brigadeiros (a Juraci busca a panela)'], ['↓ + L', 'Canto com notas musicais']] }
+    gabi: { quote: '"Faz o L, ama o Lula!"', moves: [['L', 'Super L + chuva de brigadeiros (a Juraci busca a panela)'], ['↓ + L', 'Canto com notas musicais']] },
+    paula: { quote: '"Aqui em casa quem manda sou eu!"', moves: [['L', 'Super Almoço: avalanche de pratos e comida'], ['↓ + L', 'Bar Simone: Pedro não aparece e Paula desperta a fúria']] },
+    tainara: { quote: '"Com arroz eu fico invencível!"', moves: [['L', 'Poder do Arroz: aumento temporário de força'], ['↓ + L', 'Cuidado em Dobro: crianças atacam em grupo']] },
+    cao: { quote: '"Sempre junto nessa luta!"', moves: [['L', 'Lambida Poderosa: língua e corações voadores'], ['↓ + L', 'Amigo Protetor: defesa reforçada por alguns segundos']] }
   };
   const STAGE_INFO = {
     padaria: 'A padaria da Juju, com bolos na vitrine.',

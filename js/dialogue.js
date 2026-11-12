@@ -162,5 +162,36 @@ window.FF_DIALOGUE = {
     win: ['Faz o L!', 'Porque amor também é luta!', 'Vinícius, eu venci!'],
     lose: ['Vinícius... me leva pra casa.', 'Amanhã tem mais luta!'],
     formEnd: []
+  },
+
+  paula: {
+    lunch: ['SUPER ALMOÇO!', 'Vem almoçar, adversário!'],
+    bar: ['Pedro! Bar Simone!', 'Pedro? Ah, agora eu fiquei brava!'],
+    fury: ['Aqui em casa quem manda sou eu!', 'A Paula ficou furiosa!'],
+    combo: ['Espátula certeira!', 'Tapinha de carinho!'],
+    knockdown: ['Derrubei você com o almoço!'],
+    win: ['Aqui em casa quem manda sou eu!', 'Depois da luta, tem almoço!'],
+    lose: ['Pedro, vem me ajudar!'],
+    formEnd: ['A fúria passou. Cadê a sobremesa?']
+  },
+
+  tainara: {
+    rice: ['Poder do arroz!', 'Com arroz eu fico invencível!'],
+    children: ['Cuidado em dobro!', 'Todos comigo! Agora é bagunça boa!'],
+    combo: ['Cuidado em dobro!', 'Ninguém luta sozinha!'],
+    knockdown: ['Ainda tenho força!'],
+    win: ['Com arroz eu fico invencível!', 'Cuidar e lutar!'],
+    lose: ['Vou voltar mais forte!'],
+    formEnd: ['A energia do arroz acabou!']
+  },
+
+  cao: {
+    lick: ['Lambida poderosa!', 'Sai da frente, humano!'],
+    protect: ['Amigo protetor!', 'Au! Eu protejo o Daniel!'],
+    combo: ['Au au! Peguei!', 'Essa foi na mordida!'],
+    knockdown: ['Au! Essa doeu!'],
+    win: ['Bom garoto! Vitória!', 'Au au! Vencemos!'],
+    lose: ['Cadê o Daniel?'],
+    formEnd: ['Hora de abanar o rabo!']
   }
 };

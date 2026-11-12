@@ -601,9 +601,11 @@ body[data-touch-size="large"] .control { --size: clamp(68px, 14vh, 96px); font-s
 .roster {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  align-content: center;
+  align-content: start;
   gap: clamp(6px, 1vw, 12px);
   min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 .tile {
   position: relative;

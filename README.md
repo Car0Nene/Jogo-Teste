@@ -122,11 +122,26 @@ Os clipes opcionais em `assets/voice/arcade/` vêm do **Voiceover Pack: Fighter*
 ├── art-source/              artes de origem e arquivos de trabalho
 │   ├── *-sheet.png          folhas originais dos lutadores
 │   ├── audio/               gravações originais e amostras geradas; cópias de jogo ficam em assets/voice/
-│   ├── cutouts/             recortes sem fundo gerados por tools/cutout.py
+│   ├── cutouts/             recortes transparentes usados pelo atlas
 │   └── references/          pôsteres e artes de referência
 ├── supabase/schema.sql      banco de dados (opcional)
 └── tools/                   ferramentas locais para preparar arte e sprites
 ```
+
+As artes novas da Paula, Tainara e do Cão do Daniel estão em `art-source/*-sheet.png`.
+Como são fichas de referência com uma pose por movimento, os recortes ficam em
+`art-source/cutouts/{paula,tainara,cao}/`; o jogo usa essas poses nos estados
+correspondentes. Para refazer os recortes após editar as fichas:
+
+```
+pip install pillow numpy scipy
+python tools/cutout_reference_cards.py
+python tools/build_atlas.py
+```
+
+Os arquivos de cenário originais e as colagens de referência do Bar da Simone e
+da Praia ficam em `art-source/references/stages-bar-praia/`. As imagens otimizadas
+que o jogo carrega estão em `assets/stages/bar.webp` e `assets/stages/praia.webp`.
 
 ### Regenerar o atlas
 

@@ -154,6 +154,26 @@ if _G:
         'dance':  C('gabi', 'dance', [0, 1, 2, 3], _G * 0.72),
     }
 
+# As fichas novas têm uma pose por movimento; os ataques usam os quadros
+# ilustrados da própria ficha, mantendo a mesma escala dos personagens existentes.
+for _fighter in ('paula', 'tainara', 'cao'):
+    _S = auto_scale(_fighter)
+    if not _S:
+        continue
+    FRAMES[_fighter] = {
+        'idle': C(_fighter, 'idle', [0], _S),
+        'walk': C(_fighter, 'walk', [0], _S),
+        'run': C(_fighter, 'run', [0], _S),
+        'jump': C(_fighter, 'jump', [0], _S),
+        'crouch': C(_fighter, 'crouch', [0], _S * 1.12),
+        'guard': C(_fighter, 'guard', [0], _S),
+        'light': C(_fighter, 'light', [0], _S),
+        'medium': C(_fighter, 'medium', [0], _S),
+        'heavy': C(_fighter, 'heavy', [0], _S),
+        'special': C(_fighter, 'special' if _fighter != 'paula' else 'heavy', [0], _S),
+        'win': C(_fighter, 'idle', [0], _S),
+    }
+
 # Efeitos: componente (sheet, comps) ou recorte com chroma-key do painel roxo (rect).
 FX = {
     'cake':   F(SPECIALS, [(478, 158)], 1.0),
