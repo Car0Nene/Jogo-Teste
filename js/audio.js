@@ -12,7 +12,7 @@
   let nextNoteTime = 0;
   let currentSong = null;
 
-  const state = { sound: true, music: true, voice: true, volume: 0.7 };
+  const state = { sound: true, music: true, voice: true, volume: 1, effectsVolume: 0.7, musicVolume: 0.55, voiceVolume: 0.85 };
 
   function ensure() {
     if (ctx) {
@@ -26,10 +26,10 @@
     master.gain.value = state.volume;
     master.connect(ctx.destination);
     sfxBus = ctx.createGain();
-    sfxBus.gain.value = 0.55;
+    sfxBus.gain.value = 0.55 * state.effectsVolume;
     sfxBus.connect(master);
     musicBus = ctx.createGain();
-    musicBus.gain.value = 0.16;
+    musicBus.gain.value = 0.16 * state.musicVolume;
     musicBus.connect(master);
     noiseBuffer = ctx.createBuffer(1, ctx.sampleRate * 0.5, ctx.sampleRate);
     const data = noiseBuffer.getChannelData(0);
@@ -82,6 +82,9 @@
     jump: () => tone(300, 0.09, 'triangle', 0.25, 620),
     land: () => noise(0.06, 0.25, 500),
     ko: () => { tone(600, 0.9, 'sawtooth', 0.35, 60); noise(0.5, 0.5, 700); },
+    dash: () => { noise(0.1, 0.3, 2600, 0, 'bandpass'); tone(260, 0.12, 'triangle', 0.2, 110); },
+    perfect: () => [523, 659, 784, 1046, 1318].forEach((f, i) => tone(f, 0.34, 'triangle', 0.2, null, i * 0.08)),
+    countdown: () => { tone(880, 0.075, 'square', 0.2, 660); },
     round: () => { tone(523, 0.12, 'square', 0.3); tone(784, 0.25, 'square', 0.3, null, 0.13); },
     fight: () => { tone(392, 0.1, 'square', 0.35); tone(523, 0.1, 'square', 0.35, null, 0.1); tone(784, 0.35, 'square', 0.35, null, 0.2); },
     ui: () => tone(660, 0.05, 'square', 0.18),
@@ -199,7 +202,7 @@
 
   function applyTrackVolume() {
     const el = currentTrack && players[currentTrack] && players[currentTrack].el;
-    if (el) el.volume = Math.max(0, Math.min(1, state.volume * 0.75 * trackLevel));
+    if (el) el.volume = Math.max(0, Math.min(1, state.volume * state.musicVolume * 0.75 * trackLevel));
   }
 
   function stopChiptune() {
@@ -279,6 +282,8 @@
   function configure(options) {
     Object.assign(state, options);
     if (master) master.gain.value = state.volume;
+    if (sfxBus) sfxBus.gain.value = 0.55 * state.effectsVolume;
+    if (musicBus) musicBus.gain.value = 0.16 * state.musicVolume;
     applyTrackVolume();
     if (!state.music) stopMusic();
     if (!state.voice) stopSpeech();
@@ -306,7 +311,7 @@
         if (clipPlaying) clipPlaying.pause();
         const el = clipCache[clip.url] || (clipCache[clip.url] = new window.Audio(clip.url));
         el.currentTime = 0;
-        el.volume = Math.min(1, state.volume + 0.2);
+        el.volume = Math.min(1, state.voiceVolume);
         el.play().catch(() => {});
         clipPlaying = el;
       } catch { /* sem áudio */ }
@@ -358,7 +363,7 @@
       if (voice) utter.voice = voice;
       utter.pitch = style.pitch;
       utter.rate = style.rate;
-      utter.volume = Math.min(1, state.volume + 0.15);
+      utter.volume = Math.min(1, state.voiceVolume);
       if (!queue) synth.cancel(); // falas prioritárias podem entrar na fila
       synth.speak(utter);
     } catch (error) {

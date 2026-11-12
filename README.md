@@ -33,6 +33,9 @@ Jogo de luta arcade em HTML Canvas e JavaScript puro (sem build), com a família
 - **Pose de apresentação:** cada personagem aparece na seleção com uma pose característica.
 - **Corrida curta:** toque duas vezes para frente para correr por um instante; também funciona com teclado e gamepad.
 - **Narrador por voz:** anuncia rodada, início da luta, K.O., tempo e resultado final. Ative a opção de voz nas configurações.
+- **Impacto mais claro:** flashes, hitstop, vibração, sons de contagem regressiva e faíscas ajudam a destacar golpes e rounds decisivos.
+- **HUD e resultado polidos:** vida numérica e colorida, especiais com marca de meia barra, combos em destaque e retratos dos lutadores com confete no resultado.
+- **Ajustes de acessibilidade:** volume separado para efeitos, música e vozes; remapeamento de teclado no modo de 1 jogador; botões de toque em tamanho maior; animações reduzidas quando o aparelho pede menos movimento.
 
 ### Artes de referência
 
@@ -164,7 +167,7 @@ e acesse `http://localhost:8080`.
 
 **Gamepad:** analógico/direcional move, toque duplo para frente corre, `A` pula, `X` soco, `Y` forte, `B` especial, `LB/RB/LT/RT` defesa, `Start` pausa. No modo 2P, o segundo controle é o 2P.
 
-**Celular:** direcional à esquerda (cima = pular, baixo = agachar) e botões à direita (segundo especial: direcional para baixo + Especial). Jogue na horizontal; ao iniciar a luta o jogo tenta entrar em tela cheia.
+**Celular:** direcional à esquerda (cima = pular, baixo = agachar) e botões à direita (segundo especial: direcional para baixo + Especial). Em Configurações, escolha o tamanho maior dos controles de toque. Jogue na horizontal; ao iniciar a luta o jogo tenta entrar em tela cheia.
 
 **Dicas:**
 

@@ -42,6 +42,14 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
   background: #100d20e0;
   text-align: center;
 }
+.screen:not([hidden]) { animation: screenEnter 240ms cubic-bezier(.2, .8, .2, 1) both; }
+@keyframes screenEnter {
+  from { opacity: 0; transform: translateY(8px) scale(.99); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
 .screen h1, .screen h2, .screen h3, .screen p { margin: 0; }
 .screen h1 {
   color: var(--gold);
@@ -269,10 +277,17 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
 .settings label { display: flex; align-items: center; gap: 12px; font-weight: 700; }
 .settings input[type="checkbox"] { width: 22px; height: 22px; accent-color: var(--gold); }
 .settings input[type="range"] { flex: 1; accent-color: var(--gold); }
+.settings output { min-width: 42px; color: var(--gold); font-variant-numeric: tabular-nums; text-align: right; }
 .settings select { flex: 1; min-height: 38px; border-radius: 8px; border: 1px solid #aaa1c2; background: #100d20; padding: 4px 8px; }
 .controls-help { padding: 10px 12px; border-radius: 10px; background: #0005; font-size: 12.5px; }
 .controls-help h3 { margin: 0 0 6px; color: var(--gold); font-size: 14px; }
 .controls-help p { margin: 4px 0; }
+.binding-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.bind-button { min-height: 38px; padding: 6px 9px; border: 1px solid #ffffff38; border-radius: 8px; background: #1a1b2d; color: #f5e8c9; font-weight: 800; text-align: left; }
+.bind-button:hover, .bind-button:focus-visible { border-color: var(--gold); background: #29283b; }
+.bind-button.is-listening { border-color: #62efff; box-shadow: 0 0 0 2px #62efff50; color: #62efff; animation: bindPulse .8s ease-in-out infinite alternate; }
+@keyframes bindPulse { to { box-shadow: 0 0 0 4px #62efff20; } }
+.bind-reset { justify-self: start; min-height: 36px; padding: 7px 11px; font-size: 12px; }
 .auth-form { display: grid; width: 100%; gap: 12px; text-align: left; }
 .auth-form label { display: grid; gap: 5px; font-size: 13px; }
 .auth-form input {
@@ -401,11 +416,29 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
 }
 .control[data-act="special"].ready { animation: ready .6s ease-in-out infinite alternate; }
 .control[data-act="special"] svg { fill: #fff; stroke: #7a3a00; stroke-width: 1; }
+body[data-touch-size="large"] .stick { --size: clamp(138px, 24vh, 190px); }
+body[data-touch-size="large"] .control { --size: clamp(68px, 14vh, 96px); font-size: clamp(9px, 1.7vh, 12px); }
 @keyframes ready { to { box-shadow: 0 4px 0 #0009, 0 0 22px #62efff, inset 0 6px 10px #fff4; } }
+
+.result-panel { width: min(760px, 96vw); }
+.result-fighters { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: clamp(5px, 2vw, 18px); width: 100%; }
+.result-fighters figure { display: grid; justify-items: center; gap: 2px; min-width: 0; margin: 0; }
+.result-fighters canvas { display: block; width: min(100%, 180px); height: auto; filter: drop-shadow(0 8px 10px #0008); }
+.result-fighters figcaption { color: var(--gold); font: var(--arcade); font-size: clamp(10px, 1.5vw, 15px); text-align: center; }
+.result-vs { color: #ffffff; font: var(--arcade); font-size: clamp(22px, 4vw, 36px); text-shadow: 2px 3px #7f291d; }
+.result-panel .stats { width: min(420px, 100%); }
 
 /* ---------- Responsivo ---------- */
 @media (orientation: portrait) {
   .menu-art { width: 100vw; height: 56.25vw; }
+}
+@media (max-width: 520px) {
+  .binding-grid { grid-template-columns: 1fr 1fr; }
+  .result-panel { gap: 9px; padding: 12px; }
+  .result-fighters { gap: 4px; }
+  .result-fighters canvas { max-height: 112px; object-fit: contain; }
+  .result-panel .screen-actions { gap: 6px; }
+  .result-panel .screen-actions button { min-width: 0; flex: 1 1 44%; padding-inline: 8px; font-size: 12px; }
 }
 @media (max-width: 760px), (max-height: 470px) {
   .select-body { grid-template-columns: minmax(90px, .8fr) minmax(0, 2.6fr) minmax(90px, .8fr); }

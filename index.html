@@ -12,7 +12,7 @@
   <link rel="icon" href="assets/icons/icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
   
-  <link rel="stylesheet" href="css/style.css?v=23">
+  <link rel="stylesheet" href="css/style.css?v=24">
 </head>
 <body>
   <canvas id="game" aria-label="Família Fighter, jogo de luta"></canvas>
@@ -203,7 +203,9 @@
         </label>
         <label class="toggle"><input id="setVoice" type="checkbox"> Vozes dos lutadores e narrador (voz do navegador)</label>
         <label class="toggle"><input id="setTalk" type="checkbox"> Conversa antes da luta</label>
-        <label class="range">Volume <input id="setVolume" type="range" min="0" max="1" step="0.05"></label>
+        <label class="range">Efeitos <input id="setEffectsVolume" type="range" min="0" max="1" step="0.05"><output id="effectsVolumeValue">70%</output></label>
+        <label class="range">Música <input id="setMusicVolume" type="range" min="0" max="1" step="0.05"><output id="musicVolumeValue">55%</output></label>
+        <label class="range">Vozes <input id="setVoiceVolume" type="range" min="0" max="1" step="0.05"><output id="voiceVolumeValue">85%</output></label>
         <label class="toggle"><input id="setVibration" type="checkbox"> Vibrar ao tomar golpe (celular)</label>
         <label class="select-label">Controles na tela
           <select id="setTouch">
@@ -212,10 +214,29 @@
             <option value="never">Nunca mostrar</option>
           </select>
         </label>
+        <label class="select-label">Tamanho dos controles de toque
+          <select id="setTouchSize">
+            <option value="normal">Padrão</option>
+            <option value="large">Maior</option>
+          </select>
+        </label>
         <div class="controls-help">
-          <h3>Teclado</h3>
-          <p><b>1 jogador:</b> mover A/D ou ←/→ · toque duplo para frente corre · pular W/↑/Espaço · agachar S/↓ · soco J · forte K · defesa I · especial L (barra cheia) · segundo especial ↓ + L (meia barra)</p>
-          <p><b>2 jogadores:</b> 1P = WASD + F soco, G forte, H defesa, T especial · 2P = setas + J, K, I, L (ou Num 1, 2, 3, 0) · toque duplo para frente corre</p>
+          <h3>Teclado (1 jogador)</h3>
+          <div class="binding-grid">
+            <button type="button" class="bind-button" id="bind-left" data-rebind="left" data-label="Esquerda">Esquerda: A</button>
+            <button type="button" class="bind-button" id="bind-right" data-rebind="right" data-label="Direita">Direita: D</button>
+            <button type="button" class="bind-button" id="bind-up" data-rebind="up" data-label="Pular">Pular: W</button>
+            <button type="button" class="bind-button" id="bind-down" data-rebind="down" data-label="Agachar">Agachar: S</button>
+            <button type="button" class="bind-button" id="bind-light" data-rebind="light" data-label="Soco">Soco: J</button>
+            <button type="button" class="bind-button" id="bind-heavy" data-rebind="heavy" data-label="Golpe forte">Golpe forte: K</button>
+            <button type="button" class="bind-button" id="bind-guard" data-rebind="guard" data-label="Defesa">Defesa: I</button>
+            <button type="button" class="bind-button" id="bind-special" data-rebind="special" data-label="Especial">Especial: L</button>
+          </div>
+          <p id="bindingStatus" role="status" aria-live="polite">Selecione um botão e pressione a nova tecla. Esc cancela.</p>
+          <button type="button" id="resetBindings" class="secondary bind-reset">RESTAURAR TECLAS PADRÃO</button>
+          <p><b>2 jogadores:</b> 1P = WASD + F soco, G forte, H defesa, T especial · 2P = setas + J, K, I, L (ou Num 1, 2, 3, 0)</p>
+          <h3>Outros controles</h3>
+          <p><b>1 jogador:</b> A/D ou ←/→ move · toque duplo para frente corre · W/↑/Espaço pula · S/↓ agacha · J soca · K golpe forte · I defende · L especial (↓ + L usa o segundo especial)</p>
           <p><b>Combos:</b> soco → soco → forte encadeiam quando acertam. Controles (gamepad) também funcionam.</p>
         </div>
       </div>
@@ -262,6 +283,11 @@
     <div class="dialog-panel result-panel">
       <h1 id="resultTitle">FIM DE LUTA</h1>
       <p id="resultText"></p>
+      <div class="result-fighters" aria-label="Lutadores da partida">
+        <figure><canvas id="resultFighter1" width="180" height="150" aria-hidden="true"></canvas><figcaption id="resultName1"></figcaption></figure>
+        <span class="result-vs" aria-hidden="true">VS</span>
+        <figure><canvas id="resultFighter2" width="180" height="150" aria-hidden="true"></canvas><figcaption id="resultName2"></figcaption></figure>
+      </div>
       <dl id="resultStats" class="stats"></dl>
       <p id="syncStatus" role="status"></p>
       <div class="screen-actions">
@@ -324,8 +350,8 @@
   <script src="supabase-config.js?v=20"></script>
   <script src="js/sprite-data.js?v=23"></script>
   <script src="js/dialogue.js?v=20"></script>
-  <script src="js/audio.js?v=21"></script>
+  <script src="js/audio.js?v=22"></script>
   <script src="js/account.js?v=20"></script>
-  <script src="js/game.js?v=24"></script>
+  <script src="js/game.js?v=25"></script>
 </body>
 </html>
