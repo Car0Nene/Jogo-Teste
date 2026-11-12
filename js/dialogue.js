@@ -18,7 +18,7 @@ window.FF_DIALOGUE = {
     ],
     'carlos>juraci': [
       [['p1', 'Vó, cadê aquele bolo de cenoura?'], ['p2', 'Só depois de lavar a louça!'], ['p1', 'Então vamos resolver na luta!']],
-      [['p1', 'Hoje a padaria é minha, vó!'], ['p2', 'Ah é? Vem buscar, meu filho!']],
+      [['p1', 'Hoje a padaria é minha, vó!'], ['p2', 'Ah, é? Vem buscar, meu filho!']],
       [['p2', 'Comeu a pizza toda sozinho, Carlos?'], ['p1', 'Sobrou a borda... pra você!'], ['p2', 'Ah, agora vai apanhar!']]
     ],
     'juraci>juraci': [
@@ -62,7 +62,7 @@ window.FF_DIALOGUE = {
       [['p1', 'Vó, trouxe brigadeiro pra senhora!'], ['p2', 'Ai, que menina boa!'], ['p1', 'Mas antes... vamos lutar!']]
     ],
     'juraci>gabi': [
-      [['p1', 'Gabi, cadê meus brigadeiros?'], ['p2', 'Tão no fogo, vó! Ganhando eu entrego!']]
+      [['p1', 'Gabi, cadê meus brigadeiros?'], ['p2', 'Estão no fogo, vó! Se eu ganhar, eu entrego!']]
     ],
     'gabi>franciely': [
       [['p1', 'Fran, quer um brigadeiro?'], ['p2', 'Quero TODOS!']]
@@ -70,7 +70,7 @@ window.FF_DIALOGUE = {
     // Usada quando não existe conversa específica para a dupla.
     '*': [
       [['p1', 'Família é tudo, {oponente}...'], ['p2', '...mas hoje eu vou ganhar!']],
-      [['p2', 'Tá pronto(a), {oponente}?'], ['p1', 'Nasci pronto(a)!']],
+      [['p2', 'Vai encarar, {oponente}?'], ['p1', 'Nasci para isso!']],
       [['p1', 'Depois da luta tem bolo da vó!'], ['p2', 'Então vamos logo!']]
     ]
   },

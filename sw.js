@@ -1,5 +1,5 @@
 // O deploy substitui o número da versão pelo ID da execução do GitHub Actions.
-const CACHE_NAME = 'familia-fighter-v19';
+const CACHE_NAME = 'familia-fighter-v20';
 
 // Baixado na instalação (o jogo abre offline). Músicas entram no cache na primeira vez que tocam.
 const APP_ASSETS = [
@@ -7,6 +7,7 @@ const APP_ASSETS = [
   './index.html',
   './css/style.css',
   './js/game.js',
+  './js/boot.js',
   './js/audio.js',
   './js/account.js',
   './js/sprite-data.js',

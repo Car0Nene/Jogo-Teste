@@ -342,10 +342,11 @@
     franciely: { pitch: 1.15, rate: 1.15, prefer: FEMALE },
     gabi: { pitch: 1.3, rate: 1.1, prefer: FEMALE },
     esposa: { pitch: 1.2, rate: 1.05, prefer: FEMALE },
-    dada: { pitch: 0.7, rate: 0.92, prefer: MALE }
+    dada: { pitch: 0.7, rate: 0.92, prefer: MALE },
+    narrator: { pitch: 0.92, rate: 0.94, prefer: MALE }
   };
 
-  function speak(text, who) {
+  function speak(text, who, queue = false) {
     if (!synth || !state.voice || !text) return;
     try {
       const style = VOICE_STYLE[who] || { pitch: 1, rate: 1.05, prefer: null };
@@ -358,7 +359,7 @@
       utter.pitch = style.pitch;
       utter.rate = style.rate;
       utter.volume = Math.min(1, state.volume + 0.15);
-      synth.cancel(); // fala nova interrompe a anterior
+      if (!queue) synth.cancel(); // falas prioritárias podem entrar na fila
       synth.speak(utter);
     } catch (error) {
       console.warn('Falha ao falar a frase.', error);

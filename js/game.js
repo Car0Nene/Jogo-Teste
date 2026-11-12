@@ -157,7 +157,7 @@
   // ======================================================================
   const CHARS = {
     juraci: {
-      name: 'JURACI', heavyLabel: 'FORTE',
+      name: 'JURACI', heavyLabel: 'FORTE', powerLevel: 820, pose: { animation: 'heavy', frame: 1 },
       desc: 'Rápida e esperta. Especial: Super Bolo de Cenoura (projétil que derruba).',
       scale: 1.22, height: 148, crouchHeight: 92, width: 30,
       walk: 225, back: 175, jumpV: 900, jumpX: 250, gravity: 2500,
@@ -170,7 +170,7 @@
       }
     },
     carlos: {
-      name: 'CARLOS', heavyLabel: 'CHUTE',
+      name: 'CARLOS', heavyLabel: 'CHUTE', powerLevel: 880, pose: { animation: 'crente', frame: 3 },
       desc: 'Forte e versátil. Especial: alterna entre Gordão (+força) e Modo Fé (+defesa).',
       scale: 1.2, height: 156, crouchHeight: 96, width: 32,
       walk: 215, back: 170, jumpV: 920, jumpX: 240, gravity: 2550,
@@ -183,7 +183,7 @@
       }
     },
     pedro: {
-      name: 'PEDRO', heavyLabel: 'CHUTE',
+      name: 'PEDRO', heavyLabel: 'CHUTE', powerLevel: 950, pose: { animation: 'hulk', frame: 0 },
       desc: '"Fuma, bebe e vence!" Meia barra: fumaça de cigarro. Barra cheia: Heineken e vira Monstrão.',
       scale: 1.2, height: 158, crouchHeight: 98, width: 30,
       walk: 220, back: 172, jumpV: 910, jumpX: 245, gravity: 2520,
@@ -197,7 +197,7 @@
       }
     },
     daniel: {
-      name: 'DANIEL', heavyLabel: 'CHUTE',
+      name: 'DANIEL', heavyLabel: 'CHUTE', powerLevel: 760, pose: { animation: 'dance', frame: 2 },
       desc: '"Partiu praia?" Especial: Modo Natal Praia — rápido e imprevisível: dança, bate o carro ou toma uma (se a esposa deixar).',
       scale: 1.2, height: 152, crouchHeight: 92, width: 30,
       walk: 235, back: 180, jumpV: 940, jumpX: 255, gravity: 2550,
@@ -211,7 +211,7 @@
       }
     },
     franciely: {
-      name: 'FRANCIELY', heavyLabel: 'CHUTE',
+      name: 'FRANCIELY', heavyLabel: 'CHUTE', powerLevel: 930, pose: { animation: 'win', frame: 0 },
       desc: '"Cuidar também é lutar!" Barra cheia: fica irritada sem motivo, briga com o Carlos e bate uma fome sem fim. Meia barra: jato de leite.',
       scale: 1.2, height: 150, crouchHeight: 92, width: 31,
       walk: 220, back: 172, jumpV: 900, jumpX: 240, gravity: 2520,
@@ -225,7 +225,7 @@
       }
     },
     gabi: {
-      name: 'GABI', heavyLabel: 'CHUTE',
+      name: 'GABI', heavyLabel: 'CHUTE', powerLevel: 840, pose: { animation: 'dance', frame: 3 },
       desc: '"Faz o L, ama o Lula!" Barra cheia: Super L e brigadeiros (a Juraci vem buscar a panela). Meia barra: canto.',
       scale: 1.2, height: 150, crouchHeight: 92, width: 30,
       walk: 225, back: 175, jumpV: 910, jumpX: 245, gravity: 2520,
@@ -472,7 +472,7 @@
       state: 'idle', t: 0, stun: 0,
       move: null, moveName: '', hitDone: false, connected: false, airborne: false, airAttacked: false,
       invuln: 0, flash: 0, form: 'normal', formTime: 0, nextForm: 'gordao', crouchGuard: false,
-      combo: 0, comboShow: 0, held: {}, prevUp: false, buffer: [],
+      combo: 0, comboShow: 0, held: {}, prevUp: false, prevForward: false, lastForwardTap: -1, dashTime: 0, buffer: [],
       say: null, sayCooldown: 0, food: 'cake',
       stats: { hits: 0, maxCombo: 0, damage: 0 },
       ai: { timer: 0.5, moveDir: 0, guardT: 0, threatKey: '', willBlock: false, reactAt: 0, chainKey: '', aaTried: false }
@@ -484,7 +484,7 @@
       x: STAGE_W / 2 + (f.slot === 0 ? -170 : 170), y: 0, vx: 0, vy: 0,
       facing: f.slot === 0 ? 1 : -1, hp: MAX_HP, hpLag: MAX_HP, state: 'idle', t: 0, stun: 0,
       move: null, invuln: 0, flash: 0, form: 'normal', formTime: 0, combo: 0, comboShow: 0, buffer: [],
-      airAttacked: false, say: null, sayCooldown: 0
+      airAttacked: false, say: null, sayCooldown: 0, prevForward: false, lastForwardTap: -1, dashTime: 0
     });
   }
 
@@ -522,7 +522,7 @@
 
   const opponentOf = f => fighters[1 - f.slot];
   const grounded = f => f.y <= 0 && f.vy <= 0;
-  const NEUTRAL = new Set(['idle', 'walk', 'crouch', 'guard']);
+  const NEUTRAL = new Set(['idle', 'walk', 'run', 'crouch', 'guard']);
   const INVULNERABLE = new Set(['launch', 'down', 'getup', 'ko', 'transform', 'win']);
 
   function setState(f, state) {
@@ -941,12 +941,26 @@
     const input = inputs[f.slot];
     const live = match.sub === 'fight';
     for (const k of HOLDS) f.held[k] = live && Boolean(input.kb[k] || input.touch[k] || input.pad[k] || input.ai[k]);
+    const forwardHeld = f.facing > 0
+      ? f.held.right && !f.held.left
+      : f.held.left && !f.held.right;
+    if (!f.isCpu && forwardHeld && !f.prevForward) {
+      if (clock - f.lastForwardTap <= 0.3) {
+        f.dashTime = 0.42;
+        f.lastForwardTap = -1;
+      } else {
+        f.lastForwardTap = clock;
+      }
+    }
+    if (!forwardHeld) f.dashTime = 0;
+    f.prevForward = forwardHeld;
+    f.dashTime = Math.max(0, f.dashTime - dt);
     if (f.held.up && !f.prevUp) pushAction(f.slot, 'jump');
     f.prevUp = f.held.up;
     f.buffer = f.buffer.filter(b => clock - b.t < 0.18);
 
     switch (f.state) {
-      case 'idle': case 'walk': case 'crouch': case 'guard':
+      case 'idle': case 'walk': case 'run': case 'crouch': case 'guard':
         neutral(f);
         break;
       case 'jumpsquat':
@@ -1008,8 +1022,9 @@
     const dir = (h.right ? 1 : 0) - (h.left ? 1 : 0);
     if (dir) {
       const forward = dir === f.facing;
-      f.vx = dir * (forward ? f.ch.walk : f.ch.back) * speedMul(f);
-      setState(f, 'walk');
+      const running = forward && f.dashTime > 0;
+      f.vx = dir * (forward ? f.ch.walk * (running ? 1.65 : 1) : f.ch.back) * speedMul(f);
+      setState(f, running ? 'run' : 'walk');
     } else {
       f.vx = 0;
       setState(f, 'idle');
@@ -1054,7 +1069,7 @@
         f.vy = 0;
         land(f);
       }
-    } else if (f.state !== 'walk') {
+    } else if (f.state !== 'walk' && f.state !== 'run') {
       f.vx *= Math.exp(-8 * dt);
       if (Math.abs(f.vx) < 4) f.vx = 0;
     }
@@ -1120,7 +1135,8 @@
   function applyHit(att, def, m, fromX, cx, cy) {
     const dir = Math.sign(def.x - fromX) || att.facing;
     // Natal Praia: dano imprevisível (de 60% a 180%)
-    const atkMul = form(att).atk * (form(att).wild ? rand(0.6, 1.8) : 1);
+    const powerMul = 0.85 + att.ch.powerLevel / 1000 * 0.3;
+    const atkMul = form(att).atk * powerMul * (form(att).wild ? rand(0.6, 1.8) : 1);
     const defMul = form(def).def;
     const pushMul = form(att).push;
     att.connected = true;
@@ -1490,12 +1506,17 @@
   function beginIntro() {
     for (const f of fighters) f.say = null;
     Audio.stopSpeech();
+    match.narratorClip = false;
     // Franciely na praia: "Na praia a gente só desarma!" (voz real) no 1º round
     const fran = fighters.find(f => f.id === 'franciely');
     if (fran && match.stage === 'praia' && match.round === 1 && Audio.hasClip && Audio.hasClip('franciely', 'desarma')) {
       const clipText = Audio.playClip('franciely', 'desarma');
-      fran.say = { text: clipText, t: 0, life: 2 };
+      if (clipText) {
+        fran.say = { text: clipText, t: 0, life: 2 };
+        match.narratorClip = true;
+      }
     }
+    if (!match.narratorClip) Audio.speak(`Rodada ${match.round}. ${CHARS[fighters[0].id].name} contra ${CHARS[fighters[1].id].name}!`, 'narrator');
     match.sub = 'intro';
     match.t = 0;
     Audio.play('round');
@@ -1522,6 +1543,7 @@
     match.roundWinner = att.slot;
     match.perfect = att.hp === MAX_HP;
     say(def, 'lose', { important: true });
+    Audio.speak(`K.O.! ${CHARS[att.id].name} venceu o round!`, 'narrator', true);
     Audio.play('ko');
   }
 
@@ -1553,6 +1575,7 @@
           match.sub = 'fight';
           match.t = 0;
           Audio.play('fight');
+          if (!match.narratorClip) Audio.speak('Lutem!', 'narrator', true);
         }
         break;
       case 'fight':
@@ -1562,6 +1585,10 @@
           match.t = 0;
           const [a, b] = fighters;
           match.roundWinner = a.hp === b.hp ? -1 : a.hp > b.hp ? 0 : 1;
+          const timeCall = match.roundWinner < 0
+            ? 'Tempo! Empate neste round.'
+            : `Tempo! ${CHARS[fighters[match.roundWinner].id].name} vence o round!`;
+          Audio.speak(timeCall, 'narrator', true);
           Audio.play('ko');
         }
         break;
@@ -1664,6 +1691,7 @@
     }));
     $('#syncStatus').textContent = '';
     setApp('result');
+    Audio.speak(title, 'narrator', true);
     Audio.startMusic('theme');
     if (!versus) void Account.recordMatch(outcome, a.id);
   }
@@ -2448,13 +2476,21 @@
     }
 
     switch (f.state) {
-      case 'idle': lean.frame = cycle(S.idle, 6, clock + f.slot * 0.4); break;
+      case 'idle': {
+        lean.frame = cycle(S.idle, 6, clock + f.slot * 0.4);
+        const breath = Math.sin(clock * 2.4 + f.slot * 0.8);
+        lean.sy = 1 + breath * 0.008;
+        lean.sx = 1 - breath * 0.005;
+        lean.dy = -Math.max(0, breath) * 1.2;
+        break;
+      }
       case 'walk': {
         const backwards = Math.sign(f.vx) !== f.facing;
         const frames = backwards ? [...S.walk].reverse() : S.walk;
         lean.frame = cycle(frames, 9, t);
         break;
       }
+      case 'run': lean.frame = cycle(S.run || S.walk, 12, t); break;
       case 'crouch': lean.frame = S.crouch[t < 0.06 || S.crouch.length < 2 ? 0 : 1 + (Math.floor(clock * 3) % (S.crouch.length - 1))]; break;
       case 'guard': lean.frame = f.crouchGuard ? pickFrame(S.crouch, 1) : pickFrame(S.guard, t < 0.05 ? 0 : 1); break;
       case 'blockstun': lean.frame = f.crouchGuard ? pickFrame(S.crouch, 1) : pickFrame(S.guard, 1); lean.dx = -4; break;
@@ -3383,6 +3419,10 @@
         img.addEventListener('error', () => { img.style.visibility = 'hidden'; });
         b.append(img);
         label.textContent = CHARS[id].name;
+        const power = document.createElement('small');
+        power.className = 'tile-power';
+        power.textContent = `PODER ${CHARS[id].powerLevel}`;
+        b.append(power);
         if (!available(id)) { b.disabled = true; b.title = 'Em breve'; }
       }
       b.append(label);
@@ -3427,6 +3467,14 @@
     const info = id && id !== 'auto' ? CHARS[id] : null;
     card.querySelector('.card-name').textContent = info ? info.name : id === 'auto' ? 'ALEATÓRIO' : '???';
     card.querySelector('.card-quote').textContent = info ? PROFILE[id].quote : 'Um adversário surpresa!';
+    const power = card.querySelector('.card-power');
+    if (power) {
+      power.hidden = !info;
+      if (info) {
+        power.querySelector('.power-value').textContent = `${info.powerLevel} / 1000`;
+        power.querySelector('.power-fill').style.width = `${info.powerLevel / 10}%`;
+      }
+    }
     const moves = card.querySelector('.card-moves');
     moves.replaceChildren(...(info ? PROFILE[id].moves : []).map(([key, text]) => {
       const li = document.createElement('li');
@@ -3444,6 +3492,8 @@
   // desenha o lutador grande (parado, animado) num canvas de painel
   function drawBigFighter(cv, id, mirror, alt = false, dim = false) {
     const g = cv.getContext('2d');
+    g.imageSmoothingEnabled = true;
+    g.imageSmoothingQuality = 'high';
     g.clearRect(0, 0, cv.width, cv.height);
     if (!id || !ready(atlas)) return;
     g.globalAlpha = dim ? 0.35 : 1;
@@ -3455,7 +3505,12 @@
     }
     const S = SPR[showId];
     if (!S) return;
-    const [sx, sy, sw, sh, ax, ay] = cycle(S.idle, 6, clock + (mirror ? 0.3 : 0));
+    const pose = CHARS[showId].pose;
+    const poseFrames = pose && S[pose.animation];
+    const frame = poseFrames && poseFrames[pose.frame]
+      ? poseFrames[pose.frame]
+      : cycle(S.idle, 6, clock + (mirror ? 0.3 : 0));
+    const [sx, sy, sw, sh, ax, ay] = frame;
     const s = Math.min((cv.height * 0.86) / (sh / AS), (cv.width * 0.9) / (sw / AS)) / AS;
     g.fillStyle = 'rgba(0,0,0,0.35)';
     g.beginPath(); g.ellipse(cv.width / 2, cv.height - 18, cv.width * 0.25, 10, 0, 0, Math.PI * 2); g.fill();
@@ -3888,4 +3943,5 @@
   resize();
   updateOverlays();
   requestAnimationFrame(frame);
+  window.FF_READY = true;
 })();

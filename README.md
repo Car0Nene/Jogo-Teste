@@ -27,6 +27,13 @@ Jogo de luta arcade em HTML Canvas e JavaScript puro (sem build), com a família
 - **Voz real da Franciely:** "É isso!" (especial), "Ferrinho por ferrinho!" (combo), "Na praia a gente só desarma!" (começo da luta na Praia) e "Aí, essa tem que montar ferrinho por ferrinho!" (vitória).
 - **Lista de golpes** no menu de pausa e regras de luta (1 round, melhor de 3 ou de 5; 45 s, 60 s, 99 s ou sem tempo).
 
+## Novidades da v0.9
+
+- **Nível de poder:** cada lutador recebe uma classificação de 1 a 1000, mostrada na seleção; ela afeta moderadamente o dano.
+- **Pose de apresentação:** cada personagem aparece na seleção com uma pose característica.
+- **Corrida curta:** toque duas vezes para frente para correr por um instante; também funciona com teclado e gamepad.
+- **Narrador por voz:** anuncia rodada, início da luta, K.O., tempo e resultado final. Ative a opção de voz nas configurações.
+
 ### Artes de referência
 
 `art-source/references/` guarda os pôsteres e a imagem "Selecione seu lutador". Eles **não** são usados como sprites: vários quadros têm nome ou aparência trocados (ex.: no pôster 4 a coluna "Juraci" mostra o Carlos, e Gabi/Franciely estão invertidas) e os bonequinhos são pequenos demais e diferentes dos sprites do jogo. Servem de inspiração e divulgação.
@@ -57,6 +64,7 @@ A música tema **"Bolo da Juraci"** toca nos menus e, por padrão, também duran
 ## Falas e conversas
 
 - **Conversa antes da luta** no 1º round (balões de quadrinho; qualquer botão ou toque pula).
+- **Narrador** anuncia os momentos principais da partida; a voz sintetizada depende das vozes pt-BR disponíveis no aparelho.
 - **Juraci** grita "BOLO DE CENOURA!" no especial, dá bronca nos combos e comemora a vitória.
 - **Carlos** no especial **Gordão** come um bolo ou uma pizza (com mordidas e farelos) e engorda; no **Modo Fé** é batizado com água e luz do céu e grita "Aleluia!".
 - Frases ao derrubar, ser nocauteado e vencer.
@@ -74,6 +82,7 @@ Todas as frases ficam em **`js/dialogue.js`** — dá para editar ou acrescentar
 ├── css/style.css            visual de menus, seleção e controles de toque
 ├── js/
 │   ├── game.js              motor: lutadores, IA, rounds, cenários, HUD
+│   ├── boot.js              recuperação de arquivos antigos do cache offline
 │   ├── dialogue.js          ✏️ FALAS DOS PERSONAGENS (edite aqui)
 │   ├── audio.js             efeitos, música e voz
 │   ├── account.js           conta Supabase e sincronização
@@ -98,12 +107,21 @@ Todas as frases ficam em **`js/dialogue.js`** — dá para editar ou acrescentar
 
 ### Regenerar o atlas
 
-Se alterar as folhas de sprite originais:
+Se alterar as folhas de sprite originais, gere o atlas normal:
 
 ```
 pip install pillow numpy scipy
 python tools/build_atlas.py
 ```
+
+Para gerar sprites com super-resolução, instale também `onnxruntime` e use:
+
+```
+pip install pillow numpy scipy onnxruntime
+python tools/build_atlas.py --enhance
+```
+
+Na primeira execução, o modelo de super-resolução (~18 MB) é baixado para a pasta temporária do sistema e validado por hash. O processamento das artes é feito localmente.
 
 Os quadros de cada animação são definidos no topo de `tools/build_atlas.py`.
 
@@ -135,7 +153,7 @@ e acesse `http://localhost:8080`.
 
 **1 jogador (teclado):**
 
-- Mover: `A`/`D` ou `←`/`→` · Pular: `W`, `↑` ou `Espaço` (segure uma direção para pular para o lado) · Agachar: `S`/`↓`
+- Mover: `A`/`D` ou `←`/`→` · toque duplo para frente corre · Pular: `W`, `↑` ou `Espaço` (segure uma direção para pular para o lado) · Agachar: `S`/`↓`
 - Soco: `J` · Forte/Chute: `K` · Defesa: segure `I` · Especial: `L` (barra cheia) · Segundo especial: segure `↓` + `L` (meia barra)
 - Pausar: `P` ou `Esc`
 
@@ -144,7 +162,7 @@ e acesse `http://localhost:8080`.
 - 1P: `WASD` + `F` soco, `G` forte, `H` defesa, `T` especial
 - 2P: setas + `J` soco, `K` forte, `I` defesa, `L` especial (ou `Num1`, `Num2`, `Num3`, `Num0`)
 
-**Gamepad:** analógico/direcional move, `A` pula, `X` soco, `Y` forte, `B` especial, `LB/RB/LT/RT` defesa, `Start` pausa. No modo 2P, o segundo controle é o 2P.
+**Gamepad:** analógico/direcional move, toque duplo para frente corre, `A` pula, `X` soco, `Y` forte, `B` especial, `LB/RB/LT/RT` defesa, `Start` pausa. No modo 2P, o segundo controle é o 2P.
 
 **Celular:** direcional à esquerda (cima = pular, baixo = agachar) e botões à direita (segundo especial: direcional para baixo + Especial). Jogue na horizontal; ao iniciar a luta o jogo tenta entrar em tela cheia.
 

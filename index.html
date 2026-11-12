@@ -12,7 +12,7 @@
   <link rel="icon" href="assets/icons/icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
   
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/style.css?v=23">
 </head>
 <body>
   <canvas id="game" aria-label="Família Fighter, jogo de luta"></canvas>
@@ -58,6 +58,10 @@
         <canvas class="big-preview" width="360" height="400" aria-hidden="true"></canvas>
         <div class="card-info">
           <strong class="card-name"></strong>
+          <div class="card-power">
+            <div class="power-heading"><span>NÍVEL DE PODER</span><strong class="power-value"></strong></div>
+            <div class="power-track" aria-hidden="true"><span class="power-fill"></span></div>
+          </div>
           <em class="card-quote"></em>
           <ul class="card-moves"></ul>
         </div>
@@ -68,6 +72,10 @@
         <canvas class="big-preview" width="360" height="400" aria-hidden="true"></canvas>
         <div class="card-info">
           <strong class="card-name"></strong>
+          <div class="card-power">
+            <div class="power-heading"><span>NÍVEL DE PODER</span><strong class="power-value"></strong></div>
+            <div class="power-track" aria-hidden="true"><span class="power-fill"></span></div>
+          </div>
           <em class="card-quote"></em>
           <ul class="card-moves"></ul>
         </div>
@@ -193,7 +201,7 @@
             <option value="chip">Trilha 8-bit</option>
           </select>
         </label>
-        <label class="toggle"><input id="setVoice" type="checkbox"> Falas em voz alta (voz do navegador)</label>
+        <label class="toggle"><input id="setVoice" type="checkbox"> Vozes dos lutadores e narrador (voz do navegador)</label>
         <label class="toggle"><input id="setTalk" type="checkbox"> Conversa antes da luta</label>
         <label class="range">Volume <input id="setVolume" type="range" min="0" max="1" step="0.05"></label>
         <label class="toggle"><input id="setVibration" type="checkbox"> Vibrar ao tomar golpe (celular)</label>
@@ -206,8 +214,8 @@
         </label>
         <div class="controls-help">
           <h3>Teclado</h3>
-          <p><b>1 jogador:</b> mover A/D ou ←/→ · pular W/↑/Espaço · agachar S/↓ · soco J · forte K · defesa I · especial L (barra cheia) · segundo especial ↓ + L (meia barra)</p>
-          <p><b>2 jogadores:</b> 1P = WASD + F soco, G forte, H defesa, T especial · 2P = setas + J, K, I, L (ou Num 1, 2, 3, 0)</p>
+          <p><b>1 jogador:</b> mover A/D ou ←/→ · toque duplo para frente corre · pular W/↑/Espaço · agachar S/↓ · soco J · forte K · defesa I · especial L (barra cheia) · segundo especial ↓ + L (meia barra)</p>
+          <p><b>2 jogadores:</b> 1P = WASD + F soco, G forte, H defesa, T especial · 2P = setas + J, K, I, L (ou Num 1, 2, 3, 0) · toque duplo para frente corre</p>
           <p><b>Combos:</b> soco → soco → forte encadeiam quando acertam. Controles (gamepad) também funcionam.</p>
         </div>
       </div>
@@ -312,11 +320,12 @@
     </div>
   </div>
 
-  <script src="supabase-config.js"></script>
-  <script src="js/sprite-data.js"></script>
-  <script src="js/dialogue.js"></script>
-  <script src="js/audio.js"></script>
-  <script src="js/account.js"></script>
-  <script src="js/game.js"></script>
+  <script src="js/boot.js?v=20"></script>
+  <script src="supabase-config.js?v=20"></script>
+  <script src="js/sprite-data.js?v=23"></script>
+  <script src="js/dialogue.js?v=20"></script>
+  <script src="js/audio.js?v=21"></script>
+  <script src="js/account.js?v=20"></script>
+  <script src="js/game.js?v=24"></script>
 </body>
 </html>
