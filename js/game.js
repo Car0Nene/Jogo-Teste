@@ -42,7 +42,7 @@
   // Configurações persistentes (validadas: o localStorage pode ser editado)
   // ======================================================================
   const DEFAULTS = {
-    sound: true, music: true, voice: true, talk: true, volume: 1,
+    sound: true, music: true, voice: true, arcadeAnnouncer: false, talk: true, volume: 1,
     effectsVolume: 0.7, musicVolume: 0.7, voiceVolume: 0.85,
     vibration: true, touch: 'auto', touchSize: 'normal', highContrast: false,
     reducedEffects: matchMedia('(prefers-reduced-motion: reduce)').matches,
@@ -99,10 +99,10 @@
   })();
   function saveSettings() {
     try { localStorage.setItem('ff-settings', JSON.stringify(settings)); } catch { /* modo privado */ }
-    Audio.configure({ sound: settings.sound, music: settings.music, voice: settings.voice, volume: settings.volume,
+    Audio.configure({ sound: settings.sound, music: settings.music, voice: settings.voice, arcadeAnnouncer: settings.arcadeAnnouncer, volume: settings.volume,
       effectsVolume: settings.effectsVolume, musicVolume: settings.musicVolume, voiceVolume: settings.voiceVolume });
   }
-  Audio.configure({ sound: settings.sound, music: settings.music, voice: settings.voice, volume: settings.volume,
+  Audio.configure({ sound: settings.sound, music: settings.music, voice: settings.voice, arcadeAnnouncer: settings.arcadeAnnouncer, volume: settings.volume,
     effectsVolume: settings.effectsVolume, musicVolume: settings.musicVolume, voiceVolume: settings.voiceVolume });
 
   // ======================================================================
@@ -390,6 +390,11 @@
     if (match.sub === 'talk') { match.skipTalk = true; return; } // qualquer botão pula a conversa
     if (match.sub !== 'fight') return;
     f.buffer.push({ action, t: clock });
+    if (slot === 0 && match.mode === 'training') {
+      const labels = { light: 'SOCO', heavy: 'FORTE', special: 'ESPECIAL', jump: 'PULO' };
+      match.inputHistory.unshift({ label: labels[action] || action.toUpperCase(), t: clock });
+      match.inputHistory.length = Math.min(match.inputHistory.length, 8);
+    }
   }
 
   function isTyping(target) {
@@ -429,6 +434,9 @@
     if (FLOW_SCREENS.includes(app) && !event.repeat && flowKey(event)) return;
     if (app === 'vs' && ['Enter', 'Space', 'KeyJ'].includes(event.code)) { beginFight(); return; }
     if (event.code === 'KeyP' && app === 'fight') { togglePause(); return; }
+    if (event.code === 'KeyR' && event.shiftKey && app === 'fight' && !paused && match?.mode === 'training') {
+      event.preventDefault(); resetTrainingSession(); return;
+    }
     if (app !== 'fight' || paused) return;
     if (match && match.sub === 'talk' && !event.repeat
       && (event.code === 'Enter' || keyBindings().some(([, map]) => map[event.code]))) {
@@ -1033,7 +1041,8 @@
 
     const input = inputs[f.slot];
     const live = match.sub === 'fight';
-    for (const k of HOLDS) f.held[k] = live && Boolean(input.kb[k] || input.touch[k] || input.pad[k] || input.ai[k]);
+    for (const k of HOLDS) f.held[k] = live && (Boolean(input.kb[k] || input.touch[k] || input.pad[k] || input.ai[k])
+      || (match.mode === 'training' && f.slot === 1 && k === 'guard' && match.targetGuard));
     const forwardHeld = f.facing > 0
       ? f.held.right && !f.held.left
       : f.held.left && !f.held.right;
@@ -1267,7 +1276,7 @@
     att.stats.hits += 1;
     att.stats.damage += damage;
     att.stats.maxCombo = Math.max(att.stats.maxCombo, att.combo);
-    if (att.combo === 3) say(att, 'combo', { chance: 0.6 });
+    if (att.combo === 3 && !(Audio.playAnnouncer && Audio.playAnnouncer('combo'))) say(att, 'combo', { chance: 0.6 });
     if (def.hp > 0 && (m.knockdown || def.y > 0)) say(def, 'knockdown', { chance: 0.45 });
     att.meter = Math.min(100, att.meter + 10);
     def.meter = Math.min(100, def.meter + 6);
@@ -1564,6 +1573,7 @@
     match = {
       mode, difficulty: settings.difficulty, stage: resolveStage(),
       wins: [0, 0], round: 1, sub: 'intro', t: 0, roundWinner: -1, resultShown: false,
+      targetGuard: false, inputHistory: [],
       winsNeeded: settings.rounds, roundTime: settings.mode === 'training' ? Infinity : settings.roundTime || Infinity,
       timer: settings.mode === 'training' ? Infinity : settings.roundTime || Infinity
     };
@@ -1633,7 +1643,8 @@
         match.narratorClip = true;
       }
     }
-    if (!match.narratorClip) {
+    if (!match.narratorClip && !(Audio.playAnnouncer && Audio.playAnnouncer(
+      (match.wins[0] >= match.winsNeeded - 1 || match.wins[1] >= match.winsNeeded - 1) ? 'final_round' : `round_${match.round}`))) {
       const finalRound = match.wins[0] >= match.winsNeeded - 1 || match.wins[1] >= match.winsNeeded - 1;
       Audio.speak(`${finalRound ? 'Rodada decisiva!' : `Rodada ${match.round}.`} ${CHARS[fighters[0].id].name} contra ${CHARS[fighters[1].id].name}!`, 'narrator');
     }
@@ -1708,7 +1719,7 @@
           match.sub = 'fight';
           match.t = 0;
           Audio.play('fight');
-          if (!match.narratorClip) Audio.speak('Lutem!', 'narrator', true);
+          if (!match.narratorClip && !(Audio.playAnnouncer && Audio.playAnnouncer('fight'))) Audio.speak('Lutem!', 'narrator', true);
         }
         break;
       case 'fight':
@@ -1728,7 +1739,7 @@
           const timeCall = match.roundWinner < 0
             ? 'Tempo! Empate neste round.'
             : `Tempo! ${CHARS[fighters[match.roundWinner].id].name} vence o round!`;
-          Audio.speak(timeCall, 'narrator', true);
+          if (!(Audio.playAnnouncer && Audio.playAnnouncer('time'))) Audio.speak(timeCall, 'narrator', true);
           Audio.play('ko');
         }
         break;
@@ -1845,7 +1856,7 @@
       particles.push({ kind: 'confetti', x: camX + rand(0, worldW), y: FLOOR - rand(220, 500), vx: rand(-100, 100), vy: rand(-220, -80), life: rand(1.8, 3), max: 3, color: palette[i % palette.length], size: rand(4, 9), spin: rand(-5, 5) });
     }
     if (match.perfect) Audio.play('perfect');
-    Audio.speak(title, 'narrator', true);
+    if (!(Audio.playAnnouncer && Audio.playAnnouncer(winnerSlot < 0 ? 'tie' : winnerSlot === 0 ? 'you_win' : 'you_lose'))) Audio.speak(title, 'narrator', true);
     Audio.startMusic('theme');
     if (!versus) void Account.recordMatch(outcome, a.id);
   }
@@ -3298,6 +3309,23 @@
     else if (time === null) hudText('∞', cx, 52, 40, '#fff16b', 'center', '#7f291d', 5);
     else hudText(String(time).padStart(2, '0'), cx, 52, 38, time <= 10 && Math.floor(clock * 4) % 2 ? '#ff5a5a' : '#fff16b', 'center', '#7f291d', 5);
     hudText(match.mode === 'training' ? 'ALVO' : `ROUND ${match.round}`, cx, 82, 13, '#ffd0e0', 'center', '#170d24', 4);
+    if (match.mode === 'training') {
+      const panelW = Math.min(190, viewW * 0.28);
+      const x = 14;
+      const y = 128;
+      ctx.fillStyle = 'rgba(20,14,35,.78)';
+      roundRect(ctx, x, y, panelW, 116, 10); ctx.fill();
+      ctx.strokeStyle = '#ffd166'; ctx.lineWidth = 2;
+      roundRect(ctx, x, y, panelW, 116, 10); ctx.stroke();
+      ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+      hudText('DADOS DO TREINO', x + 10, y + 20, 12, '#ffd166', 'left', '#170d24', 3);
+      hudText(`DANO TOTAL  ${fighters[0].stats.damage}`, x + 10, y + 42, 12, '#fff', 'left', '#170d24', 3);
+      hudText(`COMBO MÁX.  ${fighters[0].stats.maxCombo}`, x + 10, y + 62, 12, '#fff', 'left', '#170d24', 3);
+      hudText(`ALVO  ${match.targetGuard ? 'DEFENDE' : 'PARADO'}`, x + 10, y + 82, 11, '#9fe8ff', 'left', '#170d24', 3);
+      const recent = match.inputHistory.slice(0, 3).map(item => item.label).join('  ›  ') || '—';
+      ctx.save(); ctx.beginPath(); ctx.rect(x + 8, y + 88, panelW - 16, 23); ctx.clip();
+      hudText(recent, x + 10, y + 106, 10, '#d8c9fa', 'left', '#170d24', 2); ctx.restore();
+    }
   }
 
   function banner(textValue, sub, progress, color = '#ffd23f') {
@@ -3518,8 +3546,40 @@
     clearInputs();
     Audio.pauseMusic(true);
     Audio.stopSpeech();
+    $('#trainingTools').hidden = match?.mode !== 'training';
+    refreshTrainingButtons();
     updateOverlays();
     $('#resume').focus({ preventScroll: true });
+  }
+  function refreshTrainingButtons() {
+    const button = $('#trainingGuard');
+    if (!button || !match) return;
+    button.textContent = `DEFESA DO ALVO: ${match.targetGuard ? 'LIGADA' : 'DESLIGADA'}`;
+    button.setAttribute('aria-pressed', String(match.targetGuard));
+  }
+  function resetTrainingSession() {
+    if (match?.mode !== 'training') return;
+    for (const f of fighters) resetFighterForRound(f);
+    projectiles = []; effects = []; particles = []; cameos = [];
+    announcement = null; hitstop = 0; superFreeze = 0; shake = 0; impactFlash = 0;
+    lastCountdown = Infinity;
+    match.sub = 'fight';
+    match.t = 0;
+    match.timer = Infinity;
+    match.roundWinner = -1;
+    match.perfect = false;
+    camX = (STAGE_W - worldW) / 2;
+    camTop = CAM_TOP;
+    match.inputHistory = [];
+    for (const f of fighters) {
+      f.stats = { hits: 0, maxCombo: 0, damage: 0 };
+      f.meter = 0;
+      f.trainingRecover = 0;
+    }
+    fighters[1].trainingHomeX = fighters[1].x;
+    announcement = null;
+    clearInputs();
+    if (paused) resumeGame();
   }
   function resumeGame() {
     if (app !== 'fight' || !paused) return;
@@ -4072,6 +4132,7 @@
     $('#setMusic').checked = settings.music;
     $('#setFightMusic').value = settings.fightMusic;
     $('#setVoice').checked = settings.voice;
+    $('#setArcadeAnnouncer').checked = settings.arcadeAnnouncer;
     $('#setTalk').checked = settings.talk;
     $('#setEffectsVolume').value = String(settings.effectsVolume);
     $('#setMusicVolume').value = String(settings.musicVolume);
@@ -4139,6 +4200,11 @@
     saveSettings();
     if (settings.voice) Audio.speak('Olá, família!', 'juraci');
   });
+  $('#setArcadeAnnouncer').addEventListener('change', e => {
+    settings.arcadeAnnouncer = e.currentTarget.checked;
+    saveSettings();
+    if (settings.arcadeAnnouncer) Audio.playAnnouncer?.('fight');
+  });
   $('#setTouch').addEventListener('change', e => {
     if (ENUMS.touch.includes(e.currentTarget.value)) settings.touch = e.currentTarget.value;
     saveSettings();
@@ -4187,6 +4253,13 @@
   $('#toMenu').addEventListener('click', goSplash);
   $('#resume').addEventListener('click', resumeGame);
   $('#restartFight').addEventListener('click', () => startMatch());
+  $('#trainingGuard').addEventListener('click', () => {
+    if (match?.mode !== 'training') return;
+    match.targetGuard = !match.targetGuard;
+    refreshTrainingButtons();
+    Audio.play('confirm');
+  });
+  $('#resetTraining').addEventListener('click', resetTrainingSession);
   $('#pauseMenu').addEventListener('click', goSplash);
   ui.pauseButton.addEventListener('click', pauseGame);
   $('#fullscreenButton').addEventListener('click', () => {

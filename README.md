@@ -41,6 +41,8 @@ Jogo de luta arcade em HTML Canvas e JavaScript puro (sem build), com a família
 ## Novidades da v0.10
 
 - **Modo treino:** escolha um alvo parado, sem cronômetro; ele recupera a vida para você praticar combos e especiais.
+- **Treino avançado:** painel ao vivo com dano acumulado, maior combo e últimos comandos; o alvo pode ficar parado ou defender. Reinicie posição e estatísticas pelo menu de pausa ou use `Shift + R`.
+- **Locutor arcade opcional:** falas em inglês nos rounds, início, combos, tempo e resultado. Desligado por padrão; pode ser ativado em Configurações e funciona offline.
 - **Lista de golpes contextual:** disponível antes da luta e na pausa; no versus mostra os comandos e golpes de cada jogador conforme as teclas configuradas.
 - **Teclas remapeáveis no versus:** configure separadamente 1P e 2P; conflitos entre os dois conjuntos são trocados automaticamente.
 - **Acessibilidade:** opção de alto contraste e redução de flashes, tremores e confetes; a redução de movimento do sistema é respeitada por padrão.
@@ -86,6 +88,10 @@ A música tema **"Bolo da Juraci"** toca nos menus e, por padrão, também duran
 
 Todas as frases ficam em **`js/dialogue.js`** — dá para editar ou acrescentar sem mexer no resto do código.
 
+### Locutor arcade
+
+Os clipes opcionais em `assets/voice/arcade/` vêm do **Voiceover Pack: Fighter**, de Kenney Vleugels. Licença **CC0 1.0** (uso livre em projetos pessoais e comerciais; atribuição não obrigatória). A licença está junto dos arquivos em `assets/voice/arcade/LICENSE.txt`. Fonte: [Kenney — Voiceover Pack (Fighter)](https://kenney.nl/assets/voiceover-pack-fighter).
+
 ## Estrutura
 
 ```
@@ -106,7 +112,7 @@ Todas as frases ficam em **`js/dialogue.js`** — dá para editar ou acrescentar
 │   ├── menu/                arte do menu (menu.png original + menu.webp otimizado)
 │   ├── portraits/           retratos dos lutadores
 │   ├── music/               músicas (.m4a original + .mp3 reserva)
-│   ├── voice/               clipes de voz dos personagens preparados para o jogo
+│   ├── voice/               clipes dos personagens e locutor arcade CC0
 │   ├── stages/              cenários pintados (Bar da Simone, Praia)
 │   └── icons/               ícones do app
 ├── art-source/              artes de origem e arquivos de trabalho

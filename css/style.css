@@ -82,6 +82,10 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
 .primary:disabled, .secondary:disabled { filter: grayscale(.8); opacity: .6; cursor: progress; }
 .screen-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
 .stack { display: grid; gap: 12px; width: min(280px, 80vw); }
+.training-tools { display: grid; gap: 8px; padding: 12px; border: 1px solid #ffd16688; border-radius: 14px; background: linear-gradient(145deg, #33244ddd, #171327ee); }
+.training-tools p { color: #ffd166; font: var(--arcade); font-size: 13px; letter-spacing: .8px; }
+.training-tools .secondary { min-height: 40px; padding: 8px 12px; font-size: 12px; }
+.training-tools small { color: #d8c9fa; font-size: 11px; }
 
 /* ---------- Menu inicial ---------- */
 #splash { z-index: 5; padding: 0; background: #100d20; }

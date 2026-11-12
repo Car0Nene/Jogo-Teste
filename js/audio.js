@@ -12,7 +12,7 @@
   let nextNoteTime = 0;
   let currentSong = null;
 
-  const state = { sound: true, music: true, voice: true, volume: 1, effectsVolume: 0.7, musicVolume: 0.55, voiceVolume: 0.85 };
+  const state = { sound: true, music: true, voice: true, arcadeAnnouncer: false, volume: 1, effectsVolume: 0.7, musicVolume: 0.55, voiceVolume: 0.85 };
 
   function ensure() {
     if (ctx) {
@@ -286,7 +286,41 @@
     if (musicBus) musicBus.gain.value = 0.16 * state.musicVolume;
     applyTrackVolume();
     if (!state.music) stopMusic();
-    if (!state.voice) stopSpeech();
+    if (!state.voice) {
+      stopSpeech();
+      if (clipPlaying) { clipPlaying.pause(); clipPlaying = null; }
+    }
+  }
+
+  const ANNOUNCER = {
+    fight: 'fight.ogg', round_1: 'round_1.ogg', round_2: 'round_2.ogg', round_3: 'round_3.ogg',
+    final_round: 'final_round.ogg', time: 'time.ogg',
+    you_win: 'you_win.ogg', you_lose: 'you_lose.ogg', tie: 'tie.ogg', combo: 'combo.ogg'
+  };
+  const ANNOUNCER_TEXT = {
+    fight: 'Lutem!', round_1: 'Rodada 1.', round_2: 'Rodada 2.', round_3: 'Rodada 3.',
+    final_round: 'Rodada decisiva!', time: 'Tempo!', you_win: 'Você venceu!',
+    you_lose: 'Você perdeu!', tie: 'Empate!', combo: 'Combo!'
+  };
+  const announcerCache = {};
+  function playAnnouncer(key) {
+    const file = ANNOUNCER[key];
+    if (!file || !state.voice || !state.arcadeAnnouncer) return false;
+    try {
+      const url = `assets/voice/arcade/${file}`;
+      const player = announcerCache[url] || (announcerCache[url] = new window.Audio(url));
+      if (clipPlaying) clipPlaying.pause();
+      stopSpeech();
+      player.currentTime = 0;
+      player.volume = Math.min(1, state.voiceVolume);
+      clipPlaying = player;
+      player.onended = () => { if (clipPlaying === player) clipPlaying = null; };
+      player.play().catch(() => {
+        if (clipPlaying === player) clipPlaying = null;
+        if (state.voice && state.arcadeAnnouncer) speak(ANNOUNCER_TEXT[key], 'narrator', true);
+      });
+      return true;
+    } catch { return false; }
   }
 
   // ---------- Falas gravadas ----------
@@ -396,5 +430,5 @@
     if (clipPlaying) { try { clipPlaying.pause(); } catch { /* ok */ } }
   }
 
-  window.FFAudio = { play, startMusic, stopMusic, pauseMusic, configure, unlock: ensure, speak, stopSpeech, playClip, hasClip, clipDuration, debugMusic };
+  window.FFAudio = { play, startMusic, stopMusic, pauseMusic, configure, unlock: ensure, speak, stopSpeech, playClip, hasClip, clipDuration, playAnnouncer, debugMusic };
 })();

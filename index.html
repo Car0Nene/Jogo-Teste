@@ -205,6 +205,7 @@
           </select>
         </label>
         <label class="toggle"><input id="setVoice" type="checkbox"> Vozes dos lutadores e narrador (voz do navegador)</label>
+        <label class="toggle"><input id="setArcadeAnnouncer" type="checkbox"> Locutor arcade (voz em inglês, CC0)</label>
         <label class="toggle"><input id="setTalk" type="checkbox"> Conversa antes da luta</label>
         <label class="range">Efeitos <input id="setEffectsVolume" type="range" min="0" max="1" step="0.05"><output id="effectsVolumeValue">70%</output></label>
         <label class="range">Música <input id="setMusicVolume" type="range" min="0" max="1" step="0.05"><output id="musicVolumeValue">55%</output></label>
@@ -334,6 +335,12 @@
       <div class="stack">
         <button id="resume" class="primary" type="button">CONTINUAR</button>
         <button id="restartFight" class="secondary" type="button">REINICIAR LUTA</button>
+        <div id="trainingTools" class="training-tools" hidden aria-label="Ferramentas de treino">
+          <p>FERRAMENTAS DE TREINO</p>
+          <button id="trainingGuard" class="secondary" type="button" aria-pressed="false">DEFESA DO ALVO: DESLIGADA</button>
+          <button id="resetTraining" class="secondary" type="button">REINICIAR POSIÇÃO E DANO</button>
+          <small>Atalho durante o treino: Shift + R</small>
+        </div>
         <button id="pauseMoves" class="secondary" type="button">LISTA DE GOLPES</button>
         <button id="pauseSettings" class="secondary" type="button">CONFIGURAÇÕES</button>
         <button id="pauseMenu" class="secondary" type="button">MENU INICIAL</button>
