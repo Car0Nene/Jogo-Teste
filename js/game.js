@@ -1861,7 +1861,9 @@
       particles.push({ kind: 'confetti', x: camX + rand(0, worldW), y: FLOOR - rand(220, 500), vx: rand(-100, 100), vy: rand(-220, -80), life: rand(1.8, 3), max: 3, color: palette[i % palette.length], size: rand(4, 9), spin: rand(-5, 5) });
     }
     if (match.perfect) Audio.play('perfect');
-    if (!(Audio.playAnnouncer && Audio.playAnnouncer(winnerSlot < 0 ? 'tie' : winnerSlot === 0 ? 'you_win' : 'you_lose'))) Audio.speak(title, 'narrator', true);
+    const portugueseWinClip = winnerSlot === 0 && settings.voice && Audio.hasClip?.('narrator', 'victory');
+    if (portugueseWinClip) Audio.playClip('narrator', 'victory');
+    else if (!(Audio.playAnnouncer && Audio.playAnnouncer(winnerSlot < 0 ? 'tie' : winnerSlot === 0 ? 'you_win' : 'you_lose'))) Audio.speak(title, 'narrator', true);
     Audio.startMusic('theme');
     if (!versus) void Account.recordMatch(outcome, a.id);
   }
@@ -4245,6 +4247,12 @@
     openChars('p1');
   });
   $('#menuSettings').addEventListener('click', () => openMenuDialog('CONFIGURAÇÕES', SETTINGS_TEXT, true));
+  $('#trainingQuickStart').addEventListener('click', () => {
+    settings.mode = 'training';
+    saveSettings();
+    Audio.play('confirm');
+    openChars('p1');
+  });
   $('#pauseSettings').addEventListener('click', () => openMenuDialog('CONFIGURAÇÕES', SETTINGS_TEXT, true));
   $('#menuCredits').addEventListener('click', () => openMenuDialog('CRÉDITOS',
     'Família Fighter é um projeto de Carlos, inspirado em sua família: Juraci, Carlos, Pedro, Daniel, Franciely e Gabi. Músicas: "Bolo da Juraci" e "Family Fighter". Vozes gravadas: Franciely, Pedro, Daniel, Tainara e Gabi. Efeitos sonoros sintetizados pelo próprio navegador.'));

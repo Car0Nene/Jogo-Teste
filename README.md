@@ -41,8 +41,11 @@ Jogo de luta arcade em HTML Canvas e JavaScript puro (sem build), com a família
 ## Novidades da v0.10
 
 - **Modo treino:** escolha um alvo parado, sem cronômetro; ele recupera a vida para você praticar combos e especiais.
+- **Atalho para treino:** botão dedicado na tela inicial, além da seleção de modo na escolha do lutador.
 - **Treino avançado:** painel ao vivo com dano acumulado, maior combo e últimos comandos; o alvo pode ficar parado ou defender. Reinicie posição e estatísticas pelo menu de pausa ou use `Shift + R`.
 - **Locutor arcade opcional:** falas em inglês nos rounds, início, combos, tempo e resultado. Desligado por padrão; pode ser ativado em Configurações e funciona offline.
+- **Locução de vitória em português:** o clipe enviado ao repositório é usado quando o jogador vence e também funciona offline.
+- **Configurações compactas:** áudio, acessibilidade/celular e teclado ficam em seções recolhíveis para facilitar o uso em telas pequenas.
 - **Lista de golpes contextual:** disponível antes da luta e na pausa; no versus mostra os comandos e golpes de cada jogador conforme as teclas configuradas.
 - **Teclas remapeáveis no versus:** configure separadamente 1P e 2P; conflitos entre os dois conjuntos são trocados automaticamente.
 - **Acessibilidade:** opção de alto contraste e redução de flashes, tremores e confetes; a redução de movimento do sistema é respeitada por padrão.

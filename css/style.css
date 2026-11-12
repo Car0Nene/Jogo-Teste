@@ -279,6 +279,12 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
   box-shadow: 0 12px 40px #0009;
 }
 .settings { display: grid; gap: 12px; width: 100%; text-align: left; }
+.settings-group { display: grid; gap: 12px; min-width: 0; padding: 10px; border: 1px solid #ffffff26; border-radius: 12px; background: #090b1680; }
+.settings-group > summary { display: flex; min-height: 38px; align-items: center; justify-content: space-between; gap: 12px; color: #f6d783; font-size: 13px; font-weight: 900; letter-spacing: .6px; cursor: pointer; list-style: none; }
+.settings-group > summary::-webkit-details-marker { display: none; }
+.settings-group > summary::after { content: "+"; color: #fff; font-size: 20px; }
+.settings-group[open] > summary::after { content: "−"; }
+.settings-group:not([open]) { gap: 0; }
 .settings label { display: flex; align-items: center; gap: 12px; font-weight: 700; }
 .settings input[type="checkbox"] { width: 22px; height: 22px; accent-color: var(--gold); }
 .settings input[type="range"] { flex: 1; accent-color: var(--gold); }
@@ -294,6 +300,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
 .bind-button.is-listening { border-color: #62efff; box-shadow: 0 0 0 2px #62efff50; color: #62efff; animation: bindPulse .8s ease-in-out infinite alternate; }
 @keyframes bindPulse { to { box-shadow: 0 0 0 4px #62efff20; } }
 .bind-reset { justify-self: start; min-height: 36px; padding: 7px 11px; font-size: 12px; }
+.training-quick-start { border-color: #ffe49b; background: linear-gradient(145deg, #8c4414, #472516); box-shadow: 0 3px 0 #27130d; }
 
 body[data-high-contrast="true"] .screen:not(#splash) { background: #05060af5; }
 body[data-high-contrast="true"] .dialog-panel,
@@ -457,6 +464,14 @@ body[data-touch-size="large"] .control { --size: clamp(68px, 14vh, 96px); font-s
   .menu-art { width: 100vw; height: 56.25vw; }
 }
 @media (max-width: 520px) {
+  .corner-left { flex-wrap: wrap; max-width: 52vw; }
+  .corner-left .chip { min-height: 36px; padding: 6px 9px; font-size: 11px; }
+  .settings { gap: 8px; }
+  .settings-group { gap: 9px; padding: 9px; }
+  .settings-group:not([open]) { padding-block: 4px; }
+  .settings label { gap: 8px; font-size: 13px; }
+  .menu-dialog { padding: max(8px, env(safe-area-inset-top)) 8px max(8px, env(safe-area-inset-bottom)); }
+  #menuDialog .dialog-panel { width: min(500px, 100%); max-height: calc(100dvh - 16px); padding: 12px; border-radius: 14px; }
   .binding-grid { grid-template-columns: 1fr; }
   .controls-help { font-size: 12px; }
   .binding-grid { grid-template-columns: 1fr 1fr; }

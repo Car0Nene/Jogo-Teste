@@ -31,6 +31,7 @@
     </div>
     <div class="corner-left">
       <button id="accountButton" class="chip" type="button">👤 MINHA CONTA</button>
+      <button id="trainingQuickStart" class="chip training-quick-start" type="button" aria-label="Começar modo treino">🥊 TREINO</button>
     </div>
     <div class="corner-right">
       <button id="fullscreenButton" class="chip" type="button" aria-label="Tela cheia">⛶</button>
@@ -195,6 +196,8 @@
       <h2 id="menuDialogTitle"></h2>
       <p id="menuDialogText"></p>
       <div id="settingsPanel" class="settings" hidden>
+        <details class="settings-group" open>
+          <summary>ÁUDIO E FALAS</summary>
         <label class="toggle"><input id="setSound" type="checkbox"> Efeitos sonoros</label>
         <label class="toggle"><input id="setMusic" type="checkbox"> Música</label>
         <label class="select-label">Música na luta
@@ -204,12 +207,15 @@
             <option value="chip">Trilha 8-bit</option>
           </select>
         </label>
-        <label class="toggle"><input id="setVoice" type="checkbox"> Vozes gravadas dos personagens</label>
+        <label class="toggle"><input id="setVoice" type="checkbox"> Vozes gravadas dos personagens e narrador</label>
         <label class="toggle"><input id="setArcadeAnnouncer" type="checkbox"> Locutor arcade (voz em inglês, CC0)</label>
         <label class="toggle"><input id="setTalk" type="checkbox"> Conversa antes da luta</label>
         <label class="range">Efeitos <input id="setEffectsVolume" type="range" min="0" max="1" step="0.05"><output id="effectsVolumeValue">70%</output></label>
         <label class="range">Música <input id="setMusicVolume" type="range" min="0" max="1" step="0.05"><output id="musicVolumeValue">55%</output></label>
         <label class="range">Vozes <input id="setVoiceVolume" type="range" min="0" max="1" step="0.05"><output id="voiceVolumeValue">85%</output></label>
+        </details>
+        <details class="settings-group">
+          <summary>ACESSIBILIDADE E CELULAR</summary>
         <label class="toggle"><input id="setVibration" type="checkbox"> Vibrar ao tomar golpe (celular)</label>
         <label class="toggle"><input id="setHighContrast" type="checkbox"> Alto contraste na interface</label>
         <label class="toggle"><input id="setReducedEffects" type="checkbox"> Reduzir flashes e tremores</label>
@@ -226,6 +232,9 @@
             <option value="large">Maior</option>
           </select>
         </label>
+        </details>
+        <details class="settings-group">
+          <summary>TECLADO E COMANDOS</summary>
         <div class="controls-help">
           <h3>Teclado (1 jogador)</h3>
           <div class="binding-grid">
@@ -268,6 +277,7 @@
           <p><b>1 jogador:</b> A/D ou ←/→ move · toque duplo para frente corre · W/↑/Espaço pula · S/↓ agacha · J soca · K golpe forte · I defende · L especial (↓ + L usa o segundo especial)</p>
           <p><b>Combos:</b> soco → soco → forte encadeiam quando acertam. Controles (gamepad) também funcionam.</p>
         </div>
+        </details>
       </div>
       <button id="closeMenuDialog" class="primary" type="button">VOLTAR</button>
     </div>

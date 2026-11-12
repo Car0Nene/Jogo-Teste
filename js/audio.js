@@ -344,6 +344,9 @@
     },
     gabi: {
       sing: { url: 'assets/voice/gabi-canto.mp3', text: '♪ Gabi canta ♪', duration: 3.95 }
+    },
+    narrator: {
+      victory: { url: 'assets/voice/narrator/vitoria-na-luta.mp3', text: 'Vitória na luta!', duration: 2.7 }
     }
   };
   const clipCache = {};
