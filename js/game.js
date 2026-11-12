@@ -1619,7 +1619,13 @@
   // ======================================================================
   // Cenários (pré-renderizados em canvas fora da tela — desenhados uma vez)
   // ======================================================================
-  const stageNames = { padaria: 'Padaria da Juju', quintal: 'Quintal da Família', festa: 'Festa Junina' };
+  const stageNames = {
+    padaria: 'Padaria da Juju',
+    quintal: 'Quintal da Família',
+    festa: 'Festa Junina',
+    bar: 'Bar da Simone',
+    praia: 'Praia do Natal'
+  };
 
   function seeded(seed) {
     let s = seed >>> 0;
@@ -2182,9 +2188,6 @@
       }
     }
   });
-  stageNames.bar = 'Bar da Simone';
-  stageNames.praia = 'Praia do Natal';
-
   function ensureStage(name) {
     const k = clamp(renderScale, 1, 2);
     if (stageCache && stageCache.name === name && stageCache.k === k) return stageCache;
@@ -2211,10 +2214,13 @@
   // Desenho dos lutadores
   // ======================================================================
   function cycle(frames, fps, time) {
-    return frames[Math.floor(time * fps) % frames.length];
+    if (!Array.isArray(frames) || !frames.length) return null;
+    const v = Number.isFinite(time) ? time : 0;
+    return frames[Math.floor(v * fps) % frames.length];
   }
 
   function attackFrame(frames, f) {
+    if (!Array.isArray(frames) || !frames.length) return null;
     const m = f.move;
     if (!m) return frames[0];
     if (m.frame !== undefined) return frames[Math.min(m.frame, frames.length - 1)];
@@ -2225,7 +2231,10 @@
     return frames[0];
   }
 
-  const pickFrame = (frames, i) => (frames && frames.length ? frames[clamp(i, 0, frames.length - 1)] : null);
+  const pickFrame = (frames, i) => {
+    if (!Array.isArray(frames) || !frames.length) return null;
+    return frames[clamp(Math.floor(i), 0, frames.length - 1)];
+  };
 
   // Deitado no chão para quem não tem sprite de queda: gira a pose em pé.
   function lying(lean, S, amount) {
@@ -2238,12 +2247,13 @@
     const S = SPR[f.id];
     if (!S) return null;
     const lean = { frame: null, rot: 0, dx: 0, dy: 0, sx: 1, sy: 1 };
-    const fallback = S.idle;
+    const fallback = Array.isArray(S.idle) && S.idle.length ? S.idle : [];
+    if (!fallback.length) return null;
     const t = f.t;
 
     if (f.state === 'transform') {
       const total = transformTime(f);
-      const frames = S[f.nextForm] || fallback;
+      const frames = Array.isArray(S[f.nextForm]) && S[f.nextForm].length ? S[f.nextForm] : fallback;
       switch (f.nextForm) {
         case 'gordao':
           if (t < 0.85) {
@@ -2359,6 +2369,9 @@
         }
         break;
       default: lean.frame = fallback[0];
+    }
+    if (!lean.frame) {
+      lean.frame = cycle(fallback, 6, clock + f.slot * 0.4) || fallback[0];
     }
     return lean;
   }

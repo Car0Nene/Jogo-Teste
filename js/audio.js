@@ -154,13 +154,21 @@
 
   // Música principal real do projeto. O fallback sintetizado permanece disponível
   // para trilhas de cenário caso o usuário selecione o modo 8-bit.
+  function pickThemeSource() {
+    if (typeof window.Audio !== 'function') return './assets/music/bolo-da-juraci.mp3';
+    const probe = new window.Audio();
+    const canPlay = typeof probe.canPlayType === 'function' ? probe.canPlayType.bind(probe) : () => '';
+    if (canPlay('audio/mp4; codecs="mp4a.40.2"') || canPlay('audio/mp4')) return './assets/music/bolo-da-juraci.m4a';
+    return './assets/music/bolo-da-juraci.mp3';
+  }
+
   function startMusic(song) {
     stopMusic();
     if (!state.music) return;
     try {
       currentSong = song || 'theme';
       if (currentSong === 'theme' || currentSong === 'padaria') {
-        themeAudio = new window.Audio('./assets/music/bolo-da-juraci.mp3');
+        themeAudio = new window.Audio(pickThemeSource());
         themeAudio.loop = true;
         themeAudio.preload = 'auto';
         themeAudio.volume = Math.max(0, Math.min(1, state.volume));
