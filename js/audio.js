@@ -11,6 +11,8 @@
   let musicStep = 0;
   let nextNoteTime = 0;
   let currentSong = null;
+  let themeAudio = null;
+  let musicPaused = false;
 
   const state = { sound: true, music: true, voice: true, volume: 0.7 };
 
@@ -150,12 +152,26 @@
     }
   }
 
+  // Música principal real do projeto. O fallback sintetizado permanece disponível
+  // para trilhas de cenário caso o usuário selecione o modo 8-bit.
   function startMusic(song) {
     stopMusic();
-    if (!state.music || !SONGS[song]) return;
+    if (!state.music) return;
     try {
       if (!ensure()) return;
-      currentSong = song;
+      currentSong = song || 'theme';
+      if (currentSong === 'theme' || currentSong === 'padaria') {
+        themeAudio = new window.Audio('./assets/music/bolo-da-juraci.mp3');
+        themeAudio.loop = true;
+        themeAudio.preload = 'auto';
+        themeAudio.volume = Math.max(0, Math.min(1, state.volume));
+        const promise = themeAudio.play();
+        if (promise && typeof promise.catch === 'function') {
+          promise.catch(error => console.warn('A música precisa ser iniciada após interação do usuário.', error));
+        }
+        return;
+      }
+      if (!SONGS[currentSong]) currentSong = 'padaria';
       musicStep = 0;
       nextNoteTime = ctx.currentTime + 0.1;
       musicTimer = setInterval(scheduler, 90);
@@ -167,14 +183,30 @@
   function stopMusic() {
     clearInterval(musicTimer);
     musicTimer = 0;
+    if (themeAudio) {
+      themeAudio.pause();
+      try { themeAudio.currentTime = 0; } catch {}
+      themeAudio.src = '';
+      themeAudio = null;
+    }
     currentSong = null;
+    musicPaused = false;
   }
 
   function pauseMusic(paused) {
+    musicPaused = Boolean(paused);
+    if (themeAudio) {
+      if (musicPaused) themeAudio.pause();
+      else {
+        const promise = themeAudio.play();
+        if (promise && typeof promise.catch === 'function') promise.catch(() => {});
+      }
+      return;
+    }
     if (!ctx || !currentSong) return;
     clearInterval(musicTimer);
     musicTimer = 0;
-    if (!paused) {
+    if (!musicPaused) {
       ensure();
       nextNoteTime = ctx.currentTime + 0.1;
       musicTimer = setInterval(scheduler, 90);
@@ -184,6 +216,8 @@
   function configure(options) {
     Object.assign(state, options);
     if (master) master.gain.value = state.volume;
+    if (master) master.gain.value = state.volume;
+    if (themeAudio) themeAudio.volume = Math.max(0, Math.min(1, state.volume));
     if (!state.music) stopMusic();
     if (!state.voice) stopSpeech();
   }
