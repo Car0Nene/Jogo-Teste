@@ -12,7 +12,7 @@ Jogo de luta arcade em HTML Canvas e JavaScript puro (sem build), com a família
 - **Modos:** 1P × CPU (Fácil, Normal, Difícil) e **1P × 2P local** no mesmo teclado. Luta espelhada (mesmo lutador) com roupas em cores alternativas.
 - **Controles:** teclado, **gamepad** e, no celular, direcional analógico + botões redondos (o botão Especial mostra a barra carregando).
 - **Áudio:** efeitos sintetizados melhores e trilha chiptune por cenário (pode desligar).
-- **Configurações salvas:** som, música, voz, conversa, volume, vibração e exibição dos controles de toque.
+- **Configurações salvas:** som, música, voz, conversa, volume, vibração e exibição dos controles de toque. O locutor arcade em inglês é sempre ativado.
 - **v0.6 — Falas:** balões de fala, conversa antes da luta e cenas do Carlos com bolo/pizza e no batismo.
 - **v0.7 — Novos lutadores:** Pedro, Daniel, Franciely e Gabi; segundo especial (↓ + L) para todos; Juraci chama o Dadá; cenários **Bar da Simone** e **Praia do Natal**.
 
@@ -44,7 +44,7 @@ Jogo de luta arcade em HTML Canvas e JavaScript puro (sem build), com a família
 - **Modo treino:** escolha um alvo parado, sem cronômetro; ele recupera a vida para você praticar combos e especiais.
 - **Atalho para treino:** botão dedicado na tela inicial, além da seleção de modo na escolha do lutador.
 - **Treino avançado:** painel ao vivo com dano acumulado, maior combo e últimos comandos; o alvo pode ficar parado ou defender. Reinicie posição e estatísticas pelo menu de pausa ou use `Shift + R`.
-- **Locutor arcade opcional:** falas em inglês nos rounds, início, combos, tempo e resultado. Desligado por padrão; pode ser ativado em Configurações e funciona offline.
+- **Locutor arcade em inglês:** falas em inglês nos rounds, início, combos, tempo e resultado. Sempre ativo e funciona offline.
 - **Locução de vitória em português:** o clipe enviado ao repositório é usado quando o jogador vence e também funciona offline.
 - **Configurações compactas:** áudio, acessibilidade/celular e teclado ficam em seções recolhíveis para facilitar o uso em telas pequenas.
 - **Lista de golpes contextual:** disponível antes da luta e na pausa; no versus mostra os comandos e golpes de cada jogador conforme as teclas configuradas.

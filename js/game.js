@@ -42,7 +42,7 @@
   // Configurações persistentes (validadas: o localStorage pode ser editado)
   // ======================================================================
   const DEFAULTS = {
-    sound: true, music: true, voice: true, arcadeAnnouncer: false, talk: true, volume: 1,
+    sound: true, music: true, voice: true, talk: true, volume: 1,
     effectsVolume: 0.7, musicVolume: 0.7, voiceVolume: 0.85,
     vibration: true, touch: 'auto', touchSize: 'normal', highContrast: false,
     reducedEffects: matchMedia('(prefers-reduced-motion: reduce)').matches,
@@ -99,10 +99,10 @@
   })();
   function saveSettings() {
     try { localStorage.setItem('ff-settings', JSON.stringify(settings)); } catch { /* modo privado */ }
-    Audio.configure({ sound: settings.sound, music: settings.music, voice: settings.voice, arcadeAnnouncer: settings.arcadeAnnouncer, volume: settings.volume,
+    Audio.configure({ sound: settings.sound, music: settings.music, voice: settings.voice, arcadeAnnouncer: true, volume: settings.volume,
       effectsVolume: settings.effectsVolume, musicVolume: settings.musicVolume, voiceVolume: settings.voiceVolume });
   }
-  Audio.configure({ sound: settings.sound, music: settings.music, voice: settings.voice, arcadeAnnouncer: settings.arcadeAnnouncer, volume: settings.volume,
+  Audio.configure({ sound: settings.sound, music: settings.music, voice: settings.voice, arcadeAnnouncer: true, volume: settings.volume,
     effectsVolume: settings.effectsVolume, musicVolume: settings.musicVolume, voiceVolume: settings.voiceVolume });
 
   // ======================================================================
@@ -597,7 +597,7 @@
       invuln: 0, flash: 0, form: 'normal', formTime: 0, nextForm: 'gordao', crouchGuard: false,
       combo: 0, comboShow: 0, held: {}, prevUp: false, prevForward: false, lastForwardTap: -1, dashTime: 0, buffer: [],
       dogSupportCooldown: id === 'daniel' ? rand(6, 10) : Infinity, dogProtectTime: 0,
-      say: null, sayCooldown: 0, food: 'cake',
+      say: null, sayQueue: [], sayCooldown: 0, lastDialogue: '', lastVoiceClip: '', food: 'cake',
       stats: { hits: 0, maxCombo: 0, damage: 0 },
       ai: { timer: 0.5, moveDir: 0, guardT: 0, threatKey: '', willBlock: false, reactAt: 0, chainKey: '', aaTried: false }
     };
@@ -608,7 +608,7 @@
       x: STAGE_W / 2 + (f.slot === 0 ? -170 : 170), y: 0, vx: 0, vy: 0,
       facing: f.slot === 0 ? 1 : -1, hp: MAX_HP, hpLag: MAX_HP, state: 'idle', t: 0, stun: 0,
       move: null, invuln: 0, flash: 0, form: 'normal', formTime: 0, combo: 0, comboShow: 0, buffer: [],
-      airAttacked: false, say: null, sayCooldown: 0, prevForward: false, lastForwardTap: -1, dashTime: 0, dogProtectTime: 0
+      airAttacked: false, say: null, sayQueue: [], sayCooldown: 0, prevForward: false, lastForwardTap: -1, dashTime: 0, dogProtectTime: 0
     });
     f.dogSupportCooldown = f.id === 'daniel' ? rand(6, 10) : Infinity;
   }
@@ -618,12 +618,34 @@
     if (!Array.isArray(list) || !list.length) return '';
     const opponent = fighters[1 - f.slot];
     const name = opponent ? CHARS[opponent.id].name.charAt(0) + CHARS[opponent.id].name.slice(1).toLowerCase() : '';
-    return String(list[Math.floor(Math.random() * list.length)]).replaceAll('{oponente}', name);
+    const lines = list.map(line => String(line).replaceAll('{oponente}', name));
+    const alternatives = lines.length > 1 ? lines.filter(line => line !== f.lastDialogue) : lines;
+    return alternatives[Math.floor(Math.random() * alternatives.length)] || lines[0];
   }
 
   // Balões permanecem tempo suficiente para leitura; a voz humana gravada não depende deste timer.
   function dialogueLife(text, minimum = 1.4) {
     return Math.max(minimum, clamp(1.1 + String(text || '').length * 0.075, 1.8, 5.2));
+  }
+
+  function showSay(f, entry) {
+    const clipText = entry.clipKey && Audio.playClip ? Audio.playClip(f.id, entry.clipKey) : null;
+    const text = clipText || entry.text;
+    if (!text) return;
+    const clipLife = clipText && Audio.clipDuration ? Audio.clipDuration(f.id, entry.clipKey) : 0;
+    f.say = { text, t: 0, life: Math.max(entry.duration, clipLife, dialogueLife(text)), clipKey: entry.clipKey || '' };
+    f.lastDialogue = text;
+    if (entry.clipKey) f.lastVoiceClip = entry.clipKey;
+    else Audio.speak(text, f.id);
+  }
+
+  function queueSay(f, entry) {
+    const last = f.sayQueue[f.sayQueue.length - 1] || f.say;
+    const repeatsClip = entry.clipKey && last && last.clipKey === entry.clipKey;
+    const repeatsText = entry.text && last && last.text === entry.text;
+    if (repeatsClip || repeatsText) return;
+    if (f.say) f.sayQueue.push(entry);
+    else showSay(f, entry);
   }
 
   // important = ignora o intervalo mínimo entre falas (usado em especiais, K.O., vitória)
@@ -639,18 +661,18 @@
       }))
       .filter(entry => entry.key && Audio.hasClip && Audio.hasClip(f.id, entry.key) && Math.random() < entry.chance);
     if (clipOptions.length) {
-      const clipKey = clipOptions[Math.floor(Math.random() * clipOptions.length)].key;
-      const clipText = Audio.playClip(f.id, clipKey);
-      const clipLife = Audio.clipDuration ? Audio.clipDuration(f.id, clipKey) : 0;
-      f.say = { text: clipText, t: 0, life: Math.max(duration, clipLife, dialogueLife(clipText)) };
+      const previousClip = f.sayQueue[f.sayQueue.length - 1]?.clipKey || f.say?.clipKey || f.lastVoiceClip;
+      const alternatives = clipOptions.filter(entry => entry.key !== previousClip);
+      const choices = alternatives.length ? alternatives : clipOptions;
+      const clipKey = choices[Math.floor(Math.random() * choices.length)].key;
+      queueSay(f, { clipKey, duration });
       f.sayCooldown = important ? 1.2 : 3.5;
       return;
     }
     const line = text || pickLine((DIALOGUE[f.id] || {})[key], f);
     if (!line) return;
-    f.say = { text: line, t: 0, life: Math.max(duration, dialogueLife(line)) };
+    queueSay(f, { text: line, duration });
     f.sayCooldown = important ? 1.2 : 3.5;
-    Audio.speak(line, f.id);
   }
 
   // momento da fala → trecho gravado (js/audio.js → CLIPS)
@@ -930,7 +952,7 @@
   function cameoSay(c, text, duration = 1.6, voice = '') {
     if (!text) return;
     c.say = { text, t: 0, life: dialogueLife(text, duration) };
-    if (c.owner) c.owner.say = null; // evita balões sobrepostos
+    if (c.owner) { c.owner.say = null; c.owner.sayQueue = []; } // evita balões sobrepostos
     if (voice) Audio.speak(text, voice);
   }
 
@@ -1167,7 +1189,13 @@
     }
     if (f.say) {
       f.say.t += dt;
-      if (f.say.t >= f.say.life) f.say = null;
+      if (f.say.t >= f.say.life) {
+        f.say = null;
+        const nextLine = f.sayQueue.shift();
+        if (nextLine) showSay(f, nextLine);
+      }
+    } else if (f.sayQueue.length) {
+      showSay(f, f.sayQueue.shift());
     }
     if (f.formTime > 0) {
       f.formTime -= dt;
@@ -1806,18 +1834,8 @@
   }
 
   function beginIntro() {
-    for (const f of fighters) f.say = null;
-    match.narratorClip = false;
-    // Franciely na praia: "Na praia a gente só desarma!" (voz real) no 1º round
-    const fran = fighters.find(f => f.id === 'franciely');
-    if (fran && match.stage === 'praia' && match.round === 1 && Audio.hasClip && Audio.hasClip('franciely', 'desarma')) {
-      const clipText = Audio.playClip('franciely', 'desarma');
-      if (clipText) {
-        fran.say = { text: clipText, t: 0, life: Math.max(2, Audio.clipDuration?.('franciely', 'desarma') || 0, dialogueLife(clipText)) };
-        match.narratorClip = true;
-      }
-    }
-    if (!match.narratorClip && !(Audio.playAnnouncer && Audio.playAnnouncer(
+    for (const f of fighters) { f.say = null; f.sayQueue = []; }
+    if (!(Audio.playAnnouncer && Audio.playAnnouncer(
       (match.wins[0] >= match.winsNeeded - 1 || match.wins[1] >= match.winsNeeded - 1) ? 'final_round' : `round_${match.round}`))) {
       const finalRound = match.wins[0] >= match.winsNeeded - 1 || match.wins[1] >= match.winsNeeded - 1;
       Audio.speak(`${finalRound ? 'Rodada decisiva!' : `Rodada ${match.round}.`} ${CHARS[fighters[0].id].name} contra ${CHARS[fighters[1].id].name}!`, 'narrator');
@@ -1837,7 +1855,7 @@
     const f = fighters[who === 'p2' ? 1 : 0];
     const line = pickLine([text], f);
     const duration = dialogueLife(line, 1.7);
-    for (const other of fighters) if (other !== f) other.say = null;
+    for (const other of fighters) if (other !== f) { other.say = null; other.sayQueue = []; }
     say(f, '', { important: true, text: line, duration });
     talk.next = match.t + duration + 0.12;
   }
@@ -1878,6 +1896,7 @@
         match.sub = 'fight';
         match.t = 0;
         Audio.play('fight');
+        Audio.playAnnouncer?.('fight');
       }
       const target = fighters[1];
       target.trainingRecover = Math.max(0, (target.trainingRecover || 0) - dt);
@@ -1893,7 +1912,7 @@
           match.sub = 'fight';
           match.t = 0;
           Audio.play('fight');
-          if (!match.narratorClip && !(Audio.playAnnouncer && Audio.playAnnouncer('fight'))) Audio.speak('Lutem!', 'narrator', true);
+          if (!(Audio.playAnnouncer && Audio.playAnnouncer('fight'))) Audio.speak('Lutem!', 'narrator', true);
         }
         break;
       case 'fight':
@@ -4367,7 +4386,6 @@
     $('#setMusic').checked = settings.music;
     $('#setFightMusic').value = settings.fightMusic;
     $('#setVoice').checked = settings.voice;
-    $('#setArcadeAnnouncer').checked = settings.arcadeAnnouncer;
     $('#setTalk').checked = settings.talk;
     $('#setEffectsVolume').value = String(settings.effectsVolume);
     $('#setMusicVolume').value = String(settings.musicVolume);
@@ -4433,11 +4451,6 @@
   $('#setVoice').addEventListener('change', e => {
     settings.voice = e.currentTarget.checked;
     saveSettings();
-  });
-  $('#setArcadeAnnouncer').addEventListener('change', e => {
-    settings.arcadeAnnouncer = e.currentTarget.checked;
-    saveSettings();
-    if (settings.arcadeAnnouncer) Audio.playAnnouncer?.('fight');
   });
   $('#setTouch').addEventListener('change', e => {
     if (ENUMS.touch.includes(e.currentTarget.value)) settings.touch = e.currentTarget.value;

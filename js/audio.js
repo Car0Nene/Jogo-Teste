@@ -12,7 +12,7 @@
   let nextNoteTime = 0;
   let currentSong = null;
 
-  const state = { sound: true, music: true, voice: true, arcadeAnnouncer: false, volume: 1, effectsVolume: 0.7, musicVolume: 0.55, voiceVolume: 0.85 };
+  const state = { sound: true, music: true, voice: true, arcadeAnnouncer: true, volume: 1, effectsVolume: 0.7, musicVolume: 0.55, voiceVolume: 0.85 };
 
   function ensure() {
     if (ctx) {
