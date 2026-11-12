@@ -40,15 +40,16 @@
   // ======================================================================
   const DEFAULTS = {
     sound: true, music: true, voice: true, talk: true, volume: 0.7, vibration: true, touch: 'auto',
-    difficulty: 'normal', stage: 'padaria', mode: 'cpu', fighter: 'juraci', opponent: 'auto'
+    difficulty: 'normal', stage: 'padaria', mode: 'cpu', fighter: 'juraci', opponent: 'auto', fightMusic: 'theme'
   };
   const ENUMS = {
     touch: ['auto', 'always', 'never'],
     difficulty: ['easy', 'normal', 'hard'],
     stage: ['padaria', 'quintal', 'festa', 'bar', 'praia', 'random'],
     mode: ['cpu', 'versus'],
-    fighter: ['juraci', 'carlos', 'pedro', 'daniel'],
-    opponent: ['auto', 'juraci', 'carlos', 'pedro', 'daniel']
+    fighter: ['juraci', 'carlos', 'pedro', 'daniel', 'franciely', 'gabi'],
+    opponent: ['auto', 'juraci', 'carlos', 'pedro', 'daniel', 'franciely', 'gabi'],
+    fightMusic: ['theme', 'stage']
   };
   const settings = (() => {
     let stored = {};
@@ -1412,7 +1413,7 @@
     paused = false;
     setApp('fight');
     Audio.unlock();
-    Audio.startMusic(match.stage);
+    Audio.startMusic(settings.fightMusic === 'theme' ? 'theme' : match.stage);
     if (matchMedia('(pointer: coarse)').matches) void enterFullscreen();
   }
 
@@ -3273,6 +3274,7 @@
     $('#settingsPanel').hidden = !withSettings;
     $('#setSound').checked = settings.sound;
     $('#setMusic').checked = settings.music;
+    $('#setFightMusic').value = settings.fightMusic;
     $('#setVoice').checked = settings.voice;
     $('#setTalk').checked = settings.talk;
     $('#setVolume').value = String(settings.volume);
@@ -3293,7 +3295,19 @@
   $('#setMusic').addEventListener('change', e => {
     settings.music = e.currentTarget.checked;
     saveSettings();
-    if (settings.music && app === 'fight' && match) { Audio.startMusic(match.stage); if (paused) Audio.pauseMusic(true); }
+    if (settings.music) {
+      Audio.startMusic(app === 'fight' && match && settings.fightMusic === 'stage' ? match.stage : 'theme');
+      if (app === 'fight' && paused) Audio.pauseMusic(true);
+    }
+  });
+  $('#setFightMusic').addEventListener('change', e => {
+    if (!ENUMS.fightMusic.includes(e.currentTarget.value)) return;
+    settings.fightMusic = e.currentTarget.value;
+    saveSettings();
+    if (settings.music && app === 'fight' && match) {
+      Audio.startMusic(settings.fightMusic === 'theme' ? 'theme' : match.stage);
+      if (paused) Audio.pauseMusic(true);
+    }
   });
   $('#setVolume').addEventListener('input', e => { settings.volume = clamp(Number(e.currentTarget.value), 0, 1); saveSettings(); });
   $('#setVolume').addEventListener('change', () => Audio.play('ui'));
@@ -3311,7 +3325,12 @@
   });
 
   const SETTINGS_TEXT = '';
-  $('#splashStart').addEventListener('click', () => { Audio.unlock(); Audio.play('confirm'); setApp('select'); });
+  $('#splashStart').addEventListener('click', () => {
+    Audio.unlock();
+    Audio.play('confirm');
+    Audio.startMusic('theme');
+    setApp('select');
+  });
   $('#menuSettings').addEventListener('click', () => openMenuDialog('CONFIGURAÇÕES', SETTINGS_TEXT, true));
   $('#pauseSettings').addEventListener('click', () => openMenuDialog('CONFIGURAÇÕES', SETTINGS_TEXT, true));
   $('#menuCredits').addEventListener('click', () => openMenuDialog('CRÉDITOS',

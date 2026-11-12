@@ -158,7 +158,6 @@
     stopMusic();
     if (!state.music) return;
     try {
-      if (!ensure()) return;
       currentSong = song || 'theme';
       if (currentSong === 'theme' || currentSong === 'padaria') {
         themeAudio = new window.Audio('./assets/music/bolo-da-juraci.mp3');
@@ -171,6 +170,7 @@
         }
         return;
       }
+      if (!ensure()) return;
       if (!SONGS[currentSong]) currentSong = 'padaria';
       musicStep = 0;
       nextNoteTime = ctx.currentTime + 0.1;
