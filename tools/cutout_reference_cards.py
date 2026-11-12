@@ -53,6 +53,24 @@ MOVEMENT = {
     },
 }
 MOVEMENT_SHEET = 'art-source/paula-tainara-movement-sheet.png'
+ATTACK_ROWS = {
+    'paula': {'light': (204, 316), 'medium': (204, 316), 'heavy': (204, 316), 'special': (208, 319)},
+    'tainara': {'light': (724, 842), 'medium': (724, 842), 'heavy': (724, 842), 'special': (730, 849)},
+}
+ATTACK_BOXES = {
+    'paula': {
+        'light': [(14, 86), (90, 171), (178, 252)],
+        'medium': [(253, 345), (358, 437), (447, 532)],
+        'heavy': [(535, 625), (637, 728), (740, 842)],
+        'special': [(890, 1005), (1055, 1160), (1435, 1532)],
+    },
+    'tainara': {
+        'light': [(10, 96), (98, 182), (184, 270)],
+        'medium': [(270, 405), (485, 570)],
+        'heavy': [(580, 715), (718, 838)],
+        'special': [(890, 1015), (1015, 1145), (1410, 1532)],
+    },
+}
 MOVEMENT_REGIONS = {
     'paula': {'run': [(748, 820), (821, 890), (891, 952)],
               'crouch': [(1347, 1411), (1416, 1479), (1480, 1531)]},
@@ -99,11 +117,10 @@ def main() -> None:
                        'tainara': ((16, 45, 115), (47, 155, 222)),
                        'cao': ((72, 38, 18), (230, 144, 50))}
     for fighter, (source, key, poses) in SHEETS.items():
-        sheet = Image.open(ROOT / source)
         out = ROOT / 'art-source' / 'cutouts' / fighter
         out.mkdir(parents=True, exist_ok=True)
-        for animation, box in poses.items():
-            cut_pose(sheet, box, key).save(out / f'{animation}_0.png')
+        for old in out.glob('*.png'):
+            old.unlink()
         if fighter in MOVEMENT:
             movement_sheet = Image.open(ROOT / MOVEMENT_SHEET)
             y0, y1 = MOVEMENT[fighter]['rows']
@@ -115,8 +132,18 @@ def main() -> None:
                     x0, x1 = regions[index] if regions else (center - 28, center + 28)
                     box = (x0, y0, x1, y1)
                     cut_pose(movement_sheet, box, 'blue', remove_specks=True).save(out / f'{animation}_{index}.png')
+            for animation, boxes in ATTACK_BOXES[fighter].items():
+                ay0, ay1 = ATTACK_ROWS[fighter][animation]
+                for index, (x0, x1) in enumerate(boxes):
+                    cut_pose(movement_sheet, (x0, ay0, x1, ay1), 'blue', remove_specks=True).save(out / f'{animation}_{index}.png')
+        else:
+            sheet = Image.open(ROOT / source)
+            for animation, box in poses.items():
+                cut_pose(sheet, box, key).save(out / f'{animation}_0.png')
         if fighter in PORTRAIT_BOXES:
             portrait = movement_sheet.crop(PORTRAIT_BOXES[fighter]).resize((512, 640), Image.Resampling.LANCZOS)
+        elif fighter == 'cao':
+            portrait = None
         else:
             idle = Image.open(out / 'idle_0.png').convert('RGBA')
             head = idle.crop((0, 0, idle.width, max(1, int(idle.height * 0.78))))
@@ -130,8 +157,9 @@ def main() -> None:
                 draw.line((0, y, 511, y), fill=(*color, 255))
             draw.ellipse((58, 42, 454, 438), fill=(255, 255, 255, 18), outline=(255, 255, 255, 70), width=4)
             portrait.alpha_composite(head, ((512 - head.width) // 2, 24))
-        (ROOT / 'assets' / 'portraits').mkdir(parents=True, exist_ok=True)
-        portrait.save(ROOT / 'assets' / 'portraits' / f'{fighter}.png')
+        if portrait is not None:
+            (ROOT / 'assets' / 'portraits').mkdir(parents=True, exist_ok=True)
+            portrait.save(ROOT / 'assets' / 'portraits' / f'{fighter}.png')
         print(f'{fighter}: {len(list(out.glob("*.png")))} recortes gerados')
 
 

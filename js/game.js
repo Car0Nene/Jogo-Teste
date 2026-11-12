@@ -118,8 +118,7 @@
   const portraits = { juraci: loadImage('assets/portraits/juraci.png'), carlos: loadImage('assets/portraits/carlos.png'),
     pedro: loadImage('assets/portraits/pedro.png'), daniel: loadImage('assets/portraits/daniel.png'),
     franciely: loadImage('assets/portraits/franciely.png'), gabi: loadImage('assets/portraits/gabi.png'),
-    paula: loadImage('assets/portraits/paula.png'), tainara: loadImage('assets/portraits/tainara.png'),
-    cao: loadImage('assets/portraits/cao.png') };
+    paula: loadImage('assets/portraits/paula.png'), tainara: loadImage('assets/portraits/tainara.png') };
   let altAtlas = null;
 
   function buildAltAtlas() {
@@ -299,24 +298,10 @@
         special: { anim: 'special', startup: 0.32, active: 0, recovery: 0.32 }
       }
     },
-    cao: {
-      name: 'CÃO DO DANIEL', heavyLabel: 'INVESTIDA', powerLevel: 850, pose: { animation: 'special', frame: 0 },
-      desc: 'Companheiro caramelo do Daniel. L: Lambida Poderosa. ↓ + L: Amigo Protetor.',
-      scale: 1.2, height: 128, crouchHeight: 88, width: 42,
-      walk: 250, back: 190, jumpV: 840, jumpX: 275, gravity: 2480,
-      transformTime: 1.1,
-      moves: {
-        light: { anim: 'light', startup: 0.05, active: 0.1, recovery: 0.12, damage: 42, box: [14, 118, 26, 102], hitstun: 0.3, blockstun: 0.16, push: 245, hitstop: 0.05, chain: { light: 'medium', heavy: 'heavy' } },
-        medium: { anim: 'medium', startup: 0.09, active: 0.11, recovery: 0.18, damage: 62, box: [14, 145, 18, 108], hitstun: 0.34, blockstun: 0.18, push: 320, hitstop: 0.07 },
-        heavy: { anim: 'heavy', startup: 0.13, active: 0.12, recovery: 0.27, damage: 90, box: [14, 165, 10, 104], hitstun: 0.45, blockstun: 0.22, push: 440, hitstop: 0.09, lunge: 130, heavy: true, knockdown: true },
-        air: { anim: 'heavy', startup: 0.07, active: 0.2, recovery: 0.1, damage: 54, box: [6, 122, 12, 100], hitstun: 0.32, blockstun: 0.18, push: 225, hitstop: 0.06 },
-        special: { anim: 'special', startup: 0.3, active: 0, recovery: 0.34 }
-      }
-    }
   };
   const FIGHTER_IDS = Object.keys(CHARS);
   // Lutador só pode ser escolhido se os sprites dele existem no atlas.
-  const available = id => Boolean(SPR[id] && SPR[id].idle && SPR[id].idle.length);
+  const available = id => Boolean(CHARS[id] && SPR[id] && SPR[id].idle && SPR[id].idle.length);
   const PLAYABLE = FIGHTER_IDS.filter(available);
 
   // Formas temporárias (especiais de transformação). atk = dano causado, def = dano recebido.
@@ -328,11 +313,16 @@
     praia:  { atk: 1, def: 1, speed: 1.3, push: 1, reach: 1, wide: 0, jump: 1.08, label: 'NATAL PRAIA!', color: '#ff8ad8', aura: [255, 120, 220], wild: true },
     brava:  { atk: 1.35, def: 0.9, speed: 1.15, push: 1.2, reach: 1, wide: 0, label: 'IRRITADA + FOME', color: '#ff6b6b', aura: [255, 70, 60], hungry: true },
     paulaFury: { atk: 1.38, def: 0.82, speed: 1.08, push: 1.25, reach: 1.08, wide: 8, label: 'FÚRIA DO BAR SIMONE', color: '#ff4ca0', aura: [255, 58, 155] },
-    ricePower: { atk: 1.32, def: 0.9, speed: 1.08, push: 1.1, reach: 1.05, wide: 7, label: 'PODER DO ARROZ', color: '#fff4c4', aura: [255, 245, 190] },
-    dogGuard: { atk: 1.08, def: 0.58, speed: 1.04, push: 1.08, reach: 1.05, wide: 5, label: 'AMIGO PROTETOR', color: '#ffce5c', aura: [255, 196, 65] }
+    ricePower: { atk: 1.32, def: 0.9, speed: 1.08, push: 1.1, reach: 1.05, wide: 7, label: 'PODER DO ARROZ', color: '#fff4c4', aura: [255, 245, 190] }
   };
   const form = f => FORMS[f.form] || FORMS.normal;
+  const SCALE_STABLE_STATES = new Set(['idle', 'walk', 'run', 'guard', 'blockstun', 'attack', 'hitstun', 'air', 'landing', 'jumpsquat', 'win']);
+  const BASE_SPRITE_HEIGHT = Object.fromEntries(Object.entries(SPR).map(([id, sprites]) => {
+    const heights = (sprites.idle || []).map(frame => frame[3]).sort((a, b) => a - b);
+    return [id, heights.length ? heights[Math.floor(heights.length / 2)] : 0];
+  }));
   const FORM_TIME = 10;
+  const DOG_SUPPORT_SCALE = 0.72;
   const otherFighter = id => (id === 'juraci' ? 'carlos' : 'juraci');
   const randomOther = id => {
     const others = PLAYABLE.filter(other => other !== id);
@@ -605,6 +595,7 @@
       move: null, moveName: '', hitDone: false, connected: false, airborne: false, airAttacked: false,
       invuln: 0, flash: 0, form: 'normal', formTime: 0, nextForm: 'gordao', crouchGuard: false,
       combo: 0, comboShow: 0, held: {}, prevUp: false, prevForward: false, lastForwardTap: -1, dashTime: 0, buffer: [],
+      dogSupportCooldown: id === 'daniel' ? rand(6, 10) : Infinity, dogProtectTime: 0,
       say: null, sayCooldown: 0, food: 'cake',
       stats: { hits: 0, maxCombo: 0, damage: 0 },
       ai: { timer: 0.5, moveDir: 0, guardT: 0, threatKey: '', willBlock: false, reactAt: 0, chainKey: '', aaTried: false }
@@ -616,8 +607,9 @@
       x: STAGE_W / 2 + (f.slot === 0 ? -170 : 170), y: 0, vx: 0, vy: 0,
       facing: f.slot === 0 ? 1 : -1, hp: MAX_HP, hpLag: MAX_HP, state: 'idle', t: 0, stun: 0,
       move: null, invuln: 0, flash: 0, form: 'normal', formTime: 0, combo: 0, comboShow: 0, buffer: [],
-      airAttacked: false, say: null, sayCooldown: 0, prevForward: false, lastForwardTap: -1, dashTime: 0
+      airAttacked: false, say: null, sayCooldown: 0, prevForward: false, lastForwardTap: -1, dashTime: 0, dogProtectTime: 0
     });
+    f.dogSupportCooldown = f.id === 'daniel' ? rand(6, 10) : Infinity;
   }
 
   // ---------- Falas (balões + voz) ----------
@@ -677,7 +669,6 @@
     carlos: { win: { clip: 'pizzaAmor', chance: 1 } },
     paula: { lunch: { clip: 'lunch', chance: 1 }, bar: { clip: 'bar', chance: 1 } },
     tainara: { rice: { clip: 'rice', chance: 1 }, children: { clip: 'children', chance: 1 } },
-    cao: { lick: { clip: 'lick', chance: 1 }, protect: { clip: 'protect', chance: 1 } }
   };
 
   const opponentOf = f => fighters[1 - f.slot];
@@ -785,12 +776,6 @@
         return true;
       }
       if (f.id === 'tainara') return childrenRush(f);
-      if (f.id === 'cao') {
-        if (f.meter < 50) return fizzle(f);
-        startTransform(f, 'dogGuard', f.meter - 50);
-        say(f, 'protect', { important: true });
-        return true;
-      }
     }
     if (f.id === 'pedro') {
       if (f.meter >= 100 && f.form === 'normal') {
@@ -836,12 +821,6 @@
     } else if (f.id === 'tainara') {
       startTransform(f, 'ricePower');
       say(f, 'rice', { important: true });
-    } else if (f.id === 'cao') {
-      f.meter = 0;
-      startAttack(f, 'special');
-      say(f, 'lick', { important: true });
-      spawnProjectile(f, { sprite: 'lick', speed: 560, damage: 115, w: 130, h: 78, y: 105, life: 1.8 });
-      Audio.play('special');
     } else {
       f.meter = 0;
       superFreeze = 0.4;
@@ -936,6 +915,7 @@
     const behind = dir > 0 ? camX - 70 : camX + worldW + 70;
     cameos.push({
       kind, owner, dir, delay, t: 0, phase: 'enter', hit: false,
+      supportStyle: kind === 'dogAssist' && owner.hp <= MAX_HP * 0.55 && Math.random() < 0.65 ? 'protect' : 'attack',
       x: kind === 'carlosFlee' ? owner.x - dir * 30 : behind,
       say: null
     });
@@ -955,7 +935,48 @@
       if (c.say) { c.say.t += dt; if (c.say.t >= c.say.life) c.say = null; }
       const owner = c.owner;
       const o = opponentOf(owner);
-      if (c.kind === 'dada') {
+      if (c.kind === 'dogAssist') {
+        if (c.supportStyle === 'protect') {
+          if (c.phase === 'enter') {
+            const target = owner.x - owner.facing * 50;
+            c.walkDir = Math.sign(target - c.x) || -owner.facing;
+            c.x += c.walkDir * 560 * dt;
+            if (Math.abs(c.x - target) < 14) {
+              c.phase = 'protect'; c.t = 0; c.x = target;
+              owner.dogProtectTime = Math.max(owner.dogProtectTime, 2.8);
+              const line = Audio.playClip('cao', 'protect') || pickLine(DIALOGUE.cao?.protect, owner) || 'Au! Eu protejo o Daniel!';
+              cameoSay(c, line, 1.8);
+              spark(owner.x, FLOOR - owner.y - 80, '#ffd36a', 14);
+            }
+          } else if (c.phase === 'protect') {
+            c.x = owner.x - owner.facing * 50;
+            if (c.t >= 2.8) { c.phase = 'leave'; c.t = 0; }
+          } else {
+            c.walkDir = -owner.facing;
+            c.x += c.walkDir * 420 * dt;
+          }
+        } else {
+          if (!c.said && Math.abs(c.x - owner.x) < 110) {
+            c.said = true;
+            const line = Audio.playClip('cao', 'lick') || pickLine(DIALOGUE.cao?.lick, owner) || 'Au au! Lambida poderosa!';
+            cameoSay(c, line, 1.5);
+          }
+          if (c.phase === 'attack') {
+            if (c.t >= 0.22) { c.phase = 'leave'; c.t = 0; }
+          } else {
+            c.x += c.dir * (c.phase === 'enter' ? 590 : 400) * dt;
+            if (c.phase === 'enter' && !c.hit && Math.abs(c.x - o.x) < 48 && o.y < 65
+              && !(o.invuln > 0 || INVULNERABLE.has(o.state))) {
+              c.hit = true;
+              c.phase = 'attack';
+              c.t = 0;
+              applyHit(owner, o, { damage: 72, push: 270, hitstun: 0.4, blockstun: 0.2, hitstop: 0.06, heavy: true, knockdown: false }, c.x, o.x, 76);
+              spark(o.x, FLOOR - o.y - 74, '#ffd36a', 12);
+            }
+          }
+        }
+        if (c.x < camX - 150 || c.x > camX + worldW + 150) c.done = true;
+      } else if (c.kind === 'dada') {
         const target = owner.x - owner.facing * 75;
         if (c.phase === 'enter') {
           if (c.t > 0.35 && !c.replied) {
@@ -1081,8 +1102,6 @@
       if (Math.random() < 0.75) particles.push({ x: f.x + rand(-36, 36), y: headY + rand(0, 80), vx: rand(-55, 55), vy: rand(-190, -100), life: 0.55, max: 0.55, color: Math.random() < 0.5 ? '#ff3e98' : '#ffd45c', size: rand(5, 9) });
     } else if (f.nextForm === 'ricePower') {
       if (Math.random() < 0.8) particles.push({ x: f.x + rand(-32, 32), y: headY + rand(0, 85), vx: rand(-35, 35), vy: rand(-180, -90), life: 0.55, max: 0.55, color: Math.random() < 0.5 ? '#fff8d9' : '#ffe27a', size: rand(3, 7) });
-    } else if (f.nextForm === 'dogGuard') {
-      if (Math.random() < 0.8) particles.push({ x: f.x + rand(-38, 38), y: headY + rand(0, 75), vx: rand(-40, 40), vy: rand(-180, -80), life: 0.6, max: 0.6, color: Math.random() < 0.5 ? '#ffd45c' : '#fff3b0', size: rand(4, 8) });
     } else if (f.nextForm === 'gordao') {
       if (t >= 0.35 && f.transformStage === 0) {
         f.transformStage = 1;
@@ -1120,10 +1139,6 @@
         say(f, 'hulk', { important: true });
       } else if (f.form === 'paulaFury') {
         say(f, 'fury', { important: true });
-      } else if (f.form === 'ricePower') {
-        say(f, 'rice', { important: true });
-      } else if (f.form === 'dogGuard') {
-        say(f, 'protect', { important: true });
       }
       toNeutral(f);
       if (f.form === 'praia') praiaEvent(f);
@@ -1136,6 +1151,14 @@
     f.flash = Math.max(0, f.flash - dt);
     f.comboShow = Math.max(0, f.comboShow - dt);
     f.sayCooldown = Math.max(0, f.sayCooldown - dt);
+    f.dogProtectTime = Math.max(0, f.dogProtectTime - dt);
+    if (f.id === 'daniel' && match?.sub === 'fight' && f.hp > 0) {
+      f.dogSupportCooldown = Math.max(0, f.dogSupportCooldown - dt);
+      if (f.dogSupportCooldown <= 0) {
+        if (!cameos.some(c => c.kind === 'dogAssist' && c.owner === f)) spawnCameo('dogAssist', f);
+        f.dogSupportCooldown = rand(16, 22);
+      }
+    }
     if (f.say) {
       f.say.t += dt;
       if (f.say.t >= f.say.life) f.say = null;
@@ -1381,10 +1404,11 @@
     const powerMul = 0.85 + att.ch.powerLevel / 1000 * 0.3;
     const atkMul = form(att).atk * powerMul * (form(att).wild ? rand(0.6, 1.8) : 1);
     const defMul = form(def).def;
+    const protectedByDog = def.dogProtectTime > 0 ? 0.65 : 1;
     const pushMul = form(att).push;
     att.connected = true;
     if (!m.unblockable && isBlocking(def, fromX)) {
-      const chip = Math.round(m.damage * 0.12 * atkMul * defMul);
+      const chip = Math.round(m.damage * 0.12 * atkMul * defMul * protectedByDog);
       def.hp = Math.max(1, def.hp - chip);
       def.lagDelay = 0.4;
       def.state = 'blockstun';
@@ -1405,7 +1429,7 @@
       return;
     }
     const scaling = Math.max(0.4, 1 - att.combo * 0.16);
-    const damage = Math.max(1, Math.round(m.damage * atkMul * defMul * scaling));
+    const damage = Math.max(1, Math.round(m.damage * atkMul * defMul * protectedByDog * scaling));
     const trainingTarget = match.mode === 'training' && def.slot === 1;
     def.hp = Math.max(trainingTarget ? 1 : 0, def.hp - damage);
     if (trainingTarget) def.trainingRecover = 2.2;
@@ -1628,7 +1652,7 @@
       const wantsSpecial = (f.id === 'juraci' && f.meter >= 100 && dist > 180)
         || (['carlos', 'daniel', 'franciely', 'pedro'].includes(f.id) && full)
         || (f.id === 'gabi' && f.meter >= 100 && dist > 150)
-        || (['paula', 'tainara', 'cao'].includes(f.id) && full && dist > 150);
+        || (['paula', 'tainara'].includes(f.id) && full && dist > 150);
       // segundo especial (↓ + L) com meia barra, de longe
       const wantsAlt = !wantsSpecial && f.meter >= 50 && f.id !== 'carlos' && dist > 230 && Math.random() < L.special * 0.35;
       if (wantsAlt) {
@@ -1699,7 +1723,8 @@
   // AUTO = adversário sorteado entre os outros lutadores. Na tela de seleção (preview)
   // a prévia vai alternando entre eles.
   function resolveOpponent(preview = false) {
-    if (settings.opponent !== 'auto') return settings.opponent;
+    if (settings.opponent !== 'auto' && PLAYABLE.includes(settings.opponent)) return settings.opponent;
+    if (settings.opponent !== 'auto') settings.opponent = 'auto';
     if (!preview) return randomOther(settings.fighter);
     const others = PLAYABLE.filter(id => id !== settings.fighter);
     return others[Math.floor(clock / 1.1) % others.length];
@@ -2885,7 +2910,10 @@
       return;
     }
     const [sx, sy, sw, sh, ax, ay] = pose.frame;
-    const s = f.ch.scale;
+    const keepIntentionalScale = ['gordao', 'hulk'].includes(f.form) || f.crouchGuard;
+    const heightCorrection = SCALE_STABLE_STATES.has(f.state) && !keepIntentionalScale
+      ? clamp((BASE_SPRITE_HEIGHT[f.id] || sh) / sh, 0.86, 1.14) : 1;
+    const s = f.ch.scale * heightCorrection;
     const img = f.alt && altAtlas ? altAtlas : atlas;
     ctx.save();
     ctx.translate(x + pose.dx * f.facing, footY + (pose.dy || 0));
@@ -3012,7 +3040,7 @@
     ctx.lineTo(tx + f.facing * -4, by + h + 16);
     ctx.lineTo(tx + 9, by + h);
     ctx.stroke();
-    ctx.fillStyle = { juraci: '#a0124f', carlos: '#1d2a6b', pedro: '#3a1450', daniel: '#b0156e', franciely: '#1d4f91', gabi: '#b3121f', dada: '#3b2a1a' }[f.id] || '#1d2a6b';
+    ctx.fillStyle = { juraci: '#a0124f', carlos: '#1d2a6b', pedro: '#3a1450', daniel: '#b0156e', franciely: '#1d4f91', gabi: '#b3121f', dada: '#3b2a1a', cao: '#9a5b22' }[f.id] || '#1d2a6b';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
     lines.forEach((l, i) => ctx.fillText(l, bx + w / 2, by + 9 + i * 21));
@@ -3069,17 +3097,6 @@
           ctx.strokeStyle = kid.c; ctx.lineWidth = 4;
           ctx.beginPath(); ctx.moveTo(kid.x - 6, kid.y + 12); ctx.lineTo(kid.x - 14, kid.y + 3); ctx.moveTo(kid.x + 6, kid.y + 12); ctx.lineTo(kid.x + 13, kid.y + 3); ctx.stroke();
         }
-        break;
-      }
-      case 'lick': {
-        ctx.translate(x, y);
-        ctx.scale(dir, 1);
-        ctx.shadowColor = '#ff69b4'; ctx.shadowBlur = 18;
-        ctx.fillStyle = '#ff82c8'; ctx.strokeStyle = '#fff0fa'; ctx.lineWidth = 3;
-        ctx.beginPath(); ctx.moveTo(-p.w * 0.46, 0); ctx.quadraticCurveTo(-p.w * 0.1, -p.h * 0.62, p.w * 0.46, -p.h * 0.2);
-        ctx.quadraticCurveTo(p.w * 0.2, p.h * 0.58, -p.w * 0.46, 0); ctx.fill(); ctx.stroke();
-        ctx.shadowBlur = 0;
-        ctx.fillStyle = '#fff'; ctx.font = '900 20px Arial'; ctx.textAlign = 'center'; ctx.fillText('♥', p.w * 0.25, -p.h * 0.32);
         break;
       }
       case 'car': {
@@ -3281,19 +3298,30 @@
       if (c.phase === 'wash') drawBasin(x + c.owner.facing * 30, FLOOR);
       return;
     }
-    const sprite = (id, frames, fps, dir) => {
+    const sprite = (id, frames, fps, dir, scaleOverride = 0) => {
       const S = SPR[id];
       const list = S && S[frames];
       if (!list || !ready(atlas)) return;
       const [sx, sy, sw, sh, ax, ay] = cycle(list, fps, c.t);
-      const s = CHARS[id].scale;
+      const s = scaleOverride || CHARS[id].scale;
       ctx.save();
       ctx.translate(x, FLOOR);
       ctx.scale(dir * s, s);
       ctx.drawImage(atlas, sx, sy, sw, sh, -ax / AS, -ay / AS, sw / AS, sh / AS);
       ctx.restore();
     };
-    if (c.kind === 'carlosFlee') {
+    if (c.kind === 'dogAssist') {
+      sprite('cao', c.phase === 'attack' ? 'heavy' : c.phase === 'protect' ? 'guard' : 'run', 13, c.dir, DOG_SUPPORT_SCALE);
+      if (c.phase === 'protect') {
+        const ownerX = c.owner.x - camX;
+        const ownerY = FLOOR - c.owner.y - c.owner.ch.height * 0.52;
+        ctx.save();
+        ctx.strokeStyle = `rgba(255, 211, 106, ${0.45 + Math.sin(clock * 8) * 0.12})`;
+        ctx.lineWidth = 4;
+        ctx.beginPath(); ctx.ellipse(ownerX, ownerY, 40, 83, 0, 0, Math.PI * 2); ctx.stroke();
+        ctx.restore();
+      }
+    } else if (c.kind === 'carlosFlee') {
       sprite('carlos', 'run', 12, c.dir);
       // gotas de suor de medo
       ctx.fillStyle = '#9fdcff';
@@ -3307,7 +3335,8 @@
   }
 
   function cameoBubbleTarget(c) {
-    return { x: c.x, y: 0, form: 'normal', ch: { height: 150 }, facing: c.walkDir || c.dir || 1, id: c.kind === 'dada' ? 'dada' : c.kind === 'carlosFlee' ? 'carlos' : 'juraci', say: c.say };
+    const id = c.kind === 'dogAssist' ? 'cao' : c.kind === 'dada' ? 'dada' : c.kind === 'carlosFlee' ? 'carlos' : 'juraci';
+    return { x: c.x, y: 0, form: 'normal', ch: { height: c.kind === 'dogAssist' ? 100 : 150 }, facing: c.kind === 'dogAssist' ? c.dir : c.walkDir || c.dir || 1, id, say: c.say };
   }
 
   // Itens nas mãos: garrafa do Daniel (quando a esposa deixa) e panela da Juraci
@@ -3830,8 +3859,7 @@
     franciely: { quote: '"Cuidar também é lutar!"', moves: [['L', 'Irritada sem motivo: Carlos foge e bate a fome sem fim'], ['↓ + L', 'Jato de leite']] },
     gabi: { quote: '"Faz o L, ama o Lula!"', moves: [['L', 'Super L + chuva de brigadeiros (a Juraci busca a panela)'], ['↓ + L', 'Canto com notas musicais']] },
     paula: { quote: '"Aqui em casa quem manda sou eu!"', moves: [['L', 'Super Almoço: avalanche de pratos e comida'], ['↓ + L', 'Bar Simone: Pedro não aparece e Paula desperta a fúria']] },
-    tainara: { quote: '"Com arroz eu fico invencível!"', moves: [['L', 'Poder do Arroz: aumento temporário de força'], ['↓ + L', 'Cuidado em Dobro: crianças atacam em grupo']] },
-    cao: { quote: '"Sempre junto nessa luta!"', moves: [['L', 'Lambida Poderosa: língua e corações voadores'], ['↓ + L', 'Amigo Protetor: defesa reforçada por alguns segundos']] }
+    tainara: { quote: '"Com arroz eu fico invencível!"', moves: [['L', 'Poder do Arroz: aumento temporário de força'], ['↓ + L', 'Cuidado em Dobro: crianças atacam em grupo']] }
   };
   const STAGE_INFO = {
     padaria: 'A padaria da Juju, com bolos na vitrine.',

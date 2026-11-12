@@ -154,8 +154,8 @@ if _G:
         'dance':  C('gabi', 'dance', [0, 1, 2, 3], _G * 0.72),
     }
 
-# As fichas novas têm uma pose por movimento; os ataques usam os quadros
-# ilustrados da própria ficha, mantendo a mesma escala dos personagens existentes.
+# Paula e Tainara têm sequências de vários quadros na ficha nova; o cão conserva
+# poses de apoio próprias, mas não é um personagem selecionável.
 for _fighter in ('paula', 'tainara', 'cao'):
     _S = auto_scale(_fighter)
     if not _S:
@@ -168,10 +168,10 @@ for _fighter in ('paula', 'tainara', 'cao'):
         'jump': C(_fighter, 'jump', _seq('jump'), _S),
         'crouch': C(_fighter, 'crouch', _seq('crouch'), _S * 1.12),
         'guard': C(_fighter, 'guard', _seq('guard'), _S),
-        'light': C(_fighter, 'light', [0], _S),
-        'medium': C(_fighter, 'medium', [0], _S),
-        'heavy': C(_fighter, 'heavy', [0], _S),
-        'special': C(_fighter, 'special' if _fighter != 'paula' else 'heavy', [0], _S),
+        'light': C(_fighter, 'light', _seq('light'), _S),
+        'medium': C(_fighter, 'medium', _seq('medium'), _S),
+        'heavy': C(_fighter, 'heavy', _seq('heavy'), _S),
+        'special': C(_fighter, 'special', _seq('special'), _S),
         'win': C(_fighter, 'idle', [0], _S),
     }
 

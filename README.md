@@ -1,6 +1,6 @@
 # Família Fighter — Batalha na Padaria
 
-Jogo de luta arcade em HTML Canvas e JavaScript puro (sem build), com a família: Juraci, Carlos, Pedro, Daniel, Franciely e Gabi.
+Jogo de luta arcade em HTML Canvas e JavaScript puro (sem build), com a família: Juraci, Carlos, Pedro, Daniel, Franciely, Gabi, Paula e Tainara.
 
 ## Novidades da v0.5 a v0.7
 
@@ -30,6 +30,7 @@ Jogo de luta arcade em HTML Canvas e JavaScript puro (sem build), com a família
 ## Novidades da v0.9
 
 - **Nível de poder:** cada lutador recebe uma classificação de 1 a 1000, mostrada na seleção; ela afeta moderadamente o dano.
+- **Companheiro do Daniel:** o cão caramelo não é selecionável. Ele entra automaticamente de tempos em tempos para atacar o adversário ou proteger Daniel quando a vida dele está baixa.
 - **Pose de apresentação:** cada personagem aparece na seleção com uma pose característica.
 - **Corrida curta:** toque duas vezes para frente para correr por um instante; também funciona com teclado e gamepad.
 - **Locução arcade:** anúncios de rodada, início, combos, tempo e resultado com clipes humanos CC0 em inglês, ativados separadamente nas configurações.
@@ -67,6 +68,8 @@ Jogo de luta arcade em HTML Canvas e JavaScript puro (sem build), com a família
 | **Daniel** | **Modo Natal Praia**: rápido e imprevisível, dano aleatório + surpresa: bate o carro, pede uma Heineken pra esposa (ela pode deixar e ele recupera vida… ou não) ou faz um show | Dancinha com notas musicais |
 | **Franciely** | Fica **irritada sem motivo**: o Carlos aparece fugindo de medo, ela ganha força e uma **fome sem fim** (vai recuperando vida) | Jato de leite |
 | **Gabi** | **Super L** gigante + chuva de **brigadeiros**; no fim a **Juraci vem buscar a panela** | Canto com notas musicais |
+| **Paula** | **Super Almoço**: avalanche de pratos e comida | Chama Pedro para o Bar Simone; sem resposta, desperta a fúria |
+| **Tainara** | **Poder do Arroz**: aumento temporário de força | **Cuidado em Dobro**: crianças atacam em grupo |
 
 Vitórias: o Pedro foge pro Bar da Simone, o Daniel comemora de biquíni, o Carlos ergue os braços no Modo Fé e a Juraci levanta o bolo.
 
@@ -131,9 +134,9 @@ Os clipes opcionais em `assets/voice/arcade/` vêm do **Voiceover Pack: Fighter*
 As artes-fonte de Paula e Tainara incluem a ficha de movimentos em
 `art-source/paula-tainara-movement-sheet.png`, com vários quadros para parado,
 andar, correr, pular, defesa e agachado. Os recortes transparentes ficam em
-`art-source/cutouts/{paula,tainara,cao}/` e são usados para animar os lutadores.
-A ficha do cão ainda fornece uma pose por estado. Para refazer os recortes após
-editar as fichas:
+`art-source/cutouts/{paula,tainara}/` e animam as duas lutadoras. Os recortes do
+cão ficam em `art-source/cutouts/cao/` e são usados quando ele entra como apoio
+do Daniel. Para refazer os recortes após editar as fichas:
 
 ```
 pip install pillow numpy scipy
