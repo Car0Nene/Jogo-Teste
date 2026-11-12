@@ -570,10 +570,13 @@
     if (!f) return;
     if (!important && (f.sayCooldown > 0 || Math.random() > chance)) return;
     // voz real gravada (quando existe trecho para esse momento) no lugar da voz do navegador
-    const clipKey = !text && VOICE_CLIPS[f.id] && VOICE_CLIPS[f.id][key];
-    if (clipKey && Audio.hasClip && Audio.hasClip(f.id, clipKey) && Math.random() < 0.75) {
+    const clipEntry = !text && VOICE_CLIPS[f.id] && VOICE_CLIPS[f.id][key];
+    const clipKey = typeof clipEntry === 'string' ? clipEntry : clipEntry && clipEntry.clip;
+    const clipChance = clipEntry && typeof clipEntry === 'object' ? clipEntry.chance : 0.75;
+    if (clipKey && Audio.hasClip && Audio.hasClip(f.id, clipKey) && Math.random() < clipChance) {
       const clipText = Audio.playClip(f.id, clipKey);
-      f.say = { text: clipText, t: 0, life: duration || clamp(1.1 + clipText.length * 0.045, 1.4, 3.2) };
+      const clipLife = Audio.clipDuration ? Audio.clipDuration(f.id, clipKey) : 0;
+      f.say = { text: clipText, t: 0, life: Math.max(duration, clipLife, clamp(1.1 + clipText.length * 0.045, 1.4, 3.2)) };
       f.sayCooldown = important ? 1.2 : 3.5;
       return;
     }
@@ -586,7 +589,13 @@
 
   // momento da fala → trecho gravado (js/audio.js → CLIPS)
   const VOICE_CLIPS = {
-    franciely: { angry: 'isso', combo: 'ferrinho', win: 'montar', milk: 'isso' }
+    franciely: { angry: 'isso', combo: 'ferrinho', win: 'montar', milk: 'isso' },
+    pedro: {
+      combo: { clip: 'combo', chance: 1 },
+      drink: { clip: 'drink', chance: 1 }
+    },
+    daniel: { praia: { clip: 'praia', chance: 1 } },
+    gabi: { sing: { clip: 'sing', chance: 1 } }
   };
 
   const opponentOf = f => fighters[1 - f.slot];
@@ -878,7 +887,8 @@
   function wifeAnswers(f) {
     const allowed = Math.random() < 0.5;
     const lines = (DIALOGUE.daniel || {})[allowed ? 'wifeYes' : 'wifeNo'];
-    announce(pickLine(lines, f) || (allowed ? 'Pode, amor!' : 'NÃO!'), 'esposa', 'ESPOSA DO DANIEL');
+    const response = pickLine(lines, f) || (allowed ? 'Pode, amor!' : 'NÃO!');
+    announce(response, 'esposa', 'ESPOSA DO DANIEL', allowed ? null : { who: 'esposa', key: 'trabalho' });
     if (allowed) {
       f.hp = Math.min(MAX_HP, f.hp + 150);
       f.drinkT = 1.6;
@@ -891,9 +901,15 @@
 
   // Aviso no alto da tela (ex.: resposta da esposa do Daniel)
   let announcement = null;
-  function announce(text, voice, label) {
-    announcement = { text, label, t: 0, life: clamp(1.4 + text.length * 0.05, 1.8, 3) };
-    Audio.speak(text, voice);
+  function announce(text, voice, label, clip = null) {
+    let usedClip = false;
+    if (clip && Audio.hasClip && Audio.hasClip(clip.who, clip.key)) {
+      const clipText = Audio.playClip(clip.who, clip.key);
+      if (clipText) { text = clipText; usedClip = true; }
+    }
+    const clipLife = usedClip && Audio.clipDuration ? Audio.clipDuration(clip.who, clip.key) : 0;
+    announcement = { text, label, t: 0, life: Math.max(clipLife, clamp(1.4 + text.length * 0.05, 1.8, 3)) };
+    if (!usedClip) Audio.speak(text, voice);
   }
 
   // Transformações:
@@ -3078,13 +3094,24 @@
     ctx.save();
     ctx.globalAlpha = alpha;
     ctx.font = '800 20px system-ui, "Segoe UI", Arial, sans-serif';
-    const w = Math.max(ctx.measureText(text).width, 160) + 40;
+    const maxTextWidth = Math.max(200, viewW - 56);
+    const words = String(text).split(/\s+/);
+    const lines = [''];
+    for (const word of words) {
+      const current = lines[lines.length - 1];
+      const next = current ? `${current} ${word}` : word;
+      if (current && ctx.measureText(next).width > maxTextWidth) lines.push(word);
+      else lines[lines.length - 1] = next;
+    }
+    const textWidth = Math.min(maxTextWidth, Math.max(...lines.map(line => ctx.measureText(line).width)));
+    const w = Math.max(textWidth, 160) + 40;
     const x = viewW / 2 - w / 2;
     const y = 104;
+    const h = lines.length > 1 ? 68 : 52;
     ctx.fillStyle = '#ffffff';
     ctx.strokeStyle = '#1a1030';
     ctx.lineWidth = 3;
-    roundRect(ctx, x, y, w, 52, 14); ctx.fill(); ctx.stroke();
+    roundRect(ctx, x, y, w, h, 14); ctx.fill(); ctx.stroke();
     ctx.fillStyle = '#d6336c';
     ctx.font = '900 12px system-ui, Arial, sans-serif';
     ctx.textAlign = 'center';
@@ -3092,7 +3119,7 @@
     if (label) ctx.fillText(label, viewW / 2, y + 6);
     ctx.fillStyle = '#1a1030';
     ctx.font = '800 20px system-ui, "Segoe UI", Arial, sans-serif';
-    ctx.fillText(text, viewW / 2, y + 22);
+    lines.forEach((line, index) => ctx.fillText(line, viewW / 2, y + 22 + index * 21));
     ctx.restore();
   }
 
@@ -4046,7 +4073,7 @@
   $('#menuSettings').addEventListener('click', () => openMenuDialog('CONFIGURAÇÕES', SETTINGS_TEXT, true));
   $('#pauseSettings').addEventListener('click', () => openMenuDialog('CONFIGURAÇÕES', SETTINGS_TEXT, true));
   $('#menuCredits').addEventListener('click', () => openMenuDialog('CRÉDITOS',
-    'Família Fighter é um projeto de Carlos, inspirado em sua família: Juraci, Carlos, Pedro, Daniel, Franciely e Gabi. Músicas: "Bolo da Juraci" e "Family Fighter". Voz real: Franciely. Efeitos sonoros sintetizados pelo próprio navegador.'));
+    'Família Fighter é um projeto de Carlos, inspirado em sua família: Juraci, Carlos, Pedro, Daniel, Franciely e Gabi. Músicas: "Bolo da Juraci" e "Family Fighter". Vozes gravadas: Franciely, Pedro, Daniel, Tainara e Gabi. Efeitos sonoros sintetizados pelo próprio navegador.'));
   $('#menuExit').addEventListener('click', () => openMenuDialog('ATÉ A PRÓXIMA!',
     'Para sair, feche esta aba ou o aplicativo. O navegador não permite que o jogo feche a tela sozinho.'));
   $('#closeMenuDialog').addEventListener('click', closeMenuDialog);

@@ -289,14 +289,27 @@
     if (!state.voice) stopSpeech();
   }
 
-  // ---------- Falas gravadas (voz real) ----------
-  // Trechos curtos tirados do áudio da Franciely (art-source/audio/voz-franciely.opus).
+  // ---------- Falas gravadas ----------
+  // Áudios originais em art-source/audio; os MP3 publicados foram nivelados e preparados para o jogo.
   const CLIPS = {
     franciely: {
       isso: { url: 'assets/voice/franciely-isso.mp3', text: 'É isso!' },
       ferrinho: { url: 'assets/voice/franciely-ferrinho.mp3', text: 'Ferrinho por ferrinho!' },
       desarma: { url: 'assets/voice/franciely-desarma.mp3', text: 'Na praia a gente só desarma!' },
       montar: { url: 'assets/voice/franciely-montar.mp3', text: 'Aí, essa tem que montar ferrinho por ferrinho!' }
+    },
+    pedro: {
+      combo: { url: 'assets/voice/pedro-domingo.mp3', text: 'Domingo, domingo! Bora, bora, bora!', duration: 3.64 },
+      drink: { url: 'assets/voice/pedro-cerveja.mp3', text: 'Eu posso tomar cerveja hoje?', duration: 1.85 }
+    },
+    daniel: {
+      praia: { url: 'assets/voice/daniel-praia.mp3', text: 'Praia, praia! Eu vou fazer as malas!', duration: 3.86 }
+    },
+    esposa: {
+      trabalho: { url: 'assets/voice/tainara-trabalho.mp3', text: 'Daniel deve estar sem internet, foi trabalhar hoje.', duration: 3.74 }
+    },
+    gabi: {
+      sing: { url: 'assets/voice/gabi-canto.mp3', text: '♪ Gabi canta ♪', duration: 3.95 }
     }
   };
   const clipCache = {};
@@ -312,13 +325,18 @@
         const el = clipCache[clip.url] || (clipCache[clip.url] = new window.Audio(clip.url));
         el.currentTime = 0;
         el.volume = Math.min(1, state.voiceVolume);
-        el.play().catch(() => {});
         clipPlaying = el;
+        el.onended = () => { if (clipPlaying === el) clipPlaying = null; };
+        el.play().catch(() => {
+          if (clipPlaying === el) clipPlaying = null;
+          speak(clip.text, who);
+        });
       } catch { /* sem áudio */ }
     }
     return clip.text;
   }
   const hasClip = (who, key) => Boolean(CLIPS[who] && CLIPS[who][key]);
+  const clipDuration = (who, key) => CLIPS[who] && CLIPS[who][key] ? CLIPS[who][key].duration || 0 : 0;
 
   function debugMusic() {
     const el = currentTrack && players[currentTrack] && players[currentTrack].el;
@@ -364,7 +382,10 @@
       utter.pitch = style.pitch;
       utter.rate = style.rate;
       utter.volume = Math.min(1, state.voiceVolume);
-      if (!queue) synth.cancel(); // falas prioritárias podem entrar na fila
+      if (clipPlaying) { clipPlaying.pause(); clipPlaying = null; }
+      if (!queue) {
+        synth.cancel(); // falas prioritárias podem entrar na fila
+      }
       synth.speak(utter);
     } catch (error) {
       console.warn('Falha ao falar a frase.', error);
@@ -375,5 +396,5 @@
     if (clipPlaying) { try { clipPlaying.pause(); } catch { /* ok */ } }
   }
 
-  window.FFAudio = { play, startMusic, stopMusic, pauseMusic, configure, unlock: ensure, speak, stopSpeech, playClip, hasClip, debugMusic };
+  window.FFAudio = { play, startMusic, stopMusic, pauseMusic, configure, unlock: ensure, speak, stopSpeech, playClip, hasClip, clipDuration, debugMusic };
 })();

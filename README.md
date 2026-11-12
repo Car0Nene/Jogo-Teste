@@ -33,6 +33,7 @@ Jogo de luta arcade em HTML Canvas e JavaScript puro (sem build), com a família
 - **Pose de apresentação:** cada personagem aparece na seleção com uma pose característica.
 - **Corrida curta:** toque duas vezes para frente para correr por um instante; também funciona com teclado e gamepad.
 - **Narrador por voz:** anuncia rodada, início da luta, K.O., tempo e resultado final. Ative a opção de voz nas configurações.
+- **Vozes gravadas dos personagens:** os clipes do Pedro, Daniel, Tainara e Gabi entram nos golpes e cenas correspondentes; as falas aparecem legendadas. Os arquivos foram nivelados, aparados e convertidos para MP3.
 - **Impacto mais claro:** flashes, hitstop, vibração, sons de contagem regressiva e faíscas ajudam a destacar golpes e rounds decisivos.
 - **HUD e resultado polidos:** vida numérica e colorida, especiais com marca de meia barra, combos em destaque e retratos dos lutadores com confete no resultado.
 - **Ajustes de acessibilidade:** volume separado para efeitos, música e vozes; remapeamento de teclado no modo de 1 jogador; botões de toque em tamanho maior; animações reduzidas quando o aparelho pede menos movimento.
@@ -70,6 +71,7 @@ A música tema **"Bolo da Juraci"** toca nos menus e, por padrão, também duran
 - **Narrador** anuncia os momentos principais da partida; a voz sintetizada depende das vozes pt-BR disponíveis no aparelho.
 - **Juraci** grita "BOLO DE CENOURA!" no especial, dá bronca nos combos e comemora a vitória.
 - **Carlos** no especial **Gordão** come um bolo ou uma pizza (com mordidas e farelos) e engorda; no **Modo Fé** é batizado com água e luz do céu e grita "Aleluia!".
+- **Pedro** fala ao fazer combo e ao beber a cerveja; **Daniel** anuncia a praia; **Tainara** responde quando ele pede uma bebida; **Gabi** canta no especial.
 - Frases ao derrubar, ser nocauteado e vencer.
 - **Voz:** as falas podem ser lidas em voz alta pela voz do próprio navegador (pt-BR). Liga/desliga em Configurações; a qualidade depende do aparelho.
 
@@ -95,12 +97,12 @@ Todas as frases ficam em **`js/dialogue.js`** — dá para editar ou acrescentar
 │   ├── menu/                arte do menu (menu.png original + menu.webp otimizado)
 │   ├── portraits/           retratos dos lutadores
 │   ├── music/               músicas (.m4a original + .mp3 reserva)
-│   ├── voice/               trechos da voz real da Franciely
+│   ├── voice/               clipes de voz dos personagens preparados para o jogo
 │   ├── stages/              cenários pintados (Bar da Simone, Praia)
 │   └── icons/               ícones do app
 ├── art-source/              artes originais (fonte do atlas; NÃO são publicadas)
 │   ├── references/          pôsteres e artes de referência
-│   └── audio/               áudio original da Franciely
+│   └── audio/               gravações originais dos personagens
 │   └── cutouts/             recortes sem fundo gerados por tools/cutout.py
 ├── tools/cutout.py          remove o fundo das folhas opacas (IA local, rembg)
 ├── tools/build_atlas.py     gera o atlas a partir de art-source/
