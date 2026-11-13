@@ -22,7 +22,7 @@ Jogo de luta arcade em HTML Canvas e JavaScript puro (sem build), com a família
 - **Personagens maiores:** câmera aproximada (cerca de 40% da altura da tela), que sobe quando alguém pula. Sprites em resolução maior e em WebP (mais nítidos).
 - **Funciona em qualquer tela:** a luta se adapta de 4:3 (tablet) a 21:9 (ultrawide) sem faixas pretas; as telas de escolha têm layout para celular deitado, em pé, tablet e monitor grande.
 - **Sprites "quebrados" corrigidos:** o cache offline podia misturar a tabela de sprites nova com a imagem antiga. Agora o atlas tem versão no endereço e o código é sempre buscado na rede primeiro.
-- **Cenários pintados:** Bar da Simone e Praia usam a sua arte (`assets/stages`).
+- **Cenários pintados:** Bar da Simone e Praia usam a sua arte (`assets/stages`), com fundo e primeiro plano em parallax 2.5D. A seleção, a tela VS e a luta compartilham o mesmo enquadramento panorâmico.
 - **Músicas por cenário:** Padaria = "Bolo da Juraci", Quintal e Praia = música 3, Festa Junina e Bar = música 2 (configurável).
 - **Voz real da Franciely:** "É isso!" (especial), "Ferrinho por ferrinho!" (combo), "Na praia a gente só desarma!" (começo da luta na Praia) e "Aí, essa tem que montar ferrinho por ferrinho!" (vitória).
 - **Lista de golpes** no menu de pausa e regras de luta (1 round, melhor de 3 ou de 5; 45 s, 60 s, 99 s ou sem tempo).
@@ -99,7 +99,7 @@ O botão **JOGAR** desbloqueia a reprodução exigida pelos navegadores e inicia
 
 **Inventário de Gabi:** `assets/voice/gabi-canto.mp3` é usado no especial de canto e `assets/voice/generated/gabi-amor-e-luta.mp3` na vitória. Não existe gravação publicada com o texto "FAZ O L" do especial principal; o jogo não associa a esse golpe uma gravação incorreta. O narrador em inglês anuncia o especial. Para adicionar uma fala específica, grave-a como `assets/voice/gabi-super-l.mp3`, cadastre-a em `js/audio.js` e inclua-a no precache de `sw.js`.
 
-O Bar da Simone e a Praia já usam camadas separadas de fundo/primeiro plano, parallax de câmera, chão com perspectiva, sombras de contato e iluminação por lutador; o mar tem ondas animadas e o letreiro do Bar pulsa. Esses efeitos são desenhados no Canvas sem dependências adicionais.
+O Bar da Simone e a Praia usam camadas separadas de fundo/primeiro plano, parallax de câmera, chão com perspectiva, sombras de contato e iluminação por lutador; o mar tem ondas animadas e o letreiro do Bar pulsa. A seleção de cenário e a tela VS reutilizam o recorte e a proporção da câmera da luta; na tela VS em paisagem, os lutadores também são desenhados diretamente sobre a arena, no mesmo piso e com sombras de contato. Esses efeitos são desenhados no Canvas sem dependências adicionais.
 
 Todas as frases ficam em **`js/dialogue.js`** — dá para editar ou acrescentar sem mexer no resto do código.
 

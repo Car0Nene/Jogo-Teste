@@ -2696,11 +2696,11 @@
       }
     }
   });
-  // Cenários com arte pintada (assets/stages). ground = linha do chão na imagem (px originais),
-  // que fica alinhada com os pés dos lutadores; scale = ampliação da imagem no mundo.
+  // Cenários pintados usam coordenadas de mundo consistentes nas camadas distantes e próximas.
+  // ground = linha do chão na imagem (px originais); o primeiro plano é separado por faixa vertical.
   const STAGE_ART = {
-    bar: { src: 'assets/stages/bar.webp', ground: 440, foregroundY: 310, scale: 0.97 },
-    praia: { src: 'assets/stages/praia.webp', ground: 380, foregroundY: 330, scale: 1.05 }
+    bar: { src: 'assets/stages/bar.webp', ground: 397, foregroundY: 310 },
+    praia: { src: 'assets/stages/praia.webp', ground: 380, foregroundY: 330 }
   };
   for (const [name, art] of Object.entries(STAGE_ART)) {
     art.img = loadImage(art.src);
@@ -2711,15 +2711,15 @@
     });
     const procedural = STAGES[name];
     const drawArt = (g, w) => {
-      const { img, ground, scale } = art;
-      const dw = img.naturalWidth * scale;
+      const { img, ground } = art;
+      const scale = STAGE_W / img.naturalWidth;
+      const dw = STAGE_W;
       const dh = img.naturalHeight * scale;
-      const dx = (STAGE_W - dw) / 2;
       const dy = FLOOR - ground * scale;
       if (dy > 0) { // completa o céu acima da imagem com a cor do topo
         g.drawImage(img, 0, 0, img.naturalWidth, 2, 0, 0, w, dy + 2);
       }
-      g.drawImage(img, dx, dy, dw, dh);
+      g.drawImage(img, 0, dy, dw, dh);
       if (dy + dh < H) { // completa o chão abaixo com a cor média da base da imagem, escurecendo
         if (!art.floor) {
           try {
@@ -2745,9 +2745,9 @@
       }
     };
     const drawForeground = (g, w) => {
-      const { img, ground, foregroundY, scale } = art;
-      const dw = img.naturalWidth * scale;
-      const dx = (STAGE_W - dw) / 2;
+      const { img, ground, foregroundY } = art;
+      const scale = STAGE_W / img.naturalWidth;
+      const dw = STAGE_W;
       const dy = FLOOR - ground * scale;
       const sourceY = Math.min(foregroundY, img.naturalHeight - 1);
       const top = dy + sourceY * scale;
@@ -2756,7 +2756,7 @@
       fade.addColorStop(1, 'rgba(255,255,255,1)');
       g.save();
       g.drawImage(img, 0, sourceY, img.naturalWidth, img.naturalHeight - sourceY,
-        dx, top, dw, (img.naturalHeight - sourceY) * scale);
+        0, top, dw, (img.naturalHeight - sourceY) * scale);
       g.globalCompositeOperation = 'destination-in';
       g.fillStyle = fade;
       g.fillRect(0, top - 24, w, H - top + 24);
@@ -2809,28 +2809,59 @@
   const stageThumbs = new Map();
   function stageThumb(name) {
     if (stageThumbs.has(name)) return stageThumbs.get(name);
-    const def = STAGES[name] || STAGES.padaria;
-    const k = 0.32;
-    const view = 900; // pedaço central do cenário
-    const [c, g] = layer(view, k);
-    g.save();
-    g.translate(-(STAGE_W - view) / 2, 0);
-    def.far(g, FAR_W);
-    def.near(g, STAGE_W);
-    g.restore();
+    const k = 1;
+    const view = BASE_W / ZOOM;
+    const camera = (STAGE_W - view) / 2;
+    const { far, near } = buildStageLayers(name, k);
+
+    const c = document.createElement('canvas');
+    c.width = BASE_W;
+    c.height = H;
+    const g = c.getContext('2d');
+    const sourceY = CAM_TOP * k;
+    const sourceHeight = (H - CAM_TOP) * k;
+    g.drawImage(far, camera * 0.5 * k, sourceY, view * k, sourceHeight, 0, 0, BASE_W, H);
+    g.drawImage(near, camera * k, sourceY, view * k, sourceHeight, 0, 0, BASE_W, H);
     stageThumbs.set(name, c);
     return c;
+  }
+
+  function buildStageLayers(name, k) {
+    const def = STAGES[name] || STAGES.padaria;
+    const [far, farContext] = layer(FAR_W, k);
+    const [near, nearContext] = layer(STAGE_W, k);
+    def.far(farContext, FAR_W);
+    def.near(nearContext, STAGE_W);
+    return { far, near, animate: def.animate };
+  }
+
+  function drawStageFighter(g, cv, id, worldX, mirrored, alt = false, timeOffset = 0) {
+    const S = SPR[id];
+    if (!S || !ready(atlas)) return;
+    const frame = cycle(S.idle, 6, clock + timeOffset);
+    if (!frame) return;
+    const [sx, sy, sw, sh, ax, ay] = frame;
+    const view = cv.width / ZOOM;
+    const camera = (STAGE_W - view) / 2;
+    const x = (worldX - camera) / view * cv.width;
+    const y = (FLOOR - CAM_TOP) * ZOOM * cv.height / H;
+    const heightCorrection = clamp((BASE_SPRITE_HEIGHT[id] || sh) / sh, 0.86, 1.14);
+    const scale = CHARS[id].scale * heightCorrection * ZOOM * cv.height / (H * AS);
+    g.save();
+    g.fillStyle = 'rgba(6,5,14,0.42)';
+    g.beginPath();
+    g.ellipse(x, y + 3, 32 * cv.width / BASE_W, 9 * cv.height / H, 0, 0, Math.PI * 2);
+    g.fill();
+    g.translate(x, y);
+    g.scale(mirrored ? -scale : scale, scale);
+    g.drawImage(alt && altAtlas ? altAtlas : atlas, sx, sy, sw, sh, -ax / AS, -ay / AS, sw / AS, sh / AS);
+    g.restore();
   }
 
   function ensureStage(name) {
     const k = clamp(renderScale * ZOOM, 1, 2.4); // resolução do cenário acompanha o zoom
     if (stageCache && stageCache.name === name && stageCache.k === k) return stageCache;
-    const def = STAGES[name] || STAGES.padaria;
-    const [far, fg] = layer(FAR_W, k);
-    def.far(fg, FAR_W);
-    const [near, ng] = layer(STAGE_W, k);
-    def.near(ng, STAGE_W);
-    stageCache = { name, k, far, near, animate: def.animate };
+    stageCache = { name, k, ...buildStageLayers(name, k) };
     return stageCache;
   }
 
@@ -4304,15 +4335,9 @@
     if (ready(atlas)) {
       const ids = [settings.fighter, settings.opponent === 'auto' ? null : settings.opponent];
       ids.forEach((fid, i) => {
-        const S = fid && SPR[fid];
-        if (!S) return;
-        const [sx, sy, sw, sh, ax, ay] = cycle(S.idle, 6, clock + i * 0.3);
-        const s = (cv.height / 540) * 1.25 * ZOOM / AS;
-        g.save();
-        g.translate(cv.width * (i ? 0.66 : 0.34), cv.height * ((FLOOR - 40) / 540) + 40 * (cv.height / 540));
-        g.scale(i ? -s : s, s);
-        g.drawImage(i && fid === settings.fighter && altAtlas ? altAtlas : atlas, sx, sy, sw, sh, -ax, -ay, sw, sh);
-        g.restore();
+        if (!fid) return;
+        drawStageFighter(g, cv, fid, STAGE_W / 2 + (i ? 170 : -170), Boolean(i),
+          Boolean(i && fid === settings.fighter && altAtlas), i * 0.3);
       });
     }
     if (flow.stageCursor === 'random') {
@@ -4386,21 +4411,22 @@
     const arena = $('#vsArena');
     const arenaContext = arena.getContext('2d');
     const stage = stageThumb(match.stage);
-    const stageScale = Math.max(arena.width / stage.width, arena.height / stage.height);
-    const stageWidth = stage.width * stageScale;
-    const stageHeight = stage.height * stageScale;
     arenaContext.clearRect(0, 0, arena.width, arena.height);
-    arenaContext.drawImage(stage,
-      (arena.width - stageWidth) / 2 + Math.sin(clock * 0.3) * 10,
-      (arena.height - stageHeight) / 2,
-      stageWidth, stageHeight);
+    arenaContext.drawImage(stage, 0, 0, arena.width, arena.height);
+    const immersive = arena.clientWidth > 700 && arena.clientWidth >= arena.clientHeight;
+    $('#vsScreen').classList.toggle('vs-immersive', immersive);
     const shade = arenaContext.createLinearGradient(0, 0, 0, arena.height);
     shade.addColorStop(0, 'rgba(12, 8, 24, .38)');
     shade.addColorStop(1, 'rgba(12, 8, 24, .72)');
     arenaContext.fillStyle = shade;
     arenaContext.fillRect(0, 0, arena.width, arena.height);
-    drawBigFighter($('.vs-left canvas'), fighters[0].id, false);
-    drawBigFighter($('.vs-right canvas'), fighters[1].id, true, fighters[1].alt);
+    if (immersive) {
+      drawStageFighter(arenaContext, arena, fighters[0].id, STAGE_W / 2 - 170, false, fighters[0].alt);
+      drawStageFighter(arenaContext, arena, fighters[1].id, STAGE_W / 2 + 170, true, fighters[1].alt);
+    } else {
+      drawBigFighter($('.vs-left canvas'), fighters[0].id, false);
+      drawBigFighter($('.vs-right canvas'), fighters[1].id, true, fighters[1].alt);
+    }
   }
   function beginFight() {
     clearTimeout(vsTimer);
