@@ -1,0 +1,18 @@
+{
+  "name": "familia-fighter-3d-prototype",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "vite build",
+    "test": "node --test src/**/*.test.js"
+  },
+  "dependencies": {
+    "three": "^0.180.0"
+  },
+  "devDependencies": {
+    "playwright": "^1.65.0",
+    "vite": "^6.3.5"
+  }
+}

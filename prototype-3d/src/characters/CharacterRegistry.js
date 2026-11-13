@@ -1,0 +1,28 @@
+export const CHARACTER_LIBRARY = {
+  pedro: {
+    name: 'PEDRO',
+    skin: 0xe8b78f,
+    shirt: 0x2ca76f,
+    accent: 0xd9d6b3,
+    pants: 0x2f3241,
+    hair: 0x2c241d,
+    aura: 0x6ff0a5,
+    jumpSpeed: 5.2,
+    moveSpeed: 3.6,
+    runSpeed: 5.4,
+    power: 1.1,
+  },
+  paula: {
+    name: 'PAULA',
+    skin: 0xe6c39a,
+    shirt: 0xd7c2a1,
+    accent: 0xbc6d77,
+    pants: 0x5d2d5b,
+    hair: 0x382426,
+    aura: 0xd9a2ff,
+    jumpSpeed: 5.05,
+    moveSpeed: 3.4,
+    runSpeed: 5.1,
+    power: 1.0,
+  },
+};

@@ -1,0 +1,1390 @@
+{
+  "frames": [
+    {
+      "filename": "pedro/idle_0",
+      "frame": {
+        "x": 515,
+        "y": 402,
+        "w": 58,
+        "h": 183
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 58,
+        "h": 183
+      },
+      "sourceSize": {
+        "w": 58,
+        "h": 183
+      },
+      "pivot": {
+        "x": 0.4793103448275862,
+        "y": 0.9994535519125683
+      }
+    },
+    {
+      "filename": "pedro/idle_1",
+      "frame": {
+        "x": 577,
+        "y": 402,
+        "w": 60,
+        "h": 183
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 60,
+        "h": 183
+      },
+      "sourceSize": {
+        "w": 60,
+        "h": 183
+      },
+      "pivot": {
+        "x": 0.48000000000000004,
+        "y": 0.9994535519125683
+      }
+    },
+    {
+      "filename": "pedro/walk_0",
+      "frame": {
+        "x": 401,
+        "y": 1144,
+        "w": 57,
+        "h": 177
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 57,
+        "h": 177
+      },
+      "sourceSize": {
+        "w": 57,
+        "h": 177
+      },
+      "pivot": {
+        "x": 0.4929824561403509,
+        "y": 0.9994350282485877
+      }
+    },
+    {
+      "filename": "pedro/walk_1",
+      "frame": {
+        "x": 1984,
+        "y": 1144,
+        "w": 60,
+        "h": 175
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 60,
+        "h": 175
+      },
+      "sourceSize": {
+        "w": 60,
+        "h": 175
+      },
+      "pivot": {
+        "x": 0.53,
+        "y": 0.9994285714285714
+      }
+    },
+    {
+      "filename": "pedro/walk_2",
+      "frame": {
+        "x": 1664,
+        "y": 1326,
+        "w": 72,
+        "h": 174
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 72,
+        "h": 174
+      },
+      "sourceSize": {
+        "w": 72,
+        "h": 174
+      },
+      "pivot": {
+        "x": 0.4694444444444444,
+        "y": 1
+      }
+    },
+    {
+      "filename": "pedro/walk_3",
+      "frame": {
+        "x": 1740,
+        "y": 1326,
+        "w": 70,
+        "h": 174
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 70,
+        "h": 174
+      },
+      "sourceSize": {
+        "w": 70,
+        "h": 174
+      },
+      "pivot": {
+        "x": 0.5757142857142856,
+        "y": 1
+      }
+    },
+    {
+      "filename": "pedro/run_0",
+      "frame": {
+        "x": 602,
+        "y": 1505,
+        "w": 95,
+        "h": 173
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 95,
+        "h": 173
+      },
+      "sourceSize": {
+        "w": 95,
+        "h": 173
+      },
+      "pivot": {
+        "x": 0.5073684210526316,
+        "y": 1
+      }
+    },
+    {
+      "filename": "pedro/run_1",
+      "frame": {
+        "x": 701,
+        "y": 1505,
+        "w": 102,
+        "h": 173
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 102,
+        "h": 173
+      },
+      "sourceSize": {
+        "w": 102,
+        "h": 173
+      },
+      "pivot": {
+        "x": 0.48725490196078436,
+        "y": 1
+      }
+    },
+    {
+      "filename": "pedro/run_2",
+      "frame": {
+        "x": 694,
+        "y": 1683,
+        "w": 104,
+        "h": 172
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 104,
+        "h": 172
+      },
+      "sourceSize": {
+        "w": 104,
+        "h": 172
+      },
+      "pivot": {
+        "x": 0.49230769230769234,
+        "y": 1
+      }
+    },
+    {
+      "filename": "pedro/jump_0",
+      "frame": {
+        "x": 641,
+        "y": 402,
+        "w": 70,
+        "h": 183
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 70,
+        "h": 183
+      },
+      "sourceSize": {
+        "w": 70,
+        "h": 183
+      },
+      "pivot": {
+        "x": 0.4114285714285714,
+        "y": 0.9994535519125683
+      }
+    },
+    {
+      "filename": "pedro/jump_1",
+      "frame": {
+        "x": 1728,
+        "y": 1859,
+        "w": 77,
+        "h": 168
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 77,
+        "h": 168
+      },
+      "sourceSize": {
+        "w": 77,
+        "h": 168
+      },
+      "pivot": {
+        "x": 0.5103896103896104,
+        "y": 1
+      }
+    },
+    {
+      "filename": "pedro/light_0",
+      "frame": {
+        "x": 896,
+        "y": 1505,
+        "w": 91,
+        "h": 173
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 91,
+        "h": 173
+      },
+      "sourceSize": {
+        "w": 91,
+        "h": 173
+      },
+      "pivot": {
+        "x": 0.5791208791208792,
+        "y": 1
+      }
+    },
+    {
+      "filename": "pedro/light_1",
+      "frame": {
+        "x": 0,
+        "y": 1326,
+        "w": 137,
+        "h": 175
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 137,
+        "h": 175
+      },
+      "sourceSize": {
+        "w": 137,
+        "h": 175
+      },
+      "pivot": {
+        "x": 0.39197080291970804,
+        "y": 0.9994285714285714
+      }
+    },
+    {
+      "filename": "pedro/heavy_0",
+      "frame": {
+        "x": 462,
+        "y": 1144,
+        "w": 72,
+        "h": 177
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 72,
+        "h": 177
+      },
+      "sourceSize": {
+        "w": 72,
+        "h": 177
+      },
+      "pivot": {
+        "x": 0.46249999999999997,
+        "y": 0.9994350282485877
+      }
+    },
+    {
+      "filename": "pedro/heavy_1",
+      "frame": {
+        "x": 141,
+        "y": 1326,
+        "w": 142,
+        "h": 175
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 142,
+        "h": 175
+      },
+      "sourceSize": {
+        "w": 142,
+        "h": 175
+      },
+      "pivot": {
+        "x": 0.28732394366197184,
+        "y": 0.9994285714285714
+      }
+    },
+    {
+      "filename": "pedro/heavy_2",
+      "frame": {
+        "x": 287,
+        "y": 1326,
+        "w": 139,
+        "h": 175
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 139,
+        "h": 175
+      },
+      "sourceSize": {
+        "w": 139,
+        "h": 175
+      },
+      "pivot": {
+        "x": 0.2611510791366906,
+        "y": 0.9994285714285714
+      }
+    },
+    {
+      "filename": "pedro/guard_0",
+      "frame": {
+        "x": 1814,
+        "y": 1326,
+        "w": 79,
+        "h": 174
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 79,
+        "h": 174
+      },
+      "sourceSize": {
+        "w": 79,
+        "h": 174
+      },
+      "pivot": {
+        "x": 0.42784810126582273,
+        "y": 1
+      }
+    },
+    {
+      "filename": "pedro/guard_1",
+      "frame": {
+        "x": 807,
+        "y": 1505,
+        "w": 85,
+        "h": 173
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 85,
+        "h": 173
+      },
+      "sourceSize": {
+        "w": 85,
+        "h": 173
+      },
+      "pivot": {
+        "x": 0.4270588235294117,
+        "y": 1
+      }
+    },
+    {
+      "filename": "pedro/hulk_0",
+      "frame": {
+        "x": 234,
+        "y": 0,
+        "w": 129,
+        "h": 202
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 129,
+        "h": 202
+      },
+      "sourceSize": {
+        "w": 129,
+        "h": 202
+      },
+      "pivot": {
+        "x": 0.5263565891472869,
+        "y": 0.998019801980198
+      }
+    },
+    {
+      "filename": "pedro/hulk_1",
+      "frame": {
+        "x": 668,
+        "y": 0,
+        "w": 122,
+        "h": 198
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 122,
+        "h": 198
+      },
+      "sourceSize": {
+        "w": 122,
+        "h": 198
+      },
+      "pivot": {
+        "x": 0.49016393442622946,
+        "y": 1.001010101010101
+      }
+    },
+    {
+      "filename": "pedro/hulk_2",
+      "frame": {
+        "x": 1094,
+        "y": 0,
+        "w": 136,
+        "h": 196
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 136,
+        "h": 196
+      },
+      "sourceSize": {
+        "w": 136,
+        "h": 196
+      },
+      "pivot": {
+        "x": 0.45955882352941174,
+        "y": 0.9979591836734694
+      }
+    },
+    {
+      "filename": "pedro/hulkPower_0",
+      "frame": {
+        "x": 793,
+        "y": 402,
+        "w": 134,
+        "h": 183
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 134,
+        "h": 183
+      },
+      "sourceSize": {
+        "w": 134,
+        "h": 183
+      },
+      "pivot": {
+        "x": 0.4686567164179104,
+        "y": 1.0027322404371584
+      }
+    },
+    {
+      "filename": "pedro/hulkPower_1",
+      "frame": {
+        "x": 266,
+        "y": 210,
+        "w": 140,
+        "h": 187
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 140,
+        "h": 187
+      },
+      "sourceSize": {
+        "w": 140,
+        "h": 187
+      },
+      "pivot": {
+        "x": 0.47071428571428575,
+        "y": 0.9989304812834225
+      }
+    },
+    {
+      "filename": "pedro/hulkPower_2",
+      "frame": {
+        "x": 1318,
+        "y": 775,
+        "w": 155,
+        "h": 180
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 155,
+        "h": 180
+      },
+      "sourceSize": {
+        "w": 155,
+        "h": 180
+      },
+      "pivot": {
+        "x": 0.4858064516129032,
+        "y": 1.0005555555555554
+      }
+    },
+    {
+      "filename": "pedro/hulkPower_3",
+      "frame": {
+        "x": 106,
+        "y": 210,
+        "w": 156,
+        "h": 188
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 156,
+        "h": 188
+      },
+      "sourceSize": {
+        "w": 156,
+        "h": 188
+      },
+      "pivot": {
+        "x": 0.46538461538461534,
+        "y": 1.001063829787234
+      }
+    },
+    {
+      "filename": "pedro/hulkBlast_0",
+      "frame": {
+        "x": 0,
+        "y": 1505,
+        "w": 310,
+        "h": 174
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 310,
+        "h": 174
+      },
+      "sourceSize": {
+        "w": 310,
+        "h": 174
+      },
+      "pivot": {
+        "x": 0.507741935483871,
+        "y": 1
+      }
+    },
+    {
+      "filename": "pedro/crouch_0",
+      "frame": {
+        "x": 154,
+        "y": 2853,
+        "w": 81,
+        "h": 135
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 81,
+        "h": 135
+      },
+      "sourceSize": {
+        "w": 81,
+        "h": 135
+      },
+      "pivot": {
+        "x": 0.49753086419753084,
+        "y": 1.0014814814814814
+      }
+    },
+    {
+      "filename": "pedro/crouch_1",
+      "frame": {
+        "x": 239,
+        "y": 2853,
+        "w": 83,
+        "h": 134
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 83,
+        "h": 134
+      },
+      "sourceSize": {
+        "w": 83,
+        "h": 134
+      },
+      "pivot": {
+        "x": 0.5144578313253012,
+        "y": 1.0014925373134327
+      }
+    },
+    {
+      "filename": "paula/idle_0",
+      "frame": {
+        "x": 1871,
+        "y": 402,
+        "w": 80,
+        "h": 182
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 80,
+        "h": 182
+      },
+      "sourceSize": {
+        "w": 80,
+        "h": 182
+      },
+      "pivot": {
+        "x": 0.57375,
+        "y": 1
+      }
+    },
+    {
+      "filename": "paula/idle_1",
+      "frame": {
+        "x": 1642,
+        "y": 1144,
+        "w": 66,
+        "h": 176
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 66,
+        "h": 176
+      },
+      "sourceSize": {
+        "w": 66,
+        "h": 176
+      },
+      "pivot": {
+        "x": 0.47424242424242424,
+        "y": 0.984659090909091
+      }
+    },
+    {
+      "filename": "paula/idle_2",
+      "frame": {
+        "x": 839,
+        "y": 1326,
+        "w": 66,
+        "h": 175
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 66,
+        "h": 175
+      },
+      "sourceSize": {
+        "w": 66,
+        "h": 175
+      },
+      "pivot": {
+        "x": 0.47424242424242424,
+        "y": 0.9817142857142858
+      }
+    },
+    {
+      "filename": "paula/idle_3",
+      "frame": {
+        "x": 1955,
+        "y": 402,
+        "w": 82,
+        "h": 182
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 82,
+        "h": 182
+      },
+      "sourceSize": {
+        "w": 82,
+        "h": 182
+      },
+      "pivot": {
+        "x": 0.3195121951219512,
+        "y": 1
+      }
+    },
+    {
+      "filename": "paula/walk_0",
+      "frame": {
+        "x": 0,
+        "y": 589,
+        "w": 82,
+        "h": 182
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 82,
+        "h": 182
+      },
+      "sourceSize": {
+        "w": 82,
+        "h": 182
+      },
+      "pivot": {
+        "x": 0.5768292682926829,
+        "y": 1
+      }
+    },
+    {
+      "filename": "paula/walk_1",
+      "frame": {
+        "x": 909,
+        "y": 1326,
+        "w": 82,
+        "h": 175
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 82,
+        "h": 175
+      },
+      "sourceSize": {
+        "w": 82,
+        "h": 175
+      },
+      "pivot": {
+        "x": 0.4878048780487805,
+        "y": 0.9817142857142858
+      }
+    },
+    {
+      "filename": "paula/walk_2",
+      "frame": {
+        "x": 1775,
+        "y": 1505,
+        "w": 82,
+        "h": 173
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 82,
+        "h": 173
+      },
+      "sourceSize": {
+        "w": 82,
+        "h": 173
+      },
+      "pivot": {
+        "x": 0.4524390243902439,
+        "y": 0.984971098265896
+      }
+    },
+    {
+      "filename": "paula/walk_3",
+      "frame": {
+        "x": 86,
+        "y": 589,
+        "w": 82,
+        "h": 182
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 82,
+        "h": 182
+      },
+      "sourceSize": {
+        "w": 82,
+        "h": 182
+      },
+      "pivot": {
+        "x": 0.33780487804878045,
+        "y": 1
+      }
+    },
+    {
+      "filename": "paula/run_0",
+      "frame": {
+        "x": 1774,
+        "y": 2536,
+        "w": 105,
+        "h": 153
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 105,
+        "h": 153
+      },
+      "sourceSize": {
+        "w": 105,
+        "h": 153
+      },
+      "pivot": {
+        "x": 0.4438095238095238,
+        "y": 0.9803921568627451
+      }
+    },
+    {
+      "filename": "paula/run_1",
+      "frame": {
+        "x": 1883,
+        "y": 2536,
+        "w": 100,
+        "h": 153
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 100,
+        "h": 153
+      },
+      "sourceSize": {
+        "w": 100,
+        "h": 153
+      },
+      "pivot": {
+        "x": 0.415,
+        "y": 0.9803921568627451
+      }
+    },
+    {
+      "filename": "paula/run_2",
+      "frame": {
+        "x": 172,
+        "y": 589,
+        "w": 89,
+        "h": 182
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 89,
+        "h": 182
+      },
+      "sourceSize": {
+        "w": 89,
+        "h": 182
+      },
+      "pivot": {
+        "x": 0.2786516853932584,
+        "y": 1
+      }
+    },
+    {
+      "filename": "paula/jump_0",
+      "frame": {
+        "x": 99,
+        "y": 2372,
+        "w": 79,
+        "h": 160
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 79,
+        "h": 160
+      },
+      "sourceSize": {
+        "w": 79,
+        "h": 160
+      },
+      "pivot": {
+        "x": 0.46075949367088603,
+        "y": 0.9824999999999999
+      }
+    },
+    {
+      "filename": "paula/jump_1",
+      "frame": {
+        "x": 1586,
+        "y": 2372,
+        "w": 71,
+        "h": 157
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 71,
+        "h": 157
+      },
+      "sourceSize": {
+        "w": 71,
+        "h": 157
+      },
+      "pivot": {
+        "x": 0.4309859154929578,
+        "y": 0.9828025477707008
+      }
+    },
+    {
+      "filename": "paula/jump_2",
+      "frame": {
+        "x": 182,
+        "y": 2372,
+        "w": 57,
+        "h": 160
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 57,
+        "h": 160
+      },
+      "sourceSize": {
+        "w": 57,
+        "h": 160
+      },
+      "pivot": {
+        "x": 0.35789473684210527,
+        "y": 0.9824999999999999
+      }
+    },
+    {
+      "filename": "paula/light_0",
+      "frame": {
+        "x": 261,
+        "y": 2204,
+        "w": 105,
+        "h": 163
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 105,
+        "h": 163
+      },
+      "sourceSize": {
+        "w": 105,
+        "h": 163
+      },
+      "pivot": {
+        "x": 0.4161904761904762,
+        "y": 1.0006134969325153
+      }
+    },
+    {
+      "filename": "paula/light_1",
+      "frame": {
+        "x": 370,
+        "y": 2204,
+        "w": 118,
+        "h": 163
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 118,
+        "h": 163
+      },
+      "sourceSize": {
+        "w": 118,
+        "h": 163
+      },
+      "pivot": {
+        "x": 0.3889830508474576,
+        "y": 1.0006134969325153
+      }
+    },
+    {
+      "filename": "paula/light_2",
+      "frame": {
+        "x": 1661,
+        "y": 2372,
+        "w": 92,
+        "h": 157
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 92,
+        "h": 157
+      },
+      "sourceSize": {
+        "w": 92,
+        "h": 157
+      },
+      "pivot": {
+        "x": 0.5380434782608695,
+        "y": 1.0012738853503185
+      }
+    },
+    {
+      "filename": "paula/heavy_0",
+      "frame": {
+        "x": 612,
+        "y": 2536,
+        "w": 131,
+        "h": 156
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 131,
+        "h": 156
+      },
+      "sourceSize": {
+        "w": 131,
+        "h": 156
+      },
+      "pivot": {
+        "x": 0.25038167938931294,
+        "y": 0.9987179487179488
+      }
+    },
+    {
+      "filename": "paula/heavy_1",
+      "frame": {
+        "x": 961,
+        "y": 2372,
+        "w": 132,
+        "h": 159
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 132,
+        "h": 159
+      },
+      "sourceSize": {
+        "w": 132,
+        "h": 159
+      },
+      "pivot": {
+        "x": 0.20984848484848484,
+        "y": 0.9981132075471697
+      }
+    },
+    {
+      "filename": "paula/heavy_2",
+      "frame": {
+        "x": 747,
+        "y": 2536,
+        "w": 149,
+        "h": 156
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 149,
+        "h": 156
+      },
+      "sourceSize": {
+        "w": 149,
+        "h": 156
+      },
+      "pivot": {
+        "x": 0.2295302013422819,
+        "y": 0.9987179487179488
+      }
+    },
+    {
+      "filename": "paula/guard_0",
+      "frame": {
+        "x": 842,
+        "y": 775,
+        "w": 82,
+        "h": 181
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 82,
+        "h": 181
+      },
+      "sourceSize": {
+        "w": 82,
+        "h": 181
+      },
+      "pivot": {
+        "x": 0.40853658536585363,
+        "y": 0.9812154696132597
+      }
+    },
+    {
+      "filename": "paula/guard_1",
+      "frame": {
+        "x": 1712,
+        "y": 1144,
+        "w": 60,
+        "h": 176
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 60,
+        "h": 176
+      },
+      "sourceSize": {
+        "w": 60,
+        "h": 176
+      },
+      "pivot": {
+        "x": 0.3766666666666667,
+        "y": 0.984659090909091
+      }
+    },
+    {
+      "filename": "paula/guard_2",
+      "frame": {
+        "x": 265,
+        "y": 589,
+        "w": 82,
+        "h": 182
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 82,
+        "h": 182
+      },
+      "sourceSize": {
+        "w": 82,
+        "h": 182
+      },
+      "pivot": {
+        "x": 0.2926829268292683,
+        "y": 1
+      }
+    },
+    {
+      "filename": "paula/special_0",
+      "frame": {
+        "x": 1348,
+        "y": 2697,
+        "w": 167,
+        "h": 143
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 167,
+        "h": 143
+      },
+      "sourceSize": {
+        "w": 167,
+        "h": 143
+      },
+      "pivot": {
+        "x": 0.38802395209580837,
+        "y": 0.9979020979020978
+      }
+    },
+    {
+      "filename": "paula/special_1",
+      "frame": {
+        "x": 371,
+        "y": 2372,
+        "w": 153,
+        "h": 160
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 153,
+        "h": 160
+      },
+      "sourceSize": {
+        "w": 153,
+        "h": 160
+      },
+      "pivot": {
+        "x": 0.373202614379085,
+        "y": 1.00125
+      }
+    },
+    {
+      "filename": "paula/special_2",
+      "frame": {
+        "x": 927,
+        "y": 2204,
+        "w": 141,
+        "h": 162
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 141,
+        "h": 162
+      },
+      "sourceSize": {
+        "w": 141,
+        "h": 162
+      },
+      "pivot": {
+        "x": 0.4907801418439717,
+        "y": 0.9975308641975308
+      }
+    },
+    {
+      "filename": "fx/beerBlast_0",
+      "frame": {
+        "x": 1695,
+        "y": 2853,
+        "w": 184,
+        "h": 86
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 184,
+        "h": 86
+      },
+      "sourceSize": {
+        "w": 184,
+        "h": 86
+      },
+      "pivot": {
+        "x": 0.49945652173913047,
+        "y": 0.5011627906976744
+      }
+    }
+  ],
+  "meta": {
+    "app": "Família Fighter prototype asset sync",
+    "version": "1.0",
+    "image": "fighters.webp",
+    "format": "RGBA8888",
+    "size": {
+      "w": 2048,
+      "h": 3074
+    },
+    "scale": "1"
+  }
+}

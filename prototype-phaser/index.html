@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#100d20">
+    <meta name="description" content="Protótipo experimental Família Fighter 2.0 com seleção de lutadores e arenas.">
+    <title>Família Fighter 2.0 — Protótipo Phaser</title>
+  </head>
+  <body>
+    <main id="prototype">
+      <div id="game-root" aria-label="Arena de luta Família Fighter"></div>
+      <section id="start-screen" class="screen" aria-labelledby="title">
+        <div class="title-card">
+          <p class="eyebrow">PROTÓTIPO EXPERIMENTAL · PHASER 3</p>
+          <h1 id="title">FAMÍLIA<br>FIGHTER 2.0</h1>
+          <p class="matchup">ESCOLHA SEUS <span>LUTADORES</span></p>
+          <button id="start-button" type="button" disabled>CARREGANDO JOGO…</button>
+          <p id="load-status" role="status">Preparando sprites e cenário.</p>
+        </div>
+      </section>
+      <nav id="game-tools" aria-label="Opções da partida" hidden>
+        <button id="pause-button" type="button" aria-label="Pausar partida">PAUSAR</button>
+        <button id="restart-button" type="button">REINICIAR</button>
+        <button id="music-button" type="button" aria-pressed="true">MÚSICA: ON</button>
+        <button id="effects-button" type="button" aria-pressed="true">EFEITOS: ON</button>
+        <button id="character-voice-button" type="button" aria-pressed="true">VOZES: ON</button>
+        <button id="announcer-button" type="button" aria-pressed="true">NARRADOR: ON</button>
+      </nav>
+      <nav id="result-actions" aria-label="Opções após a luta" hidden>
+        <button id="result-restart-button" type="button">REINICIAR LUTA</button>
+        <button id="result-menu-button" type="button">MENU PRINCIPAL</button>
+      </nav>
+      <div id="touch-controls" aria-label="Controles touch" hidden>
+        <div class="touch-movement">
+          <button type="button" data-action="crouch" aria-label="Agachar">AGACHAR</button>
+          <button type="button" data-action="left" aria-label="Mover para esquerda">◀</button>
+          <button type="button" data-action="jump" aria-label="Pular">▲</button>
+          <button type="button" data-action="run" aria-label="Correr">CORRER</button>
+          <button type="button" data-action="right" aria-label="Mover para direita">▶</button>
+          <button type="button" data-action="depth-back" aria-label="Recuar na profundidade">TRÁS</button>
+          <button type="button" data-action="depth" aria-label="Avançar na profundidade">FRENTE</button>
+        </div>
+        <div class="touch-attacks">
+          <button type="button" data-action="punch" aria-label="Soco">SOCO</button>
+          <button type="button" data-action="kick" aria-label="Chute">CHUTE</button>
+          <button type="button" data-action="block" aria-label="Defender">DEFESA</button>
+          <button type="button" data-action="special" aria-label="Especial">ESPECIAL</button>
+        </div>
+      </div>
+    </main>
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>
