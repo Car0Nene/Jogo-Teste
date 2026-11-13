@@ -770,13 +770,14 @@ body[data-touch-size="large"] .control { --size: clamp(68px, 14vh, 96px); font-s
   background: linear-gradient(110deg, #c2185bdd 0 49.6%, #fff 49.6% 50.4%, #e09b0bdd 50.4%);
   overflow: hidden;
 }
-.vs-side { display: grid; justify-items: center; align-content: center; flex: 1; height: 100%; min-width: 0; }
+.vs-side { position: relative; z-index: 1; display: grid; justify-items: center; align-content: center; flex: 1; height: 100%; min-width: 0; }
 .vs-side canvas { width: min(100%, 360px); height: auto; max-height: 72vh; object-fit: contain; }
+#vsArena { position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; opacity: .48; object-fit: cover; filter: brightness(.58) saturate(1.18); }
 .vs-left { animation: vsIn .45s cubic-bezier(.2, .9, .3, 1.2) both; }
 .vs-right { animation: vsIn .45s cubic-bezier(.2, .9, .3, 1.2) both reverse; --dir: 1; }
 .vs-right { animation-name: vsInRight; animation-direction: normal; }
 .vs-name { font: var(--arcade); font-size: clamp(26px, 5vw, 56px); text-shadow: 4px 4px #000a; }
-.vs-center { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; pointer-events: none; }
+.vs-center { position: absolute; inset: 0; z-index: 2; display: grid; place-content: center; justify-items: center; pointer-events: none; }
 .vs-text {
   font: var(--arcade);
   font-size: clamp(70px, 16vw, 180px);

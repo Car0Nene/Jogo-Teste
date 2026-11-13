@@ -91,7 +91,6 @@
     confirm: () => { tone(523, 0.06, 'square', 0.22); tone(1046, 0.1, 'square', 0.22, null, 0.06); },
     win: () => [523, 659, 784, 1046].forEach((f, i) => tone(f, 0.22, 'square', 0.25, null, i * 0.12))
   };
-
   function play(name) {
     if (!state.sound || !SFX[name]) return;
     try {
@@ -286,9 +285,7 @@
     if (musicBus) musicBus.gain.value = 0.16 * state.musicVolume;
     applyTrackVolume();
     if (!state.music) stopMusic();
-    if (!state.voice) {
-      stopSpeech();
-    }
+    if (!state.voice) stopCharacterVoices();
   }
 
   const ANNOUNCER = {
@@ -296,32 +293,70 @@
     final_round: 'final_round.ogg', time: 'time.ogg',
     you_win: 'you_win.ogg', you_lose: 'you_lose.ogg', tie: 'tie.ogg', combo: 'combo.ogg'
   };
+  const ANNOUNCER_TEXT = {
+    fight: 'Fight!', round_1: 'Round one!', round_2: 'Round two!', round_3: 'Round three!',
+    final_round: 'Final round!', time: 'Time!', you_win: 'You win!', you_lose: 'You lose!',
+    tie: 'Tie!', combo: 'Combo!'
+  };
   const activeVoicePlayers = new Set();
+  let activeUtterance = null;
+  let speechToken = 0;
 
-  // Cada fala tem seu próprio player: falas simultâneas não interrompem umas às outras.
-  function playVoicePlayer(player) {
-    if (!state.voice) return false;
+  function releaseVoicePlayer(player) {
+    if (!activeVoicePlayers.delete(player)) return;
+    clearTimeout(player.ffCleanupTimer);
+    player.onended = null;
+    player.onerror = null;
+    player.onloadedmetadata = null;
+    player.pause();
+    player.removeAttribute('src');
+    player.load();
+  }
+
+  // Players independentes permitem diálogos simultâneos sem tocar música/SFX no mesmo canal.
+  function playVoicePlayer(player, onDuration, kind = 'character', onFailure) {
+    if (!state.voice && kind === 'character') return false;
+    player.preload = 'auto';
+    player.playsInline = true;
     player.volume = Math.min(1, state.voiceVolume);
+    player.ffKind = kind;
     activeVoicePlayers.add(player);
-    const release = () => {
-      activeVoicePlayers.delete(player);
-      player.onended = null;
-      player.onerror = null;
+    const release = () => releaseVoicePlayer(player);
+    let failureHandled = false;
+    const fail = () => {
+      if (failureHandled) return;
+      failureHandled = true;
+      release();
+      onFailure?.();
     };
+    const reportDuration = () => {
+      if (Number.isFinite(player.duration) && player.duration > 0) onDuration?.(player.duration);
+    };
+    player.onloadedmetadata = reportDuration;
     player.onended = release;
-    player.onerror = release;
-    player.play().catch(release);
+    player.onerror = () => {
+      console.warn('Falha ao carregar uma fala.', player.currentSrc || player.src);
+      fail();
+    };
+    player.ffCleanupTimer = setTimeout(release, 30000);
+    player.play().then(reportDuration).catch(error => {
+      console.warn('Falha ao reproduzir uma fala.', error);
+      fail();
+    });
     return true;
   }
 
   function playAnnouncer(key) {
     const file = ANNOUNCER[key];
-    if (!file || !state.voice || !state.arcadeAnnouncer) return false;
+    if (!file || !state.arcadeAnnouncer) return false;
     try {
       const url = `assets/voice/arcade/${file}`;
       const player = new window.Audio(url);
-      return playVoicePlayer(player);
-    } catch { return false; }
+      return playVoicePlayer(player, null, 'announcer', () => speak(ANNOUNCER_TEXT[key], 'narrator', true));
+    } catch (error) {
+      console.warn(`Locução arcade "${key}" indisponível.`, error);
+      return false;
+    }
   }
 
   // ---------- Falas gravadas ----------
@@ -377,15 +412,16 @@
     }
   };
   // Toca o trecho e devolve o texto (para o balão); null se não existir.
-  function playClip(who, key) {
+  function playClip(who, key, onDuration) {
     const clip = CLIPS[who] && CLIPS[who][key];
     if (!clip) return null;
     if (state.voice) {
       try {
-        // Um elemento novo permite ocorrências simultâneas do mesmo clipe.
         const el = new window.Audio(clip.url);
-        playVoicePlayer(el);
-      } catch { /* sem áudio */ }
+        playVoicePlayer(el, onDuration, 'character', () => speak(clip.text, 'intro'));
+      } catch (error) {
+        console.warn(`Fala "${who}/${key}" indisponível.`, error);
+      }
     }
     return clip.text;
   }
@@ -397,16 +433,67 @@
     return { track: currentTrack, chiptune: currentSong, paused: el ? el.paused : null, time: el ? Math.round(el.currentTime * 10) / 10 : null, volume: el ? Math.round(el.volume * 100) / 100 : null };
   }
 
-  // Não usar SpeechSynthesis do navegador: a qualidade varia muito e soava robotizada.
-  // As falas continuam legendadas; só os clipes gravados/licenciados produzem voz.
-  function speak() {}
+  // Frases sem gravação usam a voz do dispositivo após um gesto do usuário.
+  // O locutor sempre usa inglês; as falas da conversa inicial seguem o idioma original.
+  function speak(text, voice, priority = false, onEnd) {
+    if (!text || !['narrator', 'intro'].includes(voice)) return false;
+    const synthesis = window.speechSynthesis;
+    if (!synthesis || typeof window.SpeechSynthesisUtterance !== 'function') return false;
+    if (priority) {
+      synthesis.cancel();
+      activeUtterance = null;
+    }
+    const token = ++speechToken;
+    const utterance = new window.SpeechSynthesisUtterance(String(text));
+    const english = voice === 'narrator';
+    const voices = synthesis.getVoices();
+    const preferred = voices.find(item => english
+      ? /^en(-|_)(us|gb|au|ca)\b/i.test(item.lang)
+      : /^pt(-|_)(br|pt)\b/i.test(item.lang));
+    utterance.lang = preferred?.lang || (english ? 'en-US' : 'pt-BR');
+    if (preferred) utterance.voice = preferred;
+    utterance.rate = english ? 0.82 : 0.9;
+    utterance.pitch = english ? 0.68 : 1;
+    utterance.volume = Math.min(1, state.voiceVolume);
+    utterance.onend = () => {
+      if (speechToken === token) {
+        activeUtterance = null;
+        onEnd?.();
+      }
+    };
+    utterance.onerror = event => {
+      if (speechToken === token) {
+        activeUtterance = null;
+        onEnd?.();
+      }
+      if (event.error !== 'canceled' && event.error !== 'interrupted') {
+        console.warn(`Síntese de voz indisponível (${utterance.lang}).`, event.error);
+      }
+    };
+    activeUtterance = utterance;
+    try {
+      synthesis.speak(utterance);
+      return true;
+    } catch (error) {
+      activeUtterance = null;
+      console.warn(`Não foi possível iniciar a síntese de voz (${utterance.lang}).`, error);
+      return false;
+    }
+  }
+
+  function stopCharacterVoices() {
+    for (const player of activeVoicePlayers) {
+      if (player.ffKind === 'character') releaseVoicePlayer(player);
+    }
+  }
+
   function stopSpeech() {
     for (const player of activeVoicePlayers) {
-      try { player.pause(); player.currentTime = 0; } catch { /* ok */ }
-      player.onended = null;
-      player.onerror = null;
+      releaseVoicePlayer(player);
     }
-    activeVoicePlayers.clear();
+    if (window.speechSynthesis && activeUtterance) window.speechSynthesis.cancel();
+    activeUtterance = null;
+    speechToken++;
   }
 
   window.FFAudio = { play, startMusic, stopMusic, pauseMusic, configure, unlock: ensure, speak, stopSpeech, playClip, hasClip, clipDuration, playAnnouncer, debugMusic };

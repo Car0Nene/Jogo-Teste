@@ -629,14 +629,20 @@
   }
 
   function showSay(f, entry) {
-    const clipText = entry.clipKey && Audio.playClip ? Audio.playClip(f.id, entry.clipKey) : null;
+    let bubble = null;
+    const clipText = entry.clipKey && Audio.playClip
+      ? Audio.playClip(f.id, entry.clipKey, duration => {
+        if (bubble) bubble.life = Math.max(bubble.life, duration);
+      })
+      : null;
     const text = clipText || entry.text;
     if (!text) return;
     const clipLife = clipText && Audio.clipDuration ? Audio.clipDuration(f.id, entry.clipKey) : 0;
-    f.say = { text, t: 0, life: Math.max(entry.duration, clipLife, dialogueLife(text)), clipKey: entry.clipKey || '' };
+    bubble = { text, t: 0, life: Math.max(entry.duration, clipLife, dialogueLife(text)), clipKey: entry.clipKey || '' };
+    f.say = bubble;
     f.lastDialogue = text;
     if (entry.clipKey) f.lastVoiceClip = entry.clipKey;
-    else Audio.speak(text, f.id);
+    else if (entry.voice) Audio.speak(text, entry.voice);
   }
 
   function queueSay(f, entry) {
@@ -649,7 +655,7 @@
   }
 
   // important = ignora o intervalo mínimo entre falas (usado em especiais, K.O., vitória)
-  function say(f, key, { important = false, duration = 0, chance = 1, text = '' } = {}) {
+  function say(f, key, { important = false, duration = 0, chance = 1, text = '', voice = '' } = {}) {
     if (!f) return;
     if (!important && (f.sayCooldown > 0 || Math.random() > chance)) return;
     // Usa gravação humana quando existe; sem clipe, mantém apenas a legenda.
@@ -665,13 +671,13 @@
       const alternatives = clipOptions.filter(entry => entry.key !== previousClip);
       const choices = alternatives.length ? alternatives : clipOptions;
       const clipKey = choices[Math.floor(Math.random() * choices.length)].key;
-      queueSay(f, { clipKey, duration });
+      queueSay(f, { clipKey, duration, voice });
       f.sayCooldown = important ? 1.2 : 3.5;
       return;
     }
     const line = text || pickLine((DIALOGUE[f.id] || {})[key], f);
     if (!line) return;
-    queueSay(f, { text: line, duration });
+    queueSay(f, { text: line, duration, voice });
     f.sayCooldown = important ? 1.2 : 3.5;
   }
 
@@ -775,6 +781,7 @@
     if (f.meter < 50) return fizzle(f);
     f.meter -= 50;
     startAttack(f, attack);
+    Audio.speak('Special move!', 'narrator');
     if (lineKey) say(f, lineKey, { important: true, duration: 1.2 });
     return true;
   }
@@ -784,6 +791,7 @@
       if (f.id === 'juraci') {
         if (f.meter < 50 || cameos.some(c => c.kind === 'dada' && c.owner === f)) return fizzle(f);
         f.meter -= 50;
+        Audio.speak('Special move!', 'narrator');
         say(f, 'dada', { important: true, duration: 1.3 });
         spawnCameo('dada', f);
         return true;
@@ -795,6 +803,7 @@
       if (f.id === 'paula') {
         if (f.meter < 50) return fizzle(f);
         startTransform(f, 'paulaFury', f.meter - 50);
+        Audio.speak('Special move!', 'narrator');
         say(f, 'bar', { important: true });
         return true;
       }
@@ -803,6 +812,7 @@
     if (f.id === 'pedro') {
       if (f.meter >= 100 && f.form === 'normal') {
         startTransform(f, 'hulk');
+        Audio.speak('Special move!', 'narrator');
         say(f, 'drink', { important: true, duration: 0.8 });
         return true;
       }
@@ -816,6 +826,7 @@
     if (f.meter < 100) return fizzle(f);
     if (f.id === 'franciely') {
       startTransform(f, 'brava');
+      Audio.speak('Special move!', 'narrator');
       say(f, 'angry', { important: true, duration: 1.1 });
       const o = opponentOf(f);
       if (o.id === 'carlos') {
@@ -832,28 +843,34 @@
       superFreeze = 0.4;
       superOwner = f;
       startAttack(f, 'superL');
+      Audio.speak('Special move!', 'narrator');
       say(f, 'superL', { important: true });
       Audio.play('special');
       return true;
     }
     if (f.id === 'carlos') {
       startTransform(f, f.form === 'gordao' ? 'crente' : f.form === 'crente' ? 'gordao' : f.nextForm);
+      Audio.speak('Special move!', 'narrator');
       f.food = Math.random() < 0.5 ? 'cake' : 'pizza';
       if (f.nextForm === 'gordao') say(f, f.food === 'cake' ? 'eatCake' : 'eatPizza', { important: true, duration: 0.7 });
       else say(f, 'baptize', { important: true, duration: 0.9 });
     } else if (f.id === 'daniel') {
       startTransform(f, 'praia');
+      Audio.speak('Special move!', 'narrator');
       say(f, 'praia', { important: true, duration: 1.1 });
     } else if (f.id === 'paula') {
+      Audio.speak('Special move!', 'narrator');
       superLunch(f);
     } else if (f.id === 'tainara') {
       startTransform(f, 'ricePower');
+      Audio.speak('Special move!', 'narrator');
       say(f, 'rice', { important: true });
     } else {
       f.meter = 0;
       superFreeze = 0.4;
       superOwner = f;
       startAttack(f, 'special');
+      Audio.speak('Special move!', 'narrator');
       say(f, 'special', { important: true });
       Audio.play('special');
       spark(f.x, FLOOR - f.y - 80, '#ffe680', 24);
@@ -911,6 +928,7 @@
     if (f.meter < 50) return fizzle(f);
     f.meter -= 50;
     startAttack(f, 'special');
+    Audio.speak('Special move!', 'narrator');
     say(f, 'children', { important: true });
     Audio.play('special');
     for (let i = 0; i < 4; i++) {
@@ -1095,12 +1113,16 @@
   let announcement = null;
   function announce(text, voice, label, clip = null) {
     let usedClip = false;
+    let currentAnnouncement = null;
     if (clip && Audio.hasClip && Audio.hasClip(clip.who, clip.key)) {
-      const clipText = Audio.playClip(clip.who, clip.key);
+      const clipText = Audio.playClip(clip.who, clip.key, duration => {
+        if (currentAnnouncement) currentAnnouncement.life = Math.max(currentAnnouncement.life, duration);
+      });
       if (clipText) { text = clipText; usedClip = true; }
     }
     const clipLife = usedClip && Audio.clipDuration ? Audio.clipDuration(clip.who, clip.key) : 0;
-    announcement = { text, label, t: 0, life: Math.max(clipLife, dialogueLife(text, 1.8)) };
+    currentAnnouncement = { text, label, t: 0, life: Math.max(clipLife, dialogueLife(text, 1.8)) };
+    announcement = currentAnnouncement;
     if (!usedClip) Audio.speak(text, voice);
   }
 
@@ -1776,6 +1798,7 @@
 
   // prepareOnly: só monta a luta (usado pela tela VS, que começa a luta depois)
   function startMatch(prepareOnly = false) {
+    Audio.stopSpeech();
     const p1 = settings.fighter;
     const p2 = resolveOpponent();
     const mode = settings.mode;
@@ -1790,7 +1813,7 @@
     ensureStage(match.stage);
     $('#heavyLabel').textContent = CHARS[p1].heavyLabel;
     $('[data-act="heavy"]').setAttribute('aria-label', CHARS[p1].heavyLabel === 'CHUTE' ? 'Chute' : 'Golpe forte');
-    startRound();
+    startRound(prepareOnly);
     if (mode === 'training') fighters[1].trainingHomeX = fighters[1].x;
     paused = false;
     Audio.unlock();
@@ -1808,7 +1831,7 @@
     else Audio.startMusic(settings.fightMusic === 'theme' ? 'theme' : STAGE_MUSIC[match.stage] || 'theme', 0.6);
   }
 
-  function startRound() {
+  function startRound(deferIntroAudio = false) {
     for (const f of fighters) resetFighterForRound(f);
     projectiles = [];
     effects = [];
@@ -1834,8 +1857,10 @@
       match.sub = 'talk';
       match.skipTalk = false;
       match.talk = { lines: options[Math.floor(Math.random() * options.length)], i: -1, next: 0.35 };
+      match.introVoicePending = false;
     } else {
-      beginIntro();
+      match.introVoicePending = deferIntroAudio;
+      if (!deferIntroAudio) beginIntro();
     }
   }
 
@@ -1844,7 +1869,8 @@
     if (!(Audio.playAnnouncer && Audio.playAnnouncer(
       (match.wins[0] >= match.winsNeeded - 1 || match.wins[1] >= match.winsNeeded - 1) ? 'final_round' : `round_${match.round}`))) {
       const finalRound = match.wins[0] >= match.winsNeeded - 1 || match.wins[1] >= match.winsNeeded - 1;
-      Audio.speak(`${finalRound ? 'Rodada decisiva!' : `Rodada ${match.round}.`} ${CHARS[fighters[0].id].name} contra ${CHARS[fighters[1].id].name}!`, 'narrator');
+      const round = ['one', 'two', 'three'][match.round - 1] || String(match.round);
+      Audio.speak(`${finalRound ? 'Final round!' : `Round ${round}!`} ${CHARS[fighters[0].id].name} versus ${CHARS[fighters[1].id].name}!`, 'narrator', true);
     }
     match.sub = 'intro';
     match.t = 0;
@@ -1862,7 +1888,7 @@
     const line = pickLine([text], f);
     const duration = dialogueLife(line, 1.7);
     for (const other of fighters) if (other !== f) { other.say = null; other.sayQueue = []; }
-    say(f, '', { important: true, text: line, duration });
+    say(f, '', { important: true, text: line, duration, voice: 'intro' });
     talk.next = match.t + duration + 0.12;
   }
 
@@ -1872,7 +1898,7 @@
     match.roundWinner = att.slot;
     match.perfect = att.hp === MAX_HP;
     say(def, 'lose', { important: true });
-    Audio.speak(`K.O.! ${CHARS[att.id].name} venceu o round!`, 'narrator', true);
+    Audio.speak(`Knockout! ${CHARS[att.id].name} wins the round!`, 'narrator', true);
     Audio.play('ko');
   }
 
@@ -1918,7 +1944,7 @@
           match.sub = 'fight';
           match.t = 0;
           Audio.play('fight');
-          if (!(Audio.playAnnouncer && Audio.playAnnouncer('fight'))) Audio.speak('Lutem!', 'narrator', true);
+          if (!(Audio.playAnnouncer && Audio.playAnnouncer('fight'))) Audio.speak('Fight!', 'narrator', true);
         }
         break;
       case 'fight':
@@ -1935,10 +1961,7 @@
           match.t = 0;
           const [a, b] = fighters;
           match.roundWinner = a.hp === b.hp ? -1 : a.hp > b.hp ? 0 : 1;
-          const timeCall = match.roundWinner < 0
-            ? 'Tempo! Empate neste round.'
-            : `Tempo! ${CHARS[fighters[match.roundWinner].id].name} vence o round!`;
-          if (!(Audio.playAnnouncer && Audio.playAnnouncer('time'))) Audio.speak(timeCall, 'narrator', true);
+          if (!(Audio.playAnnouncer && Audio.playAnnouncer('time'))) Audio.speak('Time!', 'narrator', true);
           Audio.play('ko');
         }
         break;
@@ -2014,6 +2037,7 @@
   function showResult() {
     if (match.resultShown) return;
     match.resultShown = true;
+    Audio.stopSpeech();
     const [a, b] = fighters;
     const [wa, wb] = match.wins;
     const versus = match.mode === 'versus';
@@ -2055,9 +2079,9 @@
       particles.push({ kind: 'confetti', x: camX + rand(0, worldW), y: FLOOR - rand(220, 500), vx: rand(-100, 100), vy: rand(-220, -80), life: rand(1.8, 3), max: 3, color: palette[i % palette.length], size: rand(4, 9), spin: rand(-5, 5) });
     }
     if (match.perfect) Audio.play('perfect');
-    const portugueseWinClip = winnerSlot === 0 && settings.voice && Audio.hasClip?.('narrator', 'victory');
-    if (portugueseWinClip) Audio.playClip('narrator', 'victory');
-    else if (!(Audio.playAnnouncer && Audio.playAnnouncer(winnerSlot < 0 ? 'tie' : winnerSlot === 0 ? 'you_win' : 'you_lose'))) Audio.speak(title, 'narrator', true);
+    if (!(Audio.playAnnouncer && Audio.playAnnouncer(winnerSlot < 0 ? 'tie' : winnerSlot === 0 ? 'you_win' : 'you_lose'))) {
+      Audio.speak(winnerSlot < 0 ? 'Tie!' : winnerSlot === 0 ? 'You win!' : 'You lose!', 'narrator', true);
+    }
     Audio.startMusic('theme');
     if (!versus) void Account.recordMatch(outcome, a.id);
   }
@@ -3735,19 +3759,20 @@
       case 'intro':
         if (t < 1.1) {
           const decisive = match.wins[0] >= match.winsNeeded - 1 || match.wins[1] >= match.winsNeeded - 1;
-          banner(decisive ? 'ROUND DECISIVO' : `ROUND ${match.round}`, stageNames[match.stage], t);
+          const round = ['ONE', 'TWO', 'THREE'][match.round - 1] || String(match.round);
+          banner(decisive ? 'FINAL ROUND' : `ROUND ${round}`, stageNames[match.stage], t);
         } else {
-          banner('LUTEM!', '', t - 1.1, '#ff6b3d');
+          banner('FIGHT!', '', t - 1.1, '#ff6b3d');
         }
         break;
       case 'fight':
-        if (t < 0.5) banner('LUTEM!', '', 0.2 + t, '#ff6b3d');
+        if (t < 0.5) banner('FIGHT!', '', 0.2 + t, '#ff6b3d');
         break;
       case 'ko':
         if (t > 0.15) banner('K.O.!', match.perfect ? 'PERFEITO!' : '', t - 0.15, '#ff3b3b');
         break;
       case 'timeup':
-        banner('TEMPO!', '', t, '#ffd23f');
+        banner('TIME!', '', t, '#ffd23f');
         break;
       case 'roundEnd': {
         const w = match.roundWinner;
@@ -4231,6 +4256,7 @@
       settings.fighter = id;
       saveSettings();
       Audio.play('confirm');
+      Audio.speak(`${CHARS[id].name}! Choose your opponent!`, 'narrator');
       flow.phase = 'p2';
       flow.cursor = settings.opponent && rosterIds().includes(settings.opponent) ? settings.opponent : 'auto';
       refreshChars();
@@ -4247,6 +4273,7 @@
     flow.stageCursor = settings.stage;
     setApp('stage');
     refreshStageScreen();
+    Audio.speak('Choose your arena!', 'narrator');
   }
 
   function refreshStageScreen() {
@@ -4310,6 +4337,7 @@
   function openOptions() {
     setApp('options');
     refreshOptions();
+    Audio.speak('Get ready for the fight!', 'narrator');
   }
 
   function refreshOptions() {
@@ -4346,18 +4374,44 @@
     setApp('vs');
     Audio.play('fight');
     clearTimeout(vsTimer);
-    vsTimer = setTimeout(beginFight, 2300);
+    const introduction = `Introducing ${CHARS[a.id].name}! Versus ${CHARS[b.id].name}!`;
+    if (Audio.speak(introduction, 'narrator', true, beginFight)) {
+      vsTimer = setTimeout(beginFight, 7000);
+    } else {
+      vsTimer = setTimeout(beginFight, 2300);
+    }
   }
   function drawVersus() {
     if (!fighters.length) return;
+    const arena = $('#vsArena');
+    const arenaContext = arena.getContext('2d');
+    const stage = stageThumb(match.stage);
+    const stageScale = Math.max(arena.width / stage.width, arena.height / stage.height);
+    const stageWidth = stage.width * stageScale;
+    const stageHeight = stage.height * stageScale;
+    arenaContext.clearRect(0, 0, arena.width, arena.height);
+    arenaContext.drawImage(stage,
+      (arena.width - stageWidth) / 2 + Math.sin(clock * 0.3) * 10,
+      (arena.height - stageHeight) / 2,
+      stageWidth, stageHeight);
+    const shade = arenaContext.createLinearGradient(0, 0, 0, arena.height);
+    shade.addColorStop(0, 'rgba(12, 8, 24, .38)');
+    shade.addColorStop(1, 'rgba(12, 8, 24, .72)');
+    arenaContext.fillStyle = shade;
+    arenaContext.fillRect(0, 0, arena.width, arena.height);
     drawBigFighter($('.vs-left canvas'), fighters[0].id, false);
     drawBigFighter($('.vs-right canvas'), fighters[1].id, true, fighters[1].alt);
   }
   function beginFight() {
     clearTimeout(vsTimer);
     if (app !== 'vs') return;
+    Audio.stopSpeech();
     setApp('fight');
     playFightMusic();
+    if (match?.introVoicePending) {
+      match.introVoicePending = false;
+      beginIntro();
+    }
     if (matchMedia('(pointer: coarse)').matches) void enterFullscreen();
   }
 
@@ -4618,6 +4672,7 @@
   $('#splashStart').addEventListener('click', () => {
     Audio.unlock();
     Audio.play('confirm');
+    Audio.speak('Welcome to Family Fighter! Choose your fighter!', 'narrator', true);
     Audio.startMusic('theme');
     openChars('p1');
   });
@@ -4625,7 +4680,9 @@
   $('#trainingQuickStart').addEventListener('click', () => {
     settings.mode = 'training';
     saveSettings();
+    Audio.unlock();
     Audio.play('confirm');
+    Audio.speak('Welcome to Family Fighter! Choose your fighter!', 'narrator', true);
     openChars('p1');
   });
   $('#pauseSettings').addEventListener('click', () => openMenuDialog('CONFIGURAÇÕES', SETTINGS_TEXT, true));

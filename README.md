@@ -33,7 +33,7 @@ Jogo de luta arcade em HTML Canvas e JavaScript puro (sem build), com a família
 - **Companheiro do Daniel:** o cão caramelo não é selecionável. Ele entra automaticamente de tempos em tempos para atacar o adversário ou proteger Daniel quando a vida dele está baixa.
 - **Pose de apresentação:** cada personagem aparece na seleção com uma pose característica.
 - **Corrida curta:** toque duas vezes para frente para correr por um instante; também funciona com teclado e gamepad.
-- **Locução arcade:** anúncios de rodada, início, combos, tempo e resultado com clipes humanos CC0 em inglês, ativados separadamente nas configurações.
+- **Locução arcade:** anúncios de rodada, início, combos, tempo e resultado com clipes humanos CC0 em inglês; o narrador permanece ativo independentemente do controle de vozes dos personagens.
 - **Vozes gravadas dos personagens:** os clipes do Pedro, Daniel, Tainara e Gabi entram nos golpes e cenas correspondentes; as falas aparecem legendadas. Os arquivos foram nivelados, aparados e convertidos para MP3.
 - **Impacto mais claro:** flashes, hitstop, vibração, sons de contagem regressiva e faíscas ajudam a destacar golpes e rounds decisivos.
 - **HUD e resultado polidos:** vida numérica e colorida, especiais com marca de meia barra, combos em destaque e retratos dos lutadores com confete no resultado.
@@ -45,7 +45,7 @@ Jogo de luta arcade em HTML Canvas e JavaScript puro (sem build), com a família
 - **Atalho para treino:** botão dedicado na tela inicial, além da seleção de modo na escolha do lutador.
 - **Treino avançado:** painel ao vivo com dano acumulado, maior combo e últimos comandos; o alvo pode ficar parado ou defender. Reinicie posição e estatísticas pelo menu de pausa ou use `Shift + R`.
 - **Locutor arcade em inglês:** falas em inglês nos rounds, início, combos, tempo e resultado. Sempre ativo e funciona offline.
-- **Locução de vitória em português:** o clipe enviado ao repositório é usado quando o jogador vence e também funciona offline.
+- **Introdução cinematográfica:** após o toque em JOGAR, o narrador dá as boas-vindas, apresenta os lutadores em inglês na tela VS e aguarda essa fala antes de iniciar a luta.
 - **Configurações compactas:** áudio, acessibilidade/celular e teclado ficam em seções recolhíveis para facilitar o uso em telas pequenas.
 - **Lista de golpes contextual:** disponível antes da luta e na pausa; no versus mostra os comandos e golpes de cada jogador conforme as teclas configuradas.
 - **Teclas remapeáveis no versus:** configure separadamente 1P e 2P; conflitos entre os dois conjuntos são trocados automaticamente.
@@ -87,13 +87,19 @@ A música tema **"Bolo da Juraci"** toca nos menus e, por padrão, também duran
 ## Falas e conversas
 
 - **Conversa antes da luta** no 1º round (balões de quadrinho; qualquer botão ou toque pula).
-- **Narrador:** os anúncios aparecem como texto; o locutor arcade humano em inglês é opcional nas configurações. A síntese robotizada do navegador foi removida.
+- **Narrador:** os anúncios usam gravações arcade em inglês quando disponíveis. A abertura, a apresentação dos lutadores e frases sem gravação usam a voz em inglês do dispositivo após interação do usuário.
 - **Juraci** grita "BOLO DE CENOURA!" no especial, dá bronca nos combos e comemora a vitória.
 - **Carlos** no especial **Gordão** come um bolo ou uma pizza (com mordidas e farelos) e engorda; no **Modo Fé** é batizado com água e luz do céu e grita "Aleluia!".
 - **Pedro** fala ao fazer combo e ao beber a cerveja; **Daniel** anuncia a praia; **Tainara** responde quando ele pede uma bebida; **Gabi** canta no especial.
 - Frases ao derrubar, ser nocauteado e vencer.
-- **Vozes:** o jogo toca gravações humanas disponíveis e mantém as demais falas como legendas. Vozes sintéticas do navegador estão desativadas.
+- **Vozes:** cada gravação tem um player independente; personagens podem falar simultaneamente sem interromper música ou efeitos. Os players são liberados ao terminar/falhar e as legendas são estendidas pela duração real informada pelo navegador.
 - **Vozes complementares:** novas amostras entram em falas correspondentes; Paula, Tainara e o Cão do Daniel também têm clipes para os dois especiais de cada um. As gravações originais continuam disponíveis. O áudio de narrador que mistura momentos diferentes fica em `art-source/audio/references/`, sem tocar fora de contexto.
+
+O botão **JOGAR** desbloqueia a reprodução exigida pelos navegadores e inicia "Welcome to Family Fighter! Choose your fighter!". A tela VS anuncia os dois nomes antes de tocar a locução da rodada. A conversa de introdução usa a síntese em português quando não há gravação correspondente. A voz e o timbre da síntese podem variar conforme o navegador e as vozes instaladas no dispositivo.
+
+**Inventário de Gabi:** `assets/voice/gabi-canto.mp3` é usado no especial de canto e `assets/voice/generated/gabi-amor-e-luta.mp3` na vitória. Não existe gravação publicada com o texto "FAZ O L" do especial principal; o jogo não associa a esse golpe uma gravação incorreta. O narrador em inglês anuncia o especial. Para adicionar uma fala específica, grave-a como `assets/voice/gabi-super-l.mp3`, cadastre-a em `js/audio.js` e inclua-a no precache de `sw.js`.
+
+O Bar da Simone e a Praia já usam camadas separadas de fundo/primeiro plano, parallax de câmera, chão com perspectiva, sombras de contato e iluminação por lutador; o mar tem ondas animadas e o letreiro do Bar pulsa. Esses efeitos são desenhados no Canvas sem dependências adicionais.
 
 Todas as frases ficam em **`js/dialogue.js`** — dá para editar ou acrescentar sem mexer no resto do código.
 
