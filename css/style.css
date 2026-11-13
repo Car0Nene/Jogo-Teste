@@ -710,7 +710,7 @@ body[data-touch-size="large"] .control { --size: clamp(68px, 14vh, 96px); font-s
 }
 .stage-tile {
   position: relative;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: 5 / 3;
   padding: 0;
   border: 3px solid #ffffff35;
   border-radius: 10px;

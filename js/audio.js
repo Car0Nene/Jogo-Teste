@@ -436,7 +436,7 @@
   // Frases sem gravação usam a voz do dispositivo após um gesto do usuário.
   // O locutor sempre usa inglês; as falas da conversa inicial seguem o idioma original.
   function speak(text, voice, priority = false, onEnd) {
-    if (!text || !['narrator', 'intro'].includes(voice)) return false;
+    if (!text || typeof voice !== 'string' || !voice) return false;
     const synthesis = window.speechSynthesis;
     if (!synthesis || typeof window.SpeechSynthesisUtterance !== 'function') return false;
     if (priority) {
