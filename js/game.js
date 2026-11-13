@@ -692,12 +692,11 @@
       drink: { clip: 'drink', chance: 1 },
       win: { clip: 'fumaBebe', chance: 1 }
     },
-    daniel: { praia: [{ clip: 'praia', chance: 1 }, { clip: 'preparativos', chance: 1 }] },
+    daniel: { praia: { clip: 'praia', chance: 1 } },
     gabi: { sing: { clip: 'sing', chance: 1 }, win: { clip: 'amor', chance: 1 } },
     juraci: { win: { clip: 'cozinha', chance: 1 } },
     carlos: { win: { clip: 'pizzaAmor', chance: 1 } },
     paula: { lunch: { clip: 'lunch', chance: 1 }, bar: { clip: 'bar', chance: 1 } },
-    tainara: { rice: { clip: 'rice', chance: 1 }, children: { clip: 'children', chance: 1 } },
   };
 
   const opponentOf = f => fighters[1 - f.slot];
@@ -1095,10 +1094,8 @@
     const allowed = Math.random() < 0.5;
     const lines = (DIALOGUE.daniel || {})[allowed ? 'wifeYes' : 'wifeNo'];
     const response = pickLine(lines, f) || (allowed ? 'Pode, amor!' : 'NÃO!');
-    const wifeClip = allowed ? null : {
-      who: 'tainara', key: Math.random() < 0.5 ? 'trabalho' : 'respostaCompleta'
-    };
-    announce(response, 'tainara', 'TAINARA', wifeClip);
+    const tainaraClip = allowed ? null : { who: 'tainara', key: 'trabalho' };
+    announce(response, '', 'TAINARA', tainaraClip);
     if (allowed) {
       f.hp = Math.min(MAX_HP, f.hp + 150);
       f.drinkT = 1.6;

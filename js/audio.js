@@ -375,8 +375,7 @@
       fumaBebe: { url: 'assets/voice/generated/pedro-fuma-bebe-vence.mp3', text: 'Fuma, bebe e vence! Simone, desce uma gelada!' }
     },
     daniel: {
-      praia: { url: 'assets/voice/daniel-praia.mp3', text: 'Praia, praia! Eu vou fazer as malas!', duration: 3.86 },
-      preparativos: { url: 'assets/voice/generated/daniel-preparativos-praia.mp3', text: 'Praia, praia! Eu vou fazer as malas!' }
+      praia: { url: 'assets/voice/daniel-praia.mp3', text: 'Praia, praia! Eu vou fazer as malas!', duration: 3.86, fallbackToSpeech: false }
     },
     gabi: {
       sing: { url: 'assets/voice/gabi-canto.mp3', text: '♪ Gabi canta ♪', duration: 3.95 },
@@ -396,10 +395,7 @@
       bar: { url: 'assets/voice/generated/paula-bar-simone.mp3', text: 'Pedro! Bar Simone! Pedro? Ah, agora eu fiquei brava!' }
     },
     tainara: {
-      trabalho: { url: 'assets/voice/tainara-trabalho.mp3', text: 'Daniel deve estar sem internet, foi trabalhar hoje.', duration: 3.74 },
-      respostaCompleta: { url: 'assets/voice/generated/tainara-daniel-indo-trabalhar.mp3', text: 'Daniel deve estar sem internet, foi trabalhar hoje. Nem pensar, Daniel!' },
-      rice: { url: 'assets/voice/generated/tainara-poder-do-arroz.mp3', text: 'Poder do arroz! Com arroz eu fico invencível!' },
-      children: { url: 'assets/voice/generated/tainara-cuidado-em-dobro.mp3', text: 'Crianças, comigo! Cuidado em dobro! Agora é bagunça boa!' }
+      trabalho: { url: 'assets/voice/tainara-trabalho.mp3', text: 'Daniel deve estar sem internet, foi trabalhar hoje.', duration: 3.74, fallbackToSpeech: false }
     },
     cao: {
       lick: { url: 'assets/voice/generated/cao-lambida-poderosa.mp3', text: 'Au au! Lambida poderosa! Sai da frente, humano!' },
@@ -416,7 +412,8 @@
     if (state.voice) {
       try {
         const el = new window.Audio(clip.url);
-        playVoicePlayer(el, onDuration, 'character', () => speak(clip.text, 'intro'));
+        const onFailure = clip.fallbackToSpeech === false ? undefined : () => speak(clip.text, 'intro');
+        playVoicePlayer(el, onDuration, 'character', onFailure);
       } catch (error) {
         console.warn(`Fala "${who}/${key}" indisponível.`, error);
       }
