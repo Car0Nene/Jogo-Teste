@@ -378,10 +378,6 @@
       praia: { url: 'assets/voice/daniel-praia.mp3', text: 'Praia, praia! Eu vou fazer as malas!', duration: 3.86 },
       preparativos: { url: 'assets/voice/generated/daniel-preparativos-praia.mp3', text: 'Praia, praia! Eu vou fazer as malas!' }
     },
-    esposa: {
-      trabalho: { url: 'assets/voice/tainara-trabalho.mp3', text: 'Daniel deve estar sem internet, foi trabalhar hoje.', duration: 3.74 },
-      respostaCompleta: { url: 'assets/voice/generated/tainara-daniel-indo-trabalhar.mp3', text: 'Daniel deve estar sem internet, foi trabalhar hoje. Nem pensar, Daniel!' }
-    },
     gabi: {
       sing: { url: 'assets/voice/gabi-canto.mp3', text: '♪ Gabi canta ♪', duration: 3.95 },
       amor: { url: 'assets/voice/generated/gabi-amor-e-luta.mp3', text: 'Porque amor também é luta! Vinícius, eu venci!' }
@@ -400,6 +396,8 @@
       bar: { url: 'assets/voice/generated/paula-bar-simone.mp3', text: 'Pedro! Bar Simone! Pedro? Ah, agora eu fiquei brava!' }
     },
     tainara: {
+      trabalho: { url: 'assets/voice/tainara-trabalho.mp3', text: 'Daniel deve estar sem internet, foi trabalhar hoje.', duration: 3.74 },
+      respostaCompleta: { url: 'assets/voice/generated/tainara-daniel-indo-trabalhar.mp3', text: 'Daniel deve estar sem internet, foi trabalhar hoje. Nem pensar, Daniel!' },
       rice: { url: 'assets/voice/generated/tainara-poder-do-arroz.mp3', text: 'Poder do arroz! Com arroz eu fico invencível!' },
       children: { url: 'assets/voice/generated/tainara-cuidado-em-dobro.mp3', text: 'Crianças, comigo! Cuidado em dobro! Agora é bagunça boa!' }
     },

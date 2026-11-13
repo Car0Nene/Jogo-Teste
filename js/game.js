@@ -1096,9 +1096,9 @@
     const lines = (DIALOGUE.daniel || {})[allowed ? 'wifeYes' : 'wifeNo'];
     const response = pickLine(lines, f) || (allowed ? 'Pode, amor!' : 'NÃO!');
     const wifeClip = allowed ? null : {
-      who: 'esposa', key: Math.random() < 0.5 ? 'trabalho' : 'respostaCompleta'
+      who: 'tainara', key: Math.random() < 0.5 ? 'trabalho' : 'respostaCompleta'
     };
-    announce(response, 'esposa', 'ESPOSA DO DANIEL', wifeClip);
+    announce(response, 'tainara', 'TAINARA', wifeClip);
     if (allowed) {
       f.hp = Math.min(MAX_HP, f.hp + 150);
       f.drinkT = 1.6;
