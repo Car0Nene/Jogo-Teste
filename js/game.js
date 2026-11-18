@@ -1988,7 +1988,16 @@
     }
   }
 
+  let renderAlpha = 1;
+  let prevCamX = 0;
+  let prevCamTop = 0;
+  function snapshotForInterpolation() {
+    for (const f of fighters) { f.px = f.x; f.py = f.y; }
+    prevCamX = camX; prevCamTop = camTop;
+  }
+
   function tick(dt) {
+    snapshotForInterpolation();
     clock += dt;
     updateEffects(dt);
     shake = Math.max(0, shake - dt * 30);
@@ -2862,6 +2871,62 @@
     return stageCache;
   }
 
+  // ----------------------------------------------------------------------
+  // Primeiro plano em profundidade (2.5D): plantas desfocadas passando MAIS rápido que o
+  // chão, na frente dos lutadores, e escurecimento do chão perto da câmera.
+  // ----------------------------------------------------------------------
+  const FG_PARALLAX = 1.35; // altura do primeiro plano fica abaixo dos pés (y > FLOOR)
+  const FG_COLORS = {
+    padaria: ['#3d6b34', '#2a4d2b', '#7a3b2a'],
+    quintal: ['#2f6a35', '#245428', '#6b4a2a'],
+    festa: ['#1d3b2a', '#142d22', '#4a2a1d'],
+    bar: ['#1f5a3a', '#164a31', '#5a2a3d'],
+    praia: ['#2c7a3c', '#1f6030', '#8a6a3a']
+  };
+  let depthFg = null;
+  function ensureDepthFg(name, k) {
+    if (depthFg && depthFg.name === name && depthFg.k === k) return depthFg;
+    const width = Math.ceil(STAGE_W * FG_PARALLAX);
+    const [c, g] = layer(width, k);
+    const palette = FG_COLORS[name] || FG_COLORS.padaria;
+    const rnd = seeded(name.length * 31 + 5);
+    const hasBlur = 'filter' in g;
+    for (let x = 80; x < width; x += 430 + rnd() * 260) {
+      const h = 38 + rnd() * 34;
+      if (hasBlur) g.filter = 'blur(5px)';
+      g.save();
+      g.translate(x, H + 6);
+      for (let i = 0; i < 7; i++) {
+        const a = (i - 3) * 0.28 + rnd() * 0.12;
+        g.fillStyle = palette[i % 2];
+        g.globalAlpha = 0.9;
+        g.beginPath();
+        g.ellipse(Math.sin(a) * h * 0.5, -Math.cos(a) * h * 0.5, 14 + rnd() * 8, h * (0.5 + rnd() * 0.2), a, 0, Math.PI * 2);
+        g.fill();
+      }
+      g.fillStyle = palette[2]; g.globalAlpha = 1;
+      g.fillRect(-26, -26, 52, 40); // vaso
+      g.restore();
+      if (hasBlur) g.filter = 'none';
+    }
+    // chão escurece em direção ao espectador
+    const floor = g.createLinearGradient(0, FLOOR + 20, 0, H);
+    floor.addColorStop(0, 'rgba(8,6,18,0)');
+    floor.addColorStop(1, 'rgba(8,6,18,0.38)');
+    g.fillStyle = floor;
+    g.fillRect(0, FLOOR + 20, width, H - FLOOR - 20);
+    depthFg = { name, k, canvas: c };
+    return depthFg;
+  }
+
+  function drawDepthForeground(cam) {
+    if (!stageCache || !match) return;
+    const d = ensureDepthFg(match.stage, stageCache.k);
+    const k = d.k;
+    const sx = Math.min(cam * FG_PARALLAX, d.canvas.width / k - worldW) * k;
+    ctx.drawImage(d.canvas, Math.max(0, sx), 0, worldW * k, H * k, 0, 0, worldW, H);
+  }
+
   function drawStage(cam) {
     const s = stageCache;
     if (!s) return;
@@ -3138,18 +3203,22 @@
     const s = f.ch.scale * heightCorrection;
     const img = f.alt && altAtlas ? altAtlas : atlas;
     ctx.save();
-    ctx.translate(x + pose.dx * f.facing, footY + (pose.dy || 0));
+    // alinha ao pixel real da tela: evita o "tremer" e a borda borrada dos sprites
+    const px = Math.round((x + pose.dx * f.facing) * ZOOM * renderScale) / (ZOOM * renderScale);
+    const py = Math.round((footY + (pose.dy || 0)) * ZOOM * renderScale) / (ZOOM * renderScale);
+    ctx.translate(px, py);
     if (pose.rot) ctx.rotate(pose.rot * f.facing);
-    ctx.scale(f.facing * s * pose.sx, s * pose.sy);
+    // esticar ao subir e achatar ao cair dá peso e profundidade ao pulo
+    const airStretch = f.y > 0 && !pose.rot && f.state !== 'hitstun' ? clamp(Math.abs(f.vy || 0) / 5200, 0, 0.1) : 0;
+    ctx.scale(f.facing * s * pose.sx * (1 - airStretch * 0.6), s * pose.sy * (1 + airStretch));
     const blink = (f.flash > 0 || (f.invuln > 0 && f.state === 'getup') || (f.state === 'idle' && f.invuln > 0))
       && Math.floor(clock * 30) % 2 === 0;
     if (blink) ctx.globalAlpha = 0.55;
-    ctx.shadowColor = f.flash > 0 && !settings.reducedEffects ? '#fff2b8' : '#090712aa';
-    ctx.shadowBlur = f.flash > 0 && !settings.reducedEffects ? 14 : 8;
-    ctx.shadowOffsetY = 3;
+    // brilho só ao levar golpe; fora isso nada de halo borrado (sombra é desenhada no chão)
+    if (f.flash > 0 && !settings.reducedEffects) { ctx.shadowColor = '#fff2b8'; ctx.shadowBlur = 12; }
+    ctx.imageSmoothingQuality = 'high';
     ctx.drawImage(img, sx, sy, sw, sh, -ax / AS, -ay / AS, sw / AS, sh / AS);
     ctx.shadowBlur = 0;
-    ctx.shadowOffsetY = 0;
     ctx.restore();
     if (f.state === 'transform' && f.nextForm === 'gordao' && f.t < 0.85) drawFood(f, x, footY);
     drawHeldItems(f);
@@ -3837,6 +3906,26 @@
   // Render principal
   // ======================================================================
   function render() {
+    const interpolate = app === 'fight' && renderAlpha < 1 && fighters.length && fighters.every(f => f.px !== undefined);
+    if (!interpolate) { renderScene(); return; }
+    const real = fighters.map(f => [f.x, f.y]);
+    const realCam = camX, realTop = camTop;
+    const lerp = (a, b) => a + (b - a) * renderAlpha;
+    try {
+      fighters.forEach(f => {
+        // teleporte (novo round): não interpola
+        if (Math.abs(f.x - f.px) < 120) f.x = lerp(f.px, f.x);
+        f.y = lerp(f.py, f.y);
+      });
+      camX = lerp(prevCamX, camX); camTop = lerp(prevCamTop, camTop);
+      renderScene();
+    } finally {
+      fighters.forEach((f, i) => { f.x = real[i][0]; f.y = real[i][1]; });
+      camX = realCam; camTop = realTop;
+    }
+  }
+
+  function renderScene() {
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.fillStyle = '#100d20';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -3893,6 +3982,7 @@
         }
       }
       ctx.globalAlpha = 1;
+      if (!settings.reducedEffects) drawDepthForeground(camX);
     }
     ctx.restore();
     if ((app === 'fight' || app === 'result') && match) {
@@ -3931,7 +4021,9 @@
         steps++;
       }
       if (steps === 5) accumulator = 0;
+      renderAlpha = clamp(accumulator / STEP, 0, 1);
     } else {
+      renderAlpha = 1;
       accumulator = 0;
       clock += dt;
       if (app === 'result') updateEffects(dt);
