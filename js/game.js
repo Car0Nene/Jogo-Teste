@@ -736,6 +736,7 @@
     if (!move) return false;
     f.state = 'attack';
     f.t = 0;
+    f.dashStrike = false;
     f.attackId = (f.attackId || 0) + 1;
     f.move = move;
     f.moveName = name;
@@ -1277,6 +1278,12 @@
         f.lastForwardTap = clock;
       }
     }
+    const backHeld = f.facing > 0 ? f.held.left && !f.held.right : f.held.right && !f.held.left;
+    if (!f.isCpu && backHeld && !f.prevBack) {
+      if (clock - (f.lastBackTap ?? -1) <= 0.28) { f.backDashReq = true; f.lastBackTap = -1; }
+      else f.lastBackTap = clock;
+    }
+    f.prevBack = backHeld;
     if (!forwardHeld) f.dashTime = 0;
     f.prevForward = forwardHeld;
     f.dashTime = Math.max(0, f.dashTime - dt);
@@ -1307,6 +1314,9 @@
       case 'attack':
         attackStep(f);
         break;
+      case 'backdash':
+        if (f.t >= 0.3) toNeutral(f);
+        break;
       case 'hitstun': case 'blockstun':
         if (f.t >= f.stun && grounded(f)) toNeutral(f);
         break;
@@ -1332,15 +1342,40 @@
       default:
         break;
     }
+    if (!NEUTRAL.has(f.state)) f.backDashReq = false;
     physics(f, dt);
   }
 
   function neutral(f) {
     faceOpponent(f);
+    if (f.backDashReq) {
+      f.backDashReq = false;
+      if (grounded(f) && f.state !== 'crouch') {
+        // esquiva para trás: salto curto com invulnerabilidade rápida
+        f.state = 'backdash';
+        f.t = 0;
+        f.vx = -f.facing * f.ch.back * 3.6 * speedMul(f);
+        f.invuln = Math.max(f.invuln, 0.16);
+        Audio.play('dash');
+        dust(f.x, 0.6);
+        return;
+      }
+    }
     const action = takeAction(f, ['jump', 'special', 'light', 'heavy']);
     if (action === 'jump') { f.state = 'jumpsquat'; f.t = 0; return; }
     if (action === 'special') { trySpecial(f, Boolean(f.held.down)); return; }
-    if (action === 'light' || action === 'heavy') { startAttack(f, action); return; }
+    if (action === 'light' || action === 'heavy') {
+      const wasRunning = f.state === 'run';
+      if (startAttack(f, action) && wasRunning && f.move) {
+        // golpe em corrida ("voadora"): avança, bate mais forte e é mais punível
+        const m = f.move;
+        f.move = { ...m, damage: Math.round(m.damage * 1.2), push: (m.push || 200) * 1.25, chain: undefined, recovery: m.recovery + 0.05 };
+        f.vx = f.facing * Math.max(380, m.lunge || 0);
+        f.dashStrike = true;
+        dust(f.x, 0.7);
+      }
+      return;
+    }
     const h = f.held;
     if (h.guard) { setState(f, 'guard'); f.crouchGuard = h.down; f.vx = 0; return; }
     if (h.down) { setState(f, 'crouch'); f.vx = 0; return; }
@@ -2295,6 +2330,68 @@
       },
       animate(g, cam, t) {
         g.save();
+        const reduced = settings.reducedEffects;
+        // reflexo que varre as vitrines de tempos em tempos
+        for (const wx of [120, 470, 1030, 1340]) {
+          const sx = wx - cam;
+          if (sx < -240 || sx > worldW + 20) continue;
+          const phase = ((t * 0.22 + wx * 0.003) % 1);
+          if (phase < 0.35) {
+            g.save();
+            g.beginPath(); g.rect(sx, 202, 220, 156); g.clip();
+            g.globalAlpha = Math.sin((phase / 0.35) * Math.PI) * 0.35;
+            g.fillStyle = '#ffffff';
+            const bx = sx - 60 + (phase / 0.35) * 320;
+            g.beginPath(); g.moveTo(bx, 202); g.lineTo(bx + 34, 202); g.lineTo(bx - 40, 358); g.lineTo(bx - 74, 358); g.fill();
+            g.restore();
+          }
+        }
+        // letreiro ABERTO pulsando
+        const doorX = 1600 / 2 - 70 - cam;
+        if (doorX > -160 && doorX < worldW + 20) {
+          const glow = 0.5 + Math.sin(t * 3) * 0.5;
+          g.fillStyle = `rgba(255, ${Math.round(70 + glow * 60)}, ${Math.round(90 + glow * 40)}, 1)`;
+          roundRect(g, doorX + 30, 236, 80, 30, 6); g.fill();
+          gtext(g, 'ABERTO', doorX + 70, 258, 17, '#fff', 'center', '#7a1020', 3);
+          g.globalAlpha = 0.18 * glow;
+          g.fillStyle = '#ff9aa8';
+          g.beginPath(); g.ellipse(doorX + 70, 251, 70, 34, 0, 0, Math.PI * 2); g.fill();
+          g.globalAlpha = 1;
+        }
+        if (!reduced) {
+          // cheirinho de bolo quente subindo da mesa
+          for (let i = 0; i < 9; i++) {
+            const sx = 250 + (i % 5) * 46 + 24 - cam;
+            if (sx < -30 || sx > worldW + 30) continue;
+            const life = ((t * 0.35 + i * 0.37) % 1);
+            const y = 300 - life * 90;
+            const x = sx + Math.sin(t * 2 + i * 1.7 + life * 6) * (6 + life * 8);
+            g.globalAlpha = Math.sin(life * Math.PI) * 0.28;
+            g.strokeStyle = '#fff7e6'; g.lineWidth = 3; g.lineCap = 'round';
+            g.beginPath(); g.moveTo(x, y); g.quadraticCurveTo(x + 7, y - 9, x, y - 18); g.stroke();
+          }
+          // feixes de sol entrando
+          g.globalCompositeOperation = 'lighter';
+          for (let i = 0; i < 3; i++) {
+            const bx = (180 + i * 520) - cam * 1.0 + Math.sin(t * 0.4 + i) * 14;
+            g.globalAlpha = 0.05 + (Math.sin(t * 0.6 + i * 2) + 1) * 0.025;
+            g.fillStyle = '#ffe8b0';
+            g.beginPath(); g.moveTo(bx, 90); g.lineTo(bx + 70, 90); g.lineTo(bx + 230, FLOOR); g.lineTo(bx + 90, FLOOR); g.fill();
+          }
+          g.globalCompositeOperation = 'source-over';
+          // borboletas
+          for (let i = 0; i < 2; i++) {
+            const bx = ((t * (22 + i * 9) + i * 700) % (STAGE_W + 200)) - 100 - cam;
+            const by = 330 + Math.sin(t * 1.3 + i * 3) * 42 + Math.sin(t * 7 + i) * 4;
+            if (bx < -20 || bx > worldW + 20) continue;
+            const flap = Math.abs(Math.sin(t * 14 + i)) ;
+            g.globalAlpha = 0.95;
+            g.fillStyle = i ? '#ffd23f' : '#ff7ab8';
+            g.beginPath(); g.ellipse(bx - 3, by, 4 * (0.3 + flap * 0.7), 5, -0.4, 0, Math.PI * 2); g.fill();
+            g.beginPath(); g.ellipse(bx + 3, by, 4 * (0.3 + flap * 0.7), 5, 0.4, 0, Math.PI * 2); g.fill();
+          }
+        }
+        g.globalAlpha = 1;
         for (let i = 0; i < 5; i++) {
           const x = ((i * 170 + t * 9 - cam * 0.25) % (worldW + 80) + worldW + 80) % (worldW + 80) - 40;
           const y = 185 + (i % 3) * 55 + Math.sin(t * 0.7 + i) * 4;
@@ -3083,6 +3180,11 @@
         break;
       }
       case 'attack': lean.frame = attackFrame(S[f.move.anim] || fallback, f); break;
+      case 'backdash':
+        lean.frame = pickFrame(S.guard || S.jump || fallback, 0);
+        lean.rot = -0.14 * (1 - f.t / 0.3);
+        lean.sx = 1.05; lean.sy = 0.96;
+        break;
       case 'hitstun':
         if (f.holdPan > 0 && S.idle) { lean.frame = S.idle[0]; break; } // Juraci pegou a panela
         if (S.hurt) lean.frame = pickFrame(S.hurt, Math.floor(t * 12));
@@ -3184,8 +3286,57 @@
     }
   }
 
+  // Movimento procedural por cima dos quadros: respiração, balanço do andar, antecipação
+  // e impacto dos golpes, recuo ao levar dano, achatar no pouso.
+  function proceduralMotion(f, pose) {
+    if (!pose || pose.rot) return pose;
+    const t = f.t;
+    switch (f.state) {
+      case 'idle': case 'crouch': {
+        const b = Math.sin(clock * 2.8 + f.slot * 1.7) * (f.state === 'idle' ? 1 : 0.6);
+        pose.sy *= 1 + b * 0.012; pose.sx *= 1 - b * 0.006;
+        break;
+      }
+      case 'walk':
+        pose.dy = (pose.dy || 0) - Math.abs(Math.sin(t * 9)) * 2.2;
+        pose.rot = f.vx * f.facing > 0 ? 0.025 : -0.02;
+        break;
+      case 'run':
+        pose.dy = (pose.dy || 0) - Math.abs(Math.sin(t * 14)) * 3.5;
+        pose.rot = 0.07; pose.sx *= 1.03; pose.sy *= 0.98;
+        break;
+      case 'attack': {
+        const m = f.move;
+        if (!m) break;
+        const su = m.startup || 0.1;
+        if (t < su) { const k = t / su; pose.rot = -0.05 * k; pose.sx *= 1 - 0.03 * k; }
+        else if (t < su + m.active) { pose.rot = f.dashStrike ? 0.12 : 0.06; pose.sx *= 1.05; pose.sy *= 0.98; }
+        else {
+          const k = clamp((t - su - m.active) / Math.max(0.01, m.recovery), 0, 1);
+          pose.rot = 0.06 * (1 - k); pose.sx *= 1 + 0.05 * (1 - k);
+        }
+        break;
+      }
+      case 'hitstun': case 'blockstun': {
+        const k = clamp(t / (f.stun || 0.3), 0, 1);
+        const hard = f.state === 'hitstun';
+        pose.dx = (pose.dx || 0) - (hard ? 6 : 3) * (1 - k) + (hard ? Math.sin(t * 70) * 3 * (1 - k) : 0);
+        if (hard) { pose.rot = -0.09 * (1 - k); pose.sx *= 1 - 0.05 * (1 - k); pose.sy *= 1 + 0.03 * (1 - k); }
+        break;
+      }
+      case 'landing': {
+        const k = clamp(t / Math.max(0.05, f.stun || 0.1), 0, 1);
+        pose.sy *= 0.9 + 0.1 * k; pose.sx *= 1.08 - 0.08 * k;
+        break;
+      }
+      case 'jumpsquat': pose.sy *= 0.9; pose.sx *= 1.06; break;
+      default: break;
+    }
+    return pose;
+  }
+
   function drawFighter(f) {
-    const pose = frameFor(f);
+    const pose = proceduralMotion(f, frameFor(f));
     const x = f.x - camX;
     const footY = FLOOR - f.y;
     if (f.state === 'transform' && f.nextForm === 'crente') drawBaptism(f, x, footY);
@@ -3214,6 +3365,16 @@
     const blink = (f.flash > 0 || (f.invuln > 0 && f.state === 'getup') || (f.state === 'idle' && f.invuln > 0))
       && Math.floor(clock * 30) % 2 === 0;
     if (blink) ctx.globalAlpha = 0.55;
+    if (!settings.reducedEffects && (f.state === 'run' || f.state === 'backdash' || (f.dashStrike && f.state === 'attack'))) {
+      ctx.save();
+      // rastro de movimento: cópias translúcidas atrás do lutador (eixo x local já espelha com facing)
+      const trailDir = f.state === 'backdash' ? 1 : -1;
+      for (let i = 1; i <= 3; i++) {
+        ctx.globalAlpha = 0.2 / i;
+        ctx.drawImage(img, sx, sy, sw, sh, -ax / AS + trailDir * i * 16 / (s * pose.sx), -ay / AS, sw / AS, sh / AS);
+      }
+      ctx.restore();
+    }
     // brilho só ao levar golpe; fora isso nada de halo borrado (sombra é desenhada no chão)
     if (f.flash > 0 && !settings.reducedEffects) { ctx.shadowColor = '#fff2b8'; ctx.shadowBlur = 12; }
     ctx.imageSmoothingQuality = 'high';

@@ -55,6 +55,15 @@ Jogo de luta arcade em HTML Canvas e JavaScript puro (sem build), com a família
 - **Cenários mais vivos:** parallax no primeiro plano do Bar e da Praia, ondas animadas, brilho de neon, vaga-lumes, poeira no ar e brasas na Festa Junina.
 - **Revanche corrigida:** reiniciar a luta não confunde mais o clique com o modo de pré-carregamento da tela VS.
 
+## Novidades da v0.11
+
+- **Esquiva para trás:** toque duas vezes para trás; salto curto com invulnerabilidade rápida e rastro de movimento.
+- **Golpe em corrida:** corra (toque duas vezes para frente) e aperte soco ou golpe forte; avança, dá 20% mais dano e deixa mais tempo de recuperação.
+- **Animação procedural:** respiração no parado, balanço ao andar e correr, antecipação e impacto nos golpes, recuo ao levar dano, achatar no pouso e esticar no pulo.
+- **Interpolação de quadros:** movimento suave em telas de 90/120/144 Hz; sprites sem halo borrado e alinhados ao pixel.
+- **Padaria animada:** reflexos nas vitrines, letreiro ABERTO pulsando, cheiro de bolo subindo da mesa, feixes de sol e borboletas. Primeiro plano com parallax.
+- **HUD arcade:** barras amarelas, selo K.O., placar e retratos nos cantos, como no mockup.
+
 ### Artes de referência
 
 `art-source/references/` guarda os pôsteres e a imagem "Selecione seu lutador". Eles **não** são usados como sprites: vários quadros têm nome ou aparência trocados (ex.: no pôster 4 a coluna "Juraci" mostra o Carlos, e Gabi/Franciely estão invertidas) e os bonequinhos são pequenos demais e diferentes dos sprites do jogo. Servem de inspiração e divulgação.
