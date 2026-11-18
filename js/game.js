@@ -3642,8 +3642,11 @@
   }
 
   function drawPortrait(f, x, y, size, mirror) {
-    ctx.fillStyle = f.slot === 0 ? '#f21870' : '#d79a0b';
-    ctx.fillRect(x - 3, y - 3, size + 6, size + 6);
+    // moldura estilo arcade: borda clara + faixa azul (1P) ou escura (2P)
+    ctx.fillStyle = '#f4ecff';
+    ctx.fillRect(x - 4, y - 4, size + 8, size + 8);
+    ctx.fillStyle = f.slot === 0 ? '#2a35c9' : '#1a1f4a';
+    ctx.fillRect(x - 1, y - 1, size + 2, size + 2);
     ctx.fillStyle = '#2b1f4f';
     ctx.fillRect(x, y, size, size);
     const img = portraits[f.id];
@@ -3655,50 +3658,62 @@
       ctx.drawImage(img, 0, 0, crop, crop, x, y, size, size);
       ctx.restore();
     }
-    const tag = f.slot === 0 ? '1P' : match.mode === 'versus' ? '2P' : 'CPU';
-    hudText(tag, mirror ? x + 4 : x + size - 4, y + size + 2, 16, f.slot === 0 ? '#ff88ac' : '#ffd95b', mirror ? 'left' : 'right', '#170d24', 4);
+  }
+
+  const HUD_FONT = '"Press Start 2P", "Courier New", Impact, monospace';
+  function arcadeText(value, x, y, size, fill, align = 'left', stroke = '#10082a', lw = 5) {
+    ctx.font = `900 ${size}px ${HUD_FONT}`;
+    ctx.textAlign = align; ctx.textBaseline = 'alphabetic'; ctx.lineJoin = 'round';
+    ctx.lineWidth = lw; ctx.strokeStyle = stroke;
+    ctx.strokeText(value, x, y);
+    ctx.fillStyle = fill; ctx.fillText(value, x, y);
   }
 
   function drawSide(f, mirror) {
     const cx = viewW / 2;
-    const size = 60;
-    const px = mirror ? viewW - 14 - size : 14;
-    drawPortrait(f, px, 12, size, mirror);
-    const barW = cx - 50 - (14 + size + 10);
-    const barX = mirror ? cx + 50 : 14 + size + 10;
-    const y = 16;
-    ctx.fillStyle = '#170d24';
-    ctx.fillRect(barX - 3, y - 3, barW + 6, 28);
-    ctx.fillStyle = '#35182e';
-    ctx.fillRect(barX, y, barW, 22);
+    const size = Math.min(76, viewW * 0.1);
+    const px = mirror ? viewW - 8 - size : 8;
+    drawPortrait(f, px, 8, size, mirror);
+    const gap = 8;
+    const barW = cx - 52 - (8 + size + gap);
+    const barX = mirror ? cx + 52 : 8 + size + gap;
+    const y = 36;
+    const bh = 24;
+    // tag 1P / 2P + placar acima da barra
+    const tag = f.slot === 0 ? '1P' : match.mode === 'versus' ? '2P' : 'CPU';
+    const score = String(Math.round((f.stats ? f.stats.damage : 0) * 10) + (match.wins[f.slot] || 0) * 500).padStart(6, '0');
+    const tagColor = f.slot === 0 ? '#ff2a3a' : '#2f8bff';
+    arcadeText(tag, mirror ? barX + barW - 150 : barX, y - 9, 15, tagColor, 'left', '#f4ecff', 4);
+    arcadeText(score, mirror ? barX + barW : barX + 86, y - 9, 15, '#ffffff', mirror ? 'right' : 'left', '#1a2a8a', 4);
+    // barra amarela com contorno preto grosso
+    ctx.fillStyle = '#000';
+    ctx.fillRect(barX - 4, y - 4, barW + 8, bh + 8);
+    ctx.fillStyle = '#3a1a2a';
+    ctx.fillRect(barX, y, barW, bh);
     const lagW = barW * f.hpLag / MAX_HP;
     const hpW = barW * f.hp / MAX_HP;
-    ctx.fillStyle = '#ff3b3b';
-    ctx.fillRect(mirror ? barX + barW - lagW : barX, y, lagW, 22);
+    ctx.fillStyle = '#e8321e';
+    ctx.fillRect(mirror ? barX + barW - lagW : barX, y, lagW, bh);
     const low = f.hp < MAX_HP * 0.25;
-    const healthGradient = ctx.createLinearGradient(mirror ? barX + barW : barX, y, mirror ? barX : barX + barW, y);
-    healthGradient.addColorStop(0, '#5de28c');
-    healthGradient.addColorStop(0.52, '#d8ec6c');
-    healthGradient.addColorStop(0.76, '#ffbd59');
-    healthGradient.addColorStop(1, '#ff526a');
-    ctx.fillStyle = low && Math.floor(clock * 6) % 2 ? '#fff0a6' : healthGradient;
-    ctx.fillRect(mirror ? barX + barW - hpW : barX, y, hpW, 22);
-    ctx.fillStyle = '#ffffff55';
-    ctx.fillRect(mirror ? barX + barW - hpW : barX, y, hpW, 6);
-    hudText(`${Math.ceil(f.hp)} / ${MAX_HP}`, mirror ? barX + barW - 8 : barX + 8, y + 17, 11, '#ffffff', mirror ? 'right' : 'left', '#211526', 3);
-    // nome + vitórias
-    hudText(CHARS[f.id].name, mirror ? barX + barW : barX, y + 46, 22, '#ffffff', mirror ? 'right' : 'left');
+    ctx.fillStyle = low && Math.floor(clock * 6) % 2 ? '#fff6b0' : '#ffe91a';
+    ctx.fillRect(mirror ? barX + barW - hpW : barX, y, hpW, bh);
+    ctx.fillStyle = '#ffffff66';
+    ctx.fillRect(mirror ? barX + barW - hpW : barX, y, hpW, 5);
+    ctx.fillStyle = '#d6b800';
+    ctx.fillRect(mirror ? barX + barW - hpW : barX, y + bh - 4, hpW, 4);
+    // nome
+    arcadeText(CHARS[f.id].name, mirror ? barX + barW : barX, y + bh + 26, 17, '#ffffff', mirror ? 'right' : 'left', '#10082a', 5);
     for (let i = 0; i < match.winsNeeded; i++) {
-      const wx = mirror ? barX + 14 + i * 22 : barX + barW - 14 - i * 22;
-      ctx.fillStyle = '#170d24';
-      ctx.beginPath(); ctx.arc(wx, y + 38, 8, 0, Math.PI * 2); ctx.fill();
+      const wx = mirror ? barX + 10 + i * 20 : barX + barW - 10 - i * 20;
+      ctx.fillStyle = '#000';
+      ctx.beginPath(); ctx.arc(wx, y + bh + 17, 8, 0, Math.PI * 2); ctx.fill();
       ctx.fillStyle = i < match.wins[f.slot] ? '#ffd23f' : '#3b2a55';
-      ctx.beginPath(); ctx.arc(wx, y + 38, 6, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(wx, y + bh + 17, 5.5, 0, Math.PI * 2); ctx.fill();
     }
     // barra de especial
-    const mw = barW * 0.62;
+    const mw = barW * 0.5;
     const mx = mirror ? barX + barW - mw : barX;
-    const my = y + 54;
+    const my = y + bh + 40;
     ctx.fillStyle = '#170d24';
     ctx.fillRect(mx - 2, my - 2, mw + 4, 12);
     ctx.fillStyle = '#241a31';
@@ -3738,15 +3753,20 @@
     const cx = viewW / 2;
     drawSide(fighters[0], false);
     drawSide(fighters[1], true);
-    ctx.fillStyle = '#170d24';
-    roundRect(ctx, cx - 44, 6, 88, 62, 10); ctx.fill();
-    ctx.fillStyle = '#3b1f3f';
-    roundRect(ctx, cx - 39, 11, 78, 52, 8); ctx.fill();
+    // selo K.O. vermelho com borda dourada + tempo grande amarelo
+    ctx.fillStyle = '#000';
+    ctx.fillRect(cx - 52, 6, 104, 34);
+    ctx.fillStyle = '#d3202a';
+    ctx.fillRect(cx - 48, 10, 96, 26);
+    ctx.fillStyle = '#ffffff44';
+    ctx.fillRect(cx - 48, 10, 96, 5);
+    arcadeText('K.O.', cx, 32, 20, '#ffd21a', 'center', '#5a0a10', 4);
     const time = Number.isFinite(match.timer) ? Math.ceil(match.timer) : null;
-    if (match.mode === 'training') hudText('TREINO', cx, 45, 16, '#fff16b', 'center', '#7f291d', 5);
-    else if (time === null) hudText('∞', cx, 52, 40, '#fff16b', 'center', '#7f291d', 5);
-    else hudText(String(time).padStart(2, '0'), cx, 52, 38, time <= 10 && Math.floor(clock * 4) % 2 ? '#ff5a5a' : '#fff16b', 'center', '#7f291d', 5);
-    hudText(match.mode === 'training' ? 'ALVO' : `ROUND ${match.round}`, cx, 82, 13, '#ffd0e0', 'center', '#170d24', 4);
+    const timeColor = time !== null && time <= 10 && Math.floor(clock * 4) % 2 ? '#ff4a4a' : '#ffe91a';
+    if (match.mode === 'training') arcadeText('TREINO', cx, 74, 14, '#ffe91a', 'center', '#7a2a00', 5);
+    else if (time === null) arcadeText('∞', cx, 80, 40, timeColor, 'center', '#7a2a00', 7);
+    else arcadeText(String(time).padStart(2, '0'), cx, 80, 40, timeColor, 'center', '#7a2a00', 7);
+    hudText(match.mode === 'training' ? 'ALVO' : `ROUND ${match.round}`, cx, 106, 13, '#ffd0e0', 'center', '#170d24', 4);
     if (match.mode === 'training') {
       const panelW = Math.min(190, viewW * 0.28);
       const x = 14;
