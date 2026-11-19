@@ -20,6 +20,10 @@ export default defineConfig({
       name: 'mobile-compact-portrait',
       use: { ...devices['Pixel 7'], viewport: { width: 390, height: 640 }, isMobile: true, hasTouch: true },
     },
+    {
+      name: 'mobile-compact-landscape',
+      use: { ...devices['Pixel 7'], viewport: { width: 844, height: 390 }, isMobile: true, hasTouch: true, isLandscape: true },
+    },
   ],
   use: {
     baseURL: 'http://127.0.0.1:4173',

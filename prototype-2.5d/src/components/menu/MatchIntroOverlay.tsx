@@ -87,7 +87,7 @@ export function MatchIntroOverlay({
             <img
               src={p1.portraitUrl}
               alt={p1.name}
-              className="w-full h-full object-cover object-top"
+              className="w-full h-full object-contain object-bottom"
             />
           </div>
           <div className="mt-3 flex items-end justify-between">
@@ -117,7 +117,7 @@ export function MatchIntroOverlay({
             <img
               src={p2.portraitUrl}
               alt={p2.name}
-              className="w-full h-full object-cover object-top"
+              className="w-full h-full object-contain object-bottom"
             />
           </div>
           <div className="mt-3 flex items-end justify-between flex-row-reverse">

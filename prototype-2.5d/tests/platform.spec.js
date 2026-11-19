@@ -65,13 +65,31 @@ test('loads the game and accepts fight controls at this viewport', async ({ page
   }
 
   await page.getByRole('button', { name: /INICIAR COMBATE/ }).click();
+  const introPortraits = page.locator('.ff-match-intro .ff-intro-portrait img');
+  await expect(introPortraits).toHaveCount(2);
+  await expect.poll(() => introPortraits.first().evaluate((img) => img.complete && img.naturalWidth > 0)).toBeTruthy();
+  expect(await introPortraits.first().evaluate((img) => getComputedStyle(img).objectFit)).toBe('contain');
+  expect(await introPortraits.last().evaluate((img) => getComputedStyle(img).objectFit)).toBe('contain');
   await page.getByRole('dialog').click();
 
   const lightAttack = page.getByRole('button', { name: /Leve/ });
   await expect(lightAttack).toBeVisible();
   if (testInfo.project.name.startsWith('mobile')) {
+    const joystick = page.getByRole('group', { name: /Analógico virtual/ });
+    await expect(joystick).toBeVisible();
+    const bounds = await joystick.boundingBox();
+    expect(bounds).not.toBeNull();
+    await page.mouse.move(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(bounds.x + 8, bounds.y + bounds.height / 2);
+    await expect(joystick).toHaveAttribute('data-active-actions', /left/);
+    await page.mouse.move(bounds.x + bounds.width / 2, bounds.y + bounds.height - 5);
+    await expect(joystick).toHaveAttribute('data-active-actions', /down/);
+    await page.mouse.up();
+    await expect(joystick).toHaveAttribute('data-active-actions', '');
     await lightAttack.tap();
   } else {
+    await expect(page.getByRole('button', { name: 'Agachar' })).toBeVisible();
     await lightAttack.click();
     await page.keyboard.press('j');
   }

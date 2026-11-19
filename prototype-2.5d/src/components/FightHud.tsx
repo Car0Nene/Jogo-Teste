@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Volume2, VolumeX, Pause } from 'lucide-react';
 import { FIGHTERS } from '../data/fighters';
 import { DEFAULT_KEY_BINDINGS, formatKeyCode, HudScale, Player1KeyBindings } from '../data/settings';
@@ -128,6 +128,92 @@ function FighterMeterBlock({
   );
 }
 
+function VirtualJoystick({
+  onHold,
+  onPress,
+}: {
+  onHold: (action: string, active: boolean) => void;
+  onPress: (action: 'jump') => void;
+}) {
+  const activePointer = useRef<number | null>(null);
+  const activeActions = useRef<string[]>([]);
+  const onHoldRef = useRef(onHold);
+  onHoldRef.current = onHold;
+  const [stick, setStick] = useState({ x: 0, y: 0 });
+
+  useEffect(() => () => {
+    activeActions.current
+      .filter((action) => action !== 'up')
+      .forEach((action) => onHoldRef.current(action, false));
+  }, []);
+
+  const releaseActions = () => {
+    activeActions.current.filter((action) => action !== 'up').forEach((action) => onHoldRef.current(action, false));
+    activeActions.current = [];
+    activePointer.current = null;
+    setStick({ x: 0, y: 0 });
+  };
+
+  const updateStick = (event: React.PointerEvent<HTMLDivElement>) => {
+    const bounds = event.currentTarget.getBoundingClientRect();
+    const radius = bounds.width / 2 - 12;
+    const dx = event.clientX - (bounds.left + bounds.width / 2);
+    const dy = event.clientY - (bounds.top + bounds.height / 2);
+    const length = Math.hypot(dx, dy) || 1;
+    const scale = Math.min(1, radius / length);
+    const x = dx * scale;
+    const y = dy * scale;
+    setStick({ x, y });
+
+    const nextActions: string[] = [];
+    if (x < -radius * 0.22) nextActions.push('left');
+    if (x > radius * 0.22) nextActions.push('right');
+    if (y < -radius * 0.35) nextActions.push('up');
+    if (y > radius * 0.35) nextActions.push('down');
+    activeActions.current
+      .filter((action) => !nextActions.includes(action))
+      .filter((action) => action !== 'up')
+      .forEach((action) => onHoldRef.current(action, false));
+    nextActions
+      .filter((action) => !activeActions.current.includes(action))
+      .forEach((action) => action === 'up' ? onPress('jump') : onHoldRef.current(action, true));
+    activeActions.current = nextActions;
+  };
+
+  return (
+    <div
+      role="group"
+      aria-label="Analógico virtual: mover, pular e agachar"
+      data-active-actions={activeActions.current.join(',')}
+      className="ff-virtual-joystick relative h-[88px] w-[88px] shrink-0 place-items-center rounded-full border border-white/20 bg-stone-950/85 shadow-lg touch-none select-none"
+      onPointerDown={(event) => {
+        event.preventDefault();
+        activePointer.current = event.pointerId;
+        event.currentTarget.setPointerCapture(event.pointerId);
+        updateStick(event);
+      }}
+      onPointerMove={(event) => {
+        if (activePointer.current === event.pointerId) updateStick(event);
+      }}
+      onPointerUp={(event) => {
+        if (activePointer.current === event.pointerId) releaseActions();
+      }}
+      onPointerCancel={releaseActions}
+      onLostPointerCapture={releaseActions}
+    >
+      <span className="absolute text-[9px] text-stone-400" style={{ top: 5 }}>PULAR</span>
+      <span className="absolute text-[9px] text-stone-400" style={{ bottom: 5 }}>AGACHAR</span>
+      <span className="absolute text-xs text-stone-400" style={{ left: 7 }}>◀</span>
+      <span className="absolute text-xs text-stone-400" style={{ right: 7 }}>▶</span>
+      <span
+        aria-hidden="true"
+        className="h-10 w-10 rounded-full border border-amber-200/60 bg-amber-400/90 shadow-[0_2px_12px_rgba(251,191,36,0.35)] pointer-events-none"
+        style={{ transform: `translate(${stick.x}px, ${stick.y}px)` }}
+      />
+    </div>
+  );
+}
+
 export function FightHud({
   hud,
   gameMode,
@@ -154,7 +240,7 @@ export function FightHud({
 
   return (
     <div
-      className="fixed inset-0 z-20 pointer-events-none flex flex-col justify-between p-4 md:p-5 origin-center"
+      className="ff-hud-controls fixed inset-0 z-20 pointer-events-none flex flex-col justify-between origin-center"
       style={hudScale !== 1 ? { transform: `scale(${hudScale})` } : undefined}
     >
       {/* Top Perimeter Combat Cluster */}
@@ -267,8 +353,13 @@ export function FightHud({
 
       {/* Compact Bottom Controls Strip (Interactive + Keyboard Hint) */}
       <div className="w-full max-w-[1160px] mx-auto flex flex-wrap items-center justify-between gap-2 pointer-events-auto">
-        {/* Tactile Quick-Move Pad for Mouse / Touch */}
+        {/* Virtual joystick on touch devices, directional pad on desktop. */}
         <div className="flex items-center gap-1.5 bg-stone-950/85 border border-white/10 rounded-lg px-2.5 py-1.5">
+          <VirtualJoystick
+            onHold={(action, active) => onVirtualHold(0, action, active)}
+            onPress={(action) => onVirtualPress(0, action)}
+          />
+          <div className="ff-directional-buttons flex items-center gap-1.5">
           <button
             type="button"
             onPointerDown={() => onVirtualHold(0, 'left', true)}
@@ -288,6 +379,17 @@ export function FightHud({
           </button>
           <button
             type="button"
+            onPointerDown={() => onVirtualHold(0, 'down', true)}
+            onPointerUp={() => onVirtualHold(0, 'down', false)}
+            onPointerCancel={() => onVirtualHold(0, 'down', false)}
+            onPointerLeave={() => onVirtualHold(0, 'down', false)}
+            aria-label="Agachar"
+            className="px-2.5 h-11 rounded bg-stone-800 hover:bg-stone-700 text-xs font-semibold cursor-pointer touch-none"
+          >
+            Agachar
+          </button>
+          <button
+            type="button"
             onPointerDown={() => onVirtualHold(0, 'right', true)}
             onPointerUp={() => onVirtualHold(0, 'right', false)}
             onPointerCancel={() => onVirtualHold(0, 'right', false)}
@@ -296,6 +398,7 @@ export function FightHud({
           >
             ▶
           </button>
+          </div>
           <button
             type="button"
             onPointerDown={() => onVirtualHold(0, 'guard', true)}

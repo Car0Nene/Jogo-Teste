@@ -181,7 +181,18 @@
 }
 
 .ff-intro-portrait {
-  height: clamp(88px, 34dvh, 250px);
+  height: clamp(150px, 42dvh, 420px);
+}
+
+.ff-virtual-joystick {
+  display: none;
+}
+
+.ff-hud-controls {
+  padding: max(1rem, env(safe-area-inset-top, 0px))
+    max(1rem, env(safe-area-inset-right, 0px))
+    max(1rem, env(safe-area-inset-bottom, 0px))
+    max(1rem, env(safe-area-inset-left, 0px));
 }
 
 .ff-intro-name {
@@ -217,9 +228,25 @@
   }
 }
 
+@media (pointer: coarse) {
+  .ff-virtual-joystick {
+    display: grid;
+  }
+
+  .ff-directional-buttons {
+    display: none;
+  }
+}
+
+@media (pointer: fine) {
+  .ff-virtual-joystick {
+    display: none;
+  }
+}
+
 @media (max-height: 640px) {
   .ff-intro-portrait {
-    height: clamp(64px, 21dvh, 132px);
+    height: clamp(92px, 25dvh, 170px);
   }
 
   .ff-intro-heading {
