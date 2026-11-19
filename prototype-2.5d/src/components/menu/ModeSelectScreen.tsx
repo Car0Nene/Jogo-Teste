@@ -102,7 +102,7 @@ export function ModeSelectScreen({
   ];
 
   return (
-    <div className="fixed inset-0 z-20 bg-[#09070e]/92 flex flex-col justify-between p-5 md:p-10 overflow-y-auto animate-screen-in">
+    <div className="ff-mode-select-screen fixed inset-0 z-20 bg-[#09070e]/92 flex flex-col justify-between gap-2 p-[clamp(8px,2vmin,32px)] overflow-hidden animate-screen-in">
       <header className="max-w-[1280px] w-full mx-auto flex items-center justify-between gap-4">
         <button
           type="button"
@@ -126,14 +126,14 @@ export function ModeSelectScreen({
         </div>
       </header>
 
-      <main className="max-w-[1280px] w-full mx-auto my-auto py-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <main className="max-w-[1280px] w-full flex-1 min-h-0 mx-auto flex flex-col justify-center py-1">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
           {cards.map((c) => (
             <button
               key={c.id}
               type="button"
               onClick={c.onClick}
-              className={`group flex flex-col justify-between text-left p-6 min-h-[210px] bg-gradient-to-b from-[#171222] to-[#0f0c16] border transition-all duration-150 cursor-pointer ff-chamfer ${
+              className={`ff-mode-card group flex flex-col justify-between text-left p-3 sm:p-5 min-h-[clamp(128px,20dvh,210px)] bg-gradient-to-b from-[#171222] to-[#0f0c16] border transition-all duration-150 cursor-pointer ff-chamfer ${
                 c.available
                   ? `${c.accent} hover:-translate-y-1 shadow-xl`
                   : `${c.accent} opacity-75`
@@ -149,10 +149,10 @@ export function ModeSelectScreen({
                   </span>
                 </div>
 
-                <h2 className="font-display font-extrabold text-3xl text-white mt-4 leading-none">
+                <h2 className="font-display font-extrabold text-xl sm:text-3xl text-white mt-2 sm:mt-4 leading-none">
                   {c.title}
                 </h2>
-                <p className="text-sm text-stone-300 mt-2 leading-relaxed">
+                <p className="ff-mode-card-description text-xs sm:text-sm text-stone-300 mt-1 sm:mt-2 leading-snug sm:leading-relaxed">
                   {c.desc}
                 </p>
               </div>

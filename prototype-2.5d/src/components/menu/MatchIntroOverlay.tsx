@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { assetUrl } from '../../assetUrl';
 import { FIGHTERS, FighterId } from '../../data/fighters';
 import { STAGES, StageId } from '../../data/stages';
@@ -20,26 +20,34 @@ export function MatchIntroOverlay({
   gameMode,
   onComplete,
 }: MatchIntroOverlayProps) {
+  const [phase, setPhase] = useState<'arena' | 'p1' | 'p2' | 'versus'>('arena');
   const p1 = FIGHTERS[p1Id];
   const p2 = FIGHTERS[p2Id];
   const stage = STAGES[stageId];
 
   useEffect(() => {
     soundEngine.playRoundBell();
-    const timer = window.setTimeout(() => {
-      onComplete();
-    }, 2100);
+    const p1Timer = window.setTimeout(() => setPhase('p1'), 360);
+    const p2Timer = window.setTimeout(() => setPhase('p2'), 980);
+    const versusTimer = window.setTimeout(() => setPhase('versus'), 1600);
+    const timer = window.setTimeout(onComplete, 2500);
 
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.code === 'Enter' || e.code === 'Space' || e.code === 'Escape') {
         e.preventDefault();
         window.clearTimeout(timer);
+        window.clearTimeout(p1Timer);
+        window.clearTimeout(p2Timer);
+        window.clearTimeout(versusTimer);
         onComplete();
       }
     };
     window.addEventListener('keydown', onKeyDown);
     return () => {
       window.clearTimeout(timer);
+      window.clearTimeout(p1Timer);
+      window.clearTimeout(p2Timer);
+      window.clearTimeout(versusTimer);
       window.removeEventListener('keydown', onKeyDown);
     };
   }, [onComplete]);
@@ -49,31 +57,33 @@ export function MatchIntroOverlay({
       onClick={onComplete}
       role="dialog"
       aria-label="Apresentação da luta"
-      className="fixed inset-0 z-30 bg-[#07050b] flex flex-col justify-between overflow-hidden cursor-pointer animate-screen-in"
+      aria-live="polite"
+      data-intro-phase={phase}
+      className="ff-match-intro fixed inset-0 z-30 bg-[#07050b] flex flex-col justify-between overflow-hidden cursor-pointer animate-screen-in"
     >
       {/* Selected Stage Backdrop */}
       <img
         src={assetUrl(`/assets/stages/${stage.id}.webp`)}
         alt={stage.name}
-        className="absolute inset-0 w-full h-full object-cover opacity-35 scale-105"
+        className="ff-intro-backdrop absolute inset-0 w-full h-full object-cover opacity-35 scale-105"
       />
       <div className="absolute inset-0 bg-gradient-to-t from-[#07050b] via-[#07050b]/45 to-[#07050b]/85" />
 
       {/* Top Arena Banner */}
-      <div className="relative z-10 text-center pt-6 px-4">
+      <div className="ff-intro-heading relative z-10 text-center px-4">
         <div className="text-xs font-mono-num uppercase tracking-[0.26em] text-amber-300">
-          {gameMode === 'training' ? 'TREINO LIVRE' : gameMode === 'versus' ? 'VERSUS LOCAL' : 'MODO ARCADE'}
+          {phase === 'arena' ? 'APRESENTANDO ARENA' : phase === 'versus' ? (gameMode === 'training' ? 'TREINO LIVRE' : gameMode === 'versus' ? 'VERSUS LOCAL' : 'MODO ARCADE') : phase === 'p1' ? 'DESAFIANTE' : 'RIVAL'}
         </div>
-        <div className="font-display font-extrabold text-3xl sm:text-4xl text-white mt-0.5">
+        <div className="ff-intro-stage-title font-display font-extrabold text-3xl sm:text-4xl text-white mt-0.5">
           {stage.name.toUpperCase()} · {stage.timeOfDay.toUpperCase()}
         </div>
       </div>
 
       {/* P1 vs P2 Dramatic Portraits */}
-      <div className="relative z-10 max-w-[1160px] w-full mx-auto px-4 sm:px-8 my-auto grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] items-center gap-4 sm:gap-6">
+      <div className="ff-intro-fighters relative z-10 max-w-[1160px] w-full mx-auto px-2 sm:px-8 my-auto grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-1 sm:gap-6">
         {/* P1 Fighter Card */}
-        <div className="bg-[#120e1b]/95 border-2 border-amber-400 p-3 sm:p-4 ff-chamfer shadow-2xl">
-          <div className="h-[190px] sm:h-[250px] overflow-hidden border border-white/15 bg-[#09070d]">
+        <div className="ff-intro-card ff-intro-card-p1 bg-[#120e1b]/95 border-2 border-amber-400 p-2 sm:p-4 ff-chamfer shadow-2xl">
+          <div className="ff-intro-portrait overflow-hidden border border-white/15 bg-[#09070d]">
             <img
               src={p1.portraitUrl}
               alt={p1.name}
@@ -83,7 +93,7 @@ export function MatchIntroOverlay({
           <div className="mt-3 flex items-end justify-between">
             <div>
               <div className="text-[11px] font-mono-num font-bold text-amber-300">1P · DESAFIANTE</div>
-              <div className="font-display font-extrabold text-4xl text-white leading-none">
+              <div className="ff-intro-name font-display font-extrabold text-4xl text-white leading-none">
                 {p1.name}
               </div>
               <div className="text-xs text-stone-300 mt-0.5">{p1.roleTitle}</div>
@@ -95,15 +105,15 @@ export function MatchIntroOverlay({
         </div>
 
         {/* Center VS Crest */}
-        <div className="flex flex-col items-center justify-center animate-vs-slash py-1">
+        <div className="ff-intro-vs flex flex-col items-center justify-center animate-vs-slash py-1">
           <div className="font-display font-extrabold italic text-6xl sm:text-8xl text-transparent bg-clip-text bg-gradient-to-b from-amber-200 via-amber-400 to-rose-500 drop-shadow-[0_6px_22px_rgba(251,191,36,0.5)] leading-none select-none">
             VS
           </div>
         </div>
 
         {/* P2 Fighter Card */}
-        <div className="bg-[#120e1b]/95 border-2 border-sky-400 p-3 sm:p-4 ff-chamfer shadow-2xl text-right">
-          <div className="h-[190px] sm:h-[250px] overflow-hidden border border-white/15 bg-[#09070d]">
+        <div className="ff-intro-card ff-intro-card-p2 bg-[#120e1b]/95 border-2 border-sky-400 p-2 sm:p-4 ff-chamfer shadow-2xl text-right">
+          <div className="ff-intro-portrait overflow-hidden border border-white/15 bg-[#09070d]">
             <img
               src={p2.portraitUrl}
               alt={p2.name}
@@ -115,7 +125,7 @@ export function MatchIntroOverlay({
               <div className="text-[11px] font-mono-num font-bold text-sky-300">
                 {gameMode === 'versus' ? '2P · RIVAL' : 'CPU · RIVAL'}
               </div>
-              <div className="font-display font-extrabold text-4xl text-white leading-none">
+              <div className="ff-intro-name font-display font-extrabold text-4xl text-white leading-none">
                 {p2.name}
               </div>
               <div className="text-xs text-stone-300 mt-0.5">{p2.roleTitle}</div>
@@ -128,7 +138,10 @@ export function MatchIntroOverlay({
       </div>
 
       {/* Footer Skip Hint */}
-      <div className="relative z-10 text-center pb-5 px-4 text-xs text-stone-400">
+      <div className="relative z-10 text-center pb-3 px-4 text-xs text-stone-400">
+        <span className="ff-intro-phase-label block mb-1">
+          {phase === 'arena' ? stage.name : phase === 'p1' ? p1.name : phase === 'p2' ? p2.name : `${p1.name} VS ${p2.name}`}
+        </span>
         Preparando arena · Pressione Enter, Espaço ou clique para avançar
       </div>
     </div>

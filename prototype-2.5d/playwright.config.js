@@ -12,6 +12,14 @@ export default defineConfig({
       name: 'mobile-chromium',
       use: { ...devices['Pixel 7'] },
     },
+    {
+      name: 'desktop-short-viewport',
+      use: { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 600 } },
+    },
+    {
+      name: 'mobile-compact-portrait',
+      use: { ...devices['iPhone 13'], viewport: { width: 390, height: 640 }, isMobile: true, hasTouch: true },
+    },
   ],
   use: {
     baseURL: 'http://127.0.0.1:4173',

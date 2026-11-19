@@ -145,9 +145,9 @@ export function CharacterSelectScreen({
   }, []);
 
   return (
-    <div className="fixed inset-0 z-10 flex flex-col justify-between overflow-y-auto overscroll-contain p-3 sm:p-5 md:p-6 pointer-events-none animate-screen-in">
+    <div className="ff-character-select-screen fixed inset-0 z-10 flex flex-col justify-between gap-2 overflow-hidden overscroll-none p-[clamp(6px,1.1vmin,16px)] pointer-events-none animate-screen-in">
       {/* Top Header Strip */}
-      <header className="flex flex-wrap items-center justify-between gap-3 pointer-events-auto">
+      <header className="ff-character-select-header flex flex-wrap items-center justify-between gap-2 pointer-events-auto shrink-0">
         <div className="flex items-center gap-2.5">
           <button
             type="button"
@@ -225,7 +225,7 @@ export function CharacterSelectScreen({
       </header>
 
       {/* Left (1P) & Right (2P/CPU) Tekken-8 Style Fighter Preview Panels — center 3D stage stays unobstructed */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 my-4 sm:my-auto pointer-events-none">
+      <div className="ff-character-panels flex-1 min-h-0 grid grid-cols-2 xl:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center justify-items-center gap-2 sm:gap-4 pointer-events-none">
         {/* P1 PANEL */}
         <section
           aria-label="Lutador Jogador 1"
@@ -233,7 +233,7 @@ export function CharacterSelectScreen({
             setPickSlot('p1');
             setP1Locked(false);
           }}
-          className={`pointer-events-auto w-full max-w-[320px] sm:w-[275px] bg-[#0e0b16]/92 border-2 p-3.5 transition-all cursor-pointer ff-chamfer shadow-2xl ${
+          className={`ff-character-panel pointer-events-auto w-full max-w-[320px] min-w-0 bg-[#0e0b16]/92 border-2 p-2 sm:p-3 transition-all cursor-pointer ff-chamfer shadow-2xl ${
             pickSlot === 'p1'
               ? 'border-amber-400 shadow-[0_0_24px_rgba(251,191,36,0.22)]'
               : 'border-white/15 hover:border-white/35'
@@ -244,7 +244,7 @@ export function CharacterSelectScreen({
             <span className="text-stone-300">PODER {p1Spec.powerLevel}</span>
           </div>
 
-          <div className="relative mt-2 h-[116px] overflow-hidden border border-white/15 bg-[#09070d]">
+          <div className="ff-character-portrait relative mt-1.5 overflow-hidden border border-white/15 bg-[#09070d]">
             <img
               src={p1Spec.portraitUrl}
               alt={p1Spec.name}
@@ -266,12 +266,12 @@ export function CharacterSelectScreen({
             </div>
           </div>
 
-          <div className="mt-2 border border-white/10 bg-[#08060c] overflow-hidden">
-            <AnimatedFighterCanvas id={p1Spec.id} className="h-[104px]" />
+          <div className="ff-character-canvas-wrap mt-1.5 border border-white/10 bg-[#08060c] overflow-hidden">
+            <AnimatedFighterCanvas id={p1Spec.id} className="ff-character-animated" />
           </div>
 
-          <p className="text-[11px] italic text-amber-200/90 mt-2 truncate">{p1Spec.quote}</p>
-          <div className="mt-2 pt-2 border-t border-white/10 space-y-1 text-[11px] text-stone-300">
+          <p className="ff-character-quote text-[11px] italic text-amber-200/90 mt-1 truncate">{p1Spec.quote}</p>
+          <div className="ff-character-specials mt-1 pt-1 border-t border-white/10 space-y-0.5 text-[11px] text-stone-300">
             <div className="truncate">
               <strong className="text-amber-300">L ·</strong> {p1Spec.specialName}
             </div>
@@ -309,7 +309,7 @@ export function CharacterSelectScreen({
             setPickSlot('p2');
             setP2Locked(false);
           }}
-          className={`pointer-events-auto w-full max-w-[320px] sm:w-[275px] bg-[#0e0b16]/92 border-2 p-3.5 text-right transition-all cursor-pointer ff-chamfer shadow-2xl ${
+          className={`ff-character-panel pointer-events-auto w-full max-w-[320px] min-w-0 bg-[#0e0b16]/92 border-2 p-2 sm:p-3 text-right transition-all cursor-pointer ff-chamfer shadow-2xl ${
             pickSlot === 'p2'
               ? 'border-sky-400 shadow-[0_0_24px_rgba(56,189,248,0.22)]'
               : 'border-white/15 hover:border-white/35'
@@ -322,7 +322,7 @@ export function CharacterSelectScreen({
             </span>
           </div>
 
-          <div className="relative mt-2 h-[116px] overflow-hidden border border-white/15 bg-[#09070d]">
+          <div className="ff-character-portrait relative mt-1.5 overflow-hidden border border-white/15 bg-[#09070d]">
             <img
               src={p2Spec.portraitUrl}
               alt={p2Spec.name}
@@ -344,12 +344,12 @@ export function CharacterSelectScreen({
             </div>
           </div>
 
-          <div className="mt-2 border border-white/10 bg-[#08060c] overflow-hidden">
-            <AnimatedFighterCanvas id={p2Spec.id} mirror className="h-[104px]" />
+          <div className="ff-character-canvas-wrap mt-1.5 border border-white/10 bg-[#08060c] overflow-hidden">
+            <AnimatedFighterCanvas id={p2Spec.id} mirror className="ff-character-animated" />
           </div>
 
-          <p className="text-[11px] italic text-sky-200/90 mt-2 truncate">{p2Spec.quote}</p>
-          <div className="mt-2 pt-2 border-t border-white/10 space-y-1 text-[11px] text-stone-300">
+          <p className="ff-character-quote text-[11px] italic text-sky-200/90 mt-1 truncate">{p2Spec.quote}</p>
+          <div className="ff-character-specials mt-1 pt-1 border-t border-white/10 space-y-0.5 text-[11px] text-stone-300">
             <div className="truncate">
               {p2Spec.specialName} <strong className="text-sky-300">· L</strong>
             </div>
@@ -361,7 +361,7 @@ export function CharacterSelectScreen({
       </div>
 
       {/* Bottom 8-Fighter Grid + Cursor Controls + Proceed CTA */}
-      <div className="flex flex-col items-center pointer-events-auto">
+      <div className="ff-character-dock flex flex-col items-center pointer-events-auto shrink-0">
         <button
           type="button"
           onClick={() => setDockCollapsed((v) => !v)}
@@ -372,7 +372,7 @@ export function CharacterSelectScreen({
         </button>
 
         {!dockCollapsed && (
-          <div className="w-full max-w-[1060px] bg-[#0d0a15]/95 border border-white/15 p-3.5 shadow-2xl ff-chamfer flex flex-col gap-3">
+          <div className="w-full max-w-[1060px] bg-[#0d0a15]/95 border border-white/15 p-2 sm:p-3 shadow-2xl ff-chamfer flex flex-col gap-2">
             <div className="flex flex-wrap items-center justify-between gap-2">
               {/* Active Slot Cursor Buttons */}
               <div className="flex items-center gap-2">

@@ -57,7 +57,7 @@ export function StageSelectScreen({
   });
 
   return (
-    <div className="fixed inset-0 z-20 bg-[#09070e]/92 flex flex-col justify-between p-4 sm:p-6 md:p-8 overflow-y-auto animate-screen-in">
+    <div className="ff-stage-select-screen fixed inset-0 z-20 bg-[#09070e]/92 flex flex-col justify-between gap-2 p-[clamp(8px,1.5vmin,24px)] overflow-hidden animate-screen-in">
       {/* Header */}
       <header className="max-w-[1280px] w-full mx-auto flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
@@ -98,8 +98,8 @@ export function StageSelectScreen({
       </header>
 
       {/* Main Stage Spotlight (KOF XV style large preview + stage cards) */}
-      <main className="max-w-[1280px] w-full mx-auto my-auto py-4 flex flex-col gap-4">
-        <div className="relative w-full h-[270px] sm:h-[340px] md:h-[380px] overflow-hidden border-2 border-amber-400/60 bg-[#0b0912] shadow-2xl ff-chamfer">
+      <main className="ff-stage-select-main max-w-[1280px] w-full flex-1 min-h-0 mx-auto py-1 flex flex-col justify-center gap-2">
+        <div className="ff-stage-spotlight relative w-full overflow-hidden border-2 border-amber-400/60 bg-[#0b0912] shadow-2xl ff-chamfer">
           <img
             src={assetUrl(`/assets/stages/${stage.id}.webp`)}
             alt={stage.name}
@@ -162,7 +162,7 @@ export function StageSelectScreen({
                     : 'border-white/15 hover:border-white/40 opacity-85 hover:opacity-100'
                 }`}
               >
-                <div className="h-24 sm:h-28 overflow-hidden bg-stone-900">
+                <div className="ff-stage-thumb overflow-hidden bg-stone-900">
                   <img
                     src={assetUrl(`/assets/stages/${st.id}.webp`)}
                     alt={st.name}

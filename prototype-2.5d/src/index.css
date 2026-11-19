@@ -95,3 +95,269 @@
 .animate-confirm-stamp {
   animation: confirmStamp 220ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+/* The game menu stays inside the device viewport. Dense information collapses
+   before a primary selection screen needs page scrolling. */
+.ff-character-select-screen,
+.ff-stage-select-screen,
+.ff-mode-select-screen {
+  height: 100vh;
+  height: 100dvh;
+}
+
+.ff-character-portrait {
+  height: clamp(52px, 13dvh, 116px);
+}
+
+.ff-character-animated {
+  display: block;
+  width: 100%;
+  height: clamp(48px, 11dvh, 104px);
+}
+
+.ff-character-select-header {
+  max-width: 1440px;
+  width: 100%;
+  margin-inline: auto;
+}
+
+.ff-stage-spotlight {
+  height: clamp(140px, 34dvh, 380px);
+  flex: none;
+}
+
+.ff-stage-thumb {
+  height: clamp(48px, 8.5dvh, 112px);
+}
+
+.ff-mode-card-description {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.ff-match-intro {
+  height: 100vh;
+  height: 100dvh;
+}
+
+.ff-intro-backdrop {
+  animation: ffArenaDrift 9s ease-in-out infinite alternate;
+}
+
+.ff-intro-card {
+  min-width: 0;
+  opacity: 0;
+  transform: translateY(14px) scale(0.96);
+  transition: opacity 420ms ease, transform 620ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.ff-match-intro[data-intro-phase='p1'] .ff-intro-card-p1,
+.ff-match-intro[data-intro-phase='p2'] .ff-intro-card-p1,
+.ff-match-intro[data-intro-phase='versus'] .ff-intro-card {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.ff-match-intro[data-intro-phase='p2'] .ff-intro-card-p1 {
+  transform: translateY(0) scale(0.96);
+}
+
+.ff-match-intro[data-intro-phase='p2'] .ff-intro-card-p2 {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.ff-match-intro[data-intro-phase='arena'] .ff-intro-vs,
+.ff-match-intro[data-intro-phase='p1'] .ff-intro-vs,
+.ff-match-intro[data-intro-phase='p2'] .ff-intro-vs {
+  opacity: 0;
+  transform: scale(0.8);
+}
+
+.ff-intro-vs {
+  transition: opacity 350ms ease, transform 450ms ease;
+}
+
+.ff-intro-portrait {
+  height: clamp(88px, 34dvh, 250px);
+}
+
+.ff-intro-name {
+  font-size: clamp(1.15rem, 4.2vw, 2.25rem);
+}
+
+.ff-intro-stage-title {
+  font-size: clamp(1.15rem, 5vw, 2.25rem);
+}
+
+@keyframes ffArenaDrift {
+  from { transform: scale(1.04) translate3d(-0.5%, 0, 0); }
+  to { transform: scale(1.1) translate3d(0.5%, -0.5%, 0); }
+}
+
+@media (max-width: 639px) {
+  .ff-character-panel h2 {
+    font-size: clamp(1rem, 5vw, 1.65rem);
+  }
+
+  .ff-character-panel .ff-character-specials {
+    font-size: 9px;
+  }
+
+  .ff-stage-select-screen > footer span:last-child {
+    display: none;
+  }
+}
+
+@media (max-height: 640px) {
+  .ff-intro-portrait {
+    height: clamp(64px, 21dvh, 132px);
+  }
+
+  .ff-intro-heading {
+    padding-top: 10px;
+  }
+
+  .ff-intro-stage-title {
+    font-size: clamp(1rem, 4vh, 1.75rem);
+  }
+
+  .ff-match-intro .ff-intro-card {
+    padding: 6px;
+  }
+
+  .ff-match-intro .ff-intro-card > div:nth-child(2) {
+    margin-top: 5px;
+  }
+
+  .ff-match-intro .ff-intro-card .text-xs {
+    display: none;
+  }
+
+  .ff-intro-name {
+    font-size: clamp(1rem, 3.5vw, 1.8rem);
+  }
+
+  .ff-character-portrait {
+    height: clamp(42px, 10dvh, 72px);
+  }
+
+  .ff-character-animated {
+    height: clamp(38px, 8dvh, 58px);
+  }
+
+  .ff-character-quote {
+    display: none;
+  }
+
+  .ff-character-panel .ff-character-specials {
+    display: none;
+  }
+
+  .ff-stage-spotlight {
+    height: clamp(120px, 25dvh, 210px);
+  }
+
+  .ff-stage-thumb {
+    height: clamp(42px, 6dvh, 72px);
+  }
+
+  .ff-stage-select-screen main > div:first-child h2 {
+    font-size: clamp(1.4rem, 4.2vh, 3.75rem);
+  }
+
+  .ff-stage-select-screen main > div:first-child p {
+    display: none;
+  }
+
+  .ff-mode-card-description {
+    -webkit-line-clamp: 1;
+  }
+}
+
+@media (max-height: 680px) {
+  .ff-mode-card {
+    min-height: 0;
+    padding: 8px;
+  }
+
+  .ff-mode-card-description {
+    display: none;
+  }
+
+  .ff-mode-card > div:first-child > div:first-child {
+    width: 34px;
+    height: 34px;
+  }
+
+  .ff-mode-card > div:first-child > div:first-child svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .ff-mode-card h2 {
+    margin-top: 4px;
+    font-size: clamp(1rem, 3.2vh, 1.5rem);
+  }
+
+  .ff-mode-card > div:last-child {
+    margin-top: 5px;
+    padding-top: 5px;
+  }
+}
+
+@media (max-height: 520px) {
+  .ff-mode-select-screen > header h1 {
+    font-size: 1rem;
+  }
+
+  .ff-mode-select-screen > footer {
+    display: none;
+  }
+
+  .ff-mode-card {
+    padding: 5px;
+  }
+
+  .ff-mode-card > div:first-child > div:first-child {
+    display: none;
+  }
+
+  .ff-mode-card > div:first-child > div:last-child > div:first-child > span:first-child {
+    font-size: 9px;
+  }
+
+  .ff-mode-card h2 {
+    margin-top: 2px;
+    font-size: 0.95rem;
+  }
+
+  .ff-mode-card > div:last-child {
+    margin-top: 3px;
+    padding-top: 3px;
+    font-size: 8px;
+  }
+
+  .ff-character-panel .ff-character-portrait,
+  .ff-character-canvas-wrap {
+    display: none;
+  }
+
+  .ff-character-panel {
+    padding: 6px;
+  }
+
+  .ff-character-dock > button {
+    min-height: 28px;
+  }
+
+  .ff-character-dock > div > div:first-child {
+    gap: 4px;
+  }
+
+  .ff-stage-spotlight {
+    height: 116px;
+  }
+}
