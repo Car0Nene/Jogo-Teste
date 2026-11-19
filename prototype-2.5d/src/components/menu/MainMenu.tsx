@@ -11,6 +11,7 @@ import {
   Settings,
   Swords,
   Users,
+  UserRound,
   Volume2,
   VolumeX,
 } from 'lucide-react';
@@ -47,6 +48,7 @@ interface MainMenuProps {
   onOpenModes: () => void;
   onOpenSettings: () => void;
   onOpenExtras: () => void;
+  onOpenAccount: () => void;
 }
 
 export function MainMenu({
@@ -60,6 +62,7 @@ export function MainMenu({
   onOpenModes,
   onOpenSettings,
   onOpenExtras,
+  onOpenAccount,
 }: MainMenuProps) {
   const [focusedIdx, setFocusedIdx] = useState(0);
   const [featuredIdx, setFeaturedIdx] = useState(2); // Pedro featured initially
@@ -226,6 +229,14 @@ export function MainMenu({
         </div>
 
         <div className="flex items-center gap-2 pointer-events-auto">
+          <button
+            type="button"
+            onClick={onOpenAccount}
+            className="h-11 px-3 bg-[#14101c] hover:bg-[#211b2d] border border-white/15 hover:border-amber-400/60 flex items-center justify-center gap-2 text-stone-100 text-[10px] sm:text-xs font-bold tracking-wide cursor-pointer ff-chamfer-sm"
+          >
+            <UserRound className="w-4 h-4 text-amber-300" />
+            <span>MINHA CONTA</span>
+          </button>
           <button
             type="button"
             onClick={onToggleFullscreen}

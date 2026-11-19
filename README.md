@@ -255,13 +255,13 @@ Os dois conjuntos de teclas podem ser alterados em **Configurações → Teclado
 
 ## Instalar no celular (GitHub Pages)
 
-O projeto é um site estático. Para publicar pelo GitHub Pages, abra **Settings → Pages**, selecione **Deploy from a branch**, escolha `main` e a pasta `/ (root)`. Depois de salvar, cada envio para `main` atualiza o site. O repositório não contém atualmente um workflow de GitHub Actions.
+O jogo ativo é a versão 2.5D, mantida em `prototype-2.5d/`. O workflow compila essa pasta, executa as verificações de desktop e mobile e publica os arquivos compilados na raiz, servida pelo GitHub Pages (`main`, `/ (root)`). A URL pública continua sendo a URL principal do repositório.
 
 No Android (Chrome), use **Instalar app**. No iPhone (Safari), use **Compartilhar → Adicionar à Tela de Início**.
 
 ## Conta e progresso (Supabase, opcional)
 
-1. No Supabase, abra **SQL Editor** e execute `supabase/schema.sql` (pode executar de novo em um projeto já configurado; ele atualiza as funções e permissões).
+1. No Supabase, abra **SQL Editor** e execute `supabase/schema.sql`. Para uma instalação existente que ainda não aceita Paula e Tainara, execute também `supabase/migrations/20261119_add_new_fighters.sql`.
 2. Em **Authentication → URL Configuration**, use a URL do GitHub Pages como **Site URL** e em **Redirect URLs**.
 3. Preencha `url` e `anonKey` em `supabase-config.js` com a URL do projeto e a chave pública (*publishable/anon*). O deploy atual não injeta variáveis do GitHub nesse arquivo.
 4. Publique as alterações. Em **Minha Conta**, crie a conta ou entre; dá para trocar o apelido depois.

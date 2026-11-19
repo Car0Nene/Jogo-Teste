@@ -6,7 +6,7 @@ import {defineConfig} from 'vite';
 
 export default defineConfig(() => {
   return {
-    // The app is hosted from its own directory under the repository Pages site.
+    // The production build is published at the repository Pages root.
     base: './',
     plugins: [
       react(),

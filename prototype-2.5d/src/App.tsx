@@ -23,6 +23,8 @@ import { MatchIntroOverlay } from './components/menu/MatchIntroOverlay';
 import { ModeSelectScreen } from './components/menu/ModeSelectScreen';
 import { SettingsModal } from './components/menu/SettingsModal';
 import { StageSelectScreen } from './components/menu/StageSelectScreen';
+import { accountService } from './services/account';
+import { AccountModal } from './components/AccountModal';
 
 type AppScreen = 'title' | 'modes' | 'select' | 'stage' | 'vs' | 'fight' | 'extras';
 
@@ -33,6 +35,8 @@ export default function App() {
 
   const [settings, setSettings] = useState<GameSettings>(() => loadSettings());
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
+  const recordedMatchRef = useRef<string | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   const [screen, setScreen] = useState<AppScreen>('title');
@@ -44,6 +48,8 @@ export default function App() {
   const [showcaseOrbit, setShowcaseOrbit] = useState(false);
   const [paused, setPaused] = useState(false);
   const [hud, setHud] = useState<HudSnapshot | null>(null);
+
+  useEffect(() => { void accountService.initialize(); }, []);
 
   // Sync persisted settings to soundEngine & GameEngine
   const applySettings = useCallback((next: GameSettings) => {
@@ -148,11 +154,18 @@ export default function App() {
   }, []);
 
   const beginFightEngine = useCallback(() => {
+    recordedMatchRef.current = null;
     setShowcaseOrbit(false);
     setPaused(false);
     setScreen('fight');
     engineRef.current?.startMatch(p1Id, p2Id, stageId, gameMode, difficulty);
   }, [p1Id, p2Id, stageId, gameMode, difficulty]);
+
+  useEffect(() => {
+    if (screen !== 'fight' || gameMode !== 'cpu' || hud?.phase !== 'matchOver' || recordedMatchRef.current) return;
+    recordedMatchRef.current = `${Date.now()}-${hud.p1.id}-${hud.winnerIndex}`;
+    void accountService.recordMatch(hud.winnerIndex === 0 ? 'win' : hud.winnerIndex === 1 ? 'loss' : 'draw', hud.p1.id);
+  }, [screen, gameMode, hud]);
 
   const togglePause = useCallback(() => {
     setPaused((prev) => {
@@ -212,6 +225,7 @@ export default function App() {
           onOpenModes={() => setScreen('modes')}
           onOpenSettings={() => setSettingsOpen(true)}
           onOpenExtras={() => setScreen('extras')}
+          onOpenAccount={() => { setAccountOpen(true); void accountService.open(); }}
         />
       )}
 
@@ -367,6 +381,7 @@ export default function App() {
           onClose={() => setSettingsOpen(false)}
         />
       )}
+      {accountOpen && <AccountModal onClose={() => setAccountOpen(false)} />}
     </div>
   );
 }
