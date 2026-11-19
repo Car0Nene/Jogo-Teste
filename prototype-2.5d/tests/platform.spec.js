@@ -70,7 +70,8 @@ test('loads the game and accepts fight controls at this viewport', async ({ page
   await expect.poll(() => introPortraits.first().evaluate((img) => img.complete && img.naturalWidth > 0)).toBeTruthy();
   expect(await introPortraits.first().evaluate((img) => getComputedStyle(img).objectFit)).toBe('contain');
   expect(await introPortraits.last().evaluate((img) => getComputedStyle(img).objectFit)).toBe('contain');
-  await page.getByRole('dialog').click();
+  await page.keyboard.press('Enter');
+  await expect(page.locator('.ff-match-intro')).toHaveCount(0);
 
   const lightAttack = page.getByRole('button', { name: /Leve/ });
   await expect(lightAttack).toBeVisible();
