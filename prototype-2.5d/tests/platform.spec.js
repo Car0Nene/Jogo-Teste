@@ -20,9 +20,35 @@ test('loads the game and accepts fight controls at this viewport', async ({ page
   await expect(characterScreen).toBeVisible();
   expect(await characterScreen.evaluate((screen) => screen.scrollHeight <= screen.clientHeight)).toBeTruthy();
 
-  for (const name of ['Juraci', 'Carlos', 'Pedro', 'Daniel', 'Franciely', 'Gabi', 'Paula', 'Tainara']) {
+  const fighters = [
+    ['Juraci', 'juraci'],
+    ['Carlos', 'carlos'],
+    ['Pedro', 'pedro'],
+    ['Daniel', 'daniel'],
+    ['Franciely', 'franciely'],
+    ['Gabi', 'gabi'],
+    ['Paula', 'paula'],
+    ['Tainara', 'tainara'],
+  ];
+  for (const [name, portrait] of fighters) {
     await page.getByRole('button', { name: new RegExp(name, 'i') }).click();
+    const image = page.locator(`img[src*="/assets/portraits/${portrait}.webp"]`).first();
+    await expect(image).toBeVisible();
+    await expect.poll(() => image.evaluate((img) => img.complete && img.naturalWidth > 0)).toBeTruthy();
   }
+
+  await page.getByRole('button', { name: /Carlos/i }).click();
+  const baptismPortrait = page.locator('img[src*="/assets/portraits/carlos-batizado.webp"]');
+  await expect(baptismPortrait).toBeVisible();
+  await expect.poll(() => baptismPortrait.evaluate((img) => img.complete && img.naturalWidth > 0)).toBeTruthy();
+  const newMediaAvailable = await page.evaluate(async () => {
+    const paths = [
+      '/assets/videos/daniel-victory-imagined.mp4',
+      '/assets/videos/daniel-victory-poster.webp',
+    ];
+    return Promise.all(paths.map(async (path) => (await fetch(path)).ok));
+  });
+  expect(newMediaAvailable).toEqual([true, true]);
 
   await page.getByRole('button', { name: /ESCOLHER CEN/ }).click();
 

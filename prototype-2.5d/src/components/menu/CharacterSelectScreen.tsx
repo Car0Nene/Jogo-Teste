@@ -250,6 +250,18 @@ export function CharacterSelectScreen({
               alt={p1Spec.name}
               className="w-full h-full object-cover object-top"
             />
+            {p1Spec.alternatePortraitUrl && (
+              <div className="absolute right-2 top-2 z-10 flex items-center gap-1.5 rounded-md border border-amber-300/50 bg-stone-950/85 p-1 pr-2 shadow-lg">
+                <img
+                  src={p1Spec.alternatePortraitUrl}
+                  alt={`${p1Spec.name} ${p1Spec.alternatePortraitLabel ?? 'visual alternativo'}`}
+                  className="h-10 w-8 rounded-sm object-cover object-top"
+                />
+                <span className="text-[9px] font-extrabold tracking-wide text-amber-200">
+                  {p1Spec.alternatePortraitLabel}
+                </span>
+              </div>
+            )}
             <div className="absolute inset-0 bg-gradient-to-t from-[#09070d] via-transparent to-transparent" />
             <div className="absolute bottom-1.5 left-2.5 right-2.5 flex items-end justify-between">
               <div>
@@ -328,6 +340,18 @@ export function CharacterSelectScreen({
               alt={p2Spec.name}
               className="w-full h-full object-cover object-top"
             />
+            {p2Spec.alternatePortraitUrl && (
+              <div className="absolute left-2 top-2 z-10 flex items-center gap-1.5 rounded-md border border-amber-300/50 bg-stone-950/85 p-1 pr-2 shadow-lg">
+                <img
+                  src={p2Spec.alternatePortraitUrl}
+                  alt={`${p2Spec.name} ${p2Spec.alternatePortraitLabel ?? 'visual alternativo'}`}
+                  className="h-10 w-8 rounded-sm object-cover object-top"
+                />
+                <span className="text-[9px] font-extrabold tracking-wide text-amber-200">
+                  {p2Spec.alternatePortraitLabel}
+                </span>
+              </div>
+            )}
             <div className="absolute inset-0 bg-gradient-to-t from-[#09070d] via-transparent to-transparent" />
             <div className="absolute bottom-1.5 left-2.5 right-2.5 flex items-end justify-between flex-row-reverse">
               <div className="text-right">

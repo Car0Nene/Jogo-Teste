@@ -4,6 +4,7 @@ import { FIGHTERS } from '../data/fighters';
 import { DEFAULT_KEY_BINDINGS, formatKeyCode, HudScale, Player1KeyBindings } from '../data/settings';
 import { GameMode, HudFighterSnapshot, HudSnapshot } from '../engine/GameEngine';
 import { FighterPortrait } from './FighterBadgeSvg';
+import { DanielVictoryScene } from './DanielVictoryScene';
 
 interface FightHudProps {
   hud: HudSnapshot;
@@ -149,6 +150,7 @@ export function FightHud({
   const kLight = formatKeyCode(keyBindings.light);
   const kHeavy = formatKeyCode(keyBindings.heavy);
   const kSp = formatKeyCode(keyBindings.special);
+  const winnerId = hud.winnerIndex === 0 ? hud.p1.id : hud.winnerIndex === 1 ? hud.p2.id : null;
 
   return (
     <div
@@ -224,14 +226,16 @@ export function FightHud({
         )}
 
         {hud.phase === 'matchOver' && (
-          <div className="pointer-events-auto bg-stone-950/95 border border-amber-400/50 rounded-xl px-8 py-6 text-center shadow-2xl animate-banner-pop max-w-md w-full flex flex-col items-center">
-            {hud.winnerIndex !== null && (
+          <div className="pointer-events-auto bg-stone-950/95 border border-amber-400/50 rounded-xl px-4 py-4 text-center shadow-2xl animate-banner-pop max-w-2xl w-full flex flex-col items-center sm:px-8 sm:py-6">
+            {winnerId === 'daniel' ? (
+              <DanielVictoryScene />
+            ) : winnerId ? (
               <FighterPortrait
-                id={hud.winnerIndex === 0 ? hud.p1.id : hud.p2.id}
+                id={winnerId}
                 size="xl"
                 className="mb-3"
               />
-            )}
+            ) : null}
             <div className="text-xs font-semibold text-amber-300 tracking-wider uppercase">
               Fim da Luta
             </div>

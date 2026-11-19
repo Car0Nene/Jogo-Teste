@@ -192,6 +192,12 @@
   font-size: clamp(1.15rem, 5vw, 2.25rem);
 }
 
+.ff-daniel-victory-video {
+  width: min(100%, 720px);
+  height: clamp(120px, 31dvh, 340px);
+  background: #050407;
+}
+
 @keyframes ffArenaDrift {
   from { transform: scale(1.04) translate3d(-0.5%, 0, 0); }
   to { transform: scale(1.1) translate3d(0.5%, -0.5%, 0); }

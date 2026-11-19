@@ -1,6 +1,6 @@
 # Família Fighter 2.5D
 
-This standalone Vite, React, and Three.js game is kept in `prototype-2.5d/` so it does not replace the existing game or 3D prototype.
+This is the active Vite, React, and Three.js game published by the repository's GitHub Pages workflow.
 
 ## Run locally
 
@@ -13,7 +13,11 @@ npm run dev
 
 Build the static site with `npm run build`. The generated site is in `dist/`.
 
-Run desktop and mobile Chromium smoke checks with `npm run test:e2e` after installing Playwright's Chromium browser with `npx playwright install chromium`.
+Run desktop and mobile Chromium checks with `npm run test:e2e` after installing Playwright's Chromium browser with `npx playwright install chromium`.
+
+## Character portraits and victory scene
+
+The selection screens use transparent WebP portraits in `public/assets/portraits/`. Carlos's baptism portrait appears as his alternate “Modo Fé” form. The final match plays `public/assets/videos/daniel-victory-imagined.mp4` when Daniel wins; it starts muted for browser autoplay support and can be unmuted with the on-screen control.
 
 ## Desktop and mobile controls
 

@@ -90,6 +90,8 @@ export interface FighterSpec {
   quote: string;
   desc: string;
   portraitUrl: string;
+  alternatePortraitUrl?: string;
+  alternatePortraitLabel?: string;
   powerLevel: number;
   accentHex: string;
   auraColor: number;
@@ -241,7 +243,7 @@ export const FIGHTERS: Record<FighterId, FighterSpec> = {
     roleTitle: 'Mestra da Padaria',
     quote: '"Bolos são minha vida!"',
     desc: 'Rápida e esperta. Dispara o Super Bolo de Cenoura ou chama o Dadá para lavar a louça e molhar a arena.',
-    portraitUrl: assetUrl('/src/assets/images/portrait_juraci_clean_1795100421391.jpg'),
+    portraitUrl: assetUrl('/assets/portraits/juraci.webp'),
     powerLevel: 820,
     accentHex: '#ec4899',
     auraColor: 0xff4da6,
@@ -282,7 +284,9 @@ export const FIGHTERS: Record<FighterId, FighterSpec> = {
     roleTitle: 'Rei do Combo & Pizza',
     quote: '"Tô firme! Tô forte!"',
     desc: 'Forte e versátil. Alterna entre Gordão (+força) e Modo Fé (+defesa) e encaixa o Combo do Chute.',
-    portraitUrl: assetUrl('/src/assets/images/portrait_carlos_clean_1795100404700.jpg'),
+    portraitUrl: assetUrl('/assets/portraits/carlos.webp'),
+    alternatePortraitUrl: assetUrl('/assets/portraits/carlos-batizado.webp'),
+    alternatePortraitLabel: 'MODO FÉ',
     powerLevel: 880,
     accentHex: '#f59e0b',
     auraColor: 0xffb347,
@@ -326,7 +330,7 @@ export const FIGHTERS: Record<FighterId, FighterSpec> = {
     roleTitle: 'O Monstrão da Resenha',
     quote: '"Fuma, bebe e vence!"',
     desc: 'Bebe uma Heineken e se transforma no Monstrão Verde! Já transformado, dispara rajada com aura verde.',
-    portraitUrl: assetUrl('/src/assets/images/portrait_pedro_clean_1795100403773.jpg'),
+    portraitUrl: assetUrl('/assets/portraits/pedro.webp'),
     powerLevel: 950,
     accentHex: '#22c55e',
     auraColor: 0x45ff6b,
@@ -368,7 +372,7 @@ export const FIGHTERS: Record<FighterId, FighterSpec> = {
     roleTitle: 'Agente Natal Praia',
     quote: '"Partiu praia?"',
     desc: 'Ágil e imprevisível. Ativa o Modo Natal Praia com velocidade máxima e conta com seu Cão protetor!',
-    portraitUrl: assetUrl('/src/assets/images/portrait_daniel_clean_1795100404522.jpg'),
+    portraitUrl: assetUrl('/assets/portraits/daniel.webp'),
     powerLevel: 760,
     accentHex: '#ec4899',
     auraColor: 0xff6fd8,
@@ -412,7 +416,7 @@ export const FIGHTERS: Record<FighterId, FighterSpec> = {
     roleTitle: 'Força & Cuidado',
     quote: '"Cuidar também é lutar!"',
     desc: 'Fica irritada e com fome sem motivo para ganhar dano extremo, ou dispara um Jato de Leite certeiro.',
-    portraitUrl: assetUrl('/src/assets/images/portrait_franciely_clean_1795100404868.jpg'),
+    portraitUrl: assetUrl('/assets/portraits/franciely.webp'),
     powerLevel: 930,
     accentHex: '#3b82f6',
     auraColor: 0xff4646,
@@ -451,7 +455,7 @@ export const FIGHTERS: Record<FighterId, FighterSpec> = {
     roleTitle: 'Estrela do Super L',
     quote: '"Faz o L, ama o Lula!"',
     desc: 'Dispara um Super L gigante com chuva de brigadeiros! Com meia barra, encanta com Canto Musical.',
-    portraitUrl: assetUrl('/src/assets/images/portrait_gabi_clean_1795100405141.jpg'),
+    portraitUrl: assetUrl('/assets/portraits/gabi.webp'),
     powerLevel: 840,
     accentHex: '#ef4444',
     auraColor: 0xff3b3b,
@@ -492,7 +496,7 @@ export const FIGHTERS: Record<FighterId, FighterSpec> = {
     roleTitle: 'Dona da Espátula',
     quote: '"Aqui em casa quem manda sou eu!"',
     desc: 'Vestido magenta e espátula de aço na mão. Dispara avalanche de Super Almoço ou desperta a Fúria do Bar Simone.',
-    portraitUrl: assetUrl('/src/assets/images/portrait_paula_clean_1795100420739.jpg'),
+    portraitUrl: assetUrl('/assets/portraits/paula.webp'),
     powerLevel: 890,
     accentHex: '#d946ef',
     auraColor: 0xff4ca0,
@@ -532,7 +536,7 @@ export const FIGHTERS: Record<FighterId, FighterSpec> = {
     roleTitle: 'Guardiã do Arroz',
     quote: '"Com arroz eu fico invencível!"',
     desc: 'Ativa o Poder do Arroz dourado para elevar força e velocidade, ou chama Cuidado em Dobro com as crianças.',
-    portraitUrl: assetUrl('/src/assets/images/portrait_tainara_clean_1795100404936.jpg'),
+    portraitUrl: assetUrl('/assets/portraits/tainara.webp'),
     powerLevel: 870,
     accentHex: '#38bdf8',
     auraColor: 0xffe488,
