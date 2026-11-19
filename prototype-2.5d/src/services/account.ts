@@ -80,6 +80,10 @@ class AccountService {
       };
     }
 
+    // Vite dev serves only prototype-2.5d; the public root config is loaded by
+    // the production Pages app, while local testing can use VITE_SUPABASE_*.
+    if (import.meta.env.DEV) return null;
+
     // The production app is built into the repository root. The source preview
     // still lives one directory below it, so resolve the existing public config
     // from either location without copying or replacing that file.
