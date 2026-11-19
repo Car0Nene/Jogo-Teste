@@ -16,6 +16,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     defaults:
       run:
         working-directory: prototype-2.5d
@@ -29,3 +31,15 @@ jobs:
       - run: npm run build
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
+      - name: Publish built app at Pages root
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          cp -a dist/. ..
+          cd ..
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f index.html manifest.webmanifest assets src/assets sw.js
+          if ! git diff --cached --quiet; then
+            git commit -m "Deploy Familia Fighter 2.5D to Pages root"
+            git push
+          fi
