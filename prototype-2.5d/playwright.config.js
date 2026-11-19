@@ -18,7 +18,7 @@ export default defineConfig({
     },
     {
       name: 'mobile-compact-portrait',
-      use: { ...devices['iPhone 13'], viewport: { width: 390, height: 640 }, isMobile: true, hasTouch: true },
+      use: { ...devices['Pixel 7'], viewport: { width: 390, height: 640 }, isMobile: true, hasTouch: true },
     },
   ],
   use: {
