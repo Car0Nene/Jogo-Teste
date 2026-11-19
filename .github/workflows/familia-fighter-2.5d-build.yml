@@ -1,0 +1,29 @@
+name: Família Fighter 2.5D build
+
+on:
+  push:
+    branches:
+      - main
+      - codex/familia-fighter-2-5d
+    paths:
+      - 'prototype-2.5d/**'
+      - '.github/workflows/familia-fighter-2.5d-build.yml'
+  pull_request:
+    paths:
+      - 'prototype-2.5d/**'
+      - '.github/workflows/familia-fighter-2.5d-build.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: prototype-2.5d
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - run: npm run lint
+      - run: npm run build
