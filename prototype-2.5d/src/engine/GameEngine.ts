@@ -143,6 +143,7 @@ const MAX_HP = 1000;
 
 export class GameEngine {
   private container: HTMLElement;
+  private resizeObserver: ResizeObserver | null = null;
   private renderer: THREE.WebGLRenderer;
   private scene: THREE.Scene;
   private camera: THREE.PerspectiveCamera;
@@ -231,9 +232,7 @@ export class GameEngine {
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 1.12;
-    this.renderer.setPixelRatio(
-      this.isSoftwareGl ? 1 : Math.min(window.devicePixelRatio, 2)
-    );
+    this.renderer.setPixelRatio(this.getEffectivePixelRatio());
     this.renderer.shadowMap.enabled = !this.isSoftwareGl;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
@@ -295,10 +294,21 @@ export class GameEngine {
     if (this.disposed) return;
     const w = Math.max(1, this.container.clientWidth);
     const h = Math.max(1, this.container.clientHeight);
+    const pixelRatio = this.getEffectivePixelRatio();
+    if (Math.abs(this.renderer.getPixelRatio() - pixelRatio) > 0.01) {
+      this.renderer.setPixelRatio(pixelRatio);
+    }
     this.camera.aspect = w / h;
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(w, h);
   };
+
+  private getEffectivePixelRatio() {
+    const baseDpr = this.isSoftwareGl ? 1 : Math.min(window.devicePixelRatio || 1, 2);
+    return this.isSoftwareGl
+      ? Math.min(1, this.resolutionScale)
+      : Math.max(0.65, Math.min(2.25, baseDpr * (this.graphicsQuality === 'low' ? 0.85 : 1) * this.resolutionScale));
+  }
 
   private handleKeyDown = (e: KeyboardEvent) => {
     if (
@@ -331,6 +341,10 @@ export class GameEngine {
 
   private bindEvents() {
     window.addEventListener('resize', this.handleResize);
+    if (typeof ResizeObserver !== 'undefined') {
+      this.resizeObserver = new ResizeObserver(this.handleResize);
+      this.resizeObserver.observe(this.container);
+    }
     window.addEventListener('keydown', this.handleKeyDown);
     window.addEventListener('keyup', this.handleKeyUp);
     window.addEventListener('blur', this.handleBlur);
@@ -340,13 +354,7 @@ export class GameEngine {
   public applyGraphicsSettings(quality: GraphicsQuality, resolutionScale: ResolutionScale) {
     this.graphicsQuality = quality;
     this.resolutionScale = resolutionScale;
-
-    const baseDpr = this.isSoftwareGl ? 1 : Math.min(window.devicePixelRatio || 1, 2);
-    const effectiveRatio =
-      this.isSoftwareGl
-        ? Math.min(1, resolutionScale)
-        : Math.max(0.65, Math.min(2.25, baseDpr * (quality === 'low' ? 0.85 : 1) * resolutionScale));
-    this.renderer.setPixelRatio(effectiveRatio);
+    this.renderer.setPixelRatio(this.getEffectivePixelRatio());
 
     const shadowsOn = !this.isSoftwareGl && quality !== 'low';
     this.renderer.shadowMap.enabled = shadowsOn;
@@ -1741,7 +1749,11 @@ export class GameEngine {
     const [f1, f2] = this.fighters;
     const midX = (f1.x + f2.x) * 0.5;
     const span = Math.abs(f1.x - f2.x);
-    const zDist = THREE.MathUtils.clamp(6.8 + span * 0.68, 7.2, 12.6);
+    const baseDistance = 6.8 + span * 0.68;
+    const horizontalViewTangent = Math.tan(THREE.MathUtils.degToRad(this.camera.fov * 0.5)) * this.camera.aspect;
+    const desiredWidth = span + (this.camera.aspect < 1 ? 3.6 : 2.8);
+    const fitDistance = desiredWidth / (2 * Math.max(0.01, horizontalViewTangent));
+    const zDist = THREE.MathUtils.clamp(Math.max(baseDistance, fitDistance), 7.2, 60);
     const maxY = Math.max(f1.y, f2.y);
 
     let sx = 0;
@@ -1752,7 +1764,11 @@ export class GameEngine {
       sy = (Math.random() - 0.5) * this.shakeAmp;
     }
 
-    this._camTarget.set(midX * 0.85 + sx, 1.74 + maxY * 0.32 + sy, zDist);
+    this._camTarget.set(
+      midX * 0.85 + sx,
+      1.74 + maxY * 0.32 + sy + Math.max(0, zDist - 10) * 0.11,
+      zDist
+    );
     this._camLook.set(midX * 0.9, 1.08 + maxY * 0.25, -0.4);
     this.camera.position.lerp(this._camTarget, 1 - Math.exp(-9 * dt));
     this.camera.lookAt(this._camLook);
@@ -1834,6 +1850,8 @@ export class GameEngine {
 
   public dispose() {
     this.disposed = true;
+    this.resizeObserver?.disconnect();
+    this.resizeObserver = null;
     cancelAnimationFrame(this.frameId);
     clearTimeout(this.frameId);
     window.removeEventListener('resize', this.handleResize);

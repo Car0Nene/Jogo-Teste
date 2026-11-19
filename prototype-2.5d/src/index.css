@@ -106,7 +106,11 @@
 }
 
 .ff-character-portrait {
-  height: clamp(52px, 13dvh, 116px);
+  height: clamp(210px, 36dvh, 360px);
+  width: 120%;
+  margin: clamp(-32px, -4dvh, -16px) -10% 0;
+  z-index: 2;
+  flex: none;
 }
 
 .ff-character-animated {
@@ -274,7 +278,9 @@
   }
 
   .ff-character-portrait {
-    height: clamp(42px, 10dvh, 72px);
+    height: clamp(110px, 24dvh, 180px);
+    width: 124%;
+    margin: -16px -12% 0;
   }
 
   .ff-character-animated {

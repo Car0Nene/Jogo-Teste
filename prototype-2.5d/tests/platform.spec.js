@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { readFile } from 'node:fs/promises';
 
 test('loads the game and accepts fight controls at this viewport', async ({ page }, testInfo) => {
   const pageErrors = [];
@@ -35,6 +36,12 @@ test('loads the game and accepts fight controls at this viewport', async ({ page
     const image = page.locator(`img[src*="/assets/portraits/${portrait}.webp"]`).first();
     await expect(image).toBeVisible();
     await expect.poll(() => image.evaluate((img) => img.complete && img.naturalWidth > 0)).toBeTruthy();
+    expect(await image.evaluate((img) => getComputedStyle(img).objectFit)).toBe('contain');
+    const portraitFrame = image.locator('xpath=..');
+    const panel = image.locator('xpath=../..');
+    expect(await portraitFrame.evaluate((el) => el.getBoundingClientRect().width)).toBeGreaterThan(
+      await panel.evaluate((el) => el.getBoundingClientRect().width),
+    );
   }
 
   await page.getByRole('button', { name: /Carlos/i }).click();
@@ -93,6 +100,27 @@ test('loads the game and accepts fight controls at this viewport', async ({ page
     await expect(page.getByRole('button', { name: 'Agachar' })).toBeVisible();
     await lightAttack.click();
     await page.keyboard.press('j');
+  }
+
+  await page.getByRole('button', { name: 'Pausar' }).click();
+  await expect(page.getByText('JOGO PAUSADO')).toBeVisible();
+  await page.getByRole('button', { name: 'Menu Principal' }).click();
+  await expect(page.getByRole('navigation', { name: 'Menu Principal' })).toBeVisible();
+
+  if (testInfo.project.name === 'desktop-chromium') {
+    const fullscreen = page.getByRole('button', { name: 'Tela cheia' });
+    await fullscreen.click();
+    await expect(page.getByRole('button', { name: 'Sair da tela cheia' })).toBeVisible();
+    await page.getByRole('button', { name: 'Sair da tela cheia' }).click();
+  }
+
+  const schema = await readFile(new URL('../../supabase/schema.sql', import.meta.url), 'utf8');
+  const fighterConstraints = schema
+    .split(/\r?\n/)
+    .filter((line) => line.includes('selected_fighter') && /\bin\s*\(/i.test(line));
+  expect(fighterConstraints).toHaveLength(5);
+  for (const [, fighterId] of fighters) {
+    expect(fighterConstraints.every((line) => line.includes(`'${fighterId}'`))).toBeTruthy();
   }
 
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBeTruthy();

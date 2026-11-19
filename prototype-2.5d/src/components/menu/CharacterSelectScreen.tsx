@@ -233,7 +233,7 @@ export function CharacterSelectScreen({
             setPickSlot('p1');
             setP1Locked(false);
           }}
-          className={`ff-character-panel pointer-events-auto w-full max-w-[320px] min-w-0 bg-[#0e0b16]/92 border-2 p-2 sm:p-3 transition-all cursor-pointer ff-chamfer shadow-2xl ${
+          className={`ff-character-panel relative isolate pointer-events-auto w-full max-w-[320px] min-w-0 overflow-visible bg-[#0e0b16]/92 border-2 p-2 sm:p-3 transition-all cursor-pointer shadow-2xl ${
             pickSlot === 'p1'
               ? 'border-amber-400 shadow-[0_0_24px_rgba(251,191,36,0.22)]'
               : 'border-white/15 hover:border-white/35'
@@ -244,11 +244,11 @@ export function CharacterSelectScreen({
             <span className="text-stone-300">PODER {p1Spec.powerLevel}</span>
           </div>
 
-          <div className="ff-character-portrait relative mt-1.5 overflow-hidden border border-white/15 bg-[#09070d]">
+          <div className="ff-character-portrait relative overflow-visible bg-transparent">
             <img
               src={p1Spec.portraitUrl}
               alt={p1Spec.name}
-              className="w-full h-full object-cover object-top"
+              className="w-full h-full object-contain object-bottom drop-shadow-[0_12px_20px_rgba(0,0,0,0.65)]"
             />
             {p1Spec.alternatePortraitUrl && (
               <div className="absolute right-2 top-2 z-10 flex items-center gap-1.5 rounded-md border border-amber-300/50 bg-stone-950/85 p-1 pr-2 shadow-lg">
@@ -321,7 +321,7 @@ export function CharacterSelectScreen({
             setPickSlot('p2');
             setP2Locked(false);
           }}
-          className={`ff-character-panel pointer-events-auto w-full max-w-[320px] min-w-0 bg-[#0e0b16]/92 border-2 p-2 sm:p-3 text-right transition-all cursor-pointer ff-chamfer shadow-2xl ${
+          className={`ff-character-panel relative isolate pointer-events-auto w-full max-w-[320px] min-w-0 overflow-visible bg-[#0e0b16]/92 border-2 p-2 sm:p-3 text-right transition-all cursor-pointer shadow-2xl ${
             pickSlot === 'p2'
               ? 'border-sky-400 shadow-[0_0_24px_rgba(56,189,248,0.22)]'
               : 'border-white/15 hover:border-white/35'
@@ -334,11 +334,11 @@ export function CharacterSelectScreen({
             </span>
           </div>
 
-          <div className="ff-character-portrait relative mt-1.5 overflow-hidden border border-white/15 bg-[#09070d]">
+          <div className="ff-character-portrait relative overflow-visible bg-transparent">
             <img
               src={p2Spec.portraitUrl}
               alt={p2Spec.name}
-              className="w-full h-full object-cover object-top"
+              className="w-full h-full object-contain object-bottom drop-shadow-[0_12px_20px_rgba(0,0,0,0.65)]"
             />
             {p2Spec.alternatePortraitUrl && (
               <div className="absolute left-2 top-2 z-10 flex items-center gap-1.5 rounded-md border border-amber-300/50 bg-stone-950/85 p-1 pr-2 shadow-lg">
