@@ -13,6 +13,8 @@ npm run dev
 
 Build the static site with `npm run build`. The generated site is in `dist/`.
 
+Run desktop and mobile Chromium smoke checks with `npm run test:e2e` after installing Playwright's Chromium browser with `npx playwright install chromium`.
+
 ## Desktop and mobile controls
 
 Desktop play uses the configurable keyboard bindings and supports gamepads. The fight screen also has on-screen controls that accept pointer and touch input. The layout is responsive, and the game renderer resizes with its container.
