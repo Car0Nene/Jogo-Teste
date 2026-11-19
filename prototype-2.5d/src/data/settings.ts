@@ -1,3 +1,10 @@
+import {
+  ControlMode,
+  DEFAULT_TOUCH_CONTROLS,
+  sanitizeTouchControls,
+  TouchControlSettings,
+} from '../platform/deviceProfile';
+
 export type GraphicsQuality = 'low' | 'medium' | 'high';
 export type ResolutionScale = 0.75 | 1 | 1.5;
 export type HudScale = 0.9 | 1 | 1.1;
@@ -24,6 +31,9 @@ export interface GameSettings {
   hudScale: HudScale;
   gamepadEnabled: boolean;
   keyBindings: Player1KeyBindings;
+  /** 'auto' follows the detected device; otherwise forces touch or keyboard UI. */
+  controlMode: ControlMode;
+  touchControls: TouchControlSettings;
 }
 
 export const DEFAULT_KEY_BINDINGS: Player1KeyBindings = {
@@ -48,15 +58,27 @@ export const DEFAULT_SETTINGS: GameSettings = {
   hudScale: 1,
   gamepadEnabled: true,
   keyBindings: { ...DEFAULT_KEY_BINDINGS },
+  controlMode: 'auto',
+  touchControls: { ...DEFAULT_TOUCH_CONTROLS },
 };
 
 const STORAGE_KEY = 'familia-fighter-settings-v1';
 
-export function loadSettings(): GameSettings {
-  if (typeof window === 'undefined') return { ...DEFAULT_SETTINGS, keyBindings: { ...DEFAULT_KEY_BINDINGS } };
+/** Defaults used until the player saves their own choice (e.g. per device profile). */
+export function freshSettings(overrides: Partial<GameSettings> = {}): GameSettings {
+  return {
+    ...DEFAULT_SETTINGS,
+    keyBindings: { ...DEFAULT_KEY_BINDINGS },
+    touchControls: { ...DEFAULT_TOUCH_CONTROLS },
+    ...overrides,
+  };
+}
+
+export function loadSettings(overrides: Partial<GameSettings> = {}): GameSettings {
+  if (typeof window === 'undefined') return freshSettings(overrides);
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return { ...DEFAULT_SETTINGS, keyBindings: { ...DEFAULT_KEY_BINDINGS } };
+    if (!raw) return freshSettings(overrides);
     const parsed = JSON.parse(raw) as Partial<GameSettings>;
     return {
       masterVolume: clamp01(parsed.masterVolume, DEFAULT_SETTINGS.masterVolume),
@@ -67,7 +89,7 @@ export function loadSettings(): GameSettings {
       graphicsQuality:
         parsed.graphicsQuality === 'low' || parsed.graphicsQuality === 'medium' || parsed.graphicsQuality === 'high'
           ? parsed.graphicsQuality
-          : DEFAULT_SETTINGS.graphicsQuality,
+          : overrides.graphicsQuality ?? DEFAULT_SETTINGS.graphicsQuality,
       resolutionScale:
         parsed.resolutionScale === 0.75 || parsed.resolutionScale === 1 || parsed.resolutionScale === 1.5
           ? parsed.resolutionScale
@@ -81,9 +103,12 @@ export function loadSettings(): GameSettings {
         ...DEFAULT_KEY_BINDINGS,
         ...(parsed.keyBindings || {}),
       },
+      controlMode:
+        parsed.controlMode === 'touch' || parsed.controlMode === 'keyboard' ? parsed.controlMode : 'auto',
+      touchControls: sanitizeTouchControls(parsed.touchControls),
     };
   } catch {
-    return { ...DEFAULT_SETTINGS, keyBindings: { ...DEFAULT_KEY_BINDINGS } };
+    return freshSettings(overrides);
   }
 }
 

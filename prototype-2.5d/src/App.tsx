@@ -15,6 +15,8 @@ import {
   HudSnapshot,
 } from './engine/GameEngine';
 import { FightHud } from './components/FightHud';
+import { PROFILE_CONFIGS } from './platform/deviceProfile';
+import { useDeviceProfile } from './platform/useDeviceProfile';
 import { AmbientParticles } from './components/menu/AmbientParticles';
 import { CharacterSelectScreen } from './components/menu/CharacterSelectScreen';
 import { ExtrasScreen } from './components/menu/ExtrasScreen';
@@ -28,12 +30,27 @@ import { AccountModal } from './components/AccountModal';
 
 type AppScreen = 'title' | 'modes' | 'select' | 'stage' | 'vs' | 'fight' | 'extras';
 
+/** Defaults for a player who never saved settings, chosen from the device class. */
+function profileDefaults(): Partial<GameSettings> {
+  const coarse = typeof window.matchMedia === 'function' && window.matchMedia('(pointer: coarse)').matches;
+  return coarse ? { graphicsQuality: PROFILE_CONFIGS.mobile.defaultQuality } : {};
+}
+
+function isGameplayKey(code: string, kb: GameSettings['keyBindings']): boolean {
+  return (
+    Object.values(kb).includes(code) ||
+    code === 'Space' ||
+    code.startsWith('Arrow') ||
+    code.startsWith('Numpad')
+  );
+}
+
 export default function App() {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mountRef = useRef<HTMLDivElement | null>(null);
   const engineRef = useRef<GameEngine | null>(null);
 
-  const [settings, setSettings] = useState<GameSettings>(() => loadSettings());
+  const [settings, setSettings] = useState<GameSettings>(() => loadSettings(profileDefaults()));
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const recordedMatchRef = useRef<string | null>(null);
@@ -48,6 +65,20 @@ export default function App() {
   const [showcaseOrbit, setShowcaseOrbit] = useState(false);
   const [paused, setPaused] = useState(false);
   const [hud, setHud] = useState<HudSnapshot | null>(null);
+
+  const settingsRef = useRef(settings);
+  settingsRef.current = settings;
+  const platform = useDeviceProfile(settings.controlMode, (code) =>
+    isGameplayKey(code, settingsRef.current.keyBindings),
+  );
+
+  const platformRef = useRef(platform);
+  platformRef.current = platform;
+
+  // Per-profile presentation: camera framing + pixel-ratio ceiling.
+  useEffect(() => {
+    engineRef.current?.setViewProfile(platform.config.camera, platform.config.maxPixelRatio);
+  }, [platform.config]);
 
   useEffect(() => { void accountService.initialize(); }, []);
 
@@ -76,7 +107,8 @@ export default function App() {
     });
     engineRef.current = engine;
 
-    const initial = loadSettings();
+    const initial = loadSettings(profileDefaults());
+    engine.setViewProfile(platformRef.current.config.camera, platformRef.current.config.maxPixelRatio);
     soundEngine.setVolumes({
       masterVolume: initial.masterVolume,
       musicVolume: initial.musicVolume,
@@ -295,6 +327,11 @@ export default function App() {
           muted={settings.muted}
           hudScale={settings.hudScale}
           keyBindings={settings.keyBindings}
+          profile={platform.profile}
+          orientation={platform.orientation}
+          scheme={platform.scheme}
+          touchControls={settings.touchControls}
+          onInsets={(top, bottom) => engineRef.current?.setViewInsets(top, bottom)}
           onToggleMute={toggleMute}
           onPause={togglePause}
           onSkipIntro={() => engineRef.current?.skipIntro()}
@@ -317,10 +354,16 @@ export default function App() {
             </p>
 
             <div className="mt-4 bg-[#171222] border border-white/10 p-3 text-xs text-stone-300 space-y-1.5">
+              {platform.scheme === 'touch' ? (
+                <div>
+                  <strong className="text-amber-300">Toque:</strong> analógico à esquerda move, pula (↑) e agacha (↓) · botões à direita atacam, usam especial e defendem. Ajuste tamanho e posição em Configurações.
+                </div>
+              ) : (
               <div>
                 <strong className="text-amber-300">1P:</strong> {formatKeyCode(kb.left)}/{formatKeyCode(kb.right)} Mover · {formatKeyCode(kb.up)}/Espaço Pular · {formatKeyCode(kb.down)} Agachar · {formatKeyCode(kb.light)} Leve · {formatKeyCode(kb.heavy)} Forte · {formatKeyCode(kb.special)} Especial · ↓+{formatKeyCode(kb.special)} Sub · {formatKeyCode(kb.guard)} Defesa
               </div>
-              {gameMode === 'versus' && (
+              )}
+              {gameMode === 'versus' && platform.scheme !== 'touch' && (
                 <div>
                   <strong className="text-sky-300">2P:</strong> ←/→ Mover · ↑ Pular · ↓ Agachar · U/Num1 Leve · P/Num2 Forte · Num3 Especial · O/Num4 Defesa
                 </div>
@@ -378,6 +421,7 @@ export default function App() {
           onUpdate={applySettings}
           isFullscreen={isFullscreen}
           onToggleFullscreen={toggleFullscreen}
+          detectedLabel={{ desktop: 'Computador', tablet: 'Tablet', mobile: 'Celular' }[platform.profile]}
           onClose={() => setSettingsOpen(false)}
         />
       )}
