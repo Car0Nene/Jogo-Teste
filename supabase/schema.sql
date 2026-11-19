@@ -3,7 +3,7 @@ create table if not exists public.family_fighter_profiles (
   nickname text not null default 'Jogador'
     check (char_length(btrim(nickname)) between 1 and 32),
   selected_fighter text not null default 'juraci'
-    check (selected_fighter in ('juraci', 'carlos', 'pedro', 'daniel', 'franciely', 'gabi')),
+    check (selected_fighter in ('juraci', 'carlos', 'pedro', 'daniel', 'franciely', 'gabi', 'paula', 'tainara')),
   matches_played integer not null default 0 check (matches_played >= 0),
   wins integer not null default 0 check (wins >= 0),
   losses integer not null default 0 check (losses >= 0),
@@ -16,7 +16,7 @@ create table if not exists public.family_fighter_match_events (
   user_id uuid not null references auth.users (id) on delete cascade,
   match_id uuid not null,
   outcome text not null check (outcome in ('win', 'loss', 'draw')),
-  selected_fighter text not null check (selected_fighter in ('juraci', 'carlos', 'pedro', 'daniel', 'franciely', 'gabi')),
+  selected_fighter text not null check (selected_fighter in ('juraci', 'carlos', 'pedro', 'daniel', 'franciely', 'gabi', 'paula', 'tainara')),
   created_at timestamptz not null default now(),
   primary key (user_id, match_id)
 );
@@ -26,12 +26,12 @@ alter table public.family_fighter_profiles
   drop constraint if exists family_fighter_profiles_selected_fighter_check;
 alter table public.family_fighter_profiles
   add constraint family_fighter_profiles_selected_fighter_check
-  check (selected_fighter in ('juraci', 'carlos', 'pedro', 'daniel', 'franciely', 'gabi'));
+  check (selected_fighter in ('juraci', 'carlos', 'pedro', 'daniel', 'franciely', 'gabi', 'paula', 'tainara'));
 alter table public.family_fighter_match_events
   drop constraint if exists family_fighter_match_events_selected_fighter_check;
 alter table public.family_fighter_match_events
   add constraint family_fighter_match_events_selected_fighter_check
-  check (selected_fighter in ('juraci', 'carlos', 'pedro', 'daniel', 'franciely', 'gabi'));
+  check (selected_fighter in ('juraci', 'carlos', 'pedro', 'daniel', 'franciely', 'gabi', 'paula', 'tainara'));
 alter table public.family_fighter_profiles enable row level security;
 alter table public.family_fighter_match_events enable row level security;
 
@@ -107,7 +107,7 @@ begin
     raise exception 'Invalid match outcome';
   end if;
 
-  if p_selected_fighter is null or p_selected_fighter not in ('juraci', 'carlos', 'pedro', 'daniel', 'franciely', 'gabi') then
+  if p_selected_fighter is null or p_selected_fighter not in ('juraci', 'carlos', 'pedro', 'daniel', 'franciely', 'gabi', 'paula', 'tainara') then
     raise exception 'Invalid fighter';
   end if;
 
