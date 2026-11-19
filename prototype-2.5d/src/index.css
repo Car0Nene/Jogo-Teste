@@ -7,6 +7,22 @@
     --font-mono: 'JetBrains Mono', ui-monospace, monospace;
   }
 
+  /* Root UI scale comes from the device profile (src/platform): rem-based
+     sizes grow on large monitors / tablets without any transform. */
+  html {
+    font-size: calc(16px * var(--ff-ui-scale, 1));
+    overscroll-behavior: none;
+    touch-action: manipulation;
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html[data-control='touch'] body {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
   html, body, #root {
     width: 100%;
     height: 100%;
@@ -188,15 +204,52 @@
   height: clamp(150px, 42dvh, 420px);
 }
 
-.ff-virtual-joystick {
-  display: none;
+/* Fight HUD. --ff-hud-scale (player setting x profile factor) rescales every
+   Tailwind spacing / text token inside the HUD. It lays out for real, so
+   nothing is cropped at the edges the way transform: scale() did. */
+.ff-hud-controls {
+  --ff-hud-scale: 1;
+  --spacing: calc(0.25rem * var(--ff-hud-scale));
+  --text-xs: calc(0.75rem * var(--ff-hud-scale));
+  --text-sm: calc(0.875rem * var(--ff-hud-scale));
+  --text-base: calc(1rem * var(--ff-hud-scale));
+  --text-lg: calc(1.125rem * var(--ff-hud-scale));
+  --text-xl: calc(1.25rem * var(--ff-hud-scale));
+  --text-2xl: calc(1.5rem * var(--ff-hud-scale));
+  --text-3xl: calc(1.875rem * var(--ff-hud-scale));
+  --text-4xl: calc(2.25rem * var(--ff-hud-scale));
+  --text-5xl: calc(3rem * var(--ff-hud-scale));
+  --text-7xl: calc(4.5rem * var(--ff-hud-scale));
+  padding: max(0.75rem, env(safe-area-inset-top, 0px))
+    max(1rem, env(safe-area-inset-right, 0px))
+    max(0.75rem, env(safe-area-inset-bottom, 0px))
+    max(1rem, env(safe-area-inset-left, 0px));
 }
 
-.ff-hud-controls {
-  padding: max(1rem, env(safe-area-inset-top, 0px))
-    max(1rem, env(safe-area-inset-right, 0px))
-    max(1rem, env(safe-area-inset-bottom, 0px))
-    max(1rem, env(safe-area-inset-left, 0px));
+html[data-profile='mobile'] .ff-hud-controls {
+  padding-top: max(0.4rem, env(safe-area-inset-top, 0px));
+  padding-bottom: max(0.5rem, env(safe-area-inset-bottom, 0px));
+}
+
+/* Touch controls: sized in rem x user scale, never below a 48px target. */
+.ff-touch-controls {
+  --ff-tc: var(--ff-touch-scale, 1);
+  touch-action: none;
+  -webkit-touch-callout: none;
+  user-select: none;
+}
+
+.ff-touch-btn {
+  touch-action: none;
+  -webkit-touch-callout: none;
+  user-select: none;
+  min-width: calc(3rem * var(--ff-tc));
+  min-height: calc(3rem * var(--ff-tc));
+}
+
+.ff-touch-btn[data-pressed='true'] {
+  filter: brightness(1.35);
+  transform: scale(0.94);
 }
 
 .ff-intro-name {
@@ -228,22 +281,6 @@
   }
 
   .ff-stage-select-screen > footer span:last-child {
-    display: none;
-  }
-}
-
-@media (pointer: coarse) {
-  .ff-virtual-joystick {
-    display: grid;
-  }
-
-  .ff-directional-buttons {
-    display: none;
-  }
-}
-
-@media (pointer: fine) {
-  .ff-virtual-joystick {
     display: none;
   }
 }

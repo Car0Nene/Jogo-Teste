@@ -1,10 +1,12 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useLayoutEffect, useRef } from 'react';
 import { Volume2, VolumeX, Pause } from 'lucide-react';
 import { FIGHTERS } from '../data/fighters';
 import { DEFAULT_KEY_BINDINGS, formatKeyCode, HudScale, Player1KeyBindings } from '../data/settings';
 import { GameMode, HudFighterSnapshot, HudSnapshot } from '../engine/GameEngine';
 import { FighterPortrait } from './FighterBadgeSvg';
 import { DanielVictoryScene } from './DanielVictoryScene';
+import { TouchControls } from './hud/TouchControls';
+import { ControlScheme, DeviceProfileId, Orientation, TouchControlSettings } from '../platform/deviceProfile';
 
 interface FightHudProps {
   hud: HudSnapshot;
@@ -12,6 +14,12 @@ interface FightHudProps {
   muted: boolean;
   hudScale?: HudScale;
   keyBindings?: Player1KeyBindings;
+  profile: DeviceProfileId;
+  orientation: Orientation;
+  scheme: ControlScheme;
+  touchControls: TouchControlSettings;
+  /** Reports the fraction of viewport height covered by HUD (top, bottom). */
+  onInsets: (top: number, bottom: number) => void;
   onToggleMute: () => void;
   onPause: () => void;
   onSkipIntro: () => void;
@@ -24,9 +32,11 @@ interface FightHudProps {
 function FighterMeterBlock({
   f,
   align,
+  compact,
 }: {
   f: HudFighterSnapshot;
   align: 'left' | 'right';
+  compact: boolean;
 }) {
   const spec = FIGHTERS[f.id];
   const hpPct = Math.max(0, Math.min(100, (f.hp / f.maxHp) * 100));
@@ -34,20 +44,20 @@ function FighterMeterBlock({
   const isRight = align === 'right';
 
   return (
-    <div className={`flex-1 max-w-[440px] flex flex-col gap-1.5 ${isRight ? 'items-end' : 'items-start'}`}>
+    <div className={`flex-1 min-w-0 max-w-[440px] flex flex-col ${compact ? 'gap-1' : 'gap-1.5'} ${isRight ? 'items-end' : 'items-start'}`}>
       {/* Name, rounds & form */}
       <div className={`w-full flex items-center justify-between gap-2 ${isRight ? 'flex-row-reverse' : ''}`}>
         <div className={`flex items-center gap-2.5 ${isRight ? 'flex-row-reverse' : ''}`}>
-          <FighterPortrait id={f.id} size="md" />
+          <FighterPortrait id={f.id} size={compact ? 'sm' : 'md'} />
           <div className={isRight ? 'text-right' : 'text-left'}>
-            <div className="font-display font-extrabold text-xl tracking-wide text-white leading-none drop-shadow-[0_2px_4px_rgba(0,0,0,0.85)]">
+            <div className={`font-display font-extrabold tracking-wide text-white leading-none truncate drop-shadow-[0_2px_4px_rgba(0,0,0,0.85)] ${compact ? 'text-base' : 'text-xl'}`}>
               {f.name}
             </div>
             {f.formLabel ? (
               <div className="text-[11px] font-semibold text-amber-300 mt-0.5 tabular-nums">
                 {f.formLabel} · {f.formTimeLeft}s
               </div>
-            ) : (
+            ) : compact ? null : (
               <div className="text-[11px] text-stone-300/80 mt-0.5">{spec.roleTitle}</div>
             )}
           </div>
@@ -69,7 +79,7 @@ function FighterMeterBlock({
       </div>
 
       {/* Health bar with trailing damage */}
-      <div className="w-full h-5 bg-stone-950/90 border border-white/20 rounded-sm overflow-hidden relative shadow-[0_3px_10px_rgba(0,0,0,0.6)]">
+      <div className={`w-full ${compact ? 'h-4' : 'h-5'} bg-stone-950/90 border border-white/20 rounded-sm overflow-hidden relative shadow-[0_3px_10px_rgba(0,0,0,0.6)]`}>
         <div
           className={`absolute top-0 bottom-0 bg-red-500/80 transition-all duration-150 ${
             isRight ? 'right-0' : 'left-0'
@@ -120,7 +130,7 @@ function FighterMeterBlock({
         </div>
       )}
       {f.bark && (
-        <div className="bg-stone-950/90 border border-amber-300/40 text-amber-100 text-xs font-semibold px-3 py-1.5 rounded-md shadow-md max-w-[260px]">
+        <div className={`bg-stone-950/90 border border-amber-300/40 text-amber-100 text-xs font-semibold px-3 py-1.5 rounded-md shadow-md max-w-[260px] ${compact ? 'hidden' : ''}`}>
           “{f.bark}”
         </div>
       )}
@@ -128,106 +138,43 @@ function FighterMeterBlock({
   );
 }
 
-function VirtualJoystick({
-  onHold,
-  onPress,
-}: {
-  onHold: (action: string, active: boolean) => void;
-  onPress: (action: 'jump') => void;
-}) {
-  const activePointer = useRef<number | null>(null);
-  const activeActions = useRef<string[]>([]);
-  const onHoldRef = useRef(onHold);
-  onHoldRef.current = onHold;
-  const [stick, setStick] = useState({ x: 0, y: 0 });
+interface HoldProps {
+  label: string;
+  action: string;
+  className: string;
+  ariaLabel?: string;
+  onVirtualHold: (action: string, active: boolean) => void;
+}
 
-  useEffect(() => () => {
-    activeActions.current
-      .filter((action) => action !== 'up')
-      .forEach((action) => onHoldRef.current(action, false));
-  }, []);
-
-  const releaseActions = () => {
-    activeActions.current.filter((action) => action !== 'up').forEach((action) => onHoldRef.current(action, false));
-    activeActions.current = [];
-    activePointer.current = null;
-    setStick({ x: 0, y: 0 });
-  };
-
-  const updateStick = (event: React.PointerEvent<HTMLDivElement>) => {
-    const bounds = event.currentTarget.getBoundingClientRect();
-    const radius = bounds.width / 2 - 12;
-    const dx = event.clientX - (bounds.left + bounds.width / 2);
-    const dy = event.clientY - (bounds.top + bounds.height / 2);
-    const length = Math.hypot(dx, dy) || 1;
-    const scale = Math.min(1, radius / length);
-    const x = dx * scale;
-    const y = dy * scale;
-    setStick({ x, y });
-
-    const nextActions: string[] = [];
-    if (x < -radius * 0.22) nextActions.push('left');
-    if (x > radius * 0.22) nextActions.push('right');
-    if (y < -radius * 0.35) nextActions.push('up');
-    if (y > radius * 0.35) nextActions.push('down');
-    activeActions.current
-      .filter((action) => !nextActions.includes(action))
-      .filter((action) => action !== 'up')
-      .forEach((action) => onHoldRef.current(action, false));
-    nextActions
-      .filter((action) => !activeActions.current.includes(action))
-      .forEach((action) => action === 'up' ? onPress('jump') : onHoldRef.current(action, true));
-    activeActions.current = nextActions;
-  };
-
+function HoldButton({ label, action, className, ariaLabel, onVirtualHold }: HoldProps) {
+  const off = () => onVirtualHold(action, false);
   return (
-    <div
-      role="group"
-      aria-label="Analógico virtual: mover, pular e agachar"
-      data-active-actions={activeActions.current.join(',')}
-      className="ff-virtual-joystick relative h-[88px] w-[88px] shrink-0 place-items-center rounded-full border border-white/20 bg-stone-950/85 shadow-lg touch-none select-none"
-      onPointerDown={(event) => {
-        event.preventDefault();
-        activePointer.current = event.pointerId;
-        event.currentTarget.setPointerCapture(event.pointerId);
-        updateStick(event);
-      }}
-      onPointerMove={(event) => {
-        if (activePointer.current === event.pointerId) updateStick(event);
-      }}
-      onPointerUp={(event) => {
-        if (activePointer.current === event.pointerId) releaseActions();
-      }}
-      onPointerCancel={releaseActions}
-      onLostPointerCapture={releaseActions}
+    <button
+      type="button"
+      aria-label={ariaLabel}
+      onPointerDown={() => onVirtualHold(action, true)}
+      onPointerUp={off}
+      onPointerCancel={off}
+      onPointerLeave={off}
+      className={`${className} cursor-pointer touch-none select-none`}
     >
-      <span className="absolute text-[9px] text-stone-400" style={{ top: 5 }}>PULAR</span>
-      <span className="absolute text-[9px] text-stone-400" style={{ bottom: 5 }}>AGACHAR</span>
-      <span className="absolute text-xs text-stone-400" style={{ left: 7 }}>◀</span>
-      <span className="absolute text-xs text-stone-400" style={{ right: 7 }}>▶</span>
-      <span
-        aria-hidden="true"
-        className="h-10 w-10 rounded-full border border-amber-200/60 bg-amber-400/90 shadow-[0_2px_12px_rgba(251,191,36,0.35)] pointer-events-none"
-        style={{ transform: `translate(${stick.x}px, ${stick.y}px)` }}
-      />
-    </div>
+      {label}
+    </button>
   );
 }
 
-export function FightHud({
+/** Desktop / keyboard layout: compact clickable bar plus the key legend. */
+function DesktopControls({
   hud,
-  gameMode,
-  muted,
-  hudScale = 1,
-  keyBindings = DEFAULT_KEY_BINDINGS,
-  onToggleMute,
-  onPause,
-  onSkipIntro,
+  keyBindings,
   onVirtualHold,
   onVirtualPress,
-  onRematch,
-  onBackToSelect,
-}: FightHudProps) {
+}: {
+  hud: HudSnapshot;
+  keyBindings: Player1KeyBindings;
+  onVirtualHold: (player: 0 | 1, action: string, active: boolean) => void;
+  onVirtualPress: FightHudProps['onVirtualPress'];
+}) {
   const kL = formatKeyCode(keyBindings.left);
   const kR = formatKeyCode(keyBindings.right);
   const kU = formatKeyCode(keyBindings.up);
@@ -236,20 +183,157 @@ export function FightHud({
   const kLight = formatKeyCode(keyBindings.light);
   const kHeavy = formatKeyCode(keyBindings.heavy);
   const kSp = formatKeyCode(keyBindings.special);
+  const hold = (action: string, active: boolean) => onVirtualHold(0, action, active);
+  const key = 'w-11 h-11 rounded bg-stone-800 hover:bg-stone-700 active:bg-amber-400 active:text-stone-950 text-sm font-bold';
+
+  return (
+    <div className="w-full max-w-[1360px] mx-auto flex items-center justify-between gap-3 pointer-events-auto">
+      <div className="flex items-center gap-1.5 bg-stone-950/85 border border-white/10 rounded-lg px-2.5 py-1.5">
+        <HoldButton label="◀" action="left" className={key} onVirtualHold={hold} />
+        <button
+          type="button"
+          onClick={() => onVirtualPress(0, 'jump')}
+          className={`${key} cursor-pointer touch-none`}
+        >
+          ▲
+        </button>
+        <HoldButton
+          label="Agachar"
+          action="down"
+          ariaLabel="Agachar"
+          className="px-2.5 h-11 rounded bg-stone-800 hover:bg-stone-700 text-xs font-semibold"
+          onVirtualHold={hold}
+        />
+        <HoldButton label="▶" action="right" className={key} onVirtualHold={hold} />
+        <HoldButton
+          label="Defesa"
+          action="guard"
+          className="px-2.5 h-11 rounded bg-stone-800 hover:bg-stone-700 text-xs font-semibold"
+          onVirtualHold={hold}
+        />
+      </div>
+
+      <div className="hidden lg:block min-w-0 text-xs text-stone-300/85 bg-stone-950/75 border border-white/10 rounded-lg px-3.5 py-2 text-center">
+        {kL}/{kR} Mover · {kU}/Espaço Pular · {kD} Agachar · {kLight} Leve · {kHeavy} Forte · {kSp} Especial · {kD}+{kSp} Sub-Especial · {kG} Defesa
+      </div>
+
+      <div className="flex items-center gap-1.5 bg-stone-950/85 border border-white/10 rounded-lg px-2.5 py-1.5">
+        <button
+          type="button"
+          onClick={() => onVirtualPress(0, 'light')}
+          className="px-3 min-h-11 rounded bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold cursor-pointer"
+        >
+          Leve ({kLight})
+        </button>
+        <button
+          type="button"
+          onClick={() => onVirtualPress(0, 'heavy')}
+          className="px-3 min-h-11 rounded bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold cursor-pointer"
+        >
+          Forte ({kHeavy})
+        </button>
+        <button
+          type="button"
+          onClick={() => onVirtualPress(0, 'special')}
+          disabled={hud.p1.meter < 50}
+          className="px-3 min-h-11 rounded bg-amber-400 hover:bg-amber-300 disabled:bg-stone-800 disabled:text-stone-500 text-stone-950 text-xs font-extrabold cursor-pointer"
+        >
+          Especial ({kSp})
+        </button>
+        <button
+          type="button"
+          onClick={() => onVirtualPress(0, 'subSpecial')}
+          disabled={hud.p1.meter < 50}
+          className="px-2.5 min-h-11 rounded bg-rose-600 hover:bg-rose-500 disabled:bg-stone-800 disabled:text-stone-500 text-white text-xs font-bold cursor-pointer"
+        >
+          ↓+{kSp}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/** HUD scale factor of each profile (multiplied by the player's HUD setting). */
+const PROFILE_HUD_FACTOR: Record<DeviceProfileId, number> = { desktop: 1, tablet: 1, mobile: 0.9 };
+
+export function FightHud({
+  hud,
+  gameMode,
+  muted,
+  hudScale = 1,
+  keyBindings = DEFAULT_KEY_BINDINGS,
+  profile,
+  orientation,
+  scheme,
+  touchControls,
+  onInsets,
+  onToggleMute,
+  onPause,
+  onSkipIntro,
+  onVirtualHold,
+  onVirtualPress,
+  onRematch,
+  onBackToSelect,
+}: FightHudProps) {
   const winnerId = hud.winnerIndex === 0 ? hud.p1.id : hud.winnerIndex === 1 ? hud.p2.id : null;
+  const compact = profile === 'mobile';
+  const rootRef = useRef<HTMLDivElement | null>(null);
+  const topRef = useRef<HTMLDivElement | null>(null);
+  const bottomRef = useRef<HTMLDivElement | null>(null);
+  const onInsetsRef = useRef(onInsets);
+  onInsetsRef.current = onInsets;
+
+  // Tell the camera how much of the screen the HUD occupies, so the fighters
+  // are framed in the free band between the top bar and the controls.
+  useLayoutEffect(() => {
+    const root = rootRef.current;
+    const top = topRef.current;
+    const bottom = bottomRef.current;
+    if (!root || !top || !bottom) return;
+    const measure = () => {
+      const r = root.getBoundingClientRect();
+      if (r.height < 1) return;
+      const topInset = (top.getBoundingClientRect().bottom - r.top) / r.height;
+      const bottomInset = (r.bottom - bottom.getBoundingClientRect().top) / r.height;
+      onInsetsRef.current(topInset, bottomInset);
+    };
+    measure();
+    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(measure) : null;
+    ro?.observe(root);
+    ro?.observe(top);
+    ro?.observe(bottom);
+    window.addEventListener('resize', measure);
+    return () => {
+      ro?.disconnect();
+      window.removeEventListener('resize', measure);
+      onInsetsRef.current(0, 0);
+    };
+  }, [scheme, profile, orientation, touchControls.scale, hudScale]);
+
+  const hudStyle = {
+    '--ff-hud-scale': hudScale * PROFILE_HUD_FACTOR[profile],
+  } as React.CSSProperties;
 
   return (
     <div
-      className="ff-hud-controls fixed inset-0 z-20 pointer-events-none flex flex-col justify-between origin-center"
-      style={hudScale !== 1 ? { transform: `scale(${hudScale})` } : undefined}
+      ref={rootRef}
+      data-profile={profile}
+      data-scheme={scheme}
+      className="ff-hud-controls fixed inset-0 z-20 pointer-events-none flex flex-col justify-between"
+      style={hudStyle}
     >
       {/* Top Perimeter Combat Cluster */}
-      <div className="w-full max-w-[1360px] mx-auto flex items-start justify-between gap-3 md:gap-6">
-        <FighterMeterBlock f={hud.p1} align="left" />
+      <div
+        ref={topRef}
+        className={`w-full max-w-[1360px] mx-auto flex items-start justify-between ${
+          compact ? 'gap-2' : 'gap-3 md:gap-6'
+        }`}
+      >
+        <FighterMeterBlock f={hud.p1} align="left" compact={compact} />
 
         {/* Center Clock & Utility Controls */}
         <div className="flex flex-col items-center gap-1.5 shrink-0">
-          <div className="bg-stone-950/90 border border-amber-300/30 rounded-md px-4 py-1.5 text-center shadow-lg min-w-[82px]">
+          <div className={`bg-stone-950/90 border border-amber-300/30 rounded-md text-center shadow-lg ${compact ? 'px-2.5 py-1 min-w-[56px]' : 'px-4 py-1.5 min-w-[82px]'}`}>
             <div className="text-[10px] font-semibold tracking-wider text-amber-300/90 uppercase">
               {gameMode === 'training' ? 'Treino' : `Round ${hud.roundNumber}`}
             </div>
@@ -263,7 +347,7 @@ export function FightHud({
               type="button"
               onClick={onToggleMute}
               aria-label={muted ? 'Ativar som' : 'Silenciar'}
-              className="w-8 h-8 rounded-md bg-stone-950/85 border border-white/15 hover:border-amber-300/60 flex items-center justify-center text-stone-200 transition-colors cursor-pointer"
+              className={`${compact ? 'w-10 h-10' : 'w-8 h-8'} rounded-md bg-stone-950/85 border border-white/15 hover:border-amber-300/60 flex items-center justify-center text-stone-200 transition-colors cursor-pointer`}
             >
               {muted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
             </button>
@@ -271,14 +355,14 @@ export function FightHud({
               type="button"
               onClick={onPause}
               aria-label="Pausar"
-              className="w-8 h-8 rounded-md bg-stone-950/85 border border-white/15 hover:border-amber-300/60 flex items-center justify-center text-stone-200 transition-colors cursor-pointer"
+              className={`${compact ? 'w-10 h-10' : 'w-8 h-8'} rounded-md bg-stone-950/85 border border-white/15 hover:border-amber-300/60 flex items-center justify-center text-stone-200 transition-colors cursor-pointer`}
             >
               <Pause className="w-4 h-4" />
             </button>
           </div>
         </div>
 
-        <FighterMeterBlock f={hud.p2} align="right" />
+        <FighterMeterBlock f={hud.p2} align="right" compact={compact} />
       </div>
 
       {/* Center Stage Announcements (Banner / Intro Dialogue / Match Over) */}
@@ -351,102 +435,30 @@ export function FightHud({
         )}
       </div>
 
-      {/* Compact Bottom Controls Strip (Interactive + Keyboard Hint) */}
-      <div className="w-full max-w-[1160px] mx-auto flex flex-wrap items-center justify-between gap-2 pointer-events-auto">
-        {/* Virtual joystick on touch devices, directional pad on desktop. */}
-        <div className="flex items-center gap-1.5 bg-stone-950/85 border border-white/10 rounded-lg px-2.5 py-1.5">
-          <VirtualJoystick
-            onHold={(action, active) => onVirtualHold(0, action, active)}
-            onPress={(action) => onVirtualPress(0, action)}
+      {/* Bottom strip: touch controls on touch devices, key legend on desktop. */}
+      <div ref={bottomRef} className="w-full">
+        {scheme === 'touch' ? (
+          <>
+            {compact && orientation === 'portrait' && (
+              <div className="text-center text-[10px] text-stone-300/80 mb-1 pointer-events-none">
+                Gire o aparelho para a horizontal para ver a arena maior
+              </div>
+            )}
+            <TouchControls
+              settings={touchControls}
+              specialReady={hud.p1.meter >= 50}
+              onHold={(action, active) => onVirtualHold(0, action, active)}
+              onPress={(action) => onVirtualPress(0, action)}
+            />
+          </>
+        ) : (
+          <DesktopControls
+            hud={hud}
+            keyBindings={keyBindings}
+            onVirtualHold={onVirtualHold}
+            onVirtualPress={onVirtualPress}
           />
-          <div className="ff-directional-buttons flex items-center gap-1.5">
-          <button
-            type="button"
-            onPointerDown={() => onVirtualHold(0, 'left', true)}
-            onPointerUp={() => onVirtualHold(0, 'left', false)}
-            onPointerCancel={() => onVirtualHold(0, 'left', false)}
-            onPointerLeave={() => onVirtualHold(0, 'left', false)}
-            className="w-11 h-11 rounded bg-stone-800 hover:bg-stone-700 active:bg-amber-400 active:text-stone-950 text-sm font-bold cursor-pointer touch-none"
-          >
-            ◀
-          </button>
-          <button
-            type="button"
-            onClick={() => onVirtualPress(0, 'jump')}
-            className="w-11 h-11 rounded bg-stone-800 hover:bg-stone-700 active:bg-amber-400 active:text-stone-950 text-sm font-bold cursor-pointer touch-none"
-          >
-            ▲
-          </button>
-          <button
-            type="button"
-            onPointerDown={() => onVirtualHold(0, 'down', true)}
-            onPointerUp={() => onVirtualHold(0, 'down', false)}
-            onPointerCancel={() => onVirtualHold(0, 'down', false)}
-            onPointerLeave={() => onVirtualHold(0, 'down', false)}
-            aria-label="Agachar"
-            className="px-2.5 h-11 rounded bg-stone-800 hover:bg-stone-700 text-xs font-semibold cursor-pointer touch-none"
-          >
-            Agachar
-          </button>
-          <button
-            type="button"
-            onPointerDown={() => onVirtualHold(0, 'right', true)}
-            onPointerUp={() => onVirtualHold(0, 'right', false)}
-            onPointerCancel={() => onVirtualHold(0, 'right', false)}
-            onPointerLeave={() => onVirtualHold(0, 'right', false)}
-            className="w-11 h-11 rounded bg-stone-800 hover:bg-stone-700 active:bg-amber-400 active:text-stone-950 text-sm font-bold cursor-pointer touch-none"
-          >
-            ▶
-          </button>
-          </div>
-          <button
-            type="button"
-            onPointerDown={() => onVirtualHold(0, 'guard', true)}
-            onPointerUp={() => onVirtualHold(0, 'guard', false)}
-            onPointerCancel={() => onVirtualHold(0, 'guard', false)}
-            onPointerLeave={() => onVirtualHold(0, 'guard', false)}
-            className="px-2.5 h-11 rounded bg-stone-800 hover:bg-stone-700 text-xs font-semibold cursor-pointer touch-none"
-          >
-            Defesa
-          </button>
-        </div>
-
-        <div className="hidden lg:block text-xs text-stone-300/85 bg-stone-950/75 border border-white/10 rounded-lg px-3.5 py-2">
-          {kL}/{kR} Mover · {kU}/Espaço Pular · {kD} Agachar · {kLight} Leve · {kHeavy} Forte · {kSp} Especial · {kD}+{kSp} Sub-Especial · {kG} Defesa
-        </div>
-
-        <div className="flex items-center gap-1.5 bg-stone-950/85 border border-white/10 rounded-lg px-2.5 py-1.5">
-          <button
-            type="button"
-            onClick={() => onVirtualPress(0, 'light')}
-            className="px-3 min-h-11 rounded bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold cursor-pointer touch-none"
-          >
-            Leve ({kLight})
-          </button>
-          <button
-            type="button"
-            onClick={() => onVirtualPress(0, 'heavy')}
-            className="px-3 min-h-11 rounded bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold cursor-pointer touch-none"
-          >
-            Forte ({kHeavy})
-          </button>
-          <button
-            type="button"
-            onClick={() => onVirtualPress(0, 'special')}
-            disabled={hud.p1.meter < 50}
-            className="px-3 min-h-11 rounded bg-amber-400 hover:bg-amber-300 disabled:bg-stone-800 disabled:text-stone-500 text-stone-950 text-xs font-extrabold cursor-pointer touch-none"
-          >
-            Especial ({kSp})
-          </button>
-          <button
-            type="button"
-            onClick={() => onVirtualPress(0, 'subSpecial')}
-            disabled={hud.p1.meter < 50}
-            className="px-2.5 min-h-11 rounded bg-rose-600 hover:bg-rose-500 disabled:bg-stone-800 disabled:text-stone-500 text-white text-xs font-bold cursor-pointer touch-none"
-          >
-            ↓+{kSp}
-          </button>
-        </div>
+        )}
       </div>
     </div>
   );

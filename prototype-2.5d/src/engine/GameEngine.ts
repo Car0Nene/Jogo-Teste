@@ -1,3 +1,4 @@
+import { CameraFraming, framingDistance, PROFILE_CONFIGS } from '../platform/deviceProfile';
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import {
@@ -147,6 +148,11 @@ export class GameEngine {
   private renderer: THREE.WebGLRenderer;
   private scene: THREE.Scene;
   private camera: THREE.PerspectiveCamera;
+  // Presentation (per device profile). Never touches combat coordinates.
+  private framing: CameraFraming = PROFILE_CONFIGS.desktop.camera;
+  private maxPixelRatio = 2;
+  private insetTop = 0; // fraction of viewport height covered by HUD (top)
+  private insetBottom = 0; // fraction covered by HUD / touch controls (bottom)
   private isSoftwareGl: boolean;
   private maxAnisotropy: number;
 
@@ -299,12 +305,50 @@ export class GameEngine {
       this.renderer.setPixelRatio(pixelRatio);
     }
     this.camera.aspect = w / h;
-    this.camera.updateProjectionMatrix();
     this.renderer.setSize(w, h);
+    this.applyViewOffset();
   };
 
+  /**
+   * Shifts the projection window so the combat band is centred between the HUD
+   * bands (top bar / bottom controls). A view offset moves the principal point
+   * only — no stretching, no change to world coordinates.
+   */
+  private applyViewOffset() {
+    const w = Math.max(1, this.container.clientWidth);
+    const h = Math.max(1, this.container.clientHeight);
+    const shift = ((this.insetBottom - this.insetTop) / 2) * h;
+    if (Math.abs(shift) < 0.5) {
+      this.camera.clearViewOffset();
+    } else {
+      this.camera.setViewOffset(w, h, 0, shift, w, h);
+    }
+    this.camera.updateProjectionMatrix();
+  }
+
+  /** Per-device presentation: camera framing and pixel-ratio ceiling. */
+  public setViewProfile(framing: CameraFraming, maxPixelRatio: number) {
+    this.framing = framing;
+    this.maxPixelRatio = maxPixelRatio;
+    if (this.camera.fov !== framing.fov) {
+      this.camera.fov = framing.fov;
+      this.camera.updateProjectionMatrix();
+    }
+    this.renderer.setPixelRatio(this.getEffectivePixelRatio());
+  }
+
+  /** Fractions of the viewport height occupied by HUD at the top / bottom. */
+  public setViewInsets(top: number, bottom: number) {
+    const t = Math.max(0, Math.min(0.5, top));
+    const b = Math.max(0, Math.min(0.5, bottom));
+    if (Math.abs(t - this.insetTop) < 0.004 && Math.abs(b - this.insetBottom) < 0.004) return;
+    this.insetTop = t;
+    this.insetBottom = b;
+    this.applyViewOffset();
+  }
+
   private getEffectivePixelRatio() {
-    const baseDpr = this.isSoftwareGl ? 1 : Math.min(window.devicePixelRatio || 1, 2);
+    const baseDpr = this.isSoftwareGl ? 1 : Math.min(window.devicePixelRatio || 1, this.maxPixelRatio);
     return this.isSoftwareGl
       ? Math.min(1, this.resolutionScale)
       : Math.max(0.65, Math.min(2.25, baseDpr * (this.graphicsQuality === 'low' ? 0.85 : 1) * this.resolutionScale));
@@ -1749,11 +1793,12 @@ export class GameEngine {
     const [f1, f2] = this.fighters;
     const midX = (f1.x + f2.x) * 0.5;
     const span = Math.abs(f1.x - f2.x);
-    const baseDistance = 6.8 + span * 0.68;
-    const horizontalViewTangent = Math.tan(THREE.MathUtils.degToRad(this.camera.fov * 0.5)) * this.camera.aspect;
-    const desiredWidth = span + (this.camera.aspect < 1 ? 3.6 : 2.8);
-    const fitDistance = desiredWidth / (2 * Math.max(0.01, horizontalViewTangent));
-    const zDist = THREE.MathUtils.clamp(Math.max(baseDistance, fitDistance), 7.2, 60);
+    const zDist = framingDistance(this.framing, {
+      span,
+      aspect: this.camera.aspect,
+      topInset: this.insetTop,
+      bottomInset: this.insetBottom,
+    });
     const maxY = Math.max(f1.y, f2.y);
 
     let sx = 0;

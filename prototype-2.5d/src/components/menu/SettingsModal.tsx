@@ -23,6 +23,8 @@ import {
 import { soundEngine } from '../../engine/audio';
 
 interface SettingsModalProps {
+  /** Human-readable detected device (e.g. "Celular"), shown next to the control mode. */
+  detectedLabel?: string;
   settings: GameSettings;
   onUpdate: (next: GameSettings) => void;
   isFullscreen: boolean;
@@ -49,6 +51,7 @@ export function SettingsModal({
   isFullscreen,
   onToggleFullscreen,
   onClose,
+  detectedLabel,
 }: SettingsModalProps) {
   const [tab, setTab] = useState<TabId>('audio');
   const [rebindingKey, setRebindingKey] = useState<keyof Player1KeyBindings | null>(null);
@@ -364,6 +367,94 @@ export function SettingsModal({
 
           {tab === 'controls' && (
             <div className="space-y-4">
+              {/* Control scheme: automatic by device, or forced by the player */}
+              <div className="bg-[#161221] border border-white/10 p-4">
+                <div className="text-sm font-bold text-white">Modo de controle</div>
+                <div className="text-xs text-stone-300 mt-1">
+                  {detectedLabel
+                    ? `Dispositivo detectado: ${detectedLabel}. Automático escolhe toque ou teclado conforme o que você usa.`
+                    : 'Automático escolhe toque ou teclado conforme o que você usa.'}
+                </div>
+                <div className="grid grid-cols-3 gap-2 mt-3">
+                  {([
+                    ['auto', 'Automático'],
+                    ['touch', 'Toque'],
+                    ['keyboard', 'Teclado / Controle'],
+                  ] as const).map(([mode, label]) => (
+                    <button
+                      key={mode}
+                      type="button"
+                      onClick={() => {
+                        soundEngine.playUi('hover');
+                        onUpdate({ ...settings, controlMode: mode });
+                      }}
+                      className={`py-2 min-h-[44px] text-xs font-bold border cursor-pointer ${
+                        settings.controlMode === mode
+                          ? 'bg-amber-400 text-stone-950 border-amber-300'
+                          : 'bg-[#0e0b16] text-stone-300 border-white/15'
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Touch controls customisation */}
+              <div className="bg-[#161221] border border-white/10 p-4 space-y-3">
+                <div className="text-sm font-bold text-white">Controles de toque</div>
+                <label className="block text-xs text-stone-300">
+                  Tamanho: {Math.round(settings.touchControls.scale * 100)}%
+                  <input
+                    type="range"
+                    min={70}
+                    max={140}
+                    step={5}
+                    value={Math.round(settings.touchControls.scale * 100)}
+                    onChange={(e) =>
+                      onUpdate({
+                        ...settings,
+                        touchControls: { ...settings.touchControls, scale: Number(e.target.value) / 100 },
+                      })
+                    }
+                    className="w-full mt-1 accent-amber-400"
+                  />
+                </label>
+                <label className="block text-xs text-stone-300">
+                  Opacidade: {Math.round(settings.touchControls.opacity * 100)}%
+                  <input
+                    type="range"
+                    min={35}
+                    max={100}
+                    step={5}
+                    value={Math.round(settings.touchControls.opacity * 100)}
+                    onChange={(e) =>
+                      onUpdate({
+                        ...settings,
+                        touchControls: { ...settings.touchControls, opacity: Number(e.target.value) / 100 },
+                      })
+                    }
+                    className="w-full mt-1 accent-amber-400"
+                  />
+                </label>
+                <button
+                  type="button"
+                  onClick={() =>
+                    onUpdate({
+                      ...settings,
+                      touchControls: { ...settings.touchControls, leftHanded: !settings.touchControls.leftHanded },
+                    })
+                  }
+                  className={`px-4 py-2 min-h-[44px] text-xs font-bold border cursor-pointer ${
+                    settings.touchControls.leftHanded
+                      ? 'bg-amber-400 text-stone-950 border-amber-300'
+                      : 'bg-[#0e0b16] text-stone-300 border-white/15'
+                  }`}
+                >
+                  {settings.touchControls.leftHanded ? 'Modo canhoto: ligado' : 'Modo canhoto: desligado'}
+                </button>
+              </div>
+
               {/* Gamepad Detection */}
               <div className="bg-[#161221] border border-white/10 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
