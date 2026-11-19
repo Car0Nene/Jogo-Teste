@@ -224,7 +224,8 @@
         light:  { anim: 'light', startup: 0.07, active: 0.08, recovery: 0.12, damage: 40, box: [18, 118, 100, 134], hitstun: 0.27, blockstun: 0.16, push: 230, hitstop: 0.05, chain: { light: 'medium', heavy: 'heavy' } },
         medium: { anim: 'medium', startup: 0.1, active: 0.09, recovery: 0.18, damage: 60, box: [18, 126, 92, 136], hitstun: 0.32, blockstun: 0.18, push: 280, hitstop: 0.07, chain: { heavy: 'heavy' } },
         heavy:  { anim: 'heavy', startup: 0.15, active: 0.11, recovery: 0.28, damage: 90, box: [18, 160, 70, 150], hitstun: 0.42, blockstun: 0.22, push: 430, hitstop: 0.09, lunge: 120, heavy: true },
-        air:    { anim: 'heavy', frame: 2, startup: 0.07, active: 0.2, recovery: 0.1, damage: 56, box: [6, 118, 20, 120], hitstun: 0.32, blockstun: 0.18, push: 220, hitstop: 0.06 },
+        air:    { anim: 'flykick', frame: 1, startup: 0.07, active: 0.2, recovery: 0.1, damage: 56, box: [6, 118, 20, 120], hitstun: 0.32, blockstun: 0.18, push: 220, hitstop: 0.06 },
+        sweep:  { anim: 'sweep', startup: 0.12, active: 0.1, recovery: 0.3, damage: 62, box: [10, 140, 0, 38], hitstun: 0.45, blockstun: 0.2, push: 300, hitstop: 0.08, knockdown: true },
         smoke:  { anim: 'smoke', startup: 0.36, active: 0, recovery: 0.3, projectile: { sprite: 'smoke', speed: 300, damage: 70, w: 70, h: 60, y: 122, life: 1.7, knockdown: false, hitstun: 0.85, cough: true } },
         greenBlast: { anim: 'hulkBlast', startup: 0.34, active: 0, recovery: 0.34, projectile: { sprite: 'beerBlast', speed: 540, damage: 105, w: 128, h: 82, y: 126, life: 1.9, hitstun: 0.55 } }
       }
@@ -322,6 +323,12 @@
     const heights = (sprites.idle || []).map(frame => frame[3]).sort((a, b) => a - b);
     return [id, heights.length ? heights[Math.floor(heights.length / 2)] : 0];
   }));
+  // Sprites HD (atlas separado, só para quem tem arte nova). Quadros HD têm um 7º valor = 1.
+  const AS_HD = window.FF_HD_SCALE || AS;
+  const atlasHD = loadImage(`assets/sprites/pedro-hd.webp?v=${window.FF_HD_VERSION || '1'}`);
+  for (const [id, anims] of Object.entries(window.FF_SPRITES_HD || {})) {
+    if (SPR[id]) Object.assign(SPR[id], anims);
+  }
   const FORM_TIME = 10;
   const DOG_SUPPORT_SCALE = 0.72;
   const otherFighter = id => (id === 'juraci' ? 'carlos' : 'juraci');
@@ -1364,6 +1371,7 @@
     const action = takeAction(f, ['jump', 'special', 'light', 'heavy']);
     if (action === 'jump') { f.state = 'jumpsquat'; f.t = 0; return; }
     if (action === 'special') { trySpecial(f, Boolean(f.held.down)); return; }
+    if (action === 'heavy' && f.held.down && f.ch.moves.sweep && startAttack(f, 'sweep')) return;
     if (action === 'light' || action === 'heavy') {
       const wasRunning = f.state === 'run';
       if (startAttack(f, action) && wasRunning && f.move) {
@@ -3347,12 +3355,15 @@
       ctx.fillRect(x - 28, footY - f.ch.height, 56, f.ch.height);
       return;
     }
-    const [sx, sy, sw, sh, ax, ay] = pose.frame;
+    const [sx, sy, sw, sh, ax, ay, hdFlag] = pose.frame;
+    const hd = hdFlag === 1;
+    if (hd && !ready(atlasHD)) return; // atlas HD ainda carregando
+    const AD = hd ? AS_HD : AS;          // pixels do atlas por unidade de jogo
     const keepIntentionalScale = ['gordao', 'hulk'].includes(f.form) || f.crouchGuard;
-    const heightCorrection = SCALE_STABLE_STATES.has(f.state) && !keepIntentionalScale
+    const heightCorrection = !hd && SCALE_STABLE_STATES.has(f.state) && !keepIntentionalScale
       ? clamp((BASE_SPRITE_HEIGHT[f.id] || sh) / sh, 0.86, 1.14) : 1;
     const s = f.ch.scale * heightCorrection;
-    const img = f.alt && altAtlas ? altAtlas : atlas;
+    const img = hd ? atlasHD : f.alt && altAtlas ? altAtlas : atlas;
     ctx.save();
     // alinha ao pixel real da tela: evita o "tremer" e a borda borrada dos sprites
     const px = Math.round((x + pose.dx * f.facing) * ZOOM * renderScale) / (ZOOM * renderScale);
@@ -3371,14 +3382,14 @@
       const trailDir = f.state === 'backdash' ? 1 : -1;
       for (let i = 1; i <= 3; i++) {
         ctx.globalAlpha = 0.2 / i;
-        ctx.drawImage(img, sx, sy, sw, sh, -ax / AS + trailDir * i * 16 / (s * pose.sx), -ay / AS, sw / AS, sh / AS);
+        ctx.drawImage(img, sx, sy, sw, sh, -ax / AD + trailDir * i * 16 / (s * pose.sx), -ay / AD, sw / AD, sh / AD);
       }
       ctx.restore();
     }
     // brilho só ao levar golpe; fora isso nada de halo borrado (sombra é desenhada no chão)
     if (f.flash > 0 && !settings.reducedEffects) { ctx.shadowColor = '#fff2b8'; ctx.shadowBlur = 12; }
     ctx.imageSmoothingQuality = 'high';
-    ctx.drawImage(img, sx, sy, sw, sh, -ax / AS, -ay / AS, sw / AS, sh / AS);
+    ctx.drawImage(img, sx, sy, sw, sh, -ax / AD, -ay / AD, sw / AD, sh / AD);
     ctx.shadowBlur = 0;
     ctx.restore();
     if (f.state === 'transform' && f.nextForm === 'gordao' && f.t < 0.85) drawFood(f, x, footY);

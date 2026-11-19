@@ -62,6 +62,7 @@ Jogo de luta arcade em HTML Canvas e JavaScript puro (sem build), com a família
 - **Animação procedural:** respiração no parado, balanço ao andar e correr, antecipação e impacto nos golpes, recuo ao levar dano, achatar no pouso e esticar no pulo.
 - **Interpolação de quadros:** movimento suave em telas de 90/120/144 Hz; sprites sem halo borrado e alinhados ao pixel.
 - **Padaria animada:** reflexos nas vitrines, letreiro ABERTO pulsando, cheiro de bolo subindo da mesa, feixes de sol e borboletas. Primeiro plano com parallax.
+- **Pedro HD (teste):** arte nova em atlas separado (`assets/sprites/pedro-hd.webp`), com golpes novos: soco, chute alto, uppercut (golpe forte), voadora no ar e rasteira (↓ + golpe forte). As formas especiais (Monstrão, Heineken, cigarro) continuam com a arte antiga. Para trocar a arte: ponha as folhas em `art-source/pedro-hd/`, ajuste os índices em `tools/build_pedro_hd.py` e rode `python3 tools/build_pedro_hd.py`.
 - **HUD arcade:** barras amarelas, selo K.O., placar e retratos nos cantos, como no mockup.
 
 ### Artes de referência
