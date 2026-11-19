@@ -145,7 +145,7 @@ export function CharacterSelectScreen({
   }, []);
 
   return (
-    <div className="fixed inset-0 z-10 flex flex-col justify-between p-3 sm:p-5 md:p-6 pointer-events-none animate-screen-in">
+    <div className="fixed inset-0 z-10 flex flex-col justify-between overflow-y-auto overscroll-contain p-3 sm:p-5 md:p-6 pointer-events-none animate-screen-in">
       {/* Top Header Strip */}
       <header className="flex flex-wrap items-center justify-between gap-3 pointer-events-auto">
         <div className="flex items-center gap-2.5">
@@ -225,7 +225,7 @@ export function CharacterSelectScreen({
       </header>
 
       {/* Left (1P) & Right (2P/CPU) Tekken-8 Style Fighter Preview Panels — center 3D stage stays unobstructed */}
-      <div className="flex items-center justify-between gap-3 my-auto pointer-events-none">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 my-4 sm:my-auto pointer-events-none">
         {/* P1 PANEL */}
         <section
           aria-label="Lutador Jogador 1"
@@ -233,7 +233,7 @@ export function CharacterSelectScreen({
             setPickSlot('p1');
             setP1Locked(false);
           }}
-          className={`pointer-events-auto w-[235px] sm:w-[275px] bg-[#0e0b16]/92 border-2 p-3.5 transition-all cursor-pointer ff-chamfer shadow-2xl ${
+          className={`pointer-events-auto w-full max-w-[320px] sm:w-[275px] bg-[#0e0b16]/92 border-2 p-3.5 transition-all cursor-pointer ff-chamfer shadow-2xl ${
             pickSlot === 'p1'
               ? 'border-amber-400 shadow-[0_0_24px_rgba(251,191,36,0.22)]'
               : 'border-white/15 hover:border-white/35'
@@ -309,7 +309,7 @@ export function CharacterSelectScreen({
             setPickSlot('p2');
             setP2Locked(false);
           }}
-          className={`pointer-events-auto w-[235px] sm:w-[275px] bg-[#0e0b16]/92 border-2 p-3.5 text-right transition-all cursor-pointer ff-chamfer shadow-2xl ${
+          className={`pointer-events-auto w-full max-w-[320px] sm:w-[275px] bg-[#0e0b16]/92 border-2 p-3.5 text-right transition-all cursor-pointer ff-chamfer shadow-2xl ${
             pickSlot === 'p2'
               ? 'border-sky-400 shadow-[0_0_24px_rgba(56,189,248,0.22)]'
               : 'border-white/15 hover:border-white/35'
