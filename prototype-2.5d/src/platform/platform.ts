@@ -244,6 +244,9 @@ if (typeof window !== 'undefined') {
   }, { capture: true, passive: true });
   window.addEventListener('keydown', (event) => {
     if (event.metaKey || event.ctrlKey || event.altKey || /^(F\d+|Tab|Meta|Control|Alt|Shift)$/.test(event.key)) return;
+    // Em celular/tablet, teclas de navegação (Enter, Esc, Espaço) não provam que há um
+    // teclado físico sendo usado para jogar: só teclas de jogo trocam o modo.
+    if (deviceClass !== 'desktop' && /^(Enter|NumpadEnter|Escape|Space|Backspace)$/.test(event.code)) return;
     setInput('keyboard');
   }, { capture: true, passive: true });
   window.addEventListener('gamepadconnected', () => { gamepads++; apply(); });

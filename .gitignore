@@ -7,3 +7,8 @@ venv/
 # Arquivos temporários do sistema/editor
 .DS_Store
 Thumbs.db
+
+# Dependências e artefatos gerados
+node_modules/
+dist/
+test-results/
