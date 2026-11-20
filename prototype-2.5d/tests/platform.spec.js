@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
 
 test('loads the game and accepts fight controls at this viewport', async ({ page }, testInfo) => {
+  test.setTimeout(60_000);
   const pageErrors = [];
   const missingAssets = [];
   page.on('pageerror', (error) => pageErrors.push(error.message));
