@@ -4,8 +4,6 @@ import {
   ArrowLeft,
   ArrowRight,
   Check,
-  Eye,
-  EyeOff,
   RotateCw,
   Settings,
   ShieldAlert,
@@ -68,7 +66,6 @@ export function CharacterSelectScreen({
   const [pickSlot, setPickSlot] = useState<'p1' | 'p2'>('p1');
   const [p1Locked, setP1Locked] = useState(false);
   const [p2Locked, setP2Locked] = useState(false);
-  const [dockCollapsed, setDockCollapsed] = useState(false);
 
   const p1Spec = FIGHTERS[p1Id];
   const p2Spec = FIGHTERS[p2Id];
@@ -110,10 +107,6 @@ export function CharacterSelectScreen({
       if (e.code === 'Escape') {
         e.preventDefault();
         onBack();
-        return;
-      }
-      if (e.code === 'KeyH') {
-        setDockCollapsed((v) => !v);
         return;
       }
       if (e.code === 'ArrowRight' || e.code === 'ArrowLeft') {
@@ -293,7 +286,6 @@ export function CharacterSelectScreen({
           </div>
         </section>
 
-        {!dockCollapsed && (
           <section className="ff-character-roster pointer-events-auto" aria-label="Escolha seu lutador">
             <div className="ff-character-roster-heading">
               <span className="ff-character-roster-rule" />
@@ -327,6 +319,11 @@ export function CharacterSelectScreen({
                 );
               })}
             </div>
+            <div className="ff-character-versus" aria-label={`${p1Spec.name} contra ${p2Spec.name}`}>
+              <span>{p1Spec.name}</span>
+              <strong>VS</strong>
+              <span>{p2Spec.name}</span>
+            </div>
             {showDanielDog && (
               <div className="ff-character-support" aria-label="Suporte do Daniel">
                 <ShieldAlert className="h-3.5 w-3.5 shrink-0" />
@@ -339,7 +336,6 @@ export function CharacterSelectScreen({
               </div>
             )}
           </section>
-        )}
 
         {/* P2 / CPU PANEL */}
         <section
@@ -413,15 +409,6 @@ export function CharacterSelectScreen({
 
       {/* Compact controls and proceed action */}
       <div className="ff-character-dock flex flex-col items-center pointer-events-auto shrink-0">
-        <button
-          type="button"
-          onClick={() => setDockCollapsed((v) => !v)}
-          className="px-4 py-1 bg-[#0e0b16]/95 border border-b-0 border-white/15 text-[11px] font-semibold text-stone-300 hover:text-white flex items-center gap-1.5 cursor-pointer"
-        >
-          {dockCollapsed ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
-          {dockCollapsed ? 'Mostrar Grade (H)' : 'Ocultar Grade (H)'}
-        </button>
-
         <div className="w-full max-w-[1060px] bg-[#0d0a15]/95 border border-white/15 p-2 sm:p-3 shadow-2xl ff-chamfer flex flex-col gap-2">
             <div className="flex flex-wrap items-center justify-between gap-2">
               {/* Active Slot Cursor Buttons */}

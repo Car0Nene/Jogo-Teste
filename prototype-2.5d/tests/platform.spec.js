@@ -47,9 +47,15 @@ test('loads the game and accepts fight controls at this viewport', async ({ page
     expect(await image.evaluate((img) => getComputedStyle(img).objectFit)).toBe('contain');
     const portraitFrame = image.locator('xpath=..');
     const panel = image.locator('xpath=../..');
-    expect(await portraitFrame.evaluate((el) => el.getBoundingClientRect().width)).toBeGreaterThan(
+    expect(await portraitFrame.evaluate((el) => el.getBoundingClientRect().width)).toBeLessThanOrEqual(
       await panel.evaluate((el) => el.getBoundingClientRect().width),
     );
+    const portraitBounds = await image.boundingBox();
+    expect(portraitBounds).not.toBeNull();
+    expect(portraitBounds.x).toBeGreaterThanOrEqual(0);
+    expect(portraitBounds.y).toBeGreaterThanOrEqual(0);
+    expect(portraitBounds.x + portraitBounds.width).toBeLessThanOrEqual(page.viewportSize().width + 1);
+    expect(portraitBounds.y + portraitBounds.height).toBeLessThanOrEqual(page.viewportSize().height + 1);
   }
 
   await page.getByRole('button', { name: /Carlos/i }).click();
