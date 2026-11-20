@@ -23,6 +23,10 @@ test('loads the game and accepts fight controls at this viewport', async ({ page
   const characterScreen = page.locator('.ff-character-select-screen');
   await expect(characterScreen).toBeVisible();
   expect(await characterScreen.evaluate((screen) => screen.scrollHeight <= screen.clientHeight)).toBeTruthy();
+  await expect(page.locator('.ff-character-roster-card')).toHaveCount(8);
+  for (const card of await page.locator('.ff-character-roster-card').all()) {
+    await expect(card).toBeVisible();
+  }
 
   const fighters = [
     ['Juraci', 'juraci'],
@@ -36,7 +40,7 @@ test('loads the game and accepts fight controls at this viewport', async ({ page
   ];
   for (const [name, portrait] of fighters) {
     await page.getByRole('button', { name: new RegExp(name, 'i') }).click();
-    const image = page.locator(`img[src*="/assets/portraits/${portrait}.webp"]`).first();
+    const image = page.locator(`.ff-character-panel img[src*="/assets/portraits/${portrait}.webp"]`).first();
     await expect(image).toBeVisible();
     await expect.poll(() => image.evaluate((img) => img.complete && img.naturalWidth > 0)).toBeTruthy();
     expect(await image.evaluate((img) => getComputedStyle(img).objectFit)).toBe('contain');

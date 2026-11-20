@@ -224,8 +224,8 @@ export function CharacterSelectScreen({
         </div>
       </header>
 
-      {/* Left (1P) & Right (2P/CPU) Tekken-8 Style Fighter Preview Panels — center 3D stage stays unobstructed */}
-      <div className="ff-character-panels flex-1 min-h-0 grid grid-cols-2 xl:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center justify-items-center gap-2 sm:gap-4 pointer-events-none">
+      {/* Fighter portraits frame the centered arcade-style roster. */}
+      <div className="ff-character-panels flex-1 min-h-0 grid items-center justify-items-center gap-2 sm:gap-4 pointer-events-none">
         {/* P1 PANEL */}
         <section
           aria-label="Lutador Jogador 1"
@@ -233,7 +233,7 @@ export function CharacterSelectScreen({
             setPickSlot('p1');
             setP1Locked(false);
           }}
-          className={`ff-character-panel relative isolate pointer-events-auto w-full max-w-[320px] min-w-0 overflow-visible bg-[#0e0b16]/92 border-2 p-2 sm:p-3 transition-all cursor-pointer shadow-2xl ${
+          className={`ff-character-panel ff-character-panel-p1 relative isolate pointer-events-auto w-full max-w-[320px] min-w-0 overflow-visible bg-[#0e0b16]/75 border-2 p-2 sm:p-3 transition-all cursor-pointer shadow-2xl ${
             pickSlot === 'p1'
               ? 'border-amber-400 shadow-[0_0_24px_rgba(251,191,36,0.22)]'
               : 'border-white/15 hover:border-white/35'
@@ -293,25 +293,52 @@ export function CharacterSelectScreen({
           </div>
         </section>
 
-        {/* Center Support Banner when Daniel is active */}
-        {showDanielDog && (
-          <div className="hidden xl:flex flex-col items-center text-center max-w-[230px] bg-[#120e1b]/95 border border-pink-400/45 p-3 ff-chamfer-sm shadow-2xl animate-banner-pop">
-            <div className="text-[10px] font-mono-num font-bold tracking-widest text-pink-300 uppercase flex items-center gap-1">
-              <ShieldAlert className="w-3.5 h-3.5" />
-              Suporte do Daniel
+        {!dockCollapsed && (
+          <section className="ff-character-roster pointer-events-auto" aria-label="Escolha seu lutador">
+            <div className="ff-character-roster-heading">
+              <span className="ff-character-roster-rule" />
+              <span>SELECIONE SEU LUTADOR</span>
+              <span className="ff-character-roster-rule" />
             </div>
-            <SpecialSpritePreview
-              spriteId="dog_attack"
-              alt="Cão do Daniel"
-              className="w-24 h-20 my-1"
-            />
-            <div className="font-display font-extrabold text-lg text-white leading-none">
-              CÃO DO DANIEL
+            <div className="ff-character-roster-grid">
+              {FIGHTER_LIST.map((f) => {
+                const isP1 = p1Id === f.id;
+                const isP2 = p2Id === f.id;
+                return (
+                  <button
+                    key={f.id}
+                    type="button"
+                    onClick={() => handlePick(f.id, true)}
+                    aria-label={`Selecionar ${f.name}`}
+                    aria-pressed={(pickSlot === 'p1' && isP1) || (pickSlot === 'p2' && isP2)}
+                    className={`ff-character-roster-card ${
+                      isP1 && isP2 ? 'is-p1 is-p2' : isP1 ? 'is-p1' : isP2 ? 'is-p2' : ''
+                    }`}
+                  >
+                    {isP1 && <span className="ff-roster-cursor ff-roster-cursor-p1">1P</span>}
+                    {isP2 && (
+                      <span className="ff-roster-cursor ff-roster-cursor-p2">
+                        {gameMode === 'versus' ? '2P' : 'CPU'}
+                      </span>
+                    )}
+                    <FighterPortrait id={f.id} size="md" className="ff-roster-portrait" />
+                    <span className="ff-character-roster-name">{f.name}</span>
+                  </button>
+                );
+              })}
             </div>
-            <p className="text-[11px] text-stone-300 mt-1">
-              Companheiro protetor automático em combate. Não selecionável como lutador solo.
-            </p>
-          </div>
+            {showDanielDog && (
+              <div className="ff-character-support" aria-label="Suporte do Daniel">
+                <ShieldAlert className="h-3.5 w-3.5 shrink-0" />
+                <SpecialSpritePreview
+                  spriteId="dog_attack"
+                  alt="Cão do Daniel"
+                  className="h-8 w-9 shrink-0"
+                />
+                <span>O cão do Daniel ajuda automaticamente na luta</span>
+              </div>
+            )}
+          </section>
         )}
 
         {/* P2 / CPU PANEL */}
@@ -321,7 +348,7 @@ export function CharacterSelectScreen({
             setPickSlot('p2');
             setP2Locked(false);
           }}
-          className={`ff-character-panel relative isolate pointer-events-auto w-full max-w-[320px] min-w-0 overflow-visible bg-[#0e0b16]/92 border-2 p-2 sm:p-3 text-right transition-all cursor-pointer shadow-2xl ${
+          className={`ff-character-panel ff-character-panel-p2 relative isolate pointer-events-auto w-full max-w-[320px] min-w-0 overflow-visible bg-[#0e0b16]/75 border-2 p-2 sm:p-3 text-right transition-all cursor-pointer shadow-2xl ${
             pickSlot === 'p2'
               ? 'border-sky-400 shadow-[0_0_24px_rgba(56,189,248,0.22)]'
               : 'border-white/15 hover:border-white/35'
@@ -384,7 +411,7 @@ export function CharacterSelectScreen({
         </section>
       </div>
 
-      {/* Bottom 8-Fighter Grid + Cursor Controls + Proceed CTA */}
+      {/* Compact controls and proceed action */}
       <div className="ff-character-dock flex flex-col items-center pointer-events-auto shrink-0">
         <button
           type="button"
@@ -395,8 +422,7 @@ export function CharacterSelectScreen({
           {dockCollapsed ? 'Mostrar Grade (H)' : 'Ocultar Grade (H)'}
         </button>
 
-        {!dockCollapsed && (
-          <div className="w-full max-w-[1060px] bg-[#0d0a15]/95 border border-white/15 p-2 sm:p-3 shadow-2xl ff-chamfer flex flex-col gap-2">
+        <div className="w-full max-w-[1060px] bg-[#0d0a15]/95 border border-white/15 p-2 sm:p-3 shadow-2xl ff-chamfer flex flex-col gap-2">
             <div className="flex flex-wrap items-center justify-between gap-2">
               {/* Active Slot Cursor Buttons */}
               <div className="flex items-center gap-2">
@@ -464,53 +490,6 @@ export function CharacterSelectScreen({
               )}
             </div>
 
-            {/* 8 Existing Fighters Roster */}
-            <div className="grid grid-cols-4 md:grid-cols-8 gap-2">
-              {FIGHTER_LIST.map((f) => {
-                const isP1 = p1Id === f.id;
-                const isP2 = p2Id === f.id;
-                return (
-                  <button
-                    key={f.id}
-                    type="button"
-                    onClick={() => handlePick(f.id, true)}
-                    className={`relative group flex flex-col items-center gap-1 p-1.5 border-2 transition-all cursor-pointer ${
-                      isP1 && isP2
-                        ? 'bg-amber-400/20 border-amber-400'
-                        : isP1
-                        ? 'bg-amber-400/15 border-amber-400'
-                        : isP2
-                        ? 'bg-sky-400/15 border-sky-400'
-                        : 'bg-[#15111f] border-white/10 hover:border-white/35'
-                    }`}
-                  >
-                    {/* Selection Cursor Badges */}
-                    {(isP1 || isP2) && (
-                      <div className="absolute -top-2 left-1 right-1 flex justify-between pointer-events-none">
-                        {isP1 ? (
-                          <span className="bg-amber-400 text-stone-950 text-[9px] font-black px-1.5 py-0.2 leading-tight">
-                            1P
-                          </span>
-                        ) : (
-                          <span />
-                        )}
-                        {isP2 && (
-                          <span className="bg-sky-400 text-stone-950 text-[9px] font-black px-1.5 py-0.2 leading-tight">
-                            {gameMode === 'versus' ? '2P' : 'CPU'}
-                          </span>
-                        )}
-                      </div>
-                    )}
-
-                    <FighterPortrait id={f.id} size="md" />
-                    <span className="font-display font-bold text-xs tracking-wide text-stone-100 whitespace-nowrap">
-                      {f.name}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-
             {/* Footer Action Row */}
             <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-white/10">
               <div className="text-xs text-stone-400">
@@ -529,8 +508,7 @@ export function CharacterSelectScreen({
                 <ArrowRight className="w-5 h-5" />
               </button>
             </div>
-          </div>
-        )}
+        </div>
       </div>
     </div>
   );
