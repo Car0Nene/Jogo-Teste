@@ -204,7 +204,7 @@ export function MainMenu({
       />
 
       {/* Top Command Utility Bar */}
-      <header className="relative z-10 flex items-center justify-between gap-4 px-5 py-4 md:px-10 md:py-6">
+      <header className="ff-menu-header relative z-10 flex items-center justify-between gap-4 px-5 py-4 md:px-10 md:py-6">
         <div className="flex items-center gap-3 pointer-events-auto">
           <div className="border-l-2 border-amber-400 pl-3">
             <div className="text-[11px] font-mono-num tracking-[0.18em] text-amber-300 uppercase">
@@ -257,14 +257,14 @@ export function MainMenu({
       </header>
 
       {/* Main Content Grid: Left AAA Command Rail | Right Featured Fighter Showcase */}
-      <main className="relative z-10 flex-1 flex items-center justify-between gap-6 px-5 md:px-10 py-2 overflow-y-auto md:overflow-visible">
+      <main className="ff-main-menu relative z-10 flex-1 flex items-center justify-between gap-6 px-5 md:px-10 py-2 overflow-y-auto md:overflow-visible">
         {/* Left Column: Logo + 6-Option Command Rail */}
-        <div className="w-full max-w-[460px] flex flex-col gap-5 pointer-events-auto">
-          <div className="max-w-[400px]">
+        <div className="ff-menu-rail w-full max-w-[460px] flex flex-col gap-5 pointer-events-auto">
+          <div className="ff-menu-logo max-w-[400px]">
             <TitleLockupSvg />
           </div>
 
-          <nav aria-label="Menu Principal" className="flex flex-col gap-1.5">
+          <nav aria-label="Menu Principal" className="ff-menu-nav flex flex-col gap-1.5">
             {menuEntries.map((entry, idx) => {
               const active = focusedIdx === idx;
               return (
@@ -400,7 +400,7 @@ export function MainMenu({
       </main>
 
       {/* Bottom Stage Preview Bar + Navigation Guide */}
-      <footer className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-3 px-5 py-3.5 md:px-10 md:py-5 pointer-events-auto">
+      <footer className="ff-menu-footer relative z-10 flex flex-col md:flex-row items-center justify-between gap-3 px-5 py-3.5 md:px-10 md:py-5 pointer-events-auto">
         <div className="flex flex-wrap items-center justify-center gap-1.5 bg-[#100d18]/92 border border-white/15 p-1.5 ff-chamfer-sm">
           {STAGE_LIST.map((st) => (
             <button

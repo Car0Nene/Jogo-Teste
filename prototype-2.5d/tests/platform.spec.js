@@ -14,6 +14,9 @@ test('loads the game and accepts fight controls at this viewport', async ({ page
   await page.goto('/');
   await expect(page.getByRole('navigation', { name: 'Menu Principal' })).toBeVisible();
   await expect(page.locator('canvas').first()).toBeVisible();
+  // perfil escolhido pelas capacidades do aparelho, não pela largura da janela
+  const expectedProfile = testInfo.project.name.startsWith('mobile') ? 'mobile' : 'desktop';
+  await expect(page.locator('html')).toHaveAttribute('data-platform', expectedProfile);
 
   await page.getByRole('button', { name: /ARCADE/ }).click();
 
@@ -96,6 +99,15 @@ test('loads the game and accepts fight controls at this viewport', async ({ page
     await page.mouse.up();
     await expect(joystick).toHaveAttribute('data-active-actions', '');
     await lightAttack.tap();
+    // controles de toque completos: pulo, defesa, especial e sub-especial
+    for (const name of ['Pulo', 'Defesa', 'Forte', 'Especial']) {
+      const control = page.getByRole('button', { name, exact: true });
+      await expect(control).toBeVisible();
+      const box = await control.boundingBox();
+      expect(box.width).toBeGreaterThanOrEqual(44);
+      expect(box.x + box.width).toBeLessThanOrEqual(page.viewportSize().width + 1);
+      expect(box.y + box.height).toBeLessThanOrEqual(page.viewportSize().height + 1);
+    }
   } else {
     await expect(page.getByRole('button', { name: 'Agachar' })).toBeVisible();
     await lightAttack.click();

@@ -21,6 +21,7 @@ import {
   ResolutionScale,
 } from '../../data/settings';
 import { soundEngine } from '../../engine/audio';
+import { InterfaceSettings } from './InterfaceSettings';
 
 interface SettingsModalProps {
   settings: GameSettings;
@@ -359,6 +360,12 @@ export function SettingsModal({
                   ))}
                 </div>
               </div>
+            </div>
+          )}
+
+          {tab === 'display' && (
+            <div className="mt-5">
+              <InterfaceSettings settings={settings} onUpdate={onUpdate} />
             </div>
           )}
 

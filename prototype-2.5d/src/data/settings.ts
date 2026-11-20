@@ -24,6 +24,10 @@ export interface GameSettings {
   hudScale: HudScale;
   gamepadEnabled: boolean;
   keyBindings: Player1KeyBindings;
+  /** controles de toque: tamanho (0.8–1.4), opacidade (0.35–1) e lado */
+  touchScale: number;
+  touchOpacity: number;
+  touchLefty: boolean;
 }
 
 export const DEFAULT_KEY_BINDINGS: Player1KeyBindings = {
@@ -48,6 +52,9 @@ export const DEFAULT_SETTINGS: GameSettings = {
   hudScale: 1,
   gamepadEnabled: true,
   keyBindings: { ...DEFAULT_KEY_BINDINGS },
+  touchScale: 1,
+  touchOpacity: 0.92,
+  touchLefty: false,
 };
 
 const STORAGE_KEY = 'familia-fighter-settings-v1';
@@ -81,6 +88,9 @@ export function loadSettings(): GameSettings {
         ...DEFAULT_KEY_BINDINGS,
         ...(parsed.keyBindings || {}),
       },
+      touchScale: clampRange(parsed.touchScale, 0.8, 1.4, DEFAULT_SETTINGS.touchScale),
+      touchOpacity: clampRange(parsed.touchOpacity, 0.35, 1, DEFAULT_SETTINGS.touchOpacity),
+      touchLefty: Boolean(parsed.touchLefty),
     };
   } catch {
     return { ...DEFAULT_SETTINGS, keyBindings: { ...DEFAULT_KEY_BINDINGS } };
@@ -94,6 +104,11 @@ export function saveSettings(settings: GameSettings): void {
   } catch {
     // Ignore storage quota errors
   }
+}
+
+function clampRange(v: unknown, lo: number, hi: number, fallback: number): number {
+  if (typeof v !== 'number' || Number.isNaN(v)) return fallback;
+  return Math.max(lo, Math.min(hi, v));
 }
 
 function clamp01(v: unknown, fallback: number): number {

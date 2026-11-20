@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./platform/platform.css";
 
 @layer base {
   :root {
@@ -188,10 +189,6 @@
   height: clamp(150px, 42dvh, 420px);
 }
 
-.ff-virtual-joystick {
-  display: none;
-}
-
 .ff-hud-controls {
   padding: max(1rem, env(safe-area-inset-top, 0px))
     max(1rem, env(safe-area-inset-right, 0px))
@@ -232,21 +229,6 @@
   }
 }
 
-@media (pointer: coarse) {
-  .ff-virtual-joystick {
-    display: grid;
-  }
-
-  .ff-directional-buttons {
-    display: none;
-  }
-}
-
-@media (pointer: fine) {
-  .ff-virtual-joystick {
-    display: none;
-  }
-}
 
 @media (max-height: 640px) {
   .ff-intro-portrait {

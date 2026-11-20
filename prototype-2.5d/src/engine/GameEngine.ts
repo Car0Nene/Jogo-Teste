@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { DesktopProfile, FightFraming, platform } from '../platform/platform';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import {
   FIGHTERS,
@@ -204,6 +205,13 @@ export class GameEngine {
   private showcaseOrbit = false;
   private showcaseAngle = 0;
 
+  // Apresentação por plataforma (js: src/platform). Só muda câmera e densidade de
+  // pixels — física, hitboxes, dano e IA não leem estes valores.
+  private readonly baseFov = 38;
+  private framing: FightFraming = DesktopProfile.framing.landscape;
+  private dprCap = 2;
+  private maxPixels = 8.3e6;
+
   private onHudUpdate: (hud: HudSnapshot) => void;
   private hudEmitAccum = 0;
 
@@ -298,16 +306,55 @@ export class GameEngine {
     if (Math.abs(this.renderer.getPixelRatio() - pixelRatio) > 0.01) {
       this.renderer.setPixelRatio(pixelRatio);
     }
-    this.camera.aspect = w / h;
-    this.camera.updateProjectionMatrix();
     this.renderer.setSize(w, h);
+    this.updateProjection();
   };
 
+  /**
+   * Na luta, a câmera centraliza os lutadores na ÁREA ÚTIL do perfil (entre o HUD em
+   * cima e os controles embaixo), sem mudar a escala da imagem: o quadro é deslocado
+   * com setViewOffset sobre uma imagem virtual mais alta. Nos menus, projeção normal.
+   */
+  private updateProjection() {
+    const w = Math.max(1, this.container.clientWidth);
+    const h = Math.max(1, this.container.clientHeight);
+    const fr = this.screenMode === 'fight' ? this.framing : null;
+    const shift = fr ? ((fr.top - fr.bottom) / 2) * h : 0;
+    if (!fr || Math.abs(shift) < 0.5) {
+      this.camera.clearViewOffset();
+      this.camera.fov = this.baseFov;
+      this.camera.aspect = w / h;
+    } else {
+      const fullH = h + 2 * Math.abs(shift);
+      const tan = Math.tan(THREE.MathUtils.degToRad(this.baseFov * 0.5));
+      this.camera.fov = THREE.MathUtils.radToDeg(2 * Math.atan((tan * fullH) / h));
+      this.camera.aspect = w / fullH;
+      // centro da área útil (h/2 + shift) cai no centro da imagem virtual
+      this.camera.setViewOffset(w, fullH, 0, fullH / 2 - (h / 2 + shift), w, h);
+    }
+    this.camera.updateProjectionMatrix();
+  }
+
+  /** Perfil da plataforma: enquadramento da luta e limites de densidade de pixels. */
+  public setPresentation(framing: FightFraming, quality: { dprCap: number; maxPixels: number }) {
+    this.framing = framing;
+    this.dprCap = quality.dprCap;
+    this.maxPixels = quality.maxPixels;
+    const ratio = this.getEffectivePixelRatio();
+    if (Math.abs(this.renderer.getPixelRatio() - ratio) > 0.01) this.renderer.setPixelRatio(ratio);
+    this.handleResize();
+  }
+
   private getEffectivePixelRatio() {
-    const baseDpr = this.isSoftwareGl ? 1 : Math.min(window.devicePixelRatio || 1, 2);
-    return this.isSoftwareGl
+    const baseDpr = this.isSoftwareGl ? 1 : Math.min(window.devicePixelRatio || 1, this.dprCap);
+    let ratio = this.isSoftwareGl
       ? Math.min(1, this.resolutionScale)
       : Math.max(0.65, Math.min(2.25, baseDpr * (this.graphicsQuality === 'low' ? 0.85 : 1) * this.resolutionScale));
+    // limite de pixels físicos do canvas (monitores 4K/5K, celulares 3x)
+    const w = Math.max(1, this.container?.clientWidth || innerWidth);
+    const h = Math.max(1, this.container?.clientHeight || innerHeight);
+    if (w * h * ratio * ratio > this.maxPixels) ratio = Math.max(0.65, Math.sqrt(this.maxPixels / (w * h)));
+    return ratio;
   }
 
   private handleKeyDown = (e: KeyboardEvent) => {
@@ -384,6 +431,7 @@ export class GameEngine {
 
   public setScreenMode(mode: ScreenMode) {
     this.screenMode = mode;
+    this.updateProjection();
     this.paused = false;
     this.clearEntities();
     soundEngine.stopAllVoices();
@@ -457,6 +505,7 @@ export class GameEngine {
     soundEngine.stopAllVoices();
     soundEngine.startMusic(STAGE_MUSIC[stageId] ?? 'theme', 0.58);
     this.screenMode = 'fight';
+    this.updateProjection();
     this.paused = false;
     this.roundNumber = 1;
     this.winnerIndex = null;
@@ -1135,6 +1184,7 @@ export class GameEngine {
     const ax = gp.axes?.[0] ?? 0;
     const ay = gp.axes?.[1] ?? 0;
     const btn = (idx: number) => Boolean(gp.buttons?.[idx]?.pressed);
+    if (Math.abs(ax) > 0.5 || Math.abs(ay) > 0.6 || gp.buttons?.some((b) => b.pressed)) platform.noteGamepad();
 
     if (ax < -0.35 || btn(14)) this.gamepadHolds.add('left');
     if (ax > 0.35 || btn(15)) this.gamepadHolds.add('right');
@@ -1749,12 +1799,20 @@ export class GameEngine {
     const [f1, f2] = this.fighters;
     const midX = (f1.x + f2.x) * 0.5;
     const span = Math.abs(f1.x - f2.x);
-    const baseDistance = 6.8 + span * 0.68;
-    const horizontalViewTangent = Math.tan(THREE.MathUtils.degToRad(this.camera.fov * 0.5)) * this.camera.aspect;
-    const desiredWidth = span + (this.camera.aspect < 1 ? 3.6 : 2.8);
-    const fitDistance = desiredWidth / (2 * Math.max(0.01, horizontalViewTangent));
-    const zDist = THREE.MathUtils.clamp(Math.max(baseDistance, fitDistance), 7.2, 60);
+    const fr = this.framing;
+    const w = Math.max(1, this.container.clientWidth);
+    const h = Math.max(1, this.container.clientHeight);
     const maxY = Math.max(f1.y, f2.y);
+    const baseDistance = fr.minDistance - 0.4 + span * 0.68;
+    // escala da imagem é a da tela inteira (o deslocamento não muda o zoom)
+    const tan = Math.tan(THREE.MathUtils.degToRad(this.baseFov * 0.5));
+    const horizontalViewTangent = (tan * w) / h;
+    const desiredWidth = span + fr.sideMargin;
+    const fitDistance = desiredWidth / (2 * Math.max(0.01, horizontalViewTangent));
+    // altura: corpo + pulo cabem na área útil (entre HUD e controles)
+    const usefulH = Math.max(0.25, 1 - fr.top - fr.bottom);
+    const fitHeight = (3.1 + maxY) / (2 * tan * usefulH);
+    const zDist = THREE.MathUtils.clamp(Math.max(baseDistance, fitDistance, fitHeight), fr.minDistance, 60);
 
     let sx = 0;
     let sy = 0;

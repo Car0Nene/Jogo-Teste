@@ -25,6 +25,9 @@ import { SettingsModal } from './components/menu/SettingsModal';
 import { StageSelectScreen } from './components/menu/StageSelectScreen';
 import { accountService } from './services/account';
 import { AccountModal } from './components/AccountModal';
+import { platform, usePlatform } from './platform/platform';
+
+const platformState = () => platform.state;
 
 type AppScreen = 'title' | 'modes' | 'select' | 'stage' | 'vs' | 'fight' | 'extras';
 
@@ -48,6 +51,31 @@ export default function App() {
   const [showcaseOrbit, setShowcaseOrbit] = useState(false);
   const [paused, setPaused] = useState(false);
   const [hud, setHud] = useState<HudSnapshot | null>(null);
+  const pf = usePlatform();
+
+  // Perfil da plataforma → motor: enquadramento da luta e densidade de pixels.
+  // (O combate não muda; só câmera e resolução.)
+  useEffect(() => {
+    engineRef.current?.setPresentation(pf.profile.framing[pf.orientation], pf.profile.quality);
+  }, [pf.profile, pf.orientation]);
+
+  // Durante a luta, toques não viram rolagem, zoom de pinça, seleção ou menu de contexto.
+  useEffect(() => {
+    if (screen !== 'fight') return;
+    const block = (event: Event) => {
+      if (!paused && !settingsOpen) event.preventDefault();
+    };
+    document.addEventListener('touchmove', block, { passive: false });
+    document.addEventListener('gesturestart', block, { passive: false });
+    document.addEventListener('dblclick', block, { passive: false });
+    document.addEventListener('contextmenu', block);
+    return () => {
+      document.removeEventListener('touchmove', block);
+      document.removeEventListener('gesturestart', block);
+      document.removeEventListener('dblclick', block);
+      document.removeEventListener('contextmenu', block);
+    };
+  }, [screen, paused, settingsOpen]);
 
   useEffect(() => { void accountService.initialize(); }, []);
 
@@ -87,6 +115,8 @@ export default function App() {
     engine.applyGraphicsSettings(initial.graphicsQuality, initial.resolutionScale);
     engine.setKeyBindings(initial.keyBindings);
     engine.setGamepadEnabled(initial.gamepadEnabled);
+    const startPf = platformState();
+    engine.setPresentation(startPf.profile.framing[startPf.orientation], startPf.profile.quality);
     soundEngine.startMusic('theme', 1);
 
     return () => {
@@ -134,6 +164,11 @@ export default function App() {
   }, []);
 
   const goToSelect = useCallback((mode: GameMode = 'cpu') => {
+    // celular/tablet: entrar em tela cheia no toque do jogador (o navegador só permite com gesto)
+    const st = platform.state;
+    if (st.profile.ui === 'touch' && !st.standalone && !document.fullscreenElement) {
+      document.documentElement.requestFullscreen?.({ navigationUI: 'hide' }).catch(() => {});
+    }
     setGameMode(mode);
     setShowcaseOrbit(false);
     setPaused(false);
@@ -200,7 +235,7 @@ export default function App() {
   const kb = settings.keyBindings;
 
   return (
-    <div ref={containerRef} className="relative w-full h-full overflow-hidden bg-[#09070e]">
+    <div ref={containerRef} className="ff-app relative w-full h-full overflow-hidden bg-[#09070e]" data-screen={screen}>
       {/* Isolated 2.5D Three.js Stage + Fighters Canvas */}
       <div ref={mountRef} className="absolute inset-0 w-full h-full" />
 
@@ -295,6 +330,9 @@ export default function App() {
           muted={settings.muted}
           hudScale={settings.hudScale}
           keyBindings={settings.keyBindings}
+          touchScale={settings.touchScale}
+          touchOpacity={settings.touchOpacity}
+          touchLefty={settings.touchLefty}
           onToggleMute={toggleMute}
           onPause={togglePause}
           onSkipIntro={() => engineRef.current?.skipIntro()}
