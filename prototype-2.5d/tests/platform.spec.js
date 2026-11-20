@@ -28,6 +28,18 @@ test('loads the game and accepts fight controls at this viewport', async ({ page
   for (const card of await page.locator('.ff-character-roster-card').all()) {
     await expect(card).toBeVisible();
   }
+  const rosterImages = page.locator('.ff-character-roster-card img');
+  await expect(rosterImages).toHaveCount(8);
+  for (const image of await rosterImages.all()) {
+    await expect.poll(() => image.evaluate((img) => img.complete && img.naturalWidth > 0)).toBeTruthy();
+    expect(await image.evaluate((img) => getComputedStyle(img).objectFit)).toBe('contain');
+    const bounds = await image.boundingBox();
+    const cardBounds = await image.locator('xpath=../..').boundingBox();
+    expect(bounds.x).toBeGreaterThanOrEqual(cardBounds.x - 1);
+    expect(bounds.y).toBeGreaterThanOrEqual(cardBounds.y - 1);
+    expect(bounds.x + bounds.width).toBeLessThanOrEqual(cardBounds.x + cardBounds.width + 1);
+    expect(bounds.y + bounds.height).toBeLessThanOrEqual(cardBounds.y + cardBounds.height + 1);
+  }
 
   const fighters = [
     ['Juraci', 'juraci'],
