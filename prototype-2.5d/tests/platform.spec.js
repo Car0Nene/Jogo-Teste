@@ -32,8 +32,11 @@ test('loads the game and accepts fight controls at this viewport', async ({ page
   await expect(rosterImages).toHaveCount(8);
   for (const image of await rosterImages.all()) {
     await expect.poll(() => image.evaluate((img) => img.complete && img.naturalWidth > 0)).toBeTruthy();
-    expect(await image.evaluate((img) => getComputedStyle(img).objectFit)).toBe('contain');
-    const bounds = await image.boundingBox();
+    expect(await image.evaluate((img) => {
+      const style = getComputedStyle(img);
+      return [style.objectFit, style.objectPosition];
+    })).toEqual(['cover', '50% 0%']);
+    const bounds = await image.locator('xpath=..').boundingBox();
     const cardBounds = await image.locator('xpath=../..').boundingBox();
     expect(bounds.x).toBeGreaterThanOrEqual(cardBounds.x - 1);
     expect(bounds.y).toBeGreaterThanOrEqual(cardBounds.y - 1);

@@ -521,7 +521,9 @@
 .ff-character-roster-card:nth-child(8) { grid-column: 4; grid-row: 3; }
 
 .ff-roster-portrait {
-  width: 100%;
+  width: auto;
+  max-width: 100%;
+  aspect-ratio: 1;
   height: calc(100% - 15px);
   border-width: 0;
   border-radius: 0;
@@ -975,8 +977,13 @@
 }
 
 .ff-roster-portrait img {
-  object-fit: contain;
-  object-position: center;
+  object-fit: cover;
+  object-position: center top;
+}
+
+.ff-character-roster-card[data-fighter="daniel"] .ff-roster-portrait img {
+  transform: scale(1.7);
+  transform-origin: 35% top;
 }
 
 .ff-character-versus {

@@ -300,6 +300,7 @@ export function CharacterSelectScreen({
                   <button
                     key={f.id}
                     type="button"
+                    data-fighter={f.id}
                     onClick={() => handlePick(f.id, true)}
                     aria-label={`Selecionar ${f.name}`}
                     aria-pressed={(pickSlot === 'p1' && isP1) || (pickSlot === 'p2' && isP2)}
