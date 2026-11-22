@@ -4,6 +4,7 @@ type PressAction = 'light' | 'heavy' | 'special' | 'subSpecial' | 'jump';
 
 interface TouchControlsProps {
   meter: number;
+  specialCost: number;
   scale: number;
   opacity: number;
   lefty: boolean;
@@ -122,7 +123,7 @@ const BUTTONS: ButtonSpec[] = [
  * dá para andar com um polegar e atacar/defender com o outro, segurar Defesa e
  * apertar outro botão, e deslizar o dedo de um botão para o vizinho.
  */
-export function TouchControls({ meter, scale, opacity, lefty, onHold, onPress }: TouchControlsProps) {
+export function TouchControls({ meter, specialCost, scale, opacity, lefty, onHold, onPress }: TouchControlsProps) {
   const pointers = useRef(new Map<number, HTMLButtonElement>());
   const [down, setDown] = useState<Set<string>>(new Set());
   const onHoldRef = useRef(onHold);
@@ -198,7 +199,8 @@ export function TouchControls({ meter, scale, opacity, lefty, onHold, onPress }:
         onContextMenu={(event) => event.preventDefault()}
       >
         {BUTTONS.map((b) => {
-          const locked = Boolean(b.needsMeter && meter < 50);
+          const cost = b.act === 'special' ? specialCost : 50;
+          const locked = Boolean(b.needsMeter && meter < cost);
           return (
             <button
               key={b.act}
@@ -206,6 +208,7 @@ export function TouchControls({ meter, scale, opacity, lefty, onHold, onPress }:
               data-act={b.act}
               aria-label={b.aria}
               aria-disabled={locked}
+              title={locked ? `Requer ${cost}% de energia` : undefined}
               className={`ff-touch-btn ${b.tone} ${down.has(b.act) ? 'is-down' : ''} ${locked ? 'is-locked' : ''} ${b.act === 'special' && meter >= 100 ? 'is-ready' : ''}`}
               style={{ gridArea: b.area, ...(b.act === 'special' ? { '--meter': `${Math.min(100, meter)}%` } : {}) } as React.CSSProperties}
             >

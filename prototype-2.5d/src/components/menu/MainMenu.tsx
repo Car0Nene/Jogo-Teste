@@ -187,6 +187,7 @@ export function MainMenu({
       gabi: 'sing',
       paula: 'lunch',
       tainara: 'trabalho',
+      davi: 'videogame',
     };
     soundEngine.playClip(id, clipMap[id], 300, true);
   };

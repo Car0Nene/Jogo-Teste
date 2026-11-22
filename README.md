@@ -29,7 +29,13 @@ npm run test:e2e
 npm run build
 ```
 
-O workflow executa essas verificações em Chromium com viewports desktop e mobile, incluindo formatos compactos. A seleção de personagem mantém os oito lutadores e a seleção de arena mantém as cinco arenas.
+O workflow executa essas verificações em Chromium com viewports desktop e mobile, incluindo formatos compactos. A seleção de personagem mantém os nove lutadores e a seleção de arena mantém as cinco arenas.
+
+### Davi
+
+Davi usa especial com 100 de energia para o Super Namorador, ou Paixão Alviverde quando já está transformado; baixo + especial custa 50 e ativa a Transformação Roxa por dez segundos. A forma do Super Namorador dura oito segundos, e os especiais têm intervalo mínimo de 1,2 segundo. As falas são provisórias, sintetizadas em português com eSpeak NG, sem imitar a voz de outra pessoa.
+
+As poses de combate são recortes da arte fornecida, não uma animação completa produzida quadro a quadro. Ainda faltam sprites próprios para a preguiça, convite ao videogame, esquiva, transições suaves, cabelo roxo em todas as poses, sequência cinematográfica dos especiais e admiradoras apropriadas à idade, além de gravações de voz e efeitos sonoros definitivos. Para contas existentes, aplique `supabase/migrations/20261122_add_davi.sql` no Supabase antes de registrar partidas com Davi.
 
 ## Assets e evolução visual
 

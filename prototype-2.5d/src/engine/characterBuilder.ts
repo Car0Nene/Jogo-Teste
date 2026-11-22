@@ -8,6 +8,7 @@ import {
   ATLAS_SCALE,
   BASE_SPRITE_HEIGHT,
   CHAR_SPRITE_SCALE,
+  DAVI_ATLAS_SCALE,
   SELECT_POSES,
   SPRITE_ATLAS,
   SpriteFrame,
@@ -36,14 +37,17 @@ const SCALE_STABLE_STATES = new Set<AnimState>([
 let sharedAtlasTex: THREE.Texture | null = null;
 let sharedAtlasHdTex: THREE.Texture | null = null;
 let sharedAtlasHd2Tex: THREE.Texture | null = null;
+let sharedDaviTex: THREE.Texture | null = null;
 
-function getAtlasTexture(tier: 0 | 1 | 2, anisotropy: number): THREE.Texture {
-  const existing = tier === 2 ? sharedAtlasHd2Tex : tier === 1 ? sharedAtlasHdTex : sharedAtlasTex;
+function getAtlasTexture(tier: 0 | 1 | 2 | 3, anisotropy: number): THREE.Texture {
+  const existing = tier === 3 ? sharedDaviTex : tier === 2 ? sharedAtlasHd2Tex : tier === 1 ? sharedAtlasHdTex : sharedAtlasTex;
   if (existing) return existing;
 
   const loader = new THREE.TextureLoader();
   const url =
-    tier === 2
+    tier === 3
+      ? assetUrl('/assets/sprites/davi.webp')
+      : tier === 2
       ? assetUrl('/assets/sprites/fighters-hd.webp')
       : tier === 1
       ? assetUrl('/assets/sprites/pedro-hd.webp')
@@ -55,7 +59,8 @@ function getAtlasTexture(tier: 0 | 1 | 2, anisotropy: number): THREE.Texture {
   tex.magFilter = THREE.LinearFilter;
   tex.generateMipmaps = true;
 
-  if (tier === 2) sharedAtlasHd2Tex = tex;
+  if (tier === 3) sharedDaviTex = tex;
+  else if (tier === 2) sharedAtlasHd2Tex = tex;
   else if (tier === 1) sharedAtlasHdTex = tex;
   else sharedAtlasTex = tex;
   return tex;
@@ -111,7 +116,8 @@ export interface CharacterRig {
   atlasTex: THREE.Texture;
   atlasHdTex: THREE.Texture;
   atlasHd2Tex: THREE.Texture;
-  atlasTier: 0 | 1 | 2;
+  daviTex?: THREE.Texture;
+  atlasTier: 0 | 1 | 2 | 3;
   baseScale: number;
   baseShadowOpacity: number;
   hitFlashTimer: number;
@@ -154,6 +160,7 @@ export function buildCharacterRig(
   const atlasTex = getAtlasTexture(0, anisotropy);
   const atlasHdTex = getAtlasTexture(1, anisotropy);
   const atlasHd2Tex = getAtlasTexture(2, anisotropy);
+  const daviTex = id === 'davi' ? getAtlasTexture(3, anisotropy) : undefined;
 
   const root = new THREE.Group();
 
@@ -297,6 +304,7 @@ export function buildCharacterRig(
     atlasTex,
     atlasHdTex,
     atlasHd2Tex,
+    daviTex,
     atlasTier: 0,
     baseScale: CHAR_SPRITE_SCALE[id] || 1.2,
     baseShadowOpacity: 0.46,
@@ -496,7 +504,9 @@ function resolveSpritePose(
   // Standard states mapped directly to original frame sequences
   switch (state) {
     case 'idle': {
-      pose.frame = cycleFrame(S.idle, 6, worldTime + id.length * 0.35);
+      pose.frame = id === 'davi' && ctx.form === 'daviPurple'
+        ? S.daviPurple[1]
+        : cycleFrame(S.idle, 6, worldTime + id.length * 0.35);
       const breath = Math.sin(worldTime * 2.6 + id.length * 0.7);
       pose.sy = 1 + breath * 0.012;
       pose.sx = 1 - breath * 0.006;
@@ -721,8 +731,9 @@ export function animateCharacterRig(
   if (!frame) return;
 
   const [sx, sy, sw, sh, ax, ay, hdFlag] = frame;
-  const tier: 0 | 1 | 2 = hdFlag === 2 ? 2 : hdFlag === 1 ? 1 : 0;
-  const tex = tier === 2 ? rig.atlasHd2Tex : tier === 1 ? rig.atlasHdTex : rig.atlasTex;
+  const tier: 0 | 1 | 2 | 3 = hdFlag === 3 ? 3 : hdFlag === 2 ? 2 : hdFlag === 1 ? 1 : 0;
+  const tex = tier === 3 ? rig.daviTex : tier === 2 ? rig.atlasHd2Tex : tier === 1 ? rig.atlasHdTex : rig.atlasTex;
+  if (!tex) return;
   const img = tex.image as { width?: number; height?: number } | undefined;
 
   if (!img || !img.width || !img.height) {
@@ -746,7 +757,7 @@ export function animateCharacterRig(
 
   const texW = img.width;
   const texH = img.height;
-  const ad = tier === 2 ? ATLAS_HD2_SCALE : tier === 1 ? ATLAS_HD_SCALE : ATLAS_SCALE;
+  const ad = tier === 3 ? DAVI_ATLAS_SCALE : tier === 2 ? ATLAS_HD2_SCALE : tier === 1 ? ATLAS_HD_SCALE : ATLAS_SCALE;
 
   const keepIntentionalScale = ctx.form === 'gordao' || ctx.form === 'hulk' || state === 'crouch';
   const heightCorrection =

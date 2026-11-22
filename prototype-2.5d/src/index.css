@@ -970,6 +970,7 @@
 .ff-character-roster-card:nth-child(6) { grid-column: 4; grid-row: 2; }
 .ff-character-roster-card:nth-child(7) { grid-column: 2; grid-row: 3; }
 .ff-character-roster-card:nth-child(8) { grid-column: 3; grid-row: 3; }
+.ff-character-roster-card:nth-child(9) { grid-column: 4; grid-row: 3; }
 
 .ff-roster-portrait {
   height: calc(100% - 15px);

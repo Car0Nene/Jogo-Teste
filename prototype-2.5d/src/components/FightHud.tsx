@@ -189,7 +189,10 @@ function DesktopCommandBar({
       <div className="ff-desk-group" aria-label="Golpes (mouse)">
         <button type="button" className={`${btn} ff-desk-light`} onClick={() => onVirtualPress(0, 'light')}>Leve ({k(keyBindings.light)})</button>
         <button type="button" className={`${btn} ff-desk-heavy`} onClick={() => onVirtualPress(0, 'heavy')}>Forte ({k(keyBindings.heavy)})</button>
-        <button type="button" className={`${btn} ff-desk-special`} disabled={hud.p1.meter < 50} onClick={() => onVirtualPress(0, 'special')}>Especial ({k(keyBindings.special)})</button>
+        <button type="button" className={`${btn} ff-desk-special`} disabled={hud.p1.meter < (hud.p1.id === 'davi' ? 100 : 50)} onClick={() => onVirtualPress(0, 'special')}>Especial ({k(keyBindings.special)})</button>
+        {hud.p1.id === 'davi' && (
+          <button type="button" className={btn} disabled={hud.p1.meter < 50} onClick={() => onVirtualPress(0, 'subSpecial')}>Transformação (↓+{k(keyBindings.special)})</button>
+        )}
         <button type="button" className={btn} {...hold('guard')}>Defesa ({k(keyBindings.guard)})</button>
       </div>
     </div>
@@ -310,6 +313,7 @@ export function FightHud({
         hud.phase !== 'matchOver' && (
           <TouchControls
             meter={hud.p1.meter}
+            specialCost={hud.p1.id === 'davi' ? 100 : 50}
             scale={touchScale * pf.profile.touchScale}
             opacity={touchOpacity}
             lefty={touchLefty}

@@ -5,6 +5,7 @@ import {
   ATLAS_HD2_SCALE,
   ATLAS_HD_SCALE,
   ATLAS_SCALE,
+  DAVI_ATLAS_SCALE,
   SELECT_POSES,
   SPRITE_ATLAS,
   SpriteFrame,
@@ -13,8 +14,9 @@ import {
 let cachedAtlasImg: HTMLImageElement | null = null;
 let cachedAtlasHdImg: HTMLImageElement | null = null;
 let cachedAtlasHd2Img: HTMLImageElement | null = null;
+let cachedDaviImg: HTMLImageElement | null = null;
 
-function ensureAtlasImages(onReady: () => void) {
+function ensureAtlasImages(onReady: () => void, id: FighterId) {
   if (!cachedAtlasImg) {
     const img = new Image();
     img.src = assetUrl('/assets/sprites/fighters.webp');
@@ -38,6 +40,13 @@ function ensureAtlasImages(onReady: () => void) {
   attach(cachedAtlasImg);
   attach(cachedAtlasHdImg);
   attach(cachedAtlasHd2Img);
+  if (id === 'davi') {
+    if (!cachedDaviImg) {
+      cachedDaviImg = new Image();
+      cachedDaviImg.src = assetUrl('/assets/sprites/davi.webp');
+    }
+    attach(cachedDaviImg);
+  }
 }
 
 export function AnimatedFighterCanvas({
@@ -136,11 +145,11 @@ export function AnimatedFighterCanvas({
         : idleFrames[Math.floor(t * 5.5 + (mirror ? 0.35 : 0)) % idleFrames.length];
 
       const [sx, sy, sw, sh, ax, ay, hdFlag] = frame;
-      const tier = hdFlag === 2 ? 2 : hdFlag === 1 ? 1 : 0;
-      const srcImg = tier === 2 ? cachedAtlasHd2Img : tier === 1 ? cachedAtlasHdImg : cachedAtlasImg;
+      const tier = hdFlag === 3 ? 3 : hdFlag === 2 ? 2 : hdFlag === 1 ? 1 : 0;
+      const srcImg = tier === 3 ? cachedDaviImg : tier === 2 ? cachedAtlasHd2Img : tier === 1 ? cachedAtlasHdImg : cachedAtlasImg;
 
       if (srcImg && srcImg.complete && srcImg.naturalWidth > 0) {
-        const ad = tier === 2 ? ATLAS_HD2_SCALE : tier === 1 ? ATLAS_HD_SCALE : ATLAS_SCALE;
+        const ad = tier === 3 ? DAVI_ATLAS_SCALE : tier === 2 ? ATLAS_HD2_SCALE : tier === 1 ? ATLAS_HD_SCALE : ATLAS_SCALE;
         const normW = sw / ad;
         const normH = sh / ad;
         const fitScale = Math.min((cssH * 0.84) / normH, (cssW * 0.88) / normW) / ad;
@@ -160,7 +169,7 @@ export function AnimatedFighterCanvas({
 
     ensureAtlasImages(() => {
       if (alive) draw(performance.now());
-    });
+    }, id);
     raf = requestAnimationFrame(draw);
 
     return () => {

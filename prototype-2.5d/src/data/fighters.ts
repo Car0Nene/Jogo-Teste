@@ -8,7 +8,8 @@ export type FighterId =
   | 'franciely'
   | 'gabi'
   | 'paula'
-  | 'tainara';
+  | 'tainara'
+  | 'davi';
 
 export type FormId =
   | 'normal'
@@ -18,7 +19,8 @@ export type FormId =
   | 'praia'
   | 'brava'
   | 'paulaFury'
-  | 'ricePower';
+  | 'ricePower'
+  | 'daviPurple';
 
 export interface MoveSpec {
   id: 'light' | 'medium' | 'heavy' | 'air' | 'combo' | 'special' | 'subSpecial';
@@ -129,6 +131,12 @@ export interface FormSpec {
 }
 
 export const FORMS: Record<FormId, FormSpec> = {
+  daviPurple: {
+    id: 'daviPurple', label: 'TRANSFORMAÇÃO ROXA',
+    atk: 1.18, def: 1, speed: 1.15, push: 1.1, reach: 1,
+    torsoScale: [1, 1, 1], muscleScale: 1,
+    colorHex: '#c084fc', auraHex: 0xa855f7,
+  },
   normal: {
     id: 'normal',
     label: '',
@@ -237,6 +245,36 @@ export const FORMS: Record<FormId, FormSpec> = {
 };
 
 export const FIGHTERS: Record<FighterId, FighterSpec> = {
+  davi: {
+    id: 'davi',
+    name: 'DAVI',
+    roleTitle: 'Craque do Videogame',
+    quote: '"Vamos jogar videogame."',
+    desc: 'Filho de Pedro e Paula, irmão de Franciely e Gabi e neto de Juraci. Brincalhão, ágil e às vezes com preguiça.',
+    portraitUrl: assetUrl('/assets/portraits/davi.webp'),
+    powerLevel: 850,
+    accentHex: '#22c55e',
+    auraColor: 0xa855f7,
+    walkSpeed: 4.9,
+    backSpeed: 3.9,
+    jumpVel: 12.6,
+    gravity: 32,
+    specialName: 'Super Namorador / Paixão Alviverde',
+    subSpecialName: 'Transformação Roxa',
+    specialSummary: 'Corações e energia roxa fortalecem Davi; transformado, o especial vira Paixão Alviverde.',
+    subSpecialSummary: 'Aura roxa, força e velocidade aumentadas por tempo limitado.',
+    appearance: {
+      skin: 0xa96a47, shirt: 0x006a36, shirtSecondary: 0xffffff,
+      pants: 0x777777, shoes: 0x161616, hair: 0x191313, hairStyle: 'fade',
+      shoeStyle: 'sneakers', bareLegs: true, build: 'lean', heightScale: 0.9,
+    },
+    moves: {
+      light: { id: 'light', label: 'Direto do Davi', startup: 0.06, active: 0.09, recovery: 0.12, damage: 42, minRange: 0.2, range: 1.55, hitstun: 0.26, blockstun: 0.15, push: 2.2, hitstop: 0.045, chainTo: 'medium' },
+      medium: { id: 'medium', label: 'Sequência Alviverde', startup: 0.09, active: 0.1, recovery: 0.17, damage: 62, minRange: 0.2, range: 1.8, hitstun: 0.32, blockstun: 0.18, push: 2.8, hitstop: 0.06, chainTo: 'heavy' },
+      heavy: { id: 'heavy', label: 'Chute Relâmpago', startup: 0.14, active: 0.11, recovery: 0.25, damage: 88, minRange: 0.2, range: 2.15, hitstun: 0.42, blockstun: 0.22, push: 4.2, hitstop: 0.08, lunge: 1.5, heavy: true },
+      air: { id: 'air', label: 'Chute Aéreo', startup: 0.07, active: 0.22, recovery: 0.1, damage: 58, minRange: 0.1, range: 1.75, hitstun: 0.32, blockstun: 0.18, push: 2.4, hitstop: 0.055 },
+    },
+  },
   juraci: {
     id: 'juraci',
     name: 'JURACI',
@@ -582,6 +620,7 @@ export const FIGHTER_LIST: FighterSpec[] = [
   FIGHTERS.gabi,
   FIGHTERS.paula,
   FIGHTERS.tainara,
+  FIGHTERS.davi,
 ];
 
 export interface DialogueExchange {
@@ -590,6 +629,27 @@ export interface DialogueExchange {
 }
 
 const INTRO_MATCHUPS: Record<string, DialogueExchange[][]> = {
+  'davi>pedro': [[
+    { speaker: 'p1', text: 'Vamos jogar videogame.' },
+    { speaker: 'p2', text: 'Primeiro mostra pro pai o que você aprendeu!' },
+    { speaker: 'p1', text: 'Pode deixar, pai!' },
+  ]],
+  'davi>paula': [[
+    { speaker: 'p2', text: 'Davi, nada de preguiça agora, filho!' },
+    { speaker: 'p1', text: 'Tá bom, mãe! Depois tem videogame?' },
+  ]],
+  'davi>franciely': [[
+    { speaker: 'p2', text: 'Davi, sua irmã não vai perder tão fácil!' },
+    { speaker: 'p1', text: 'Vamos jogar videogame.' },
+  ]],
+  'davi>gabi': [[
+    { speaker: 'p1', text: 'Gabi, irmã, hoje eu ganho!' },
+    { speaker: 'p2', text: 'Quero ver, irmão! Depois tem videogame.' },
+  ]],
+  'davi>juraci': [[
+    { speaker: 'p2', text: 'Meu netinho, depois da luta tem bolo!' },
+    { speaker: 'p1', text: 'Combinado, vó! E depois videogame!' },
+  ]],
   'juraci>carlos': [
     [
       { speaker: 'p1', text: 'Carlos! Saiu da dieta de novo?' },
@@ -688,6 +748,12 @@ export function pickIntroDialogue(p1: FighterId, p2: FighterId): DialogueExchang
   if (pool && pool.length) {
     return pool[Math.floor(Math.random() * pool.length)];
   }
+  const reverse = INTRO_MATCHUPS[`${p2}>${p1}`];
+  if ((p1 === 'davi' || p2 === 'davi') && reverse?.length) {
+    return reverse[Math.floor(Math.random() * reverse.length)].map((line) => ({
+      ...line, speaker: line.speaker === 'p1' ? 'p2' : 'p1',
+    }));
+  }
   if (p1 === p2) {
     return [
       { speaker: 'p1', text: 'Ué! Tá copiando meu estilo?' },
@@ -717,6 +783,11 @@ export const FIGHTER_BARKS: Record<
   FighterId,
   { special: string[]; subSpecial: string[]; win: string[]; hit?: string[] }
 > = {
+  davi: {
+    special: ['Já tô com outra.'],
+    subSpecial: ['Agora tô c preguiça.'],
+    win: ['Vamos jogar videogame.', 'Já tô com outra.'],
+  },
   juraci: {
     special: ['BOLO DE CENOURA!', 'Toma bolo quentinho!', 'Saiu do forno agora!'],
     subSpecial: ['DADÁÁÁ! Vem lavar essa louça!', 'Cuidado que o chão tá molhado!'],

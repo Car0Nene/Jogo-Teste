@@ -22,6 +22,7 @@ const SAMPLE_CLIP: Record<FighterId, { key: string; label: string }> = {
   gabi: { key: 'amor', label: 'Ouvir Amor e Luta' },
   paula: { key: 'bar', label: 'Ouvir Bar da Simone' },
   tainara: { key: 'arroz', label: 'Ouvir Poder do Arroz' },
+  davi: { key: 'videogame', label: 'Ouvir Vamos Jogar Videogame' },
 };
 
 export function ExtrasScreen({ onBack }: ExtrasScreenProps) {

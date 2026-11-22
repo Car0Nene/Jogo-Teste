@@ -24,12 +24,25 @@ test('loads the game and accepts fight controls at this viewport', async ({ page
   const characterScreen = page.locator('.ff-character-select-screen');
   await expect(characterScreen).toBeVisible();
   expect(await characterScreen.evaluate((screen) => screen.scrollHeight <= screen.clientHeight)).toBeTruthy();
-  await expect(page.locator('.ff-character-roster-card')).toHaveCount(8);
+  await expect(page.locator('.ff-character-roster-card')).toHaveCount(9);
   for (const card of await page.locator('.ff-character-roster-card').all()) {
     await expect(card).toBeVisible();
   }
+  const cardBoxes = await page.locator('.ff-character-roster-card').evaluateAll((cards) =>
+    cards.map((card) => {
+      const { left, right, top, bottom } = card.getBoundingClientRect();
+      return { left, right, top, bottom };
+    }),
+  );
+  for (let i = 0; i < cardBoxes.length; i++) {
+    for (let j = i + 1; j < cardBoxes.length; j++) {
+      const a = cardBoxes[i];
+      const b = cardBoxes[j];
+      expect(a.right <= b.left || b.right <= a.left || a.bottom <= b.top || b.bottom <= a.top).toBeTruthy();
+    }
+  }
   const rosterImages = page.locator('.ff-character-roster-card img');
-  await expect(rosterImages).toHaveCount(8);
+  await expect(rosterImages).toHaveCount(9);
   for (const image of await rosterImages.all()) {
     await expect.poll(() => image.evaluate((img) => img.complete && img.naturalWidth > 0)).toBeTruthy();
     expect(await image.evaluate((img) => {
@@ -53,6 +66,7 @@ test('loads the game and accepts fight controls at this viewport', async ({ page
     ['Gabi', 'gabi'],
     ['Paula', 'paula'],
     ['Tainara', 'tainara'],
+    ['Davi', 'davi'],
   ];
   for (const [name, portrait] of fighters) {
     await page.getByRole('button', { name: new RegExp(name, 'i') }).click();
@@ -73,6 +87,12 @@ test('loads the game and accepts fight controls at this viewport', async ({ page
     expect(portraitBounds.y + portraitBounds.height).toBeLessThanOrEqual(page.viewportSize().height + 1);
   }
 
+  await page.locator('.ff-character-panel-p1').click();
+  await page.getByRole('button', { name: 'Selecionar DAVI' }).click();
+  await page.getByRole('button', { name: 'Selecionar DAVI' }).click();
+  await expect(page.locator('.ff-character-panel-p1 img[src*="/davi.webp"]')).toBeVisible();
+  await expect(page.locator('.ff-character-panel-p2 img[src*="/davi.webp"]')).toBeVisible();
+
   await page.getByRole('button', { name: /Carlos/i }).click();
   const baptismPortrait = page.locator('img[src*="/assets/portraits/carlos-batizado.webp"]');
   await expect(baptismPortrait).toBeVisible();
@@ -84,6 +104,7 @@ test('loads the game and accepts fight controls at this viewport', async ({ page
     ];
     return Promise.all(paths.map(async (path) => (await fetch(path)).ok));
   });
+
   expect(newMediaAvailable).toEqual([true, true]);
 
   await page.getByRole('button', { name: /ESCOLHER CEN/ }).click();
@@ -164,4 +185,124 @@ test('loads the game and accepts fight controls at this viewport', async ({ page
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBeTruthy();
   expect(pageErrors).toEqual([]);
   expect(missingAssets).toEqual([]);
+});
+
+test('Davi uses meter, timed transformation and damaging specials', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'desktop-chromium');
+  await page.goto('/');
+  const result = await page.evaluate(async () => {
+    const { GameEngine } = await import('/src/engine/GameEngine.ts');
+    const { pickIntroDialogue } = await import('/src/data/fighters.ts');
+    const engine = Object.create(GameEngine.prototype);
+    engine.matchPhase = 'fighting';
+    engine.gameMode = 'cpu';
+    engine.difficulty = 'normal';
+    engine.spawnSparks = () => {};
+    engine.emitHud = () => {};
+    engine.isHeld = () => false;
+    const hits = [];
+    engine.applyHit = (_a, _b, damage) => hits.push(damage);
+    const fighter = {
+      id: 'davi', index: 0, x: 0, y: 0, vx: 0, vy: 0, facing: 1,
+      hp: 1000, meter: 50, form: 'normal', formTimer: 0, state: 'idle',
+      stateTimer: 0, activeMove: null, activeMoveAnim: undefined, moveElapsed: 0,
+      moveHitConnected: false, bufferedAttack: null, comboCount: 0,
+      comboResetTimer: 0, bark: null, barkTimer: 0, daviIdleTime: 0,
+      daviVoiceCooldown: 0, daviSpecialCooldown: 0, hitInvuln: 0, slipTimer: 0,
+    };
+    const opponent = { x: 1.5, y: 0, state: 'idle' };
+    engine.trySpecial(fighter, false);
+    const insufficient = [fighter.meter, fighter.form];
+    engine.trySpecial(fighter, true);
+    const transformed = [fighter.meter, fighter.form, fighter.formTimer];
+    engine.stepFighter(fighter, opponent, 1.2, false);
+    engine.stepFighter(fighter, opponent, 9, false);
+    const expired = fighter.form;
+    fighter.meter = 100;
+    engine.trySpecial(fighter, false);
+    const superMove = [fighter.meter, fighter.form, fighter.activeMove.label];
+    fighter.meter = 100;
+    engine.trySpecial(fighter, false);
+    const cooldownMeter = fighter.meter;
+    engine.stepFighter(fighter, opponent, 0.31, false);
+    engine.stepFighter(fighter, opponent, 1, false);
+    fighter.state = 'idle';
+    fighter.meter = 100;
+    engine.trySpecial(fighter, false);
+    const finalMove = [fighter.meter, fighter.activeMove.label, fighter.bark];
+    engine.stepFighter(fighter, opponent, 0.31, false);
+    const dialogues = ['pedro', 'paula', 'franciely', 'gabi', 'juraci'].map((relative) => [
+      pickIntroDialogue('davi', relative),
+      pickIntroDialogue(relative, 'davi'),
+    ]);
+    const cpu = { id: 'davi', state: 'idle', meter: 100, form: 'normal', x: 0, aiThinkTimer: 0, aiAction: 'idle' };
+    const player = { x: 1.5, state: 'idle' };
+    const choices = [];
+    engine.trySpecial = (_fighter, sub) => choices.push(sub ? 'transform' : 'special');
+    engine.tryAttack = (_fighter, attack) => choices.push(attack);
+    const random = Math.random;
+    try {
+      Math.random = () => 0;
+      engine.updateCpuAi(cpu, player, 0.3);
+      cpu.meter = 50;
+      player.x = 4;
+      engine.updateCpuAi(cpu, player, 0.3);
+      cpu.meter = 0;
+      player.x = 1.5;
+      engine.updateCpuAi(cpu, player, 0.3);
+    } finally {
+      Math.random = random;
+    }
+    return { insufficient, transformed, expired, superMove, finalMove, cooldownMeter, hits, dialogues, choices };
+  });
+
+  expect(result.insufficient).toEqual([50, 'normal']);
+  expect(result.transformed).toEqual([0, 'daviPurple', 10]);
+  expect(result.expired).toBe('normal');
+  expect(result.superMove).toEqual([0, 'daviPurple', 'Super Namorador']);
+  expect(result.cooldownMeter).toBe(100);
+  expect(result.finalMove).toEqual([0, 'Paixão Alviverde', 'Vamos jogar videogame.']);
+  expect(result.hits).toHaveLength(2);
+  expect(result.hits.every((damage) => damage > 0)).toBeTruthy();
+  expect(result.choices).toEqual(['special', 'transform', 'light']);
+  for (const [forward, reverse] of result.dialogues) {
+    expect(reverse).toEqual(forward.map((line) => ({
+      ...line, speaker: line.speaker === 'p1' ? 'p2' : 'p1',
+    })));
+  }
+});
+
+test('Davi voice is not interrupted or overlapped', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'desktop-chromium');
+  await page.goto('/');
+  const result = await page.evaluate(async () => {
+    const { soundEngine } = await import('/src/engine/audio.ts');
+    soundEngine.stopAllVoices();
+    const originalAudio = window.Audio;
+    const created = [];
+    class FakeAudio {
+      constructor(url) {
+        this.src = url;
+        this.paused = false;
+        created.push(this);
+      }
+      play() { return Promise.resolve(); }
+      pause() { this.paused = true; }
+    }
+    try {
+      window.Audio = FakeAudio;
+      soundEngine.playClip('davi', 'outra', 0);
+      soundEngine.playClip('pedro', 'combo', 0, true);
+      soundEngine.playAnnouncer('fight');
+      const duringVoice = [created.length, created[0].paused];
+      created[0].onended();
+      soundEngine.playClip('pedro', 'combo', 0);
+      return { duringVoice, afterVoice: created.length };
+    } finally {
+      soundEngine.stopAllVoices();
+      window.Audio = originalAudio;
+    }
+  });
+  expect(result.duringVoice).toEqual([1, false]);
+  expect(result.afterVoice).toBe(2);
 });

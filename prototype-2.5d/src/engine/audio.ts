@@ -30,6 +30,11 @@ const TRACK_PATHS: Record<MusicTrackId, string> = {
 };
 
 const CLIPS: Record<string, Record<string, string>> = {
+  davi: {
+    outra: assetUrl('/assets/voice/davi-outra.wav'),
+    preguica: assetUrl('/assets/voice/davi-preguica.wav'),
+    videogame: assetUrl('/assets/voice/davi-videogame.wav'),
+  },
   franciely: {
     isso: assetUrl('/assets/voice/franciely-isso.mp3'),
     ferrinho: assetUrl('/assets/voice/franciely-ferrinho.mp3'),
@@ -94,6 +99,7 @@ class SoundEngine {
   private musicPaused = false;
   private activeVoices = new Set<HTMLAudioElement>();
   private currentAnnouncer: HTMLAudioElement | null = null;
+  private currentDaviVoice: HTMLAudioElement | null = null;
   private lastVoiceTime = 0;
 
   constructor() {
@@ -289,10 +295,12 @@ class SoundEngine {
       v.src = '';
     }
     this.activeVoices.clear();
+    this.currentDaviVoice = null;
   }
 
   private playVoiceFile(url: string, volume = 0.85, isAnnouncer = false): HTMLAudioElement | null {
     if (this.muted || typeof window === 'undefined') return null;
+    if (this.currentDaviVoice && this.activeVoices.has(this.currentDaviVoice)) return null;
     const scaledVol = Math.max(0, Math.min(1, volume * this.masterVolume * this.voiceVolume));
     if (scaledVol <= 0.005) return null;
 
@@ -329,8 +337,10 @@ class SoundEngine {
   playClip(who: string, key: string, throttleMs = 700, replacePrevious = false) {
     const url = CLIPS[who]?.[key];
     if (!url) return;
+    if (this.currentDaviVoice && this.activeVoices.has(this.currentDaviVoice)) return;
     const now = performance.now();
     if (who !== 'narrator' && now - this.lastVoiceTime < throttleMs) return;
+    if (who === 'davi' && this.activeVoices.size > 0) return;
     this.lastVoiceTime = now;
     if (replacePrevious) {
       for (const v of this.activeVoices) {
@@ -341,7 +351,8 @@ class SoundEngine {
         }
       }
     }
-    this.playVoiceFile(url, who === 'narrator' ? 0.92 : 0.86, who === 'narrator');
+    const voice = this.playVoiceFile(url, who === 'narrator' ? 0.92 : 0.86, who === 'narrator');
+    if (who === 'davi') this.currentDaviVoice = voice;
   }
 
   playUi(type: 'hover' | 'confirm' | 'select' = 'confirm') {
@@ -457,6 +468,26 @@ class SoundEngine {
       osc.connect(gain).connect(dest);
       osc.start(t0);
       osc.stop(t0 + 0.3);
+    });
+  }
+
+  playDaviSpecial(kind: 'hearts' | 'purple' | 'final') {
+    const ctx = this.ensureContext();
+    const dest = this.getSfxDest();
+    if (!ctx || !dest) return;
+    const freqs = kind === 'hearts' ? [440, 554, 660] : kind === 'purple' ? [160, 240, 360] : [220, 330, 660];
+    freqs.forEach((frequency, index) => {
+      const start = ctx.currentTime + index * 0.08;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = kind === 'final' ? 'sawtooth' : 'triangle';
+      osc.frequency.setValueAtTime(frequency, start);
+      osc.frequency.exponentialRampToValueAtTime(frequency * (kind === 'final' ? 0.55 : 1.6), start + 0.25);
+      gain.gain.setValueAtTime(0.06, start);
+      gain.gain.exponentialRampToValueAtTime(0.001, start + 0.3);
+      osc.connect(gain).connect(dest);
+      osc.start(start);
+      osc.stop(start + 0.31);
     });
   }
 

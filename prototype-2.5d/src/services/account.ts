@@ -1,15 +1,15 @@
 import { createClient, SupabaseClient, User } from '@supabase/supabase-js';
+import { FighterId } from '../data/fighters';
 
 const SDK_VERSION = '2.49.4';
 const QUEUE_KEY = 'ff-pending-matches';
 const MAX_QUEUE = 200;
 const VALID_OUTCOMES = new Set(['win', 'loss', 'draw']);
 const VALID_FIGHTERS = new Set([
-  'juraci', 'carlos', 'pedro', 'daniel', 'franciely', 'gabi', 'paula', 'tainara',
+  'juraci', 'carlos', 'pedro', 'daniel', 'franciely', 'gabi', 'paula', 'tainara', 'davi',
 ]);
 
 type MatchOutcome = 'win' | 'loss' | 'draw';
-type FighterId = 'juraci' | 'carlos' | 'pedro' | 'daniel' | 'franciely' | 'gabi' | 'paula' | 'tainara';
 
 interface PendingMatch {
   matchId: string;

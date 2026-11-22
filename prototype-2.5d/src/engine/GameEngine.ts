@@ -100,6 +100,9 @@ interface FighterRuntime {
   hitInvuln: number;
   aiThinkTimer: number;
   aiAction: 'approach' | 'retreat' | 'guard' | 'idle';
+  daviIdleTime: number;
+  daviVoiceCooldown: number;
+  daviSpecialCooldown: number;
 }
 
 interface ActiveProjectile {
@@ -173,6 +176,7 @@ export class GameEngine {
   private bursts: Array<{ mesh: THREE.Group; life: number; maxLife: number }> = [];
   private sparks: SparkParticle[] = [];
   private sparkGeo: THREE.SphereGeometry;
+  private heartGeo: THREE.ShapeGeometry;
 
   private matchPhase: 'intro' | 'banner' | 'fighting' | 'ko' | 'matchOver' = 'intro';
   private phaseTimer = 0;
@@ -285,6 +289,11 @@ export class GameEngine {
 
     this.shadowTex = createContactShadowTexture();
     this.sparkGeo = new THREE.SphereGeometry(0.08, 8, 6);
+    const heart = new THREE.Shape();
+    heart.moveTo(0, -0.13);
+    heart.bezierCurveTo(-0.3, 0.06, -0.14, 0.23, 0, 0.1);
+    heart.bezierCurveTo(0.14, 0.23, 0.3, 0.06, 0, -0.13);
+    this.heartGeo = new THREE.ShapeGeometry(heart);
 
     this.loadStage('bar');
     this.spawnFighters('pedro', 'paula');
@@ -474,6 +483,8 @@ export class GameEngine {
   private playIntroVoice(speakerSlot: 'p1' | 'p2') {
     if (!this.fighters) return;
     const f = speakerSlot === 'p1' ? this.fighters[0] : this.fighters[1];
+    if (this.fighters.some((fighter) => fighter.id === 'davi') && f.id !== 'davi') return;
+    if (f.id === 'davi' && this.introQueue[this.introIndex]?.text !== 'Vamos jogar videogame.') return;
     const introClips: Partial<Record<FighterId, string[]>> = {
       franciely: ['ferrinho', 'montar', 'desarma', 'isso'],
       daniel: ['preparativos', 'praia'],
@@ -483,6 +494,7 @@ export class GameEngine {
       carlos: ['pizzaAmor'],
       gabi: ['sing'],
       paula: ['lunch'],
+      davi: ['videogame'],
     };
     const list = introClips[f.id];
     if (list && list.length) {
@@ -647,6 +659,9 @@ export class GameEngine {
       hitInvuln: 0,
       aiThinkTimer: 0.2,
       aiAction: 'approach',
+      daviIdleTime: 0,
+      daviVoiceCooldown: 0,
+      daviSpecialCooldown: 0,
     };
   }
 
@@ -674,6 +689,9 @@ export class GameEngine {
       f.barkTimer = 0;
       f.slipTimer = 0;
       f.hitInvuln = 0;
+      f.daviIdleTime = 0;
+      f.daviVoiceCooldown = 0;
+      f.daviSpecialCooldown = 0;
     }
     this.syncFighterTransforms();
   }
@@ -698,6 +716,9 @@ export class GameEngine {
       f.activeMoveAnim = undefined;
       f.comboCount = 0;
       f.bark = null;
+      f.daviIdleTime = 0;
+      f.daviVoiceCooldown = 0;
+      f.daviSpecialCooldown = 0;
     }
     this.roundTimer = 99;
     this.lastCountdownSec = 99;
@@ -810,7 +831,7 @@ export class GameEngine {
   private tryJump(f: FighterRuntime) {
     if (f.y > 0.02) return;
     if (['hitstun', 'blockstun', 'knockdown', 'transform', 'victory'].includes(f.state)) return;
-    if (f.state === 'attack') return;
+    if (f.state === 'attack' || f.daviSpecialCooldown > 0) return;
     const spec = FIGHTERS[f.id];
     f.vy = spec.jumpVel;
     f.vx = (this.isHeld(f.index, 'right') ? 1 : this.isHeld(f.index, 'left') ? -1 : 0) * spec.walkSpeed * 0.92;
@@ -864,6 +885,49 @@ export class GameEngine {
   private trySpecial(f: FighterRuntime, isSub: boolean) {
     if (['hitstun', 'blockstun', 'knockdown', 'transform', 'victory'].includes(f.state)) return;
     if (f.y > 0.08) return;
+
+    if (f.id === 'davi') {
+      if (f.state === 'attack') return;
+      const cost = isSub ? 50 : 100;
+      if (f.meter < cost) return;
+      f.meter -= cost;
+      f.daviSpecialCooldown = 1.2;
+      if (isSub) {
+        soundEngine.playDaviSpecial('purple');
+        this.activateTransform(f, 'daviPurple', 10);
+        this.setBark(f, 'subSpecial');
+        soundEngine.playClip('davi', 'preguica', 2500);
+      } else {
+        const finisher = f.form === 'daviPurple';
+        soundEngine.playDaviSpecial(finisher ? 'final' : 'hearts');
+        if (!finisher) {
+          f.form = 'daviPurple';
+          f.formTimer = 8;
+        }
+        if (finisher) {
+          f.bark = 'Vamos jogar videogame.';
+          f.barkTimer = 2.1;
+        } else {
+          this.setBark(f, 'special');
+        }
+        soundEngine.playClip('davi', finisher ? 'videogame' : 'outra', 2500);
+        this.spawnSparks(f.x, f.y + 1.1, finisher ? 0x22c55e : 0xec4899, 20, !finisher);
+        if (finisher) {
+          this.spawnSparks(f.x, f.y + 1.1, 0xffffff, 8);
+          this.spawnSparks(f.x, f.y + 1.1, 0xa855f7, 8);
+        }
+        this.startAttackMove(f, {
+          id: 'special', label: finisher ? 'Paixão Alviverde' : 'Super Namorador',
+          startup: 0.3, active: 0.2, recovery: 0.45,
+          damage: finisher ? 145 : 115, minRange: 0, range: 2.7,
+          hitstun: 0.45, blockstun: 0.25, push: 4.5, hitstop: 0.1,
+          lunge: finisher ? 3 : 1.5, heavy: true, knockdown: true,
+        });
+        f.activeMoveAnim = 'special';
+      }
+      this.emitHud();
+      return;
+    }
 
     const cost = isSub ? 50 : 100;
     const actualSub = isSub || f.meter < 100;
@@ -1106,10 +1170,10 @@ export class GameEngine {
     this.bursts.push({ mesh, life: 0.24, maxLife: 0.24 });
   }
 
-  private spawnSparks(x: number, y: number, colorHex: number, count = 10) {
-    const mat = new THREE.MeshBasicMaterial({ color: colorHex });
+  private spawnSparks(x: number, y: number, colorHex: number, count = 10, hearts = false) {
+    const mat = new THREE.MeshBasicMaterial({ color: colorHex, side: hearts ? THREE.DoubleSide : THREE.FrontSide });
     for (let i = 0; i < count; i++) {
-      const m = new THREE.Mesh(this.sparkGeo, mat);
+      const m = new THREE.Mesh(hearts ? this.heartGeo : this.sparkGeo, mat);
       m.position.set(x, y, (Math.random() - 0.5) * 0.4);
       this.scene.add(m);
       const a = Math.random() * Math.PI * 2;
@@ -1434,9 +1498,13 @@ export class GameEngine {
       }
 
       if (cpu.state !== 'attack') {
-        if (cpu.meter >= 100 && dist > 2.2 && Math.random() < aggr * 0.6) {
+        if (cpu.id === 'davi' && cpu.meter >= 100 && dist < 2.7 && Math.random() < aggr * 0.6) {
           this.trySpecial(cpu, false);
-        } else if (cpu.meter >= 50 && dist > 1.8 && Math.random() < aggr * 0.32) {
+        } else if (cpu.id === 'davi' && cpu.form === 'normal' && cpu.meter >= 50 && dist > 2.5 && Math.random() < aggr * 0.22) {
+          this.trySpecial(cpu, true);
+        } else if (cpu.id !== 'davi' && cpu.meter >= 100 && dist > 2.2 && Math.random() < aggr * 0.6) {
+          this.trySpecial(cpu, false);
+        } else if (cpu.id !== 'davi' && cpu.meter >= 50 && dist > 1.8 && Math.random() < aggr * 0.32) {
           this.trySpecial(cpu, true);
         } else if (dist <= 2.15 && Math.random() < aggr) {
           this.tryAttack(cpu, Math.random() < 0.55 ? 'light' : 'heavy');
@@ -1452,6 +1520,18 @@ export class GameEngine {
     const formSpec = FORMS[f.form];
 
     f.stateTimer += dt;
+    if (f.id === 'davi' && this.matchPhase === 'fighting') {
+      f.daviVoiceCooldown = Math.max(0, f.daviVoiceCooldown - dt);
+      f.daviSpecialCooldown = Math.max(0, f.daviSpecialCooldown - dt);
+      f.daviIdleTime = f.state === 'idle' ? f.daviIdleTime + dt : 0;
+      if (f.daviIdleTime >= 8 && f.daviVoiceCooldown === 0) {
+        f.bark = 'Agora tô c preguiça.';
+        f.barkTimer = 2.1;
+        f.daviVoiceCooldown = 20;
+        f.daviIdleTime = 0;
+        soundEngine.playClip('davi', 'preguica', 2500);
+      }
+    }
     if (f.hitInvuln > 0) f.hitInvuln = Math.max(0, f.hitInvuln - dt);
     if (f.slipTimer > 0) f.slipTimer = Math.max(0, f.slipTimer - dt);
 
@@ -1733,6 +1813,7 @@ export class GameEngine {
     winner.state = 'victory';
     winner.stateTimer = 0;
     this.setBark(winner, 'win');
+    if (winner.id === 'davi') winner.bark = 'Vamos jogar videogame.';
     loser.state = 'knockdown';
     loser.stateTimer = 0;
     soundEngine.playKO();
@@ -1754,6 +1835,7 @@ export class GameEngine {
     if (!isTie) winner.roundsWon++;
     winner.state = 'victory';
     this.setBark(winner, 'win');
+    if (winner.id === 'davi') winner.bark = 'Vamos jogar videogame.';
     loser.state = 'idle';
     soundEngine.playAnnouncer('time');
     soundEngine.playVictory();
@@ -1779,6 +1861,7 @@ export class GameEngine {
         gabi: 'amor',
         paula: 'bar',
         tainara: 'arroz',
+        davi: 'videogame',
       };
       const wk = winClips[winId];
       if (wk) {
@@ -1922,6 +2005,7 @@ export class GameEngine {
     this.currentStage?.dispose();
     this.shadowTex.dispose();
     this.sparkGeo.dispose();
+    this.heartGeo.dispose();
     this.renderer.dispose();
     if (this.renderer.domElement.parentNode === this.container) {
       this.container.removeChild(this.renderer.domElement);

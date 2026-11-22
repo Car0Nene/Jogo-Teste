@@ -44,6 +44,7 @@ const VOICE_SELECT_CLIP: Record<FighterId, string> = {
   gabi: 'amor',
   paula: 'lunch',
   tainara: 'arroz',
+  davi: 'videogame',
 };
 
 export function CharacterSelectScreen({
