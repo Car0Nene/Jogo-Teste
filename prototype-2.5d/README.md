@@ -19,6 +19,8 @@ Run desktop and mobile Chromium checks with `npm run test:e2e` after installing 
 
 The selection screens use transparent WebP portraits in `public/assets/portraits/`. Carlos's baptism portrait appears as his alternate “Modo Fé” form. The final match plays `public/assets/videos/daniel-victory-imagined.mp4` when Daniel wins; it starts muted for browser autoplay support and can be unmuted with the on-screen control.
 
+Combat sprites use per-fighter HD atlases in `public/assets/sprites/`, with separate sheets for signature moves. The arenas combine their existing painted backdrops with procedural 2.5D scenery, materials, and camera parallax.
+
 ## Desktop and mobile controls
 
 O jogo tem duas experiências planejadas separadamente, escolhidas pelas **capacidades do aparelho** (mouse/trackpad, toque, sistema) e não pela largura da janela. Um notebook pequeno continua computador, e um celular ligado a um monitor continua celular. Em **Settings → Vídeo** o jogador pode escolher manualmente Computador, Celular ou Tablet.

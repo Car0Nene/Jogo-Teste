@@ -1315,6 +1315,7 @@ export class GameEngine {
     this._camLook.set(panX * 0.35, 1.4, -1.5);
     this.camera.position.lerp(this._camTarget, 1 - Math.exp(-4 * dt));
     this.camera.lookAt(this._camLook);
+    this.currentStage?.setParallax?.(this.camera.position.x);
   }
 
   private updateSelectScene(dt: number) {
@@ -1338,6 +1339,7 @@ export class GameEngine {
     this._camLook.set(0, 1.25, 0);
     this.camera.position.lerp(this._camTarget, 1 - Math.exp(-6 * dt));
     this.camera.lookAt(this._camLook);
+    this.currentStage?.setParallax?.(this.camera.position.x);
   }
 
   private updateFightSimulation(dt: number) {
@@ -1913,10 +1915,7 @@ export class GameEngine {
     this._camLook.set(midX * 0.9, 1.08 + maxY * 0.25, -0.4);
     this.camera.position.lerp(this._camTarget, 1 - Math.exp(-9 * dt));
     this.camera.lookAt(this._camLook);
-
-    if (this.currentStage) {
-      this.currentStage.backdrop.position.x = -this.camera.position.x * 0.14;
-    }
+    this.currentStage?.setParallax?.(this.camera.position.x);
   }
 
   private updateSparks(dt: number) {

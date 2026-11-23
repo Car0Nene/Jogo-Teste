@@ -4,6 +4,8 @@ import { FIGHTERS, FighterId, FORMS, FormId } from '../data/fighters';
 import { STAGES, StageId } from '../data/stages';
 import {
   ATLAS_HD2_SCALE,
+  ATLAS_HD3_SCALE,
+  ATLAS_HD4_SCALE,
   ATLAS_HD_SCALE,
   ATLAS_SCALE,
   BASE_SPRITE_HEIGHT,
@@ -37,33 +39,63 @@ const SCALE_STABLE_STATES = new Set<AnimState>([
 let sharedAtlasTex: THREE.Texture | null = null;
 let sharedAtlasHdTex: THREE.Texture | null = null;
 let sharedAtlasHd2Tex: THREE.Texture | null = null;
+const sharedFighterHd3Tex: Partial<Record<FighterId, THREE.Texture>> = {};
+const sharedFighterHd4Tex: Partial<Record<FighterId, THREE.Texture>> = {};
 let sharedDaviTex: THREE.Texture | null = null;
 
-function getAtlasTexture(tier: 0 | 1 | 2 | 3, anisotropy: number): THREE.Texture {
-  const existing = tier === 3 ? sharedDaviTex : tier === 2 ? sharedAtlasHd2Tex : tier === 1 ? sharedAtlasHdTex : sharedAtlasTex;
+function configureSpriteTexture(tex: THREE.Texture, anisotropy: number): THREE.Texture {
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.anisotropy = anisotropy;
+  tex.wrapS = THREE.ClampToEdgeWrapping;
+  tex.wrapT = THREE.ClampToEdgeWrapping;
+  tex.minFilter = THREE.LinearMipmapLinearFilter;
+  tex.magFilter = THREE.LinearFilter;
+  tex.generateMipmaps = true;
+  return tex;
+}
+
+function getAtlasTexture(tier: 0 | 1 | 2, anisotropy: number): THREE.Texture {
+  const existing = tier === 2 ? sharedAtlasHd2Tex : tier === 1 ? sharedAtlasHdTex : sharedAtlasTex;
   if (existing) return existing;
 
   const loader = new THREE.TextureLoader();
   const url =
-    tier === 3
-      ? assetUrl('/assets/sprites/davi.webp')
-      : tier === 2
+    tier === 2
       ? assetUrl('/assets/sprites/fighters-hd.webp')
       : tier === 1
       ? assetUrl('/assets/sprites/pedro-hd.webp')
       : assetUrl('/assets/sprites/fighters.webp');
-  const tex = loader.load(url);
-  tex.colorSpace = THREE.SRGBColorSpace;
-  tex.anisotropy = anisotropy;
-  tex.minFilter = THREE.LinearMipmapLinearFilter;
-  tex.magFilter = THREE.LinearFilter;
-  tex.generateMipmaps = true;
+  const tex = configureSpriteTexture(loader.load(url), anisotropy);
 
-  if (tier === 3) sharedDaviTex = tex;
-  else if (tier === 2) sharedAtlasHd2Tex = tex;
+  if (tier === 2) sharedAtlasHd2Tex = tex;
   else if (tier === 1) sharedAtlasHdTex = tex;
   else sharedAtlasTex = tex;
   return tex;
+}
+
+function getFighterHd3Texture(id: FighterId, anisotropy: number): THREE.Texture | undefined {
+  if (id === 'pedro' || id === 'davi') return undefined;
+  if (sharedFighterHd3Tex[id]) return sharedFighterHd3Tex[id];
+  const loader = new THREE.TextureLoader();
+  const tex = configureSpriteTexture(loader.load(assetUrl(`/assets/sprites/${id}-hd.webp`)), anisotropy);
+  sharedFighterHd3Tex[id] = tex;
+  return tex;
+}
+
+function getFighterHd4Texture(id: FighterId, anisotropy: number): THREE.Texture | undefined {
+  if (id === 'davi') return undefined;
+  if (sharedFighterHd4Tex[id]) return sharedFighterHd4Tex[id];
+  const loader = new THREE.TextureLoader();
+  const tex = configureSpriteTexture(loader.load(assetUrl(`/assets/sprites/${id}-specials-hd.webp`)), anisotropy);
+  sharedFighterHd4Tex[id] = tex;
+  return tex;
+}
+
+function getDaviTexture(anisotropy: number): THREE.Texture {
+  if (sharedDaviTex) return sharedDaviTex;
+  const loader = new THREE.TextureLoader();
+  sharedDaviTex = configureSpriteTexture(loader.load(assetUrl('/assets/sprites/davi.webp')), anisotropy);
+  return sharedDaviTex;
 }
 
 export type AnimState =
@@ -116,8 +148,10 @@ export interface CharacterRig {
   atlasTex: THREE.Texture;
   atlasHdTex: THREE.Texture;
   atlasHd2Tex: THREE.Texture;
+  atlasHd3Tex?: THREE.Texture;
+  atlasHd4Tex?: THREE.Texture;
   daviTex?: THREE.Texture;
-  atlasTier: 0 | 1 | 2 | 3;
+  atlasTier: 0 | 1 | 2 | 3 | 4 | 5;
   baseScale: number;
   baseShadowOpacity: number;
   hitFlashTimer: number;
@@ -160,7 +194,9 @@ export function buildCharacterRig(
   const atlasTex = getAtlasTexture(0, anisotropy);
   const atlasHdTex = getAtlasTexture(1, anisotropy);
   const atlasHd2Tex = getAtlasTexture(2, anisotropy);
-  const daviTex = id === 'davi' ? getAtlasTexture(3, anisotropy) : undefined;
+  const atlasHd3Tex = getFighterHd3Texture(id, anisotropy);
+  const atlasHd4Tex = getFighterHd4Texture(id, anisotropy);
+  const daviTex = id === 'davi' ? getDaviTexture(anisotropy) : undefined;
 
   const root = new THREE.Group();
 
@@ -204,17 +240,53 @@ export function buildCharacterRig(
   const spriteGeo = createSpriteQuadGeometry();
   const spriteMat = new THREE.MeshStandardMaterial({
     map: atlasTex,
-    alphaTest: 0.16,
+    alphaTest: 0.22,
     transparent: false,
     side: THREE.DoubleSide,
-    roughness: 0.72,
-    metalness: 0.04,
+    roughness: 0.66,
+    metalness: 0.05,
   });
+  const rimUniform = {
+    uRimTint: { value: new THREE.Color(0xffb86b) },
+    uRimPower: { value: 0.16 },
+  };
+  spriteMat.userData.rimUniform = rimUniform;
+  spriteMat.onBeforeCompile = (shader) => {
+    shader.uniforms.uRimTint = rimUniform.uRimTint;
+    shader.uniforms.uRimPower = rimUniform.uRimPower;
+    shader.vertexShader = shader.vertexShader
+      .replace(
+        '#include <common>',
+        `#include <common>
+         varying float vSpriteLocalY;`
+      )
+      .replace(
+        '#include <begin_vertex>',
+        `#include <begin_vertex>
+         vSpriteLocalY = position.y;`
+      );
+    shader.fragmentShader = shader.fragmentShader
+      .replace(
+        '#include <common>',
+        `#include <common>
+         uniform vec3 uRimTint;
+         uniform float uRimPower;
+         varying float vSpriteLocalY;`
+      )
+      .replace(
+        '#include <dithering_fragment>',
+        `vec3 viewDirSafe = normalize(vViewPosition);
+         float rimEdge = pow(1.0 - clamp(abs(dot(normal, viewDirSafe)), 0.0, 1.0), 1.65);
+         float groundBounce = smoothstep(0.0, 0.85, vSpriteLocalY);
+         gl_FragColor.rgb += uRimTint * (rimEdge * uRimPower * (0.4 + 0.6 * groundBounce));
+         #include <dithering_fragment>`
+      );
+  };
 
   const depthMat = new THREE.MeshDepthMaterial({
     depthPacking: THREE.RGBADepthPacking,
     map: atlasTex,
-    alphaTest: 0.24,
+    alphaTest: 0.26,
   });
 
   const spriteMesh = new THREE.Mesh(spriteGeo, spriteMat);
@@ -304,6 +376,8 @@ export function buildCharacterRig(
     atlasTex,
     atlasHdTex,
     atlasHd2Tex,
+    atlasHd3Tex,
+    atlasHd4Tex,
     daviTex,
     atlasTier: 0,
     baseScale: CHAR_SPRITE_SCALE[id] || 1.2,
@@ -316,6 +390,13 @@ export function applyStageLightingToRig(rig: CharacterRig, stageId: StageId) {
   const st = STAGES[stageId];
   rig.spriteMat.color.setHex(st.charTint);
   rig.spriteMat.envMapIntensity = st.charEnvIntensity;
+  const rim = rig.spriteMat.userData.rimUniform as
+    | { uRimTint: { value: THREE.Color }; uRimPower: { value: number } }
+    | undefined;
+  if (rim) {
+    rim.uRimTint.value.setHex(st.rimColor);
+    rim.uRimPower.value = 0.12 + st.rimIntensity * 0.08;
+  }
   rig.spriteMat.needsUpdate = true;
   rig.baseShadowOpacity = st.shadowOpacity;
 }
@@ -399,40 +480,66 @@ function resolveSpritePose(
     return pose;
   }
 
-  // Transform state (exact original transformation animations!)
+  // Transform state (choreographed HD 2.5D transformation animations!)
   if (state === 'transform') {
     const formKey = ctx.nextForm || ctx.form;
     const total = formKey === 'hulk' ? 1.3 : formKey === 'crente' ? 1.4 : 1.15;
     const frames = S[formKey] && S[formKey].length ? S[formKey] : fallback;
     switch (formKey) {
       case 'gordao':
-        if (t < 0.7) {
-          pose.frame = S.idle[0];
-          pose.sy = 1 - Math.sin(((t % 0.14) / 0.14) * Math.PI) * 0.03;
+        if (t < 0.65) {
+          pose.frame = frames[0];
+          pose.sy = 1 - Math.sin(((t % 0.16) / 0.16) * Math.PI) * 0.035;
+          pose.sx = 1 + Math.sin(((t % 0.16) / 0.16) * Math.PI) * 0.02;
         } else {
-          pose.frame = pickFrame(frames, Math.floor(((t - 0.7) / (total - 0.7)) * frames.length));
+          const k = clamp((t - 0.65) / (total - 0.65), 0, 1);
+          pose.frame = frames[1] || frames[0];
+          const swell = 1 + Math.sin(k * Math.PI) * 0.09;
+          pose.sx = swell;
+          pose.sy = swell;
         }
         break;
       case 'crente':
-        pose.frame = pickFrame(frames, t < 0.35 ? 0 : t < 0.7 ? 1 : t < 1.0 ? 2 : 3);
+        if (t < 0.68) {
+          pose.frame = frames[0];
+          pose.dy = 2 * Math.sin(t * 6);
+        } else {
+          const k = clamp((t - 0.68) / (total - 0.68), 0, 1);
+          pose.frame = frames[frames.length - 1];
+          pose.sx = 1 + Math.sin(k * Math.PI) * 0.06;
+          pose.sy = 1 + Math.sin(k * Math.PI) * 0.06;
+        }
         break;
       case 'hulk':
-        if (t < 0.75 && S.drink) {
-          pose.frame = pickFrame(S.drink, t < 0.25 ? 0 : t < 0.52 ? 1 : 2);
+        if (t < 0.62 && S.drink) {
+          pose.frame = S.drink[0];
+          pose.rot = -0.04 * Math.sin((t / 0.62) * Math.PI);
         } else if (S.hulkPower && S.hulkPower.length) {
-          const power = clamp((t - 0.75) / (total - 0.75), 0, 1);
+          const power = clamp((t - 0.62) / (total - 0.62), 0, 1);
           pose.frame = pickFrame(S.hulkPower, Math.floor(power * S.hulkPower.length));
-          pose.sx = pose.sy = 0.85 + power * 0.15;
+          pose.sx = pose.sy = 0.94 + Math.sin(power * Math.PI * 0.7) * 0.14;
         } else {
           pose.frame = pickFrame(S.hulk, 0);
         }
         break;
       case 'praia':
-        pose.frame = cycleFrame(S.dance || S.praia || fallback, 8, t);
+        pose.frame = t < 0.6 ? cycleFrame(S.dance || frames, 7, t) : frames[0];
+        if (t >= 0.6) {
+          const k = clamp((t - 0.6) / 0.55, 0, 1);
+          pose.sx = pose.sy = 1 + Math.sin(k * Math.PI) * 0.08;
+        }
         break;
       case 'brava':
-        pose.frame = pickFrame(S.guard || fallback, 1);
-        pose.dx = Math.sin(t * 70) * 3;
+      case 'paulaFury':
+      case 'ricePower':
+        if (t < 0.55) {
+          pose.frame = frames[0];
+          pose.dx = Math.sin(t * 65) * 2.5;
+        } else {
+          const k = clamp((t - 0.55) / (total - 0.55), 0, 1);
+          pose.frame = frames[Math.min(frames.length - 1, 1)];
+          pose.sx = pose.sy = 1 + Math.sin(k * Math.PI) * 0.09;
+        }
         break;
       default:
         pose.frame = pickFrame(frames, Math.floor((t / total) * frames.length));
@@ -446,9 +553,9 @@ function resolveSpritePose(
   // Big forms: Carlos Gordão & Pedro Monstrão
   const big =
     ctx.form === 'gordao' && S.gordao
-      ? { windup: S.gordao[2], pose: S.gordao[3], hurt: S.gordao[1] }
+      ? { idle: S.gordao[1] || S.gordao[0], windup: S.gordao[1] || S.gordao[0], pose: S.gordao[2] || S.gordao[1], hurt: S.hurt?.[0] || S.gordao[1] }
       : ctx.form === 'hulk' && S.hulk
-      ? { windup: S.hulk[0], pose: S.hulk[0], hurt: S.hulk[0] }
+      ? { idle: S.hulk[0], windup: S.hulk[0], pose: S.hulk[1] || S.hulk[0], hurt: S.hulk[0] }
       : null;
 
   if (big && !specialState) {
@@ -462,22 +569,22 @@ function resolveSpritePose(
           : active
           ? big.pose
           : big.windup;
-      pose.dx = active ? 16 : -6;
-      pose.sx = active ? 1.06 : 0.96;
+      pose.dx = active ? 14 : -5;
+      pose.sx = active ? 1.05 : 0.97;
     } else if (state === 'hitstun' || state === 'guard') {
       pose.frame = big.hurt;
       pose.rot = state === 'hitstun' ? -0.08 : 0;
     } else {
-      pose.frame = ctx.form === 'hulk' ? cycleFrame(S.hulk, 5, worldTime) : big.pose;
+      pose.frame = big.idle;
       const bounce =
-        state === 'walk' || state === 'run'
+        state === 'walk' || state === 'run' || state === 'backwalk'
           ? Math.abs(Math.sin(t * 10)) * 0.05
           : Math.sin(worldTime * 5) * 0.015;
       pose.sy = 1 - bounce;
       pose.sx = 1 + bounce;
       if (state === 'crouch') {
-        pose.sy = 0.8;
-        pose.sx = 1.08;
+        pose.sy = 0.82;
+        pose.sx = 1.07;
       }
     }
     return pose;
@@ -491,12 +598,13 @@ function resolveSpritePose(
   ) {
     if (['light', 'medium', 'heavy', 'special'].includes(state)) {
       const su = ctx.moveTiming?.startup ?? 0.1;
-      pose.frame = pickFrame(S.praia, t >= su ? 3 : 2);
+      pose.frame = pickFrame(S.praia, t >= su ? 2 : 1);
     } else if (state === 'walk' || state === 'backwalk' || state === 'run') {
-      pose.frame = cycleFrame(S.praia, 10, t);
+      pose.frame = t % 0.24 < 0.12 ? S.praia[1] : S.praia[0];
+      pose.dy = -Math.abs(Math.sin(t * 11)) * 4;
     } else {
-      pose.frame = S.praia[1];
-      pose.dy = -Math.abs(Math.sin(worldTime * 6)) * 6;
+      pose.frame = S.praia[0];
+      pose.dy = -Math.abs(Math.sin(worldTime * 5.5)) * 4;
     }
     return pose;
   }
@@ -612,30 +720,13 @@ function resolveSpritePose(
         const fallAmt = clamp(t / 0.25, 0, 1);
         pose.frame = fallback[0];
         pose.rot = -1.45 * fallAmt;
-        pose.dy = -26 * fallAmt;
+        pose.dy = 2.0 * fallAmt;
       }
       break;
     }
     case 'victory': {
-      switch (id) {
-        case 'carlos':
-          pose.frame = (S.crente && S.crente[3]) || fallback[0];
-          pose.dy = -Math.abs(Math.sin(t * 5)) * 8;
-          break;
-        case 'juraci':
-          pose.frame = (S.special && S.special[2]) || fallback[0];
-          pose.dy = -Math.abs(Math.sin(t * 5)) * 8;
-          break;
-        case 'pedro':
-          pose.frame = cycleFrame(S.escape || S.walk || fallback, 6, t);
-          break;
-        case 'daniel':
-          pose.frame = cycleFrame(S.win || fallback, 2.5, t);
-          break;
-        default:
-          pose.frame = cycleFrame(S.win || S.dance || fallback, 2.5, t);
-          break;
-      }
+      pose.frame = cycleFrame(S.win || S.heavy || fallback, 2.2, t);
+      pose.dy = -Math.abs(Math.sin(t * 4.2)) * 3.5;
       break;
     }
   }
@@ -731,9 +822,24 @@ export function animateCharacterRig(
   if (!frame) return;
 
   const [sx, sy, sw, sh, ax, ay, hdFlag] = frame;
-  const tier: 0 | 1 | 2 | 3 = hdFlag === 3 ? 3 : hdFlag === 2 ? 2 : hdFlag === 1 ? 1 : 0;
-  const tex = tier === 3 ? rig.daviTex : tier === 2 ? rig.atlasHd2Tex : tier === 1 ? rig.atlasHdTex : rig.atlasTex;
-  if (!tex) return;
+  const tier: 0 | 1 | 2 | 3 | 4 | 5 =
+    hdFlag === 5 ? 5 : hdFlag === 4 ? 4 : hdFlag === 3 ? 3 : hdFlag === 2 ? 2 : hdFlag === 1 ? 1 : 0;
+  const tex =
+    tier === 5
+      ? rig.daviTex
+      : tier === 4 && rig.atlasHd4Tex
+      ? rig.atlasHd4Tex
+      : tier === 3 && rig.atlasHd3Tex
+      ? rig.atlasHd3Tex
+      : tier === 2
+      ? rig.atlasHd2Tex
+      : tier === 1
+      ? rig.atlasHdTex
+      : rig.atlasTex;
+  if (!tex) {
+    rig.spriteMesh.visible = false;
+    return;
+  }
   const img = tex.image as { width?: number; height?: number } | undefined;
 
   if (!img || !img.width || !img.height) {
@@ -757,14 +863,25 @@ export function animateCharacterRig(
 
   const texW = img.width;
   const texH = img.height;
-  const ad = tier === 3 ? DAVI_ATLAS_SCALE : tier === 2 ? ATLAS_HD2_SCALE : tier === 1 ? ATLAS_HD_SCALE : ATLAS_SCALE;
+  const ad =
+    tier === 4
+      ? ATLAS_HD4_SCALE
+      : tier === 3
+      ? ATLAS_HD3_SCALE
+      : tier === 5
+      ? DAVI_ATLAS_SCALE
+      : tier === 2
+      ? ATLAS_HD2_SCALE
+      : tier === 1
+      ? ATLAS_HD_SCALE
+      : ATLAS_SCALE;
 
   const keepIntentionalScale = ctx.form === 'gordao' || ctx.form === 'hulk' || state === 'crouch';
   const heightCorrection =
-    tier !== 1 && SCALE_STABLE_STATES.has(state) && !keepIntentionalScale
+    tier !== 1 && tier !== 3 && tier !== 4 && tier !== 5 && SCALE_STABLE_STATES.has(state) && !keepIntentionalScale
       ? clamp((BASE_SPRITE_HEIGHT[rig.id] || sh) / sh, 0.86, 1.14)
       : 1;
-  const formScale = ctx.form === 'hulk' ? 1.12 : ctx.form === 'gordao' ? 1.06 : 1;
+  const formScale = ctx.form === 'hulk' ? 1.1 : ctx.form === 'gordao' ? 1.05 : 1;
   const s = rig.baseScale * heightCorrection * formScale;
 
   // Compute exact anchor-centered quad vertices in 3D world meters

@@ -306,3 +306,36 @@ test('Davi voice is not interrupted or overlapped', async ({ page }, testInfo) =
   expect(result.duringVoice).toEqual([1, false]);
   expect(result.afterVoice).toBe(2);
 });
+
+test('loads the HD move atlases and builds all detailed arenas', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'desktop-chromium');
+  await page.goto('/');
+
+  const result = await page.evaluate(async () => {
+    const fighterIds = ['juraci', 'carlos', 'daniel', 'franciely', 'gabi', 'paula', 'tainara', 'pedro'];
+    const atlasPaths = [
+      ...fighterIds.map((id) => `/assets/sprites/${id}-specials-hd.webp`),
+      ...fighterIds.filter((id) => id !== 'pedro').map((id) => `/assets/sprites/${id}-hd.webp`),
+    ];
+    const atlasAvailable = await Promise.all(
+      atlasPaths.map(async (path) => (await fetch(path)).ok),
+    );
+    const { buildStage } = await import('/src/engine/stageBuilder.ts');
+    const stageIds = ['padaria', 'quintal', 'festa', 'bar', 'praia'];
+    const parallaxUpdated = stageIds.map((id) => {
+      const stage = buildStage(id, 4);
+      const initialX = stage.backdrop.position.x;
+      stage.setParallax?.(4);
+      const updatedX = stage.backdrop.position.x;
+      stage.setParticlesEnabled(false);
+      stage.update(1, 1 / 60);
+      stage.dispose();
+      return updatedX !== initialX;
+    });
+
+    return { atlasAvailable, parallaxUpdated };
+  });
+
+  expect(result.atlasAvailable).toEqual(Array(15).fill(true));
+  expect(result.parallaxUpdated).toEqual(Array(5).fill(true));
+});

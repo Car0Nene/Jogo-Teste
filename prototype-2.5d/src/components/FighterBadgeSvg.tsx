@@ -3,6 +3,8 @@ import { assetUrl } from '../assetUrl';
 import { FIGHTERS, FighterId } from '../data/fighters';
 import {
   ATLAS_HD2_SCALE,
+  ATLAS_HD3_SCALE,
+  ATLAS_HD4_SCALE,
   ATLAS_HD_SCALE,
   ATLAS_SCALE,
   DAVI_ATLAS_SCALE,
@@ -15,6 +17,8 @@ let cachedAtlasImg: HTMLImageElement | null = null;
 let cachedAtlasHdImg: HTMLImageElement | null = null;
 let cachedAtlasHd2Img: HTMLImageElement | null = null;
 let cachedDaviImg: HTMLImageElement | null = null;
+const cachedFighterHd3Imgs: Partial<Record<FighterId, HTMLImageElement>> = {};
+const cachedFighterHd4Imgs: Partial<Record<FighterId, HTMLImageElement>> = {};
 
 function ensureAtlasImages(onReady: () => void, id: FighterId) {
   if (!cachedAtlasImg) {
@@ -32,6 +36,16 @@ function ensureAtlasImages(onReady: () => void, id: FighterId) {
     hd2.src = assetUrl('/assets/sprites/fighters-hd.webp');
     cachedAtlasHd2Img = hd2;
   }
+  if (id !== 'pedro' && id !== 'davi' && !cachedFighterHd3Imgs[id]) {
+    const hd3 = new Image();
+    hd3.src = assetUrl(`/assets/sprites/${id}-hd.webp`);
+    cachedFighterHd3Imgs[id] = hd3;
+  }
+  if (id !== 'davi' && !cachedFighterHd4Imgs[id]) {
+    const hd4 = new Image();
+    hd4.src = assetUrl(`/assets/sprites/${id}-specials-hd.webp`);
+    cachedFighterHd4Imgs[id] = hd4;
+  }
 
   const attach = (img: HTMLImageElement) => {
     if (img.complete && img.naturalWidth > 0) return;
@@ -40,6 +54,12 @@ function ensureAtlasImages(onReady: () => void, id: FighterId) {
   attach(cachedAtlasImg);
   attach(cachedAtlasHdImg);
   attach(cachedAtlasHd2Img);
+  if (id !== 'pedro' && id !== 'davi' && cachedFighterHd3Imgs[id]) {
+    attach(cachedFighterHd3Imgs[id]);
+  }
+  if (id !== 'davi' && cachedFighterHd4Imgs[id]) {
+    attach(cachedFighterHd4Imgs[id]);
+  }
   if (id === 'davi') {
     if (!cachedDaviImg) {
       cachedDaviImg = new Image();
@@ -145,11 +165,33 @@ export function AnimatedFighterCanvas({
         : idleFrames[Math.floor(t * 5.5 + (mirror ? 0.35 : 0)) % idleFrames.length];
 
       const [sx, sy, sw, sh, ax, ay, hdFlag] = frame;
-      const tier = hdFlag === 3 ? 3 : hdFlag === 2 ? 2 : hdFlag === 1 ? 1 : 0;
-      const srcImg = tier === 3 ? cachedDaviImg : tier === 2 ? cachedAtlasHd2Img : tier === 1 ? cachedAtlasHdImg : cachedAtlasImg;
+      const tier = hdFlag === 5 ? 5 : hdFlag === 4 ? 4 : hdFlag === 3 ? 3 : hdFlag === 2 ? 2 : hdFlag === 1 ? 1 : 0;
+      const srcImg =
+        tier === 5
+          ? cachedDaviImg
+          : tier === 4
+          ? cachedFighterHd4Imgs[id]
+          : tier === 3
+          ? cachedFighterHd3Imgs[id]
+          : tier === 2
+          ? cachedAtlasHd2Img
+          : tier === 1
+          ? cachedAtlasHdImg
+          : cachedAtlasImg;
 
       if (srcImg && srcImg.complete && srcImg.naturalWidth > 0) {
-        const ad = tier === 3 ? DAVI_ATLAS_SCALE : tier === 2 ? ATLAS_HD2_SCALE : tier === 1 ? ATLAS_HD_SCALE : ATLAS_SCALE;
+        const ad =
+          tier === 5
+            ? DAVI_ATLAS_SCALE
+            : tier === 4
+            ? ATLAS_HD4_SCALE
+            : tier === 3
+            ? ATLAS_HD3_SCALE
+            : tier === 2
+            ? ATLAS_HD2_SCALE
+            : tier === 1
+            ? ATLAS_HD_SCALE
+            : ATLAS_SCALE;
         const normW = sw / ad;
         const normH = sh / ad;
         const fitScale = Math.min((cssH * 0.84) / normH, (cssW * 0.88) / normW) / ad;

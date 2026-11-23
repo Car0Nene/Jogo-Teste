@@ -696,3 +696,300 @@ export function createFaceTexture(
 
   return finalizeColorTex(c, anisotropy);
 }
+
+export function createWoodPlankTextures(
+  c1: string,
+  c2: string,
+  grainHex: string,
+  anisotropy: number,
+  rx = 3,
+  ry = 2
+): { map: THREE.CanvasTexture; bumpMap: THREE.CanvasTexture } {
+  const [c, ctx] = makeCanvas(256, 256);
+  const [bc, bctx] = makeCanvas(256, 256);
+  ctx.fillStyle = c1;
+  ctx.fillRect(0, 0, 256, 256);
+  bctx.fillStyle = '#909090';
+  bctx.fillRect(0, 0, 256, 256);
+
+  const planks = 4;
+  const ph = 256 / planks;
+  for (let p = 0; p < planks; p++) {
+    const y = p * ph;
+    ctx.fillStyle = p % 2 === 0 ? c1 : c2;
+    ctx.fillRect(0, y + 2, 256, ph - 4);
+    bctx.fillStyle = p % 2 === 0 ? '#c8c8c8' : '#b4b4b4';
+    bctx.fillRect(0, y + 2, 256, ph - 4);
+
+    // Subtle horizontal wood grain streaks
+    ctx.fillStyle = grainHex;
+    for (let g = 0; g < 16; g++) {
+      const gy = y + 5 + ((g * 17) % Math.max(8, ph - 10));
+      const gx = (g * 43 + p * 31) % 210;
+      ctx.globalAlpha = 0.16;
+      ctx.fillRect(gx, gy, 40 + (g % 5) * 14, 2);
+    }
+    ctx.globalAlpha = 1;
+
+    // Plank seam groove
+    ctx.fillStyle = 'rgba(15,10,8,0.48)';
+    ctx.fillRect(0, y, 256, 3);
+    bctx.fillStyle = '#282828';
+    bctx.fillRect(0, y, 256, 3);
+  }
+
+  return {
+    map: finalizeColorTex(c, anisotropy, rx, ry),
+    bumpMap: finalizeDataTex(bc, rx, ry),
+  };
+}
+
+export function createRoofTileTextures(
+  tileHex: string,
+  shadeHex: string,
+  anisotropy: number,
+  rx = 6,
+  ry = 3
+): { map: THREE.CanvasTexture; bumpMap: THREE.CanvasTexture } {
+  const [c, ctx] = makeCanvas(256, 256);
+  const [bc, bctx] = makeCanvas(256, 256);
+  ctx.fillStyle = shadeHex;
+  ctx.fillRect(0, 0, 256, 256);
+  bctx.fillStyle = '#404040';
+  bctx.fillRect(0, 0, 256, 256);
+
+  const cols = 8;
+  const rows = 5;
+  const cw = 256 / cols;
+  const rh = 256 / rows;
+  for (let r = 0; r < rows; r++) {
+    for (let col = 0; col < cols; col++) {
+      const x = col * cw;
+      const y = r * rh;
+      const grad = ctx.createLinearGradient(x, y, x + cw, y);
+      grad.addColorStop(0, shadeHex);
+      grad.addColorStop(0.45, tileHex);
+      grad.addColorStop(0.75, '#d97745');
+      grad.addColorStop(1, shadeHex);
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.roundRect(x + 2, y + 2, cw - 4, rh - 5, 6);
+      ctx.fill();
+
+      const bgrad = bctx.createLinearGradient(x, y, x + cw, y);
+      bgrad.addColorStop(0, '#505050');
+      bgrad.addColorStop(0.5, '#f0f0f0');
+      bgrad.addColorStop(1, '#505050');
+      bctx.fillStyle = bgrad;
+      bctx.fillRect(x + 2, y + 2, cw - 4, rh - 5);
+    }
+  }
+  return {
+    map: finalizeColorTex(c, anisotropy, rx, ry),
+    bumpMap: finalizeDataTex(bc, rx, ry),
+  };
+}
+
+export function createAsphaltStreetTextures(anisotropy: number): {
+  map: THREE.CanvasTexture;
+  bumpMap: THREE.CanvasTexture;
+} {
+  const [c, ctx] = makeCanvas(256, 256);
+  const [bc, bctx] = makeCanvas(256, 256);
+  ctx.fillStyle = '#1b1c28';
+  ctx.fillRect(0, 0, 256, 256);
+  bctx.fillStyle = '#505050';
+  bctx.fillRect(0, 0, 256, 256);
+
+  const rows = 8;
+  const cols = 6;
+  const rh = 256 / rows;
+  const cw = 256 / cols;
+  for (let r = 0; r < rows; r++) {
+    const ox = (r % 2) * (cw * 0.5);
+    for (let col = -1; col <= cols; col++) {
+      const x = col * cw + ox;
+      const y = r * rh;
+      const pick = ((r * 7 + col * 3) % 3) === 0;
+      ctx.fillStyle = pick ? '#2c2f44' : '#232638';
+      ctx.beginPath();
+      ctx.roundRect(x + 2, y + 2, cw - 4, rh - 4, 5);
+      ctx.fill();
+      ctx.fillStyle = 'rgba(255, 196, 140, 0.06)';
+      ctx.fillRect(x + 4, y + 3, cw - 8, 3);
+      bctx.fillStyle = pick ? '#b8b8b8' : '#d2d2d2';
+      bctx.beginPath();
+      bctx.roundRect(x + 2, y + 2, cw - 4, rh - 4, 5);
+      bctx.fill();
+    }
+  }
+  return {
+    map: finalizeColorTex(c, anisotropy, 12, 3),
+    bumpMap: finalizeDataTex(bc, 12, 3),
+  };
+}
+
+export function createCheckeredTileTexture(
+  c1: string,
+  c2: string,
+  anisotropy: number,
+  rx = 4,
+  ry = 2
+): THREE.CanvasTexture {
+  const [c, ctx] = makeCanvas(128, 128);
+  const step = 32;
+  for (let y = 0; y < 128; y += step) {
+    for (let x = 0; x < 128; x += step) {
+      ctx.fillStyle = ((x / step + y / step) % 2 === 0) ? c1 : c2;
+      ctx.fillRect(x, y, step, step);
+    }
+  }
+  ctx.strokeStyle = 'rgba(0,0,0,0.12)';
+  ctx.lineWidth = 2;
+  for (let i = 0; i <= 128; i += step) {
+    ctx.beginPath();
+    ctx.moveTo(i, 0);
+    ctx.lineTo(i, 128);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(0, i);
+    ctx.lineTo(128, i);
+    ctx.stroke();
+  }
+  return finalizeColorTex(c, anisotropy, rx, ry);
+}
+
+export function createCitySkylineTexture(anisotropy: number): THREE.CanvasTexture {
+  const [c, ctx] = makeCanvas(1024, 384);
+  ctx.clearRect(0, 0, 1024, 384);
+
+  const buildings = [
+    { x: 10, w: 68, h: 210, col: '#1b1438' },
+    { x: 72, w: 54, h: 270, col: '#140f2c' },
+    { x: 122, w: 78, h: 175, col: '#221744' },
+    { x: 196, w: 62, h: 300, col: '#171130' },
+    { x: 256, w: 88, h: 230, col: '#1f163f' },
+    { x: 340, w: 56, h: 185, col: '#16102d' },
+    { x: 392, w: 92, h: 255, col: '#221746' },
+    { x: 480, w: 70, h: 315, col: '#150f2b' },
+    { x: 546, w: 84, h: 215, col: '#1d143c' },
+    { x: 626, w: 60, h: 265, col: '#140f2c' },
+    { x: 682, w: 94, h: 205, col: '#241848' },
+    { x: 772, w: 64, h: 290, col: '#171131' },
+    { x: 832, w: 82, h: 225, col: '#201641' },
+    { x: 910, w: 58, h: 275, col: '#150f2c' },
+    { x: 964, w: 56, h: 195, col: '#1c1438' },
+  ];
+
+  for (const b of buildings) {
+    const topY = 384 - b.h;
+    ctx.fillStyle = b.col;
+    ctx.fillRect(b.x, topY, b.w, b.h);
+    ctx.fillStyle = 'rgba(139, 92, 246, 0.14)';
+    ctx.fillRect(b.x, topY, b.w, 4);
+
+    // Warm & cool apartment windows
+    for (let wy = topY + 14; wy < 368; wy += 16) {
+      for (let wx = b.x + 8; wx < b.x + b.w - 10; wx += 12) {
+        const hash = (wx * 13 + wy * 7) % 11;
+        if (hash < 4) {
+          ctx.fillStyle = hash === 0 ? '#fde68a' : hash === 1 ? '#fbbf24' : '#93c5fd';
+          ctx.globalAlpha = 0.68;
+          ctx.fillRect(wx, wy, 6, 8);
+        }
+      }
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  return finalizeColorTex(c, anisotropy);
+}
+
+export function createInteriorBarWallTexture(anisotropy: number): THREE.CanvasTexture {
+  const [c, ctx] = makeCanvas(512, 256);
+  const g = ctx.createLinearGradient(0, 0, 0, 256);
+  g.addColorStop(0, '#ffd480');
+  g.addColorStop(0.55, '#f59e42');
+  g.addColorStop(0.6, '#b45309');
+  g.addColorStop(1, '#78350f');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, 512, 256);
+
+  // Warm ambient ceiling spotlight halo
+  const halo = ctx.createRadialGradient(256, 36, 12, 256, 70, 210);
+  halo.addColorStop(0, 'rgba(255, 250, 215, 0.78)');
+  halo.addColorStop(1, 'rgba(255, 215, 130, 0)');
+  ctx.fillStyle = halo;
+  ctx.fillRect(0, 0, 512, 220);
+
+  // Framed retro posters on back wall
+  ctx.fillStyle = '#451a03';
+  ctx.fillRect(365, 58, 44, 62);
+  ctx.fillStyle = '#dc2626';
+  ctx.fillRect(370, 64, 34, 24);
+  ctx.fillStyle = '#18181b';
+  ctx.fillRect(370, 88, 34, 26);
+
+  return finalizeColorTex(c, anisotropy);
+}
+
+export function createSunsetMountainTexture(anisotropy: number): THREE.CanvasTexture {
+  const [c, ctx] = makeCanvas(1024, 320);
+  ctx.clearRect(0, 0, 1024, 320);
+
+  // Far misty headland silhouette
+  const farGrad = ctx.createLinearGradient(0, 90, 0, 320);
+  farGrad.addColorStop(0, '#7c6278');
+  farGrad.addColorStop(1, '#b8836a');
+  ctx.fillStyle = farGrad;
+  ctx.beginPath();
+  ctx.moveTo(0, 320);
+  ctx.lineTo(0, 200);
+  ctx.quadraticCurveTo(110, 90, 220, 165);
+  ctx.quadraticCurveTo(320, 45, 420, 175);
+  ctx.quadraticCurveTo(540, 135, 650, 155);
+  ctx.quadraticCurveTo(780, 110, 890, 185);
+  ctx.quadraticCurveTo(960, 145, 1024, 170);
+  ctx.lineTo(1024, 320);
+  ctx.closePath();
+  ctx.fill();
+
+  // Closer lush green-olive coastal morro on left/center
+  const nearGrad = ctx.createLinearGradient(0, 120, 0, 320);
+  nearGrad.addColorStop(0, '#3a5743');
+  nearGrad.addColorStop(1, '#1e352a');
+  ctx.fillStyle = nearGrad;
+  ctx.beginPath();
+  ctx.moveTo(0, 320);
+  ctx.lineTo(0, 130);
+  ctx.quadraticCurveTo(90, 110, 185, 195);
+  ctx.quadraticCurveTo(275, 145, 365, 225);
+  ctx.quadraticCurveTo(470, 210, 560, 270);
+  ctx.quadraticCurveTo(720, 290, 1024, 305);
+  ctx.lineTo(1024, 320);
+  ctx.closePath();
+  ctx.fill();
+
+  return finalizeColorTex(c, anisotropy);
+}
+
+export function createSurfWaveTexture(anisotropy: number): THREE.CanvasTexture {
+  const [c, ctx] = makeCanvas(512, 128);
+  const g = ctx.createLinearGradient(0, 0, 0, 128);
+  g.addColorStop(0, 'rgba(14, 116, 144, 0)');
+  g.addColorStop(0.28, 'rgba(34, 211, 238, 0.55)');
+  g.addColorStop(0.68, 'rgba(224, 242, 254, 0.88)');
+  g.addColorStop(0.86, 'rgba(255, 255, 255, 0.96)');
+  g.addColorStop(1, 'rgba(255, 255, 255, 0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, 512, 128);
+
+  // Scalloped organic seafoam crest
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.72)';
+  for (let x = 0; x < 512; x += 24) {
+    ctx.beginPath();
+    ctx.ellipse(x + 12, 96 + Math.sin(x * 0.08) * 5, 15, 7, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  return finalizeColorTex(c, anisotropy, 3, 1);
+}
