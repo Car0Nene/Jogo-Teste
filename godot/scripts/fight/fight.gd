@@ -63,6 +63,7 @@ func _spawn(id: StringName, index: int, x: float, ctrl: FighterController = null
 	add_child(f)
 	f.setup(Game.fighter(id), ctrl if ctrl else PlayerController.new(1), index, x)
 	f.hit_landed.connect(_on_hit)
+	f.super_started.connect(_on_super)
 	f.knocked_out.connect(_on_ko)
 	f.spawn_projectile.connect(_on_projectile)
 	f.form_changed.connect(_on_form)
@@ -150,6 +151,7 @@ func _on_ko(loser: Fighter) -> void:
 	phase = Phase.ROUND_END
 	Audio.sfx(&"ko")
 	loser.say(&"ko")
+	hud.screen_flash(Color(1, 1, 1, 0.7), 0.35)
 	hud.banner("K.O.", Color("ff3b30"))
 	Engine.time_scale = 0.3
 	cam.impact(14.0)
@@ -225,12 +227,45 @@ func _on_hit(att: Fighter, target: Fighter, m: MoveData, blocked: bool, at: Vect
 		Audio.sfx(&"block")
 		cam.impact(2.0)
 	else:
-		HitFx.spawn(self, at, Color("ffd166") if not heavy else Color("ff6b3d"), heavy)
+		HitFx.spawn(self, at, Color("ffd166") if not heavy else Color("ff6b3d"), heavy, att.facing)
+		if heavy:
+			_hit_flash(0.18)
 		Audio.sfx(&"hit_heavy" if heavy else &"hit_light")
 		cam.impact(8.0 if heavy else 3.5)
 		if Settings.get_value("game", "vibration") and target.player_index == 1:
 			Input.vibrate_handheld(40 if heavy else 20)
 	hud.flash_bar(target)
+
+
+## Super: congela a luta, escurece a arena, câmera fecha no lutador e faixa com o nome do golpe.
+func _on_super(f: Fighter, m: MoveData) -> void:
+	var col: Color = m.projectile_color if m.kind == MoveData.Kind.PROJECTILE else f.data.accent
+	var freeze := 42
+	f._hitstop = freeze
+	f.opponent._hitstop = maxi(f.opponent._hitstop, freeze)
+	for p in get_tree().get_nodes_in_group("projectiles"):
+		p.set_physics_process(false)
+	Audio.sfx(&"special")
+	Vfx.aura(f, col, 1.4, f.model.height_scale)
+	HitFx.spawn(self, f.global_position + Vector3(0, f.model.height_scale * 0.6, 0.3), col, true)
+	hud.super_cutin(f, m.display_name if m.display_name != "" else f.data.special_name, col)
+	stage_dim(0.35, 0.12)
+	cam.super_focus(f, freeze / 60.0)
+	await _wait(freeze / 60.0)
+	if not is_inside_tree(): return
+	stage_dim(1.0, 0.25)
+	for p in get_tree().get_nodes_in_group("projectiles"):
+		if is_instance_valid(p): p.set_physics_process(true)
+
+
+func stage_dim(v: float, t: float) -> void:
+	var we := get_tree().get_first_node_in_group("world_env") as WorldEnvironment
+	if we and we.environment:
+		create_tween().tween_property(we.environment, "adjustment_brightness", v, t)
+
+
+func _hit_flash(strength: float) -> void:
+	hud.screen_flash(Color(1, 1, 1, strength), 0.12)
 
 
 func _on_projectile(f: Fighter, m: MoveData) -> void:

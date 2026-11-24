@@ -102,5 +102,12 @@ func _tune_materials(n: Node) -> void:
 				d.roughness = maxf(d.roughness, 0.72)
 				d.metallic = minf(d.metallic, 0.05)
 				d.metallic_specular = 0.3
+				# acabamento "HD": luz de borda suave, filtragem anisotrópica e normal map mais marcado
+				d.rim_enabled = true
+				d.rim = 0.28
+				d.rim_tint = 0.65
+				d.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
+				if d.normal_enabled:
+					d.normal_scale = 1.25
 				m3.set_surface_override_material(s, d)
 		m3.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON

@@ -1,4 +1,17 @@
 {
+ "hd_v2 (tpose, 4K, 100k)": {
+  "carlos": "be9bbd62-b468-4def-b402-c1f9e25a0018",
+  "carlos_batizado": "14633042-10fb-4f9d-bb70-5c266c2cb8d2",
+  "daniel": "b2e9f7c3-4e14-4066-a9c2-50138621829c",
+  "davi": "61d7c7a3-f58a-463a-9492-729dea21f007",
+  "franciely": "5abd3dd7-c4f5-497f-936c-c02475c4bddc",
+  "gabi": "dc7d79a7-d98c-44ea-94f0-d3d549a83667",
+  "juraci": "11efc915-ac28-4977-b255-c071125156ae",
+  "paula": "30f1fa93-09ea-4db5-98e0-430d39f9ea74",
+  "pedro": "894091df-f713-4d75-a0ff-c6dfd7fc3208",
+  "tainara": "8ba9453d-68d5-45b7-ba70-811ae35424e8"
+ },
+ "v1": {
   "_obs": "Projetos da Tripo Studio (studio.tripo3d.ai/pt/workspace/generate/<id>), modelo H3.1, 50k faces, textura 2K PBR, privado",
   "juraci": "e02de404-ae69-439d-bd5f-4ea8359e34b0",
   "carlos": "401529bd-3561-4439-81f3-4396fb7dd266",
@@ -11,4 +24,5 @@
   "davi": "eb113414-e182-4b8a-b08a-49c1347c809d",
   "carlos_batizado": "c6fcf85d-1409-4269-b197-093b98c49253",
   "juraci_teste_arte_antiga": "681882c8-ac12-49bf-b916-38d7ec2fc333"
+ }
 }

@@ -8,6 +8,7 @@ signal knocked_out(f: Fighter)
 signal spawn_projectile(f: Fighter, move: MoveData)
 signal form_changed(f: Fighter, form: StringName)
 signal combo(f: Fighter, hits: int, damage: float)
+signal super_started(f: Fighter, move: MoveData)
 
 enum S { IDLE, WALK, CROUCH, JUMP, ATTACK, BLOCKSTUN, HITSTUN, AIR_HIT, DOWN, GETUP, KO, WIN, INTRO }
 
@@ -157,6 +158,7 @@ func _land() -> void:
 	pos.y = 0.0
 	vel = Vector2.ZERO
 	Audio.sfx(&"land")
+	Vfx.dust(get_parent(), Vector3(pos.x, 0.05, 0.1))
 	_enter(S.IDLE)
 	model.play("idle", 1.0, 0.12)
 
@@ -203,6 +205,10 @@ func _air_hit() -> void:
 		pos.y = 0.0
 		vel = Vector2.ZERO
 		Audio.sfx(&"fall")
+		Vfx.dust(get_parent(), Vector3(pos.x, 0.05, 0.1), true)
+		var fcam := get_viewport().get_camera_3d()
+		if fcam is FightCamera:
+			fcam.impact(4.0)
 		_enter(S.DOWN)
 
 
@@ -275,6 +281,7 @@ func _start_move(n: StringName) -> bool:
 			return false
 		meter -= m.meter_cost
 		_special_cd = 40
+		super_started.emit(self, m)
 	controller.consume()
 	move = m
 	move_name = n

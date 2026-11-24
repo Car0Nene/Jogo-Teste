@@ -9,6 +9,8 @@ var shake := 0.0
 var punch := 0.0
 var cinematic_target: Node3D = null
 var _smooth := Vector3(0, 1.3, 5.0)
+var _super_target: Fighter = null
+var _super_t := 0.0
 
 
 func _ready() -> void:
@@ -20,6 +22,17 @@ func _ready() -> void:
 func _process(dt: float) -> void:
 	var target: Vector3
 	var look: Vector3
+	if _super_target and _super_t > 0.0:
+		_super_t -= dt
+		var sp := _super_target.global_position
+		var side := float(_super_target.facing)
+		target = sp + Vector3(side * 1.3, 1.45, 3.1)
+		look = sp + Vector3(side * 0.3, 1.0, 0)
+		_smooth = _smooth.lerp(target, 1.0 - exp(-dt * 14.0))
+		global_position = _smooth
+		look_at(look)
+		return
+	_super_target = null
 	if cinematic_target:
 		var p := cinematic_target.global_position
 		target = p + Vector3(0.6, 1.35, 2.4)
@@ -44,3 +57,9 @@ func _process(dt: float) -> void:
 func impact(strength: float) -> void:
 	shake = maxf(shake, strength)
 	punch = maxf(punch, clampf(strength / 10.0, 0.0, 0.6))
+
+
+## Fecha a câmera no lutador durante o "super flash".
+func super_focus(f: Fighter, duration: float) -> void:
+	_super_target = f
+	_super_t = duration

@@ -112,6 +112,84 @@ func banner(text: String, color: Color, sub := "") -> void:
 	tw.tween_property(_banner_box, "modulate:a", 1.0, 0.15)
 
 
+## Faixa de "super": retrato do lutador entrando de lado + nome do golpe (estilo SF/Tekken).
+func super_cutin(f: Fighter, move_title: String, color: Color) -> void:
+	var vw := _root.get_viewport_rect().size
+	var left := f == p1
+	var box := Control.new()
+	box.set_anchors_preset(Control.PRESET_FULL_RECT)
+	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(box)
+	# faixa diagonal
+	var band := Polygon2D.new()
+	var y0 := vw.y * 0.30
+	var h := vw.y * 0.30
+	band.polygon = PackedVector2Array([Vector2(-50, y0 + 40), Vector2(vw.x + 50, y0 - 40),
+		Vector2(vw.x + 50, y0 + h - 40), Vector2(-50, y0 + h + 40)])
+	band.vertex_colors = PackedColorArray([Color(color.darkened(0.55), 0.92), Color(color.darkened(0.2), 0.92),
+		Color(color.darkened(0.2), 0.92), Color(color.darkened(0.55), 0.92)])
+	box.add_child(band)
+	# linhas de velocidade
+	var lines := Node2D.new()
+	box.add_child(lines)
+	for i in 14:
+		var ln := Line2D.new()
+		var ly := y0 + randf() * h
+		ln.points = PackedVector2Array([Vector2(0, ly), Vector2(randf_range(160, 420), ly - 12)])
+		ln.width = randf_range(2, 6)
+		ln.default_color = Color(1, 1, 1, randf_range(0.15, 0.45))
+		ln.position.x = randf() * vw.x
+		lines.add_child(ln)
+	# retrato
+	var tex_path := "res://assets/ui/fullbody/%s.png" % f.data.id
+	var pic := TextureRect.new()
+	if ResourceLoader.exists(tex_path):
+		pic.texture = load(tex_path)
+	pic.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	pic.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	pic.size = Vector2(h * 2.3, h * 2.3)
+	pic.flip_h = not left
+	var px_final := vw.x * 0.02 if left else vw.x * 0.98 - pic.size.x
+	pic.position = Vector2(-pic.size.x if left else vw.x, y0 - h * 0.75)
+	box.add_child(pic)
+	# nome do golpe
+	var name_l := UI.label(move_title.to_upper(), 86, Color.WHITE, UI.display, 14)
+	name_l.add_theme_color_override("font_outline_color", color.darkened(0.6))
+	name_l.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT if left else HORIZONTAL_ALIGNMENT_LEFT
+	name_l.size = Vector2(vw.x * 0.62, 120)
+	var nx := vw.x * 0.34 if left else vw.x * 0.04
+	name_l.position = Vector2(nx + (200 if left else -200), y0 + h * 0.5 - 60)
+	name_l.modulate.a = 0.0
+	box.add_child(name_l)
+	var who := UI.label(f.data.display_name, 34, color.lightened(0.5), UI.body_bold, 8)
+	who.position = Vector2(nx + (vw.x * 0.62 - 300 if left else 0), y0 + h * 0.5 - 100)
+	who.modulate.a = 0.0
+	box.add_child(who)
+	box.modulate.a = 0.0
+	var tw := box.create_tween().set_parallel(true)
+	tw.tween_property(box, "modulate:a", 1.0, 0.08)
+	tw.tween_property(pic, "position:x", px_final, 0.22).set_trans(Tween.TRANS_EXPO).set_ease(Tween.EASE_OUT)
+	tw.tween_property(name_l, "position:x", nx, 0.25).set_trans(Tween.TRANS_EXPO).set_ease(Tween.EASE_OUT).set_delay(0.06)
+	tw.tween_property(name_l, "modulate:a", 1.0, 0.12).set_delay(0.06)
+	tw.tween_property(who, "modulate:a", 1.0, 0.12).set_delay(0.1)
+	tw.tween_property(lines, "position:x", -300.0 if left else 300.0, 0.7)
+	tw.chain().tween_interval(0.35)
+	tw.chain().tween_property(box, "modulate:a", 0.0, 0.15)
+	tw.chain().tween_callback(box.queue_free)
+
+
+## Clarão de tela (golpes pesados, K.O.).
+func screen_flash(color: Color, duration: float) -> void:
+	var r := ColorRect.new()
+	r.set_anchors_preset(Control.PRESET_FULL_RECT)
+	r.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	r.color = color
+	add_child(r)
+	var tw := r.create_tween()
+	tw.tween_property(r, "color:a", 0.0, duration)
+	tw.tween_callback(r.queue_free)
+
+
 func hide_banner() -> void:
 	var tw := _banner_box.create_tween()
 	tw.tween_property(_banner_box, "modulate:a", 0.0, 0.2)
