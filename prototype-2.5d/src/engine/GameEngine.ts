@@ -775,13 +775,25 @@ export class GameEngine {
   }
 
   private clearEntities() {
-    for (const p of this.projectiles) this.scene.remove(p.mesh);
+    for (const p of this.projectiles) {
+      this.scene.remove(p.mesh);
+      this.disposeMesh(p.mesh);
+    }
     this.projectiles = [];
-    for (const c of this.cameos) this.scene.remove(c.mesh);
+    for (const c of this.cameos) {
+      this.scene.remove(c.mesh);
+      this.disposeMesh(c.mesh);
+    }
     this.cameos = [];
-    for (const b of this.bursts) this.scene.remove(b.mesh);
+    for (const b of this.bursts) {
+      this.scene.remove(b.mesh);
+      this.disposeMesh(b.mesh);
+    }
     this.bursts = [];
-    for (const s of this.sparks) this.scene.remove(s.mesh);
+    for (const s of this.sparks) {
+      this.scene.remove(s.mesh);
+      this.disposeMesh(s.mesh);
+    }
     this.sparks = [];
   }
 
@@ -1992,6 +2004,7 @@ export class GameEngine {
   }
 
   private updateSparks(dt: number) {
+    // === FIX FOR PROBLEM 5: Clean up burst materials on removal ===
     for (let i = this.bursts.length - 1; i >= 0; i--) {
       const b = this.bursts[i];
       b.life -= dt;
@@ -2000,6 +2013,7 @@ export class GameEngine {
       b.mesh.scale.setScalar(sc);
       if (b.life <= 0) {
         this.scene.remove(b.mesh);
+        this.disposeMesh(b.mesh);
         this.bursts.splice(i, 1);
       }
     }
@@ -2014,8 +2028,32 @@ export class GameEngine {
       s.mesh.scale.setScalar(sc);
       if (s.life <= 0) {
         this.scene.remove(s.mesh);
+        this.disposeMesh(s.mesh);
         this.sparks.splice(i, 1);
       }
+    }
+  }
+
+  /**
+   * === FIX FOR PROBLEM 5: Properly dispose mesh geometry and material ===
+   * Prevents memory leaks when removing particles and effects
+   */
+  private disposeMesh(obj: THREE.Object3D) {
+    if (!obj) return;
+    if ('geometry' in obj && obj.geometry) {
+      (obj.geometry as THREE.BufferGeometry).dispose();
+    }
+    if ('material' in obj && obj.material) {
+      const mat = obj.material as THREE.Material | THREE.Material[];
+      if (Array.isArray(mat)) {
+        mat.forEach(m => m.dispose());
+      } else {
+        mat.dispose();
+      }
+    }
+    // Recursively dispose children (for Groups)
+    if ('children' in obj) {
+      obj.children.forEach(child => this.disposeMesh(child));
     }
   }
 
