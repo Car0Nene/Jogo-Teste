@@ -19,6 +19,7 @@ import {
 import { STAGES, StageId } from '../data/stages';
 import { STAGE_MUSIC, soundEngine } from './audio';
 import { diagnostics } from './diagnostics';
+import { getInitialAtlasTier } from './graphicsProfile';
 import {
   AnimState,
   CharacterRig,
@@ -663,8 +664,12 @@ export class GameEngine {
       this.scene.remove(this.fighters[0].rig.root);
       this.scene.remove(this.fighters[1].rig.root);
     }
-    const r1 = buildCharacterRig(p1, this.maxAnisotropy, this.shadowTex);
-    const r2 = buildCharacterRig(p2, this.maxAnisotropy, this.shadowTex);
+    
+    // === FIX FOR PROBLEM 4: Use quality-aware initial atlas tier ===
+    const initialAtlasTier = getInitialAtlasTier(this.graphicsQuality, this.isSoftwareGl);
+    
+    const r1 = buildCharacterRig(p1, this.maxAnisotropy, this.shadowTex, initialAtlasTier);
+    const r2 = buildCharacterRig(p2, this.maxAnisotropy, this.shadowTex, initialAtlasTier);
     applyStageLightingToRig(r1, this.currentStageId);
     applyStageLightingToRig(r2, this.currentStageId);
     this.scene.add(r1.root);

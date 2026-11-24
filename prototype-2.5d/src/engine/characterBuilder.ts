@@ -188,7 +188,8 @@ function createSpriteQuadGeometry(): THREE.BufferGeometry {
 export function buildCharacterRig(
   id: FighterId,
   anisotropy: number,
-  shadowTex?: THREE.Texture
+  shadowTex?: THREE.Texture,
+  initialAtlasTier = 0 // === FIX FOR PROBLEM 4: Allow selecting initial atlas tier ===
 ): CharacterRig {
   const spec = FIGHTERS[id];
   const atlasTex = getAtlasTexture(0, anisotropy);
@@ -379,7 +380,8 @@ export function buildCharacterRig(
     atlasHd3Tex,
     atlasHd4Tex,
     daviTex,
-    atlasTier: 0,
+    // === FIX FOR PROBLEM 4: Use quality-aware initial atlas tier ===
+    atlasTier: (initialAtlasTier as 0 | 1 | 2 | 3 | 4 | 5) || 0,
     baseScale: CHAR_SPRITE_SCALE[id] || 1.2,
     baseShadowOpacity: 0.46,
     hitFlashTimer: 0,
