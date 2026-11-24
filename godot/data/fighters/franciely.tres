@@ -1,13 +1,18 @@
 [gd_resource type="Resource" script_class="FighterData" format=3]
 
-[ext_resource type="PackedScene" path="res://assets/characters/franciely/franciely.glb" id="1_spnrw"]
-[ext_resource type="Script" path="res://scripts/data/move_data.gd" id="2_kjyjq"]
-[ext_resource type="Texture2D" path="res://assets/ui/portraits/franciely.png" id="3_w5uvt"]
-[ext_resource type="Script" path="res://scripts/data/fighter_data.gd" id="4_d363j"]
-[ext_resource type="AudioStream" path="res://assets/audio/voice/franciely.mp3" id="5_ol5pe"]
+[ext_resource type="PackedScene" path="res://assets/characters/franciely/franciely.glb" id="1_eol6s"]
+[ext_resource type="Script" path="res://scripts/data/move_data.gd" id="2_dm8s7"]
+[ext_resource type="Texture2D" path="res://assets/ui/portraits/franciely.png" id="3_k6dlm"]
+[ext_resource type="Script" path="res://scripts/data/fighter_data.gd" id="4_vv22e"]
+[ext_resource type="AudioStream" path="res://assets/audio/voice/franciely/special.mp3" id="5_6os2g"]
+[ext_resource type="AudioStream" path="res://assets/audio/voice/franciely/select.mp3" id="6_hlj8i"]
+[ext_resource type="AudioStream" path="res://assets/audio/voice/franciely/intro.mp3" id="7_7jru1"]
+[ext_resource type="AudioStream" path="res://assets/audio/voice/franciely/sub_special.mp3" id="8_bxofa"]
+[ext_resource type="AudioStream" path="res://assets/audio/voice/franciely/win.mp3" id="9_tc32w"]
+[ext_resource type="AudioStream" path="res://assets/audio/voice/franciely/ko.mp3" id="10_4ns5t"]
 
-[sub_resource type="Resource" id="Resource_eol6s"]
-script = ExtResource("2_kjyjq")
+[sub_resource type="Resource" id="Resource_d0mt4"]
+script = ExtResource("2_dm8s7")
 display_name = "Jab"
 startup = 5
 recovery = 9
@@ -20,8 +25,8 @@ hitstop = 5
 pushback = 1.6
 meter_gain = 5.0
 
-[sub_resource type="Resource" id="Resource_dm8s7"]
-script = ExtResource("2_kjyjq")
+[sub_resource type="Resource" id="Resource_epbjp"]
+script = ExtResource("2_dm8s7")
 display_name = "Direto"
 anim = &"cross"
 startup = 8
@@ -35,8 +40,8 @@ lunge = 1.2
 meter_gain = 7.0
 sfx = &"whoosh_heavy"
 
-[sub_resource type="Resource" id="Resource_k6dlm"]
-script = ExtResource("2_kjyjq")
+[sub_resource type="Resource" id="Resource_qqxl0"]
+script = ExtResource("2_dm8s7")
 display_name = "Gancho"
 anim = &"hook"
 startup = 10
@@ -52,8 +57,8 @@ pushback = 3.0
 meter_gain = 9.0
 sfx = &"whoosh_heavy"
 
-[sub_resource type="Resource" id="Resource_vv22e"]
-script = ExtResource("2_kjyjq")
+[sub_resource type="Resource" id="Resource_8vgdc"]
+script = ExtResource("2_dm8s7")
 display_name = "Uppercut"
 anim = &"uppercut"
 startup = 9
@@ -71,8 +76,8 @@ launch = 6.4
 meter_gain = 9.0
 sfx = &"whoosh_heavy"
 
-[sub_resource type="Resource" id="Resource_6os2g"]
-script = ExtResource("2_kjyjq")
+[sub_resource type="Resource" id="Resource_0mpjw"]
+script = ExtResource("2_dm8s7")
 display_name = "Chute"
 anim = &"kick_mid"
 startup = 9
@@ -88,8 +93,8 @@ hitstop = 7
 pushback = 2.4
 meter_gain = 7.0
 
-[sub_resource type="Resource" id="Resource_hlj8i"]
-script = ExtResource("2_kjyjq")
+[sub_resource type="Resource" id="Resource_f3mvm"]
+script = ExtResource("2_dm8s7")
 display_name = "Chute Alto"
 anim = &"low_kick"
 startup = 13
@@ -106,8 +111,8 @@ lunge = 0.8
 meter_gain = 10.0
 sfx = &"whoosh_heavy"
 
-[sub_resource type="Resource" id="Resource_7jru1"]
-script = ExtResource("2_kjyjq")
+[sub_resource type="Resource" id="Resource_w73qt"]
+script = ExtResource("2_dm8s7")
 display_name = "Chute Baixo"
 anim = &"roundhouse"
 startup = 8
@@ -118,8 +123,8 @@ hitbox_bone = &"auto"
 hitbox_radius = 0.18
 pushback = 2.0
 
-[sub_resource type="Resource" id="Resource_bxofa"]
-script = ExtResource("2_kjyjq")
+[sub_resource type="Resource" id="Resource_eenq1"]
+script = ExtResource("2_dm8s7")
 display_name = "Rasteira"
 anim = &"sweep"
 startup = 11
@@ -138,8 +143,8 @@ launch = 2.2
 meter_gain = 8.0
 sfx = &"whoosh_heavy"
 
-[sub_resource type="Resource" id="Resource_tc32w"]
-script = ExtResource("2_kjyjq")
+[sub_resource type="Resource" id="Resource_cl2co"]
+script = ExtResource("2_dm8s7")
 display_name = "Soco Aéreo"
 startup = 5
 active = 8
@@ -153,8 +158,8 @@ hitstop = 7
 pushback = 1.8
 air = true
 
-[sub_resource type="Resource" id="Resource_4ns5t"]
-script = ExtResource("2_kjyjq")
+[sub_resource type="Resource" id="Resource_elu7b"]
+script = ExtResource("2_dm8s7")
 display_name = "Voadora"
 anim = &"kick_mid"
 active = 10
@@ -171,8 +176,8 @@ meter_gain = 8.0
 air = true
 sfx = &"whoosh_heavy"
 
-[sub_resource type="Resource" id="Resource_d0mt4"]
-script = ExtResource("2_kjyjq")
+[sub_resource type="Resource" id="Resource_5dixg"]
+script = ExtResource("2_dm8s7")
 display_name = "Irritada + Fome"
 kind = 2
 anim = &"power_up"
@@ -186,8 +191,8 @@ sfx = &"special"
 buff_form = &"brava"
 voice = &"special"
 
-[sub_resource type="Resource" id="Resource_epbjp"]
-script = ExtResource("2_kjyjq")
+[sub_resource type="Resource" id="Resource_6bwfy"]
+script = ExtResource("2_dm8s7")
 display_name = "Jato de Leite"
 kind = 1
 anim = &"cast"
@@ -210,14 +215,14 @@ projectile_speed = 11.0
 voice = &"sub_special"
 
 [resource]
-script = ExtResource("4_d363j")
+script = ExtResource("4_vv22e")
 id = &"franciely"
 display_name = "FRANCIELY"
 title = "Força & Cuidado"
 quote = "Cuidar também é lutar!"
 bio = "Fica irritada e com fome para ganhar dano extremo, ou dispara um Jato de Leite certeiro."
-model = ExtResource("1_spnrw")
-portrait = ExtResource("3_w5uvt")
+model = ExtResource("1_eol6s")
+portrait = ExtResource("3_k6dlm")
 accent = Color(0.23137255, 0.50980395, 0.9647059, 1)
 height_m = 1.66
 walk_speed = 1.8
@@ -227,18 +232,18 @@ special_desc = "Aura de fúria materna: +35% de ataque."
 sub_special_name = "Jato de Leite"
 sub_special_desc = "Projétil rápido que empurra o adversário."
 moves = {
-&"air_kick": SubResource("Resource_4ns5t"),
-&"air_punch": SubResource("Resource_tc32w"),
-&"cross": SubResource("Resource_dm8s7"),
-&"high_kick": SubResource("Resource_hlj8i"),
-&"hook": SubResource("Resource_k6dlm"),
-&"jab": SubResource("Resource_eol6s"),
-&"kick": SubResource("Resource_6os2g"),
-&"low_kick": SubResource("Resource_7jru1"),
-&"special": SubResource("Resource_d0mt4"),
-&"sub_special": SubResource("Resource_epbjp"),
-&"sweep": SubResource("Resource_bxofa"),
-&"uppercut": SubResource("Resource_vv22e")
+&"air_kick": SubResource("Resource_elu7b"),
+&"air_punch": SubResource("Resource_cl2co"),
+&"cross": SubResource("Resource_epbjp"),
+&"high_kick": SubResource("Resource_f3mvm"),
+&"hook": SubResource("Resource_qqxl0"),
+&"jab": SubResource("Resource_d0mt4"),
+&"kick": SubResource("Resource_0mpjw"),
+&"low_kick": SubResource("Resource_w73qt"),
+&"special": SubResource("Resource_5dixg"),
+&"sub_special": SubResource("Resource_6bwfy"),
+&"sweep": SubResource("Resource_eenq1"),
+&"uppercut": SubResource("Resource_8vgdc")
 }
 forms = {
 &"brava": {
@@ -251,6 +256,10 @@ forms = {
 }
 }
 voices = {
-&"select": ExtResource("5_ol5pe"),
-&"special": ExtResource("5_ol5pe")
+&"intro": ExtResource("7_7jru1"),
+&"ko": ExtResource("10_4ns5t"),
+&"select": ExtResource("6_hlj8i"),
+&"special": ExtResource("5_6os2g"),
+&"sub_special": ExtResource("8_bxofa"),
+&"win": ExtResource("9_tc32w")
 }
