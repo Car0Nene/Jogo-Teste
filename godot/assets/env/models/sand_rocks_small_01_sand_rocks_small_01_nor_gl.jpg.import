@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://r102b5c620w5"
-path="res://.godot/imported/sand_rocks_small_01_sand_rocks_small_01_nor_gl.jpg-c2fe4b89e9f89b7d4f1242e93030fc20.ctex"
+path.s3tc="res://.godot/imported/sand_rocks_small_01_sand_rocks_small_01_nor_gl.jpg-c2fe4b89e9f89b7d4f1242e93030fc20.s3tc.ctex"
+path.etc2="res://.godot/imported/sand_rocks_small_01_sand_rocks_small_01_nor_gl.jpg-c2fe4b89e9f89b7d4f1242e93030fc20.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "13c1eb9b629de7ad97f7936cfdf4761f"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/sand_rocks_small_01_sand_rocks_small_01_nor_gl.jpg"
-dest_files=["res://.godot/imported/sand_rocks_small_01_sand_rocks_small_01_nor_gl.jpg-c2fe4b89e9f89b7d4f1242e93030fc20.ctex"]
+dest_files=["res://.godot/imported/sand_rocks_small_01_sand_rocks_small_01_nor_gl.jpg-c2fe4b89e9f89b7d4f1242e93030fc20.s3tc.ctex", "res://.godot/imported/sand_rocks_small_01_sand_rocks_small_01_nor_gl.jpg-c2fe4b89e9f89b7d4f1242e93030fc20.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

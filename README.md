@@ -1,46 +1,37 @@
-﻿# Família Fighter 2.5D
+# Família Fighter
 
-Jogo de luta arcade em React, TypeScript e Vite. A versão 2.5D é a aplicação ativa publicada no GitHub Pages.
+Jogo de luta 3D da família, feito em **Godot 4.7** — inspirado em Tekken, Mortal Kombat e Street Fighter.
 
-## Estrutura
+## Jogar
 
-- `prototype-2.5d/` — código-fonte ativo: engine, menus, personagens, arenas, serviços e testes de plataforma.
-- `prototype-2.5d/public/assets/` — sprites, cenários, música e vozes carregados pelo jogo.
-- `art-source/` — originais e materiais de criação usados para produzir os assets.
-- `supabase/` — esquema e migrações do banco de dados.
-- `index.html`, `assets/`, `manifest.webmanifest` e `sw.js` na raiz — artefatos de publicação do GitHub Pages, gerados pelo workflow.
-- `.github/workflows/familia-fighter-2.5d-build.yml` — lint, build, testes desktop/mobile e publicação.
+- **Navegador (PC e celular):** https://car0nene.github.io/Jogo-Teste/
+  Na primeira vez baixa ~160 MB (os cenários 3D ficam em cache depois).
+- **Windows:** baixe `FamiliaFighter-Windows.zip` na página de *Releases*, extraia e abra `FamiliaFighter.exe`.
+- **Android:** baixe `FamiliaFighter-Android.apk` em *Releases* e instale (permita "fontes desconhecidas").
 
-Os diretórios legados `css/`, `js/`, `prototype-3d/` e `prototype-phaser/` foram removidos do repositório; não são usados pela aplicação publicada.
+## Controles
 
-## Desenvolvimento
+| Ação | Jogador 1 | Jogador 2 | Controle |
+|---|---|---|---|
+| Andar / pular / agachar | W A S D | Setas | Analógico / D-pad |
+| Soco | J | Num 1 | X / □ |
+| Chute | K | Num 2 | A / ✕ |
+| Defesa | I | Num 3 | RB / R1 |
+| Especial (↓ + especial = sub-especial) | L | Num 4 | Y / △ |
 
-```sh
-cd prototype-2.5d
-npm install
-npm run dev
-```
+No celular aparecem botões de toque automaticamente. Teclas remapeáveis em **Configurações → Controles**.
 
-Verificações locais:
+## Conteúdo
 
-```sh
-npm run lint
-npm run test:e2e
-npm run build
-```
+- 9 lutadores da família em 3D (Tripo AI + animações Mixamo), com vozes (ElevenLabs).
+- 5 arenas 3D: Padaria da Juju, Quintal, Festa Junina, Bar da Simone e Praia.
+- Modos: Arcade, Versus CPU, 2 Jogadores e Treino.
 
-O workflow executa essas verificações em Chromium com viewports desktop e mobile, incluindo formatos compactos. A seleção de personagem mantém os nove lutadores e a seleção de arena mantém as cinco arenas.
+## Projeto
 
-### Davi
+- `godot/` — projeto Godot (abra `godot/project.godot`).
+- `art-source/` — artes e áudios de referência.
+- Raiz do repositório — build Web publicada no GitHub Pages.
+- A versão antiga em HTML ficou preservada no branch `legacy-html`.
 
-Davi usa especial com 100 de energia para o Super Namorador, ou Paixão Alviverde quando já está transformado; baixo + especial custa 50 e ativa a Transformação Roxa por dez segundos. A forma do Super Namorador dura oito segundos, e os especiais têm intervalo mínimo de 1,2 segundo. As falas são provisórias, sintetizadas em português com eSpeak NG, sem imitar a voz de outra pessoa.
-
-As poses de combate são recortes da arte fornecida, não uma animação completa produzida quadro a quadro. Ainda faltam sprites próprios para a preguiça, convite ao videogame, esquiva, transições suaves, cabelo roxo em todas as poses, sequência cinematográfica dos especiais e admiradoras apropriadas à idade, além de gravações de voz e efeitos sonoros definitivos. Para contas existentes, aplique `supabase/migrations/20261122_add_davi.sql` no Supabase antes de registrar partidas com Davi.
-
-## Assets e evolução visual
-
-A aplicação usa os sprites e cenários existentes e preserva o fluxo de luta, a física e os controles. A evolução visual da interface inclui seleção adaptada à viewport e uma introdução cinematográfica curta antes da luta. Para arte de personagens redesenhada, poses de entrada próprias ou cenários com camadas separadas, ainda são necessários novos assets; as imagens-fonte atuais não fornecem esses elementos separados.
-
-## GitHub Pages
-
-A raiz do branch `main` é a origem do Pages. O workflow compila `prototype-2.5d/` e sincroniza o resultado na raiz após as verificações passarem.
+Créditos de terceiros: Poly Haven (CC0), Kenney (CC0), fontes Bebas Neue/Barlow (OFL), Godot Engine (MIT).

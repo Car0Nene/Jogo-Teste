@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://d1gf7atsmxnfg"
-path="res://.godot/imported/standing_picture_frame_01_standing_picture_frame_01_metal-standing_picture_frame_01_rough.jpg-c31f5d433d9e5a7a2a8a13c03b7d1b19.ctex"
+path.s3tc="res://.godot/imported/standing_picture_frame_01_standing_picture_frame_01_metal-standing_picture_frame_01_rough.jpg-c31f5d433d9e5a7a2a8a13c03b7d1b19.s3tc.ctex"
+path.etc2="res://.godot/imported/standing_picture_frame_01_standing_picture_frame_01_metal-standing_picture_frame_01_rough.jpg-c31f5d433d9e5a7a2a8a13c03b7d1b19.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "fa9ed91e5c7c051935f0edb670a7e1b9"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/standing_picture_frame_01_standing_picture_frame_01_metal-standing_picture_frame_01_rough.jpg"
-dest_files=["res://.godot/imported/standing_picture_frame_01_standing_picture_frame_01_metal-standing_picture_frame_01_rough.jpg-c31f5d433d9e5a7a2a8a13c03b7d1b19.ctex"]
+dest_files=["res://.godot/imported/standing_picture_frame_01_standing_picture_frame_01_metal-standing_picture_frame_01_rough.jpg-c31f5d433d9e5a7a2a8a13c03b7d1b19.s3tc.ctex", "res://.godot/imported/standing_picture_frame_01_standing_picture_frame_01_metal-standing_picture_frame_01_rough.jpg-c31f5d433d9e5a7a2a8a13c03b7d1b19.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

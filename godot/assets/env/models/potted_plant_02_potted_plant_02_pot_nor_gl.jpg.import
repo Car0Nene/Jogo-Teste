@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cyavm1g7i1wxj"
-path="res://.godot/imported/potted_plant_02_potted_plant_02_pot_nor_gl.jpg-a3698138485c185fd38cc77fa87b032b.ctex"
+path.s3tc="res://.godot/imported/potted_plant_02_potted_plant_02_pot_nor_gl.jpg-a3698138485c185fd38cc77fa87b032b.s3tc.ctex"
+path.etc2="res://.godot/imported/potted_plant_02_potted_plant_02_pot_nor_gl.jpg-a3698138485c185fd38cc77fa87b032b.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "2be217b3edd04ea8123206d3097d3bbc"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/potted_plant_02_potted_plant_02_pot_nor_gl.jpg"
-dest_files=["res://.godot/imported/potted_plant_02_potted_plant_02_pot_nor_gl.jpg-a3698138485c185fd38cc77fa87b032b.ctex"]
+dest_files=["res://.godot/imported/potted_plant_02_potted_plant_02_pot_nor_gl.jpg-a3698138485c185fd38cc77fa87b032b.s3tc.ctex", "res://.godot/imported/potted_plant_02_potted_plant_02_pot_nor_gl.jpg-a3698138485c185fd38cc77fa87b032b.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

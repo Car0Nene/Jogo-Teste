@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cvv2d7wm31m8p"
-path="res://.godot/imported/davi_hd_davi_rm.jpg-6bccffbf1729ee7ad636e67b80c319fc.ctex"
+path.s3tc="res://.godot/imported/davi_hd_davi_rm.jpg-6bccffbf1729ee7ad636e67b80c319fc.s3tc.ctex"
+path.etc2="res://.godot/imported/davi_hd_davi_rm.jpg-6bccffbf1729ee7ad636e67b80c319fc.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "f8e054c1bb52c0381cf43b71b146c2ae"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/characters/davi/davi_hd_davi_rm.jpg"
-dest_files=["res://.godot/imported/davi_hd_davi_rm.jpg-6bccffbf1729ee7ad636e67b80c319fc.ctex"]
+dest_files=["res://.godot/imported/davi_hd_davi_rm.jpg-6bccffbf1729ee7ad636e67b80c319fc.s3tc.ctex", "res://.godot/imported/davi_hd_davi_rm.jpg-6bccffbf1729ee7ad636e67b80c319fc.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -39,5 +41,5 @@ process/premult_alpha=false
 process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
-process/size_limit=0
+process/size_limit=2048
 detect_3d/compress_to=1

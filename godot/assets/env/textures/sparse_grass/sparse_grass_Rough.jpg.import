@@ -3,19 +3,21 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://lvkjto8pppu6"
-path="res://.godot/imported/sparse_grass_Rough.jpg-4d7e35a7f09a8f6739c38fa194d01fdf.ctex"
+path.s3tc="res://.godot/imported/sparse_grass_Rough.jpg-4d7e35a7f09a8f6739c38fa194d01fdf.s3tc.ctex"
+path.etc2="res://.godot/imported/sparse_grass_Rough.jpg-4d7e35a7f09a8f6739c38fa194d01fdf.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/env/textures/sparse_grass/sparse_grass_Rough.jpg"
-dest_files=["res://.godot/imported/sparse_grass_Rough.jpg-4d7e35a7f09a8f6739c38fa194d01fdf.ctex"]
+dest_files=["res://.godot/imported/sparse_grass_Rough.jpg-4d7e35a7f09a8f6739c38fa194d01fdf.s3tc.ctex", "res://.godot/imported/sparse_grass_Rough.jpg-4d7e35a7f09a8f6739c38fa194d01fdf.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

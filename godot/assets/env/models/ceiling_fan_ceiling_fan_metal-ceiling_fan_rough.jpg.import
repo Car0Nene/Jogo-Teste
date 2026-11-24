@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dh8nqjsdvpmmm"
-path="res://.godot/imported/ceiling_fan_ceiling_fan_metal-ceiling_fan_rough.jpg-28a0ae0909d558b35052c674ba6ef814.ctex"
+path.s3tc="res://.godot/imported/ceiling_fan_ceiling_fan_metal-ceiling_fan_rough.jpg-28a0ae0909d558b35052c674ba6ef814.s3tc.ctex"
+path.etc2="res://.godot/imported/ceiling_fan_ceiling_fan_metal-ceiling_fan_rough.jpg-28a0ae0909d558b35052c674ba6ef814.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "5847a2e1040401c20129ddc290d8c9dc"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/ceiling_fan_ceiling_fan_metal-ceiling_fan_rough.jpg"
-dest_files=["res://.godot/imported/ceiling_fan_ceiling_fan_metal-ceiling_fan_rough.jpg-28a0ae0909d558b35052c674ba6ef814.ctex"]
+dest_files=["res://.godot/imported/ceiling_fan_ceiling_fan_metal-ceiling_fan_rough.jpg-28a0ae0909d558b35052c674ba6ef814.s3tc.ctex", "res://.godot/imported/ceiling_fan_ceiling_fan_metal-ceiling_fan_rough.jpg-28a0ae0909d558b35052c674ba6ef814.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

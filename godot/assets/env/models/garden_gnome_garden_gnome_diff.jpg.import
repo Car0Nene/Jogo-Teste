@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bmyj1ru7lqfwk"
-path="res://.godot/imported/garden_gnome_garden_gnome_diff.jpg-28ed3c3488aa83f2cae6e9e65ac50656.ctex"
+path.s3tc="res://.godot/imported/garden_gnome_garden_gnome_diff.jpg-28ed3c3488aa83f2cae6e9e65ac50656.s3tc.ctex"
+path.etc2="res://.godot/imported/garden_gnome_garden_gnome_diff.jpg-28ed3c3488aa83f2cae6e9e65ac50656.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "67bef1d33fbc784a9ded75ab92b6d1f3"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/garden_gnome_garden_gnome_diff.jpg"
-dest_files=["res://.godot/imported/garden_gnome_garden_gnome_diff.jpg-28ed3c3488aa83f2cae6e9e65ac50656.ctex"]
+dest_files=["res://.godot/imported/garden_gnome_garden_gnome_diff.jpg-28ed3c3488aa83f2cae6e9e65ac50656.s3tc.ctex", "res://.godot/imported/garden_gnome_garden_gnome_diff.jpg-28ed3c3488aa83f2cae6e9e65ac50656.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b6j1g1w14fg3x"
-path="res://.godot/imported/quintal_varal_quintal_varal_rm.jpg-834d8ad9e5273f797b8ac35e4d559eee.ctex"
+path.s3tc="res://.godot/imported/quintal_varal_quintal_varal_rm.jpg-834d8ad9e5273f797b8ac35e4d559eee.s3tc.ctex"
+path.etc2="res://.godot/imported/quintal_varal_quintal_varal_rm.jpg-834d8ad9e5273f797b8ac35e4d559eee.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "54d824c2258b0751c7c7590b2b373728"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/props/quintal_varal_quintal_varal_rm.jpg"
-dest_files=["res://.godot/imported/quintal_varal_quintal_varal_rm.jpg-834d8ad9e5273f797b8ac35e4d559eee.ctex"]
+dest_files=["res://.godot/imported/quintal_varal_quintal_varal_rm.jpg-834d8ad9e5273f797b8ac35e4d559eee.s3tc.ctex", "res://.godot/imported/quintal_varal_quintal_varal_rm.jpg-834d8ad9e5273f797b8ac35e4d559eee.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

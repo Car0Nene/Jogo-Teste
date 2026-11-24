@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bru86lt1mmy5v"
-path="res://.godot/imported/boombox_boombox_nor_gl.jpg-4dc069e6739c20e266e9f9f6b295a6e9.ctex"
+path.s3tc="res://.godot/imported/boombox_boombox_nor_gl.jpg-4dc069e6739c20e266e9f9f6b295a6e9.s3tc.ctex"
+path.etc2="res://.godot/imported/boombox_boombox_nor_gl.jpg-4dc069e6739c20e266e9f9f6b295a6e9.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "cebac4e3f16118799871b0d89eba8699"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/boombox_boombox_nor_gl.jpg"
-dest_files=["res://.godot/imported/boombox_boombox_nor_gl.jpg-4dc069e6739c20e266e9f9f6b295a6e9.ctex"]
+dest_files=["res://.godot/imported/boombox_boombox_nor_gl.jpg-4dc069e6739c20e266e9f9f6b295a6e9.s3tc.ctex", "res://.godot/imported/boombox_boombox_nor_gl.jpg-4dc069e6739c20e266e9f9f6b295a6e9.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

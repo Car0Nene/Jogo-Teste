@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://fe6c86l81leq"
-path="res://.godot/imported/boombox_boombox_diff.jpg-5b04f01a18f3f3a45d805534b4c60bc4.ctex"
+path.s3tc="res://.godot/imported/boombox_boombox_diff.jpg-5b04f01a18f3f3a45d805534b4c60bc4.s3tc.ctex"
+path.etc2="res://.godot/imported/boombox_boombox_diff.jpg-5b04f01a18f3f3a45d805534b4c60bc4.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "754400cd3bf10ad7f1dfd56ba1488fcd"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/boombox_boombox_diff.jpg"
-dest_files=["res://.godot/imported/boombox_boombox_diff.jpg-5b04f01a18f3f3a45d805534b4c60bc4.ctex"]
+dest_files=["res://.godot/imported/boombox_boombox_diff.jpg-5b04f01a18f3f3a45d805534b4c60bc4.s3tc.ctex", "res://.godot/imported/boombox_boombox_diff.jpg-5b04f01a18f3f3a45d805534b4c60bc4.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

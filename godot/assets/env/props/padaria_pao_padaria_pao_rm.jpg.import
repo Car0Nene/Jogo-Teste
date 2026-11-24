@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bwot70b8ckl0l"
-path="res://.godot/imported/padaria_pao_padaria_pao_rm.jpg-fc7fc2061b8f6922eae3343647c3b916.ctex"
+path.s3tc="res://.godot/imported/padaria_pao_padaria_pao_rm.jpg-fc7fc2061b8f6922eae3343647c3b916.s3tc.ctex"
+path.etc2="res://.godot/imported/padaria_pao_padaria_pao_rm.jpg-fc7fc2061b8f6922eae3343647c3b916.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "09e134b887536ce8fccc318a3daf20e9"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/props/padaria_pao_padaria_pao_rm.jpg"
-dest_files=["res://.godot/imported/padaria_pao_padaria_pao_rm.jpg-fc7fc2061b8f6922eae3343647c3b916.ctex"]
+dest_files=["res://.godot/imported/padaria_pao_padaria_pao_rm.jpg-fc7fc2061b8f6922eae3343647c3b916.s3tc.ctex", "res://.godot/imported/padaria_pao_padaria_pao_rm.jpg-fc7fc2061b8f6922eae3343647c3b916.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

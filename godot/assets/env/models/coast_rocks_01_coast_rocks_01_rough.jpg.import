@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bumea1v07yq8b"
-path="res://.godot/imported/coast_rocks_01_coast_rocks_01_rough.jpg-e1da6c626875a2c64f5d29a69980cd66.ctex"
+path.s3tc="res://.godot/imported/coast_rocks_01_coast_rocks_01_rough.jpg-e1da6c626875a2c64f5d29a69980cd66.s3tc.ctex"
+path.etc2="res://.godot/imported/coast_rocks_01_coast_rocks_01_rough.jpg-e1da6c626875a2c64f5d29a69980cd66.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "24352773046bf8a9809561f7bca830ac"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/coast_rocks_01_coast_rocks_01_rough.jpg"
-dest_files=["res://.godot/imported/coast_rocks_01_coast_rocks_01_rough.jpg-e1da6c626875a2c64f5d29a69980cd66.ctex"]
+dest_files=["res://.godot/imported/coast_rocks_01_coast_rocks_01_rough.jpg-e1da6c626875a2c64f5d29a69980cd66.s3tc.ctex", "res://.godot/imported/coast_rocks_01_coast_rocks_01_rough.jpg-e1da6c626875a2c64f5d29a69980cd66.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

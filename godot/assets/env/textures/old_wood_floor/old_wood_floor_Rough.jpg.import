@@ -3,19 +3,21 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bkmrbiduc12om"
-path="res://.godot/imported/old_wood_floor_Rough.jpg-d84b8a14530bcd6ceb71134483cc2d38.ctex"
+path.s3tc="res://.godot/imported/old_wood_floor_Rough.jpg-d84b8a14530bcd6ceb71134483cc2d38.s3tc.ctex"
+path.etc2="res://.godot/imported/old_wood_floor_Rough.jpg-d84b8a14530bcd6ceb71134483cc2d38.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/env/textures/old_wood_floor/old_wood_floor_Rough.jpg"
-dest_files=["res://.godot/imported/old_wood_floor_Rough.jpg-d84b8a14530bcd6ceb71134483cc2d38.ctex"]
+dest_files=["res://.godot/imported/old_wood_floor_Rough.jpg-d84b8a14530bcd6ceb71134483cc2d38.s3tc.ctex", "res://.godot/imported/old_wood_floor_Rough.jpg-d84b8a14530bcd6ceb71134483cc2d38.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

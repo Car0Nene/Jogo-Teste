@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://iybta3pv6oli"
-path="res://.godot/imported/planter_box_01_planter_box_01_diff.jpg-9500b9beba9cb93f4e2b706b29727500.ctex"
+path.s3tc="res://.godot/imported/planter_box_01_planter_box_01_diff.jpg-9500b9beba9cb93f4e2b706b29727500.s3tc.ctex"
+path.etc2="res://.godot/imported/planter_box_01_planter_box_01_diff.jpg-9500b9beba9cb93f4e2b706b29727500.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "cedeb5cb81fa14ca345794105b909750"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/planter_box_01_planter_box_01_diff.jpg"
-dest_files=["res://.godot/imported/planter_box_01_planter_box_01_diff.jpg-9500b9beba9cb93f4e2b706b29727500.ctex"]
+dest_files=["res://.godot/imported/planter_box_01_planter_box_01_diff.jpg-9500b9beba9cb93f4e2b706b29727500.s3tc.ctex", "res://.godot/imported/planter_box_01_planter_box_01_diff.jpg-9500b9beba9cb93f4e2b706b29727500.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

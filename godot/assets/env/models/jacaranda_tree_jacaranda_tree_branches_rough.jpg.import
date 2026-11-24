@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dx7tt1yj2v51u"
-path="res://.godot/imported/jacaranda_tree_jacaranda_tree_branches_rough.jpg-5b95dc84b5b3dd64d7d762a26e1d7977.ctex"
+path.s3tc="res://.godot/imported/jacaranda_tree_jacaranda_tree_branches_rough.jpg-5b95dc84b5b3dd64d7d762a26e1d7977.s3tc.ctex"
+path.etc2="res://.godot/imported/jacaranda_tree_jacaranda_tree_branches_rough.jpg-5b95dc84b5b3dd64d7d762a26e1d7977.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "6ffc9b7885dcd063360cfb9bb24fa1e5"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/jacaranda_tree_jacaranda_tree_branches_rough.jpg"
-dest_files=["res://.godot/imported/jacaranda_tree_jacaranda_tree_branches_rough.jpg-5b95dc84b5b3dd64d7d762a26e1d7977.ctex"]
+dest_files=["res://.godot/imported/jacaranda_tree_jacaranda_tree_branches_rough.jpg-5b95dc84b5b3dd64d7d762a26e1d7977.s3tc.ctex", "res://.godot/imported/jacaranda_tree_jacaranda_tree_branches_rough.jpg-5b95dc84b5b3dd64d7d762a26e1d7977.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

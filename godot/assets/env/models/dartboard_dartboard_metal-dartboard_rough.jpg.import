@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://6p818anlx4ja"
-path="res://.godot/imported/dartboard_dartboard_metal-dartboard_rough.jpg-db9df844cfa0875fe6cca0f88fef3247.ctex"
+path.s3tc="res://.godot/imported/dartboard_dartboard_metal-dartboard_rough.jpg-db9df844cfa0875fe6cca0f88fef3247.s3tc.ctex"
+path.etc2="res://.godot/imported/dartboard_dartboard_metal-dartboard_rough.jpg-db9df844cfa0875fe6cca0f88fef3247.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "c12b817211f1edef3e5118c95cb7ed81"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/dartboard_dartboard_metal-dartboard_rough.jpg"
-dest_files=["res://.godot/imported/dartboard_dartboard_metal-dartboard_rough.jpg-db9df844cfa0875fe6cca0f88fef3247.ctex"]
+dest_files=["res://.godot/imported/dartboard_dartboard_metal-dartboard_rough.jpg-db9df844cfa0875fe6cca0f88fef3247.s3tc.ctex", "res://.godot/imported/dartboard_dartboard_metal-dartboard_rough.jpg-db9df844cfa0875fe6cca0f88fef3247.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

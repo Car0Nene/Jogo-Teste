@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dj01xfofa0r4m"
-path="res://.godot/imported/jacaranda_tree_jacaranda_tree_leaves_diff-jacaranda_tree_leaves_alpha.jpg-2ec6aaabd60f1ef879aabcc632dc2328.ctex"
+path.s3tc="res://.godot/imported/jacaranda_tree_jacaranda_tree_leaves_diff-jacaranda_tree_leaves_alpha.jpg-2ec6aaabd60f1ef879aabcc632dc2328.s3tc.ctex"
+path.etc2="res://.godot/imported/jacaranda_tree_jacaranda_tree_leaves_diff-jacaranda_tree_leaves_alpha.jpg-2ec6aaabd60f1ef879aabcc632dc2328.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "0aa3d1e4640aa11ba19c710c0213ce92"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/jacaranda_tree_jacaranda_tree_leaves_diff-jacaranda_tree_leaves_alpha.jpg"
-dest_files=["res://.godot/imported/jacaranda_tree_jacaranda_tree_leaves_diff-jacaranda_tree_leaves_alpha.jpg-2ec6aaabd60f1ef879aabcc632dc2328.ctex"]
+dest_files=["res://.godot/imported/jacaranda_tree_jacaranda_tree_leaves_diff-jacaranda_tree_leaves_alpha.jpg-2ec6aaabd60f1ef879aabcc632dc2328.s3tc.ctex", "res://.godot/imported/jacaranda_tree_jacaranda_tree_leaves_diff-jacaranda_tree_leaves_alpha.jpg-2ec6aaabd60f1ef879aabcc632dc2328.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b0ox8i4fsebwf"
-path="res://.godot/imported/praia_guardasol_praia_guardasol_rm.jpg-6012acd9a4bd15da76d9f7bf81dc76e8.ctex"
+path.s3tc="res://.godot/imported/praia_guardasol_praia_guardasol_rm.jpg-6012acd9a4bd15da76d9f7bf81dc76e8.s3tc.ctex"
+path.etc2="res://.godot/imported/praia_guardasol_praia_guardasol_rm.jpg-6012acd9a4bd15da76d9f7bf81dc76e8.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "71c15f84f2f628561fe3e25fa5174ed5"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/props/praia_guardasol_praia_guardasol_rm.jpg"
-dest_files=["res://.godot/imported/praia_guardasol_praia_guardasol_rm.jpg-6012acd9a4bd15da76d9f7bf81dc76e8.ctex"]
+dest_files=["res://.godot/imported/praia_guardasol_praia_guardasol_rm.jpg-6012acd9a4bd15da76d9f7bf81dc76e8.s3tc.ctex", "res://.godot/imported/praia_guardasol_praia_guardasol_rm.jpg-6012acd9a4bd15da76d9f7bf81dc76e8.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

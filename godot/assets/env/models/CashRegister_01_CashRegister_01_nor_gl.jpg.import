@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://6gvvp5u7q4rm"
-path="res://.godot/imported/CashRegister_01_CashRegister_01_nor_gl.jpg-3e111c65f55d8e272093f2ba148d3cbc.ctex"
+path.s3tc="res://.godot/imported/CashRegister_01_CashRegister_01_nor_gl.jpg-3e111c65f55d8e272093f2ba148d3cbc.s3tc.ctex"
+path.etc2="res://.godot/imported/CashRegister_01_CashRegister_01_nor_gl.jpg-3e111c65f55d8e272093f2ba148d3cbc.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "2b933fd4ffbb7d3ce21da3aa54666289"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/CashRegister_01_CashRegister_01_nor_gl.jpg"
-dest_files=["res://.godot/imported/CashRegister_01_CashRegister_01_nor_gl.jpg-3e111c65f55d8e272093f2ba148d3cbc.ctex"]
+dest_files=["res://.godot/imported/CashRegister_01_CashRegister_01_nor_gl.jpg-3e111c65f55d8e272093f2ba148d3cbc.s3tc.ctex", "res://.godot/imported/CashRegister_01_CashRegister_01_nor_gl.jpg-3e111c65f55d8e272093f2ba148d3cbc.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

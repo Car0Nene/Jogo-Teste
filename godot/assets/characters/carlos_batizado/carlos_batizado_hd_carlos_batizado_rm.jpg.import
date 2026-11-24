@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bu5cw066vlfc5"
-path="res://.godot/imported/carlos_batizado_hd_carlos_batizado_rm.jpg-49bb85e8fb38a97155bc6174d4f16c8c.ctex"
+path.s3tc="res://.godot/imported/carlos_batizado_hd_carlos_batizado_rm.jpg-49bb85e8fb38a97155bc6174d4f16c8c.s3tc.ctex"
+path.etc2="res://.godot/imported/carlos_batizado_hd_carlos_batizado_rm.jpg-49bb85e8fb38a97155bc6174d4f16c8c.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "cec5247219f392d7dbf13e24ee9951a0"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/characters/carlos_batizado/carlos_batizado_hd_carlos_batizado_rm.jpg"
-dest_files=["res://.godot/imported/carlos_batizado_hd_carlos_batizado_rm.jpg-49bb85e8fb38a97155bc6174d4f16c8c.ctex"]
+dest_files=["res://.godot/imported/carlos_batizado_hd_carlos_batizado_rm.jpg-49bb85e8fb38a97155bc6174d4f16c8c.s3tc.ctex", "res://.godot/imported/carlos_batizado_hd_carlos_batizado_rm.jpg-49bb85e8fb38a97155bc6174d4f16c8c.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -39,5 +41,5 @@ process/premult_alpha=false
 process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
-process/size_limit=0
+process/size_limit=2048
 detect_3d/compress_to=1

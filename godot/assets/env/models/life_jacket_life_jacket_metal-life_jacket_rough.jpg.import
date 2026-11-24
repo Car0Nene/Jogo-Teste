@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ca3qxekxrabv7"
-path="res://.godot/imported/life_jacket_life_jacket_metal-life_jacket_rough.jpg-e86539755d9d3e922987bbd057e75ebd.ctex"
+path.s3tc="res://.godot/imported/life_jacket_life_jacket_metal-life_jacket_rough.jpg-e86539755d9d3e922987bbd057e75ebd.s3tc.ctex"
+path.etc2="res://.godot/imported/life_jacket_life_jacket_metal-life_jacket_rough.jpg-e86539755d9d3e922987bbd057e75ebd.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "116f89f6258da6667a0c48945ad39089"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/life_jacket_life_jacket_metal-life_jacket_rough.jpg"
-dest_files=["res://.godot/imported/life_jacket_life_jacket_metal-life_jacket_rough.jpg-e86539755d9d3e922987bbd057e75ebd.ctex"]
+dest_files=["res://.godot/imported/life_jacket_life_jacket_metal-life_jacket_rough.jpg-e86539755d9d3e922987bbd057e75ebd.s3tc.ctex", "res://.godot/imported/life_jacket_life_jacket_metal-life_jacket_rough.jpg-e86539755d9d3e922987bbd057e75ebd.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

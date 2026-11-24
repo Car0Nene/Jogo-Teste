@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c27pa6v6a0x43"
-path="res://.godot/imported/wicker_basket_01_wicker_basket_01_rough.jpg-122938075a422d52f7b9187ad5d34d40.ctex"
+path.s3tc="res://.godot/imported/wicker_basket_01_wicker_basket_01_rough.jpg-122938075a422d52f7b9187ad5d34d40.s3tc.ctex"
+path.etc2="res://.godot/imported/wicker_basket_01_wicker_basket_01_rough.jpg-122938075a422d52f7b9187ad5d34d40.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "d3449410be6195c9ff8ca8f4bbb5e316"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/wicker_basket_01_wicker_basket_01_rough.jpg"
-dest_files=["res://.godot/imported/wicker_basket_01_wicker_basket_01_rough.jpg-122938075a422d52f7b9187ad5d34d40.ctex"]
+dest_files=["res://.godot/imported/wicker_basket_01_wicker_basket_01_rough.jpg-122938075a422d52f7b9187ad5d34d40.s3tc.ctex", "res://.godot/imported/wicker_basket_01_wicker_basket_01_rough.jpg-122938075a422d52f7b9187ad5d34d40.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

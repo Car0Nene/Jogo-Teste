@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bdkelwa0nxr5r"
-path="res://.godot/imported/outdoor_table_chair_set_01_outdoor_table_chair_set_01_chair_diff.jpg-db16ffd97c733bd633bece48aae54ee4.ctex"
+path.s3tc="res://.godot/imported/outdoor_table_chair_set_01_outdoor_table_chair_set_01_chair_diff.jpg-db16ffd97c733bd633bece48aae54ee4.s3tc.ctex"
+path.etc2="res://.godot/imported/outdoor_table_chair_set_01_outdoor_table_chair_set_01_chair_diff.jpg-db16ffd97c733bd633bece48aae54ee4.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "413a343d7477abffa6b7d45f1d283211"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/outdoor_table_chair_set_01_outdoor_table_chair_set_01_chair_diff.jpg"
-dest_files=["res://.godot/imported/outdoor_table_chair_set_01_outdoor_table_chair_set_01_chair_diff.jpg-db16ffd97c733bd633bece48aae54ee4.ctex"]
+dest_files=["res://.godot/imported/outdoor_table_chair_set_01_outdoor_table_chair_set_01_chair_diff.jpg-db16ffd97c733bd633bece48aae54ee4.s3tc.ctex", "res://.godot/imported/outdoor_table_chair_set_01_outdoor_table_chair_set_01_chair_diff.jpg-db16ffd97c733bd633bece48aae54ee4.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bljr8aism1mpl"
-path="res://.godot/imported/planter_box_01_planter_box_01_nor_gl.jpg-ba594c7f6f0b94e34a2a0e9d1851b016.ctex"
+path.s3tc="res://.godot/imported/planter_box_01_planter_box_01_nor_gl.jpg-ba594c7f6f0b94e34a2a0e9d1851b016.s3tc.ctex"
+path.etc2="res://.godot/imported/planter_box_01_planter_box_01_nor_gl.jpg-ba594c7f6f0b94e34a2a0e9d1851b016.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "63b73a23989730280b8cea3a7f5bab71"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/planter_box_01_planter_box_01_nor_gl.jpg"
-dest_files=["res://.godot/imported/planter_box_01_planter_box_01_nor_gl.jpg-ba594c7f6f0b94e34a2a0e9d1851b016.ctex"]
+dest_files=["res://.godot/imported/planter_box_01_planter_box_01_nor_gl.jpg-ba594c7f6f0b94e34a2a0e9d1851b016.s3tc.ctex", "res://.godot/imported/planter_box_01_planter_box_01_nor_gl.jpg-ba594c7f6f0b94e34a2a0e9d1851b016.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

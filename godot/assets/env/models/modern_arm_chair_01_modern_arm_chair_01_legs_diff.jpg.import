@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ct01afa0s0aaq"
-path="res://.godot/imported/modern_arm_chair_01_modern_arm_chair_01_legs_diff.jpg-5ed667d91ef9147c4956aa0a6cef6463.ctex"
+path.s3tc="res://.godot/imported/modern_arm_chair_01_modern_arm_chair_01_legs_diff.jpg-5ed667d91ef9147c4956aa0a6cef6463.s3tc.ctex"
+path.etc2="res://.godot/imported/modern_arm_chair_01_modern_arm_chair_01_legs_diff.jpg-5ed667d91ef9147c4956aa0a6cef6463.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "838f000d1a544a2f4e6cd9138dae482e"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/modern_arm_chair_01_modern_arm_chair_01_legs_diff.jpg"
-dest_files=["res://.godot/imported/modern_arm_chair_01_modern_arm_chair_01_legs_diff.jpg-5ed667d91ef9147c4956aa0a6cef6463.ctex"]
+dest_files=["res://.godot/imported/modern_arm_chair_01_modern_arm_chair_01_legs_diff.jpg-5ed667d91ef9147c4956aa0a6cef6463.s3tc.ctex", "res://.godot/imported/modern_arm_chair_01_modern_arm_chair_01_legs_diff.jpg-5ed667d91ef9147c4956aa0a6cef6463.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

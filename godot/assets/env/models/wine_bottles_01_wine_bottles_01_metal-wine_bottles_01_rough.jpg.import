@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bj3ttlw2kuov0"
-path="res://.godot/imported/wine_bottles_01_wine_bottles_01_metal-wine_bottles_01_rough.jpg-931f7d97616f855fb0d6981e40bdd72d.ctex"
+path.s3tc="res://.godot/imported/wine_bottles_01_wine_bottles_01_metal-wine_bottles_01_rough.jpg-931f7d97616f855fb0d6981e40bdd72d.s3tc.ctex"
+path.etc2="res://.godot/imported/wine_bottles_01_wine_bottles_01_metal-wine_bottles_01_rough.jpg-931f7d97616f855fb0d6981e40bdd72d.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "2a030a295c543d37db32bd7f8412a0c5"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/wine_bottles_01_wine_bottles_01_metal-wine_bottles_01_rough.jpg"
-dest_files=["res://.godot/imported/wine_bottles_01_wine_bottles_01_metal-wine_bottles_01_rough.jpg-931f7d97616f855fb0d6981e40bdd72d.ctex"]
+dest_files=["res://.godot/imported/wine_bottles_01_wine_bottles_01_metal-wine_bottles_01_rough.jpg-931f7d97616f855fb0d6981e40bdd72d.s3tc.ctex", "res://.godot/imported/wine_bottles_01_wine_bottles_01_metal-wine_bottles_01_rough.jpg-931f7d97616f855fb0d6981e40bdd72d.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://787knxv40j0y"
-path="res://.godot/imported/lifebuoy_lifebuoy_metal-lifebuoy_rough.jpg-effbc2c65390e2edd78908a22ff26147.ctex"
+path.s3tc="res://.godot/imported/lifebuoy_lifebuoy_metal-lifebuoy_rough.jpg-effbc2c65390e2edd78908a22ff26147.s3tc.ctex"
+path.etc2="res://.godot/imported/lifebuoy_lifebuoy_metal-lifebuoy_rough.jpg-effbc2c65390e2edd78908a22ff26147.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "8840a39e7c554dba8c7b3badd603dea3"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/lifebuoy_lifebuoy_metal-lifebuoy_rough.jpg"
-dest_files=["res://.godot/imported/lifebuoy_lifebuoy_metal-lifebuoy_rough.jpg-effbc2c65390e2edd78908a22ff26147.ctex"]
+dest_files=["res://.godot/imported/lifebuoy_lifebuoy_metal-lifebuoy_rough.jpg-effbc2c65390e2edd78908a22ff26147.s3tc.ctex", "res://.godot/imported/lifebuoy_lifebuoy_metal-lifebuoy_rough.jpg-effbc2c65390e2edd78908a22ff26147.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

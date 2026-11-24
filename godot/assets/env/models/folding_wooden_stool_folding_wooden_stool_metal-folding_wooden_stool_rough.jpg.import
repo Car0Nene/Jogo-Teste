@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c4j0rexq2qmqi"
-path="res://.godot/imported/folding_wooden_stool_folding_wooden_stool_metal-folding_wooden_stool_rough.jpg-a591673d0c6a17ef591504c6c86de0d4.ctex"
+path.s3tc="res://.godot/imported/folding_wooden_stool_folding_wooden_stool_metal-folding_wooden_stool_rough.jpg-a591673d0c6a17ef591504c6c86de0d4.s3tc.ctex"
+path.etc2="res://.godot/imported/folding_wooden_stool_folding_wooden_stool_metal-folding_wooden_stool_rough.jpg-a591673d0c6a17ef591504c6c86de0d4.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "ff99afec6ca1bd281b313b605a710d6d"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/folding_wooden_stool_folding_wooden_stool_metal-folding_wooden_stool_rough.jpg"
-dest_files=["res://.godot/imported/folding_wooden_stool_folding_wooden_stool_metal-folding_wooden_stool_rough.jpg-a591673d0c6a17ef591504c6c86de0d4.ctex"]
+dest_files=["res://.godot/imported/folding_wooden_stool_folding_wooden_stool_metal-folding_wooden_stool_rough.jpg-a591673d0c6a17ef591504c6c86de0d4.s3tc.ctex", "res://.godot/imported/folding_wooden_stool_folding_wooden_stool_metal-folding_wooden_stool_rough.jpg-a591673d0c6a17ef591504c6c86de0d4.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

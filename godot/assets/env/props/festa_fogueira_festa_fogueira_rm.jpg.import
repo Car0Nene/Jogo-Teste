@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://diwkkebw0ekx1"
-path="res://.godot/imported/festa_fogueira_festa_fogueira_rm.jpg-f595c5e997006431efdaabe071b2d37e.ctex"
+path.s3tc="res://.godot/imported/festa_fogueira_festa_fogueira_rm.jpg-f595c5e997006431efdaabe071b2d37e.s3tc.ctex"
+path.etc2="res://.godot/imported/festa_fogueira_festa_fogueira_rm.jpg-f595c5e997006431efdaabe071b2d37e.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "2a902f2513f7bbfcbead095f7c9ca813"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/props/festa_fogueira_festa_fogueira_rm.jpg"
-dest_files=["res://.godot/imported/festa_fogueira_festa_fogueira_rm.jpg-f595c5e997006431efdaabe071b2d37e.ctex"]
+dest_files=["res://.godot/imported/festa_fogueira_festa_fogueira_rm.jpg-f595c5e997006431efdaabe071b2d37e.s3tc.ctex", "res://.godot/imported/festa_fogueira_festa_fogueira_rm.jpg-f595c5e997006431efdaabe071b2d37e.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

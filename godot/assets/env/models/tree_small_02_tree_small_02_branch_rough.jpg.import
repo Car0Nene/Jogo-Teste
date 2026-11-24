@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cn1vm6h67ko7v"
-path="res://.godot/imported/tree_small_02_tree_small_02_branch_rough.jpg-7b6a250bb630f804e3510932a25e0575.ctex"
+path.s3tc="res://.godot/imported/tree_small_02_tree_small_02_branch_rough.jpg-7b6a250bb630f804e3510932a25e0575.s3tc.ctex"
+path.etc2="res://.godot/imported/tree_small_02_tree_small_02_branch_rough.jpg-7b6a250bb630f804e3510932a25e0575.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "ac24aa107ad7260c79b4b50aa2fc95bc"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/tree_small_02_tree_small_02_branch_rough.jpg"
-dest_files=["res://.godot/imported/tree_small_02_tree_small_02_branch_rough.jpg-7b6a250bb630f804e3510932a25e0575.ctex"]
+dest_files=["res://.godot/imported/tree_small_02_tree_small_02_branch_rough.jpg-7b6a250bb630f804e3510932a25e0575.s3tc.ctex", "res://.godot/imported/tree_small_02_tree_small_02_branch_rough.jpg-7b6a250bb630f804e3510932a25e0575.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

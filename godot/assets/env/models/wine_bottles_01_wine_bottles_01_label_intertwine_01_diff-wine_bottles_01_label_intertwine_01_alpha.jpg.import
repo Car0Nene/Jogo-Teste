@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ugvmxrkwoy64"
-path="res://.godot/imported/wine_bottles_01_wine_bottles_01_label_intertwine_01_diff-wine_bottles_01_label_intertwine_01_alpha.jpg-08ce60e5c3e4c2e19e0785bab3b816ca.ctex"
+path.s3tc="res://.godot/imported/wine_bottles_01_wine_bottles_01_label_intertwine_01_diff-wine_bottles_01_label_intertwine_01_alpha.jpg-08ce60e5c3e4c2e19e0785bab3b816ca.s3tc.ctex"
+path.etc2="res://.godot/imported/wine_bottles_01_wine_bottles_01_label_intertwine_01_diff-wine_bottles_01_label_intertwine_01_alpha.jpg-08ce60e5c3e4c2e19e0785bab3b816ca.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "8b92a052574eede78ca72d2e8d6c40e3"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/wine_bottles_01_wine_bottles_01_label_intertwine_01_diff-wine_bottles_01_label_intertwine_01_alpha.jpg"
-dest_files=["res://.godot/imported/wine_bottles_01_wine_bottles_01_label_intertwine_01_diff-wine_bottles_01_label_intertwine_01_alpha.jpg-08ce60e5c3e4c2e19e0785bab3b816ca.ctex"]
+dest_files=["res://.godot/imported/wine_bottles_01_wine_bottles_01_label_intertwine_01_diff-wine_bottles_01_label_intertwine_01_alpha.jpg-08ce60e5c3e4c2e19e0785bab3b816ca.s3tc.ctex", "res://.godot/imported/wine_bottles_01_wine_bottles_01_label_intertwine_01_diff-wine_bottles_01_label_intertwine_01_alpha.jpg-08ce60e5c3e4c2e19e0785bab3b816ca.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

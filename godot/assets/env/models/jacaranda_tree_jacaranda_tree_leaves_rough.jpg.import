@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bx8ab4qix7sq5"
-path="res://.godot/imported/jacaranda_tree_jacaranda_tree_leaves_rough.jpg-2a9b73c024b757898555060e27153ab2.ctex"
+path.s3tc="res://.godot/imported/jacaranda_tree_jacaranda_tree_leaves_rough.jpg-2a9b73c024b757898555060e27153ab2.s3tc.ctex"
+path.etc2="res://.godot/imported/jacaranda_tree_jacaranda_tree_leaves_rough.jpg-2a9b73c024b757898555060e27153ab2.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "f94ade38ac023aafa0e5264409999198"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/jacaranda_tree_jacaranda_tree_leaves_rough.jpg"
-dest_files=["res://.godot/imported/jacaranda_tree_jacaranda_tree_leaves_rough.jpg-2a9b73c024b757898555060e27153ab2.ctex"]
+dest_files=["res://.godot/imported/jacaranda_tree_jacaranda_tree_leaves_rough.jpg-2a9b73c024b757898555060e27153ab2.s3tc.ctex", "res://.godot/imported/jacaranda_tree_jacaranda_tree_leaves_rough.jpg-2a9b73c024b757898555060e27153ab2.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

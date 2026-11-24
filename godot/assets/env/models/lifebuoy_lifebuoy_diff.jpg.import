@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dgrkqah5ved4n"
-path="res://.godot/imported/lifebuoy_lifebuoy_diff.jpg-4a89769a488ef033fb16a5e5e229d31a.ctex"
+path.s3tc="res://.godot/imported/lifebuoy_lifebuoy_diff.jpg-4a89769a488ef033fb16a5e5e229d31a.s3tc.ctex"
+path.etc2="res://.godot/imported/lifebuoy_lifebuoy_diff.jpg-4a89769a488ef033fb16a5e5e229d31a.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "8c06d85ce6c77379b4dfd456cf41658c"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/lifebuoy_lifebuoy_diff.jpg"
-dest_files=["res://.godot/imported/lifebuoy_lifebuoy_diff.jpg-4a89769a488ef033fb16a5e5e229d31a.ctex"]
+dest_files=["res://.godot/imported/lifebuoy_lifebuoy_diff.jpg-4a89769a488ef033fb16a5e5e229d31a.s3tc.ctex", "res://.godot/imported/lifebuoy_lifebuoy_diff.jpg-4a89769a488ef033fb16a5e5e229d31a.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

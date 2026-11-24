@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b1sctieiruyi3"
-path="res://.godot/imported/wooden_barrels_01_wooden_barrels_01_pieces_diff.jpg-e1c849f960402b8e0714530054ca40e8.ctex"
+path.s3tc="res://.godot/imported/wooden_barrels_01_wooden_barrels_01_pieces_diff.jpg-e1c849f960402b8e0714530054ca40e8.s3tc.ctex"
+path.etc2="res://.godot/imported/wooden_barrels_01_wooden_barrels_01_pieces_diff.jpg-e1c849f960402b8e0714530054ca40e8.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "bca7e53340d13adc202fff69556e4f6b"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/wooden_barrels_01_wooden_barrels_01_pieces_diff.jpg"
-dest_files=["res://.godot/imported/wooden_barrels_01_wooden_barrels_01_pieces_diff.jpg-e1c849f960402b8e0714530054ca40e8.ctex"]
+dest_files=["res://.godot/imported/wooden_barrels_01_wooden_barrels_01_pieces_diff.jpg-e1c849f960402b8e0714530054ca40e8.s3tc.ctex", "res://.godot/imported/wooden_barrels_01_wooden_barrels_01_pieces_diff.jpg-e1c849f960402b8e0714530054ca40e8.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bvo80h6hw3prn"
-path="res://.godot/imported/quintal_mesa_quintal_mesa_basecolor.jpg-9108ada8bc5a354b49b2e59354a19539.ctex"
+path.s3tc="res://.godot/imported/quintal_mesa_quintal_mesa_basecolor.jpg-9108ada8bc5a354b49b2e59354a19539.s3tc.ctex"
+path.etc2="res://.godot/imported/quintal_mesa_quintal_mesa_basecolor.jpg-9108ada8bc5a354b49b2e59354a19539.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "a5ff2032abd088089634fcfa47ed6355"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/props/quintal_mesa_quintal_mesa_basecolor.jpg"
-dest_files=["res://.godot/imported/quintal_mesa_quintal_mesa_basecolor.jpg-9108ada8bc5a354b49b2e59354a19539.ctex"]
+dest_files=["res://.godot/imported/quintal_mesa_quintal_mesa_basecolor.jpg-9108ada8bc5a354b49b2e59354a19539.s3tc.ctex", "res://.godot/imported/quintal_mesa_quintal_mesa_basecolor.jpg-9108ada8bc5a354b49b2e59354a19539.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://kuwyl4r8hjsq"
-path="res://.godot/imported/hanging_industrial_lamp_hanging_industrial_lamp_nor_gl.jpg-ab1b069568147455da7b1153675c3a9a.ctex"
+path.s3tc="res://.godot/imported/hanging_industrial_lamp_hanging_industrial_lamp_nor_gl.jpg-ab1b069568147455da7b1153675c3a9a.s3tc.ctex"
+path.etc2="res://.godot/imported/hanging_industrial_lamp_hanging_industrial_lamp_nor_gl.jpg-ab1b069568147455da7b1153675c3a9a.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "54e00abe294a99a703873686a2aa21bf"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/hanging_industrial_lamp_hanging_industrial_lamp_nor_gl.jpg"
-dest_files=["res://.godot/imported/hanging_industrial_lamp_hanging_industrial_lamp_nor_gl.jpg-ab1b069568147455da7b1153675c3a9a.ctex"]
+dest_files=["res://.godot/imported/hanging_industrial_lamp_hanging_industrial_lamp_nor_gl.jpg-ab1b069568147455da7b1153675c3a9a.s3tc.ctex", "res://.godot/imported/hanging_industrial_lamp_hanging_industrial_lamp_nor_gl.jpg-ab1b069568147455da7b1153675c3a9a.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

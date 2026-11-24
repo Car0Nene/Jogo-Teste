@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b1t7eaeigi118"
-path="res://.godot/imported/side_table_01_side_table_01_metallic-side_table_01_roughness.jpg-61a809a41a423030a9e837f7d186b7ac.ctex"
+path.s3tc="res://.godot/imported/side_table_01_side_table_01_metallic-side_table_01_roughness.jpg-61a809a41a423030a9e837f7d186b7ac.s3tc.ctex"
+path.etc2="res://.godot/imported/side_table_01_side_table_01_metallic-side_table_01_roughness.jpg-61a809a41a423030a9e837f7d186b7ac.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "c5d1810e60296ce924b3035d64733f68"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/side_table_01_side_table_01_metallic-side_table_01_roughness.jpg"
-dest_files=["res://.godot/imported/side_table_01_side_table_01_metallic-side_table_01_roughness.jpg-61a809a41a423030a9e837f7d186b7ac.ctex"]
+dest_files=["res://.godot/imported/side_table_01_side_table_01_metallic-side_table_01_roughness.jpg-61a809a41a423030a9e837f7d186b7ac.s3tc.ctex", "res://.godot/imported/side_table_01_side_table_01_metallic-side_table_01_roughness.jpg-61a809a41a423030a9e837f7d186b7ac.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

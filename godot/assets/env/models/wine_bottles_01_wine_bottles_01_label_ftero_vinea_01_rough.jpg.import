@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bxi4emuhxokwu"
-path="res://.godot/imported/wine_bottles_01_wine_bottles_01_label_ftero_vinea_01_rough.jpg-f6bf5346758e1a2e9e3c828137d5ad6a.ctex"
+path.s3tc="res://.godot/imported/wine_bottles_01_wine_bottles_01_label_ftero_vinea_01_rough.jpg-f6bf5346758e1a2e9e3c828137d5ad6a.s3tc.ctex"
+path.etc2="res://.godot/imported/wine_bottles_01_wine_bottles_01_label_ftero_vinea_01_rough.jpg-f6bf5346758e1a2e9e3c828137d5ad6a.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "3d268578a27238930a139812f0bd07ba"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/wine_bottles_01_wine_bottles_01_label_ftero_vinea_01_rough.jpg"
-dest_files=["res://.godot/imported/wine_bottles_01_wine_bottles_01_label_ftero_vinea_01_rough.jpg-f6bf5346758e1a2e9e3c828137d5ad6a.ctex"]
+dest_files=["res://.godot/imported/wine_bottles_01_wine_bottles_01_label_ftero_vinea_01_rough.jpg-f6bf5346758e1a2e9e3c828137d5ad6a.s3tc.ctex", "res://.godot/imported/wine_bottles_01_wine_bottles_01_label_ftero_vinea_01_rough.jpg-f6bf5346758e1a2e9e3c828137d5ad6a.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

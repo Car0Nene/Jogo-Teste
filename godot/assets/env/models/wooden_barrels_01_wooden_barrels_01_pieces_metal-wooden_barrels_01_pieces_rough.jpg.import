@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://3pnyasy3wrwq"
-path="res://.godot/imported/wooden_barrels_01_wooden_barrels_01_pieces_metal-wooden_barrels_01_pieces_rough.jpg-115a2e0b526d2df4cc022c0037b11b3c.ctex"
+path.s3tc="res://.godot/imported/wooden_barrels_01_wooden_barrels_01_pieces_metal-wooden_barrels_01_pieces_rough.jpg-115a2e0b526d2df4cc022c0037b11b3c.s3tc.ctex"
+path.etc2="res://.godot/imported/wooden_barrels_01_wooden_barrels_01_pieces_metal-wooden_barrels_01_pieces_rough.jpg-115a2e0b526d2df4cc022c0037b11b3c.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "ab88527cf6e4e12d7c8747a8a762721c"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/wooden_barrels_01_wooden_barrels_01_pieces_metal-wooden_barrels_01_pieces_rough.jpg"
-dest_files=["res://.godot/imported/wooden_barrels_01_wooden_barrels_01_pieces_metal-wooden_barrels_01_pieces_rough.jpg-115a2e0b526d2df4cc022c0037b11b3c.ctex"]
+dest_files=["res://.godot/imported/wooden_barrels_01_wooden_barrels_01_pieces_metal-wooden_barrels_01_pieces_rough.jpg-115a2e0b526d2df4cc022c0037b11b3c.s3tc.ctex", "res://.godot/imported/wooden_barrels_01_wooden_barrels_01_pieces_metal-wooden_barrels_01_pieces_rough.jpg-115a2e0b526d2df4cc022c0037b11b3c.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bdnu3jfw1bjtv"
-path="res://.godot/imported/life_jacket_life_jacket_nor_gl.jpg-f77de2ce7c9fd98ac1f875950a703dfe.ctex"
+path.s3tc="res://.godot/imported/life_jacket_life_jacket_nor_gl.jpg-f77de2ce7c9fd98ac1f875950a703dfe.s3tc.ctex"
+path.etc2="res://.godot/imported/life_jacket_life_jacket_nor_gl.jpg-f77de2ce7c9fd98ac1f875950a703dfe.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "c9a8e9d2ddfc01d1a3d81e9d7d72267f"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/life_jacket_life_jacket_nor_gl.jpg"
-dest_files=["res://.godot/imported/life_jacket_life_jacket_nor_gl.jpg-f77de2ce7c9fd98ac1f875950a703dfe.ctex"]
+dest_files=["res://.godot/imported/life_jacket_life_jacket_nor_gl.jpg-f77de2ce7c9fd98ac1f875950a703dfe.s3tc.ctex", "res://.godot/imported/life_jacket_life_jacket_nor_gl.jpg-f77de2ce7c9fd98ac1f875950a703dfe.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cx3rp6p225tkb"
-path="res://.godot/imported/round_wooden_table_01_round_wooden_table_01_diff.jpg-834529f8d6c2fb38b5d4642201fe3812.ctex"
+path.s3tc="res://.godot/imported/round_wooden_table_01_round_wooden_table_01_diff.jpg-834529f8d6c2fb38b5d4642201fe3812.s3tc.ctex"
+path.etc2="res://.godot/imported/round_wooden_table_01_round_wooden_table_01_diff.jpg-834529f8d6c2fb38b5d4642201fe3812.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "c9dd7cbff1552b8fac993a271fb466bc"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/round_wooden_table_01_round_wooden_table_01_diff.jpg"
-dest_files=["res://.godot/imported/round_wooden_table_01_round_wooden_table_01_diff.jpg-834529f8d6c2fb38b5d4642201fe3812.ctex"]
+dest_files=["res://.godot/imported/round_wooden_table_01_round_wooden_table_01_diff.jpg-834529f8d6c2fb38b5d4642201fe3812.s3tc.ctex", "res://.godot/imported/round_wooden_table_01_round_wooden_table_01_diff.jpg-834529f8d6c2fb38b5d4642201fe3812.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

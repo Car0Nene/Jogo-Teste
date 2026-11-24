@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dr26uhje12xis"
-path="res://.godot/imported/praia_quiosque_praia_quiosque_basecolor.jpg-750b008c19136a4fb33ea3a67cb5eef8.ctex"
+path.s3tc="res://.godot/imported/praia_quiosque_praia_quiosque_basecolor.jpg-750b008c19136a4fb33ea3a67cb5eef8.s3tc.ctex"
+path.etc2="res://.godot/imported/praia_quiosque_praia_quiosque_basecolor.jpg-750b008c19136a4fb33ea3a67cb5eef8.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "04cb8f00c1c6e2e2f5778367c73ecf98"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/props/praia_quiosque_praia_quiosque_basecolor.jpg"
-dest_files=["res://.godot/imported/praia_quiosque_praia_quiosque_basecolor.jpg-750b008c19136a4fb33ea3a67cb5eef8.ctex"]
+dest_files=["res://.godot/imported/praia_quiosque_praia_quiosque_basecolor.jpg-750b008c19136a4fb33ea3a67cb5eef8.s3tc.ctex", "res://.godot/imported/praia_quiosque_praia_quiosque_basecolor.jpg-750b008c19136a4fb33ea3a67cb5eef8.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

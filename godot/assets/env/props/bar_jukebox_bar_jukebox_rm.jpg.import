@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ccvpemn41bjnx"
-path="res://.godot/imported/bar_jukebox_bar_jukebox_rm.jpg-52b9ed60bb2c40a02059d4c2e19503ba.ctex"
+path.s3tc="res://.godot/imported/bar_jukebox_bar_jukebox_rm.jpg-52b9ed60bb2c40a02059d4c2e19503ba.s3tc.ctex"
+path.etc2="res://.godot/imported/bar_jukebox_bar_jukebox_rm.jpg-52b9ed60bb2c40a02059d4c2e19503ba.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "810e2679985da4f9381b23e0d21049e1"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/props/bar_jukebox_bar_jukebox_rm.jpg"
-dest_files=["res://.godot/imported/bar_jukebox_bar_jukebox_rm.jpg-52b9ed60bb2c40a02059d4c2e19503ba.ctex"]
+dest_files=["res://.godot/imported/bar_jukebox_bar_jukebox_rm.jpg-52b9ed60bb2c40a02059d4c2e19503ba.s3tc.ctex", "res://.godot/imported/bar_jukebox_bar_jukebox_rm.jpg-52b9ed60bb2c40a02059d4c2e19503ba.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

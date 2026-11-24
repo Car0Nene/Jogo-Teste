@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dqfpmfo8tnofu"
-path="res://.godot/imported/garden_gnome_garden_gnome_metal-garden_gnome_rough.jpg-1d23e85ea512be75b6f1004844701861.ctex"
+path.s3tc="res://.godot/imported/garden_gnome_garden_gnome_metal-garden_gnome_rough.jpg-1d23e85ea512be75b6f1004844701861.s3tc.ctex"
+path.etc2="res://.godot/imported/garden_gnome_garden_gnome_metal-garden_gnome_rough.jpg-1d23e85ea512be75b6f1004844701861.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "fba51c45a58dd03ecc7bf9dbca8f5519"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/garden_gnome_garden_gnome_metal-garden_gnome_rough.jpg"
-dest_files=["res://.godot/imported/garden_gnome_garden_gnome_metal-garden_gnome_rough.jpg-1d23e85ea512be75b6f1004844701861.ctex"]
+dest_files=["res://.godot/imported/garden_gnome_garden_gnome_metal-garden_gnome_rough.jpg-1d23e85ea512be75b6f1004844701861.s3tc.ctex", "res://.godot/imported/garden_gnome_garden_gnome_metal-garden_gnome_rough.jpg-1d23e85ea512be75b6f1004844701861.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c8hmcxp265ayv"
-path="res://.godot/imported/modern_arm_chair_01_modern_arm_chair_01_pillow_diff.jpg-515ad46eb4416d8ed03521be14256984.ctex"
+path.s3tc="res://.godot/imported/modern_arm_chair_01_modern_arm_chair_01_pillow_diff.jpg-515ad46eb4416d8ed03521be14256984.s3tc.ctex"
+path.etc2="res://.godot/imported/modern_arm_chair_01_modern_arm_chair_01_pillow_diff.jpg-515ad46eb4416d8ed03521be14256984.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "2a5fc0f9acabde46ef8d030aee0f5773"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/modern_arm_chair_01_modern_arm_chair_01_pillow_diff.jpg"
-dest_files=["res://.godot/imported/modern_arm_chair_01_modern_arm_chair_01_pillow_diff.jpg-515ad46eb4416d8ed03521be14256984.ctex"]
+dest_files=["res://.godot/imported/modern_arm_chair_01_modern_arm_chair_01_pillow_diff.jpg-515ad46eb4416d8ed03521be14256984.s3tc.ctex", "res://.godot/imported/modern_arm_chair_01_modern_arm_chair_01_pillow_diff.jpg-515ad46eb4416d8ed03521be14256984.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

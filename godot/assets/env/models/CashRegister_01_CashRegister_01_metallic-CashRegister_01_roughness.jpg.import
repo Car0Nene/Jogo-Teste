@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dens7p06uf38a"
-path="res://.godot/imported/CashRegister_01_CashRegister_01_metallic-CashRegister_01_roughness.jpg-6f9ad90d95bd10d7f3013891e8b58499.ctex"
+path.s3tc="res://.godot/imported/CashRegister_01_CashRegister_01_metallic-CashRegister_01_roughness.jpg-6f9ad90d95bd10d7f3013891e8b58499.s3tc.ctex"
+path.etc2="res://.godot/imported/CashRegister_01_CashRegister_01_metallic-CashRegister_01_roughness.jpg-6f9ad90d95bd10d7f3013891e8b58499.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "9b4bdcfa1838553050578cd638670145"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/CashRegister_01_CashRegister_01_metallic-CashRegister_01_roughness.jpg"
-dest_files=["res://.godot/imported/CashRegister_01_CashRegister_01_metallic-CashRegister_01_roughness.jpg-6f9ad90d95bd10d7f3013891e8b58499.ctex"]
+dest_files=["res://.godot/imported/CashRegister_01_CashRegister_01_metallic-CashRegister_01_roughness.jpg-6f9ad90d95bd10d7f3013891e8b58499.s3tc.ctex", "res://.godot/imported/CashRegister_01_CashRegister_01_metallic-CashRegister_01_roughness.jpg-6f9ad90d95bd10d7f3013891e8b58499.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

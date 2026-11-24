@@ -3,19 +3,21 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dw5yu40gi6wow"
-path="res://.godot/imported/checkered_pavement_tiles_Rough.jpg-b95b7f349e6f58f30f94be4a45fa0dbc.ctex"
+path.s3tc="res://.godot/imported/checkered_pavement_tiles_Rough.jpg-b95b7f349e6f58f30f94be4a45fa0dbc.s3tc.ctex"
+path.etc2="res://.godot/imported/checkered_pavement_tiles_Rough.jpg-b95b7f349e6f58f30f94be4a45fa0dbc.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/env/textures/checkered_pavement_tiles/checkered_pavement_tiles_Rough.jpg"
-dest_files=["res://.godot/imported/checkered_pavement_tiles_Rough.jpg-b95b7f349e6f58f30f94be4a45fa0dbc.ctex"]
+dest_files=["res://.godot/imported/checkered_pavement_tiles_Rough.jpg-b95b7f349e6f58f30f94be4a45fa0dbc.s3tc.ctex", "res://.godot/imported/checkered_pavement_tiles_Rough.jpg-b95b7f349e6f58f30f94be4a45fa0dbc.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

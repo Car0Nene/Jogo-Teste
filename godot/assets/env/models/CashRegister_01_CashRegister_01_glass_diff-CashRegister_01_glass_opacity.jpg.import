@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bnvnaa6l8yekh"
-path="res://.godot/imported/CashRegister_01_CashRegister_01_glass_diff-CashRegister_01_glass_opacity.jpg-c2735018e68020cd6c70132b75457eb5.ctex"
+path.s3tc="res://.godot/imported/CashRegister_01_CashRegister_01_glass_diff-CashRegister_01_glass_opacity.jpg-c2735018e68020cd6c70132b75457eb5.s3tc.ctex"
+path.etc2="res://.godot/imported/CashRegister_01_CashRegister_01_glass_diff-CashRegister_01_glass_opacity.jpg-c2735018e68020cd6c70132b75457eb5.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "aca910c9b53a341ff1997282059f6cd0"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/CashRegister_01_CashRegister_01_glass_diff-CashRegister_01_glass_opacity.jpg"
-dest_files=["res://.godot/imported/CashRegister_01_CashRegister_01_glass_diff-CashRegister_01_glass_opacity.jpg-c2735018e68020cd6c70132b75457eb5.ctex"]
+dest_files=["res://.godot/imported/CashRegister_01_CashRegister_01_glass_diff-CashRegister_01_glass_opacity.jpg-c2735018e68020cd6c70132b75457eb5.s3tc.ctex", "res://.godot/imported/CashRegister_01_CashRegister_01_glass_diff-CashRegister_01_glass_opacity.jpg-c2735018e68020cd6c70132b75457eb5.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

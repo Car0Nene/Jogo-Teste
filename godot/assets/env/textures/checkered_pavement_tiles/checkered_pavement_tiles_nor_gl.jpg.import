@@ -3,19 +3,21 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c7rb8mph76a0n"
-path="res://.godot/imported/checkered_pavement_tiles_nor_gl.jpg-19fb08879662b2a2aa6896ec45dca3e5.ctex"
+path.s3tc="res://.godot/imported/checkered_pavement_tiles_nor_gl.jpg-19fb08879662b2a2aa6896ec45dca3e5.s3tc.ctex"
+path.etc2="res://.godot/imported/checkered_pavement_tiles_nor_gl.jpg-19fb08879662b2a2aa6896ec45dca3e5.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/env/textures/checkered_pavement_tiles/checkered_pavement_tiles_nor_gl.jpg"
-dest_files=["res://.godot/imported/checkered_pavement_tiles_nor_gl.jpg-19fb08879662b2a2aa6896ec45dca3e5.ctex"]
+dest_files=["res://.godot/imported/checkered_pavement_tiles_nor_gl.jpg-19fb08879662b2a2aa6896ec45dca3e5.s3tc.ctex", "res://.godot/imported/checkered_pavement_tiles_nor_gl.jpg-19fb08879662b2a2aa6896ec45dca3e5.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

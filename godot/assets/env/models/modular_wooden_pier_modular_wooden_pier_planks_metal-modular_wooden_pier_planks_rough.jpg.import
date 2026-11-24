@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cs742rkx8u0jg"
-path="res://.godot/imported/modular_wooden_pier_modular_wooden_pier_planks_metal-modular_wooden_pier_planks_rough.jpg-60f9b8e8bebb52b7c08290ab96d11b87.ctex"
+path.s3tc="res://.godot/imported/modular_wooden_pier_modular_wooden_pier_planks_metal-modular_wooden_pier_planks_rough.jpg-60f9b8e8bebb52b7c08290ab96d11b87.s3tc.ctex"
+path.etc2="res://.godot/imported/modular_wooden_pier_modular_wooden_pier_planks_metal-modular_wooden_pier_planks_rough.jpg-60f9b8e8bebb52b7c08290ab96d11b87.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "0d9b93f40dd671088debee619aadf90a"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/modular_wooden_pier_modular_wooden_pier_planks_metal-modular_wooden_pier_planks_rough.jpg"
-dest_files=["res://.godot/imported/modular_wooden_pier_modular_wooden_pier_planks_metal-modular_wooden_pier_planks_rough.jpg-60f9b8e8bebb52b7c08290ab96d11b87.ctex"]
+dest_files=["res://.godot/imported/modular_wooden_pier_modular_wooden_pier_planks_metal-modular_wooden_pier_planks_rough.jpg-60f9b8e8bebb52b7c08290ab96d11b87.s3tc.ctex", "res://.godot/imported/modular_wooden_pier_modular_wooden_pier_planks_metal-modular_wooden_pier_planks_rough.jpg-60f9b8e8bebb52b7c08290ab96d11b87.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

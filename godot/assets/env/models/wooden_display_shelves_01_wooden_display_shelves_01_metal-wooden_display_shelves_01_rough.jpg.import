@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b1dbm3x3hh51c"
-path="res://.godot/imported/wooden_display_shelves_01_wooden_display_shelves_01_metal-wooden_display_shelves_01_rough.jpg-595b33d7652e32b09036b4546ce3593b.ctex"
+path.s3tc="res://.godot/imported/wooden_display_shelves_01_wooden_display_shelves_01_metal-wooden_display_shelves_01_rough.jpg-595b33d7652e32b09036b4546ce3593b.s3tc.ctex"
+path.etc2="res://.godot/imported/wooden_display_shelves_01_wooden_display_shelves_01_metal-wooden_display_shelves_01_rough.jpg-595b33d7652e32b09036b4546ce3593b.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "6def3d0be0eba884151f9eb91e4567a1"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/wooden_display_shelves_01_wooden_display_shelves_01_metal-wooden_display_shelves_01_rough.jpg"
-dest_files=["res://.godot/imported/wooden_display_shelves_01_wooden_display_shelves_01_metal-wooden_display_shelves_01_rough.jpg-595b33d7652e32b09036b4546ce3593b.ctex"]
+dest_files=["res://.godot/imported/wooden_display_shelves_01_wooden_display_shelves_01_metal-wooden_display_shelves_01_rough.jpg-595b33d7652e32b09036b4546ce3593b.s3tc.ctex", "res://.godot/imported/wooden_display_shelves_01_wooden_display_shelves_01_metal-wooden_display_shelves_01_rough.jpg-595b33d7652e32b09036b4546ce3593b.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

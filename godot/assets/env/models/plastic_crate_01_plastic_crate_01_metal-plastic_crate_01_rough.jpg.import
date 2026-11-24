@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cgvj02fqkmdw6"
-path="res://.godot/imported/plastic_crate_01_plastic_crate_01_metal-plastic_crate_01_rough.jpg-1787e0fd0b5bfe9207f1d0924f09e2de.ctex"
+path.s3tc="res://.godot/imported/plastic_crate_01_plastic_crate_01_metal-plastic_crate_01_rough.jpg-1787e0fd0b5bfe9207f1d0924f09e2de.s3tc.ctex"
+path.etc2="res://.godot/imported/plastic_crate_01_plastic_crate_01_metal-plastic_crate_01_rough.jpg-1787e0fd0b5bfe9207f1d0924f09e2de.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "17c80e8e3eff09c3051d6d6eba271215"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/plastic_crate_01_plastic_crate_01_metal-plastic_crate_01_rough.jpg"
-dest_files=["res://.godot/imported/plastic_crate_01_plastic_crate_01_metal-plastic_crate_01_rough.jpg-1787e0fd0b5bfe9207f1d0924f09e2de.ctex"]
+dest_files=["res://.godot/imported/plastic_crate_01_plastic_crate_01_metal-plastic_crate_01_rough.jpg-1787e0fd0b5bfe9207f1d0924f09e2de.s3tc.ctex", "res://.godot/imported/plastic_crate_01_plastic_crate_01_metal-plastic_crate_01_rough.jpg-1787e0fd0b5bfe9207f1d0924f09e2de.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://rcqqtk8v0s6a"
-path="res://.godot/imported/modular_wooden_pier_modular_wooden_pier_poles_diff.jpg-2b15b3835af9557724bb2c4f0dd21c8b.ctex"
+path.s3tc="res://.godot/imported/modular_wooden_pier_modular_wooden_pier_poles_diff.jpg-2b15b3835af9557724bb2c4f0dd21c8b.s3tc.ctex"
+path.etc2="res://.godot/imported/modular_wooden_pier_modular_wooden_pier_poles_diff.jpg-2b15b3835af9557724bb2c4f0dd21c8b.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "5ea0d205a8ed071966baf241ad3c9e23"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/modular_wooden_pier_modular_wooden_pier_poles_diff.jpg"
-dest_files=["res://.godot/imported/modular_wooden_pier_modular_wooden_pier_poles_diff.jpg-2b15b3835af9557724bb2c4f0dd21c8b.ctex"]
+dest_files=["res://.godot/imported/modular_wooden_pier_modular_wooden_pier_poles_diff.jpg-2b15b3835af9557724bb2c4f0dd21c8b.s3tc.ctex", "res://.godot/imported/modular_wooden_pier_modular_wooden_pier_poles_diff.jpg-2b15b3835af9557724bb2c4f0dd21c8b.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

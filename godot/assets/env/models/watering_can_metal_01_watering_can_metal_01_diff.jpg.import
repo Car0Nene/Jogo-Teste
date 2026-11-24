@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dhfkdhlnjfuc4"
-path="res://.godot/imported/watering_can_metal_01_watering_can_metal_01_diff.jpg-2cc2aacf5e5f801b53a9daea2234c8ce.ctex"
+path.s3tc="res://.godot/imported/watering_can_metal_01_watering_can_metal_01_diff.jpg-2cc2aacf5e5f801b53a9daea2234c8ce.s3tc.ctex"
+path.etc2="res://.godot/imported/watering_can_metal_01_watering_can_metal_01_diff.jpg-2cc2aacf5e5f801b53a9daea2234c8ce.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "b3a272b8ec1a7be49f8b1d8c977de1c2"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/watering_can_metal_01_watering_can_metal_01_diff.jpg"
-dest_files=["res://.godot/imported/watering_can_metal_01_watering_can_metal_01_diff.jpg-2cc2aacf5e5f801b53a9daea2234c8ce.ctex"]
+dest_files=["res://.godot/imported/watering_can_metal_01_watering_can_metal_01_diff.jpg-2cc2aacf5e5f801b53a9daea2234c8ce.s3tc.ctex", "res://.godot/imported/watering_can_metal_01_watering_can_metal_01_diff.jpg-2cc2aacf5e5f801b53a9daea2234c8ce.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

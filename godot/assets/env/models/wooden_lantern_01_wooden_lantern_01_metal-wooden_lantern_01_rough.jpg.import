@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dcs5r3ikw7yaf"
-path="res://.godot/imported/wooden_lantern_01_wooden_lantern_01_metal-wooden_lantern_01_rough.jpg-9a34ed420211361c63f721b10b2fab54.ctex"
+path.s3tc="res://.godot/imported/wooden_lantern_01_wooden_lantern_01_metal-wooden_lantern_01_rough.jpg-9a34ed420211361c63f721b10b2fab54.s3tc.ctex"
+path.etc2="res://.godot/imported/wooden_lantern_01_wooden_lantern_01_metal-wooden_lantern_01_rough.jpg-9a34ed420211361c63f721b10b2fab54.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "02de2a9499ff99739915e502ff51278a"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/wooden_lantern_01_wooden_lantern_01_metal-wooden_lantern_01_rough.jpg"
-dest_files=["res://.godot/imported/wooden_lantern_01_wooden_lantern_01_metal-wooden_lantern_01_rough.jpg-9a34ed420211361c63f721b10b2fab54.ctex"]
+dest_files=["res://.godot/imported/wooden_lantern_01_wooden_lantern_01_metal-wooden_lantern_01_rough.jpg-9a34ed420211361c63f721b10b2fab54.s3tc.ctex", "res://.godot/imported/wooden_lantern_01_wooden_lantern_01_metal-wooden_lantern_01_rough.jpg-9a34ed420211361c63f721b10b2fab54.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

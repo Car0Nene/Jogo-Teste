@@ -3,19 +3,21 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bt7vxw63g3yjc"
-path="res://.godot/imported/plastered_wall_03_Diffuse.jpg-55eb9ef4d58a4c18014a990bbcb0e13b.ctex"
+path.s3tc="res://.godot/imported/plastered_wall_03_Diffuse.jpg-55eb9ef4d58a4c18014a990bbcb0e13b.s3tc.ctex"
+path.etc2="res://.godot/imported/plastered_wall_03_Diffuse.jpg-55eb9ef4d58a4c18014a990bbcb0e13b.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/env/textures/plastered_wall_03/plastered_wall_03_Diffuse.jpg"
-dest_files=["res://.godot/imported/plastered_wall_03_Diffuse.jpg-55eb9ef4d58a4c18014a990bbcb0e13b.ctex"]
+dest_files=["res://.godot/imported/plastered_wall_03_Diffuse.jpg-55eb9ef4d58a4c18014a990bbcb0e13b.s3tc.ctex", "res://.godot/imported/plastered_wall_03_Diffuse.jpg-55eb9ef4d58a4c18014a990bbcb0e13b.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

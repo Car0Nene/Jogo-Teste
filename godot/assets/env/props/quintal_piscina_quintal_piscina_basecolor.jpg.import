@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cfttltt1ukp03"
-path="res://.godot/imported/quintal_piscina_quintal_piscina_basecolor.jpg-0468ec488b1b80b356dc19653b46280e.ctex"
+path.s3tc="res://.godot/imported/quintal_piscina_quintal_piscina_basecolor.jpg-0468ec488b1b80b356dc19653b46280e.s3tc.ctex"
+path.etc2="res://.godot/imported/quintal_piscina_quintal_piscina_basecolor.jpg-0468ec488b1b80b356dc19653b46280e.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "f5f51a1054580a46a716871109c235b6"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/props/quintal_piscina_quintal_piscina_basecolor.jpg"
-dest_files=["res://.godot/imported/quintal_piscina_quintal_piscina_basecolor.jpg-0468ec488b1b80b356dc19653b46280e.ctex"]
+dest_files=["res://.godot/imported/quintal_piscina_quintal_piscina_basecolor.jpg-0468ec488b1b80b356dc19653b46280e.s3tc.ctex", "res://.godot/imported/quintal_piscina_quintal_piscina_basecolor.jpg-0468ec488b1b80b356dc19653b46280e.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

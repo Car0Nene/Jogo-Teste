@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bc4xkk1j6rt6f"
-path="res://.godot/imported/carrot_cake_carrot_cake_nor_gl.jpg-95389d21d0508deebde165f4e6f999b1.ctex"
+path.s3tc="res://.godot/imported/carrot_cake_carrot_cake_nor_gl.jpg-95389d21d0508deebde165f4e6f999b1.s3tc.ctex"
+path.etc2="res://.godot/imported/carrot_cake_carrot_cake_nor_gl.jpg-95389d21d0508deebde165f4e6f999b1.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "cfc70260ae7a66458fa6416b3619f429"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/carrot_cake_carrot_cake_nor_gl.jpg"
-dest_files=["res://.godot/imported/carrot_cake_carrot_cake_nor_gl.jpg-95389d21d0508deebde165f4e6f999b1.ctex"]
+dest_files=["res://.godot/imported/carrot_cake_carrot_cake_nor_gl.jpg-95389d21d0508deebde165f4e6f999b1.s3tc.ctex", "res://.godot/imported/carrot_cake_carrot_cake_nor_gl.jpg-95389d21d0508deebde165f4e6f999b1.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c82vwv7lygbm1"
-path="res://.godot/imported/CoffeeCart_01_CoffeeCart_01_cart_nor_gl.jpg-23e2766e47757ba32c3f92edfa98eacd.ctex"
+path.s3tc="res://.godot/imported/CoffeeCart_01_CoffeeCart_01_cart_nor_gl.jpg-23e2766e47757ba32c3f92edfa98eacd.s3tc.ctex"
+path.etc2="res://.godot/imported/CoffeeCart_01_CoffeeCart_01_cart_nor_gl.jpg-23e2766e47757ba32c3f92edfa98eacd.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "21e621558f7f22c65b1b4e4da7436752"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/CoffeeCart_01_CoffeeCart_01_cart_nor_gl.jpg"
-dest_files=["res://.godot/imported/CoffeeCart_01_CoffeeCart_01_cart_nor_gl.jpg-23e2766e47757ba32c3f92edfa98eacd.ctex"]
+dest_files=["res://.godot/imported/CoffeeCart_01_CoffeeCart_01_cart_nor_gl.jpg-23e2766e47757ba32c3f92edfa98eacd.s3tc.ctex", "res://.godot/imported/CoffeeCart_01_CoffeeCart_01_cart_nor_gl.jpg-23e2766e47757ba32c3f92edfa98eacd.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

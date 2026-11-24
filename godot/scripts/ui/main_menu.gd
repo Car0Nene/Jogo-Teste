@@ -53,7 +53,7 @@ func _ready() -> void:
 		var d := Game.fighter(ids[i])
 		fm.setup(d.model, d.height_m)
 		fm.position = Vector3(1.0 + i * 1.25, 0, -0.4 - absf(i - 1) * 0.6)
-		fm.rotation_degrees.y = -25 + i * 8
+		fm.rotation_degrees.y = 155 + i * 8
 		fm.play(["idle", "taunt", "idle"][i])
 		_fighters.append(fm)
 	# luz de destaque nos lutadores

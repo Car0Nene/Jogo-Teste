@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://jt55x1ra441d"
-path="res://.godot/imported/Barrel_01_Barrel_01_explosive_diff.jpg-fdea8967f73b05044937b10fd56b2507.ctex"
+path.s3tc="res://.godot/imported/Barrel_01_Barrel_01_explosive_diff.jpg-fdea8967f73b05044937b10fd56b2507.s3tc.ctex"
+path.etc2="res://.godot/imported/Barrel_01_Barrel_01_explosive_diff.jpg-fdea8967f73b05044937b10fd56b2507.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "86c46e2a1e6b59790cd2df7fcbf9e366"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/Barrel_01_Barrel_01_explosive_diff.jpg"
-dest_files=["res://.godot/imported/Barrel_01_Barrel_01_explosive_diff.jpg-fdea8967f73b05044937b10fd56b2507.ctex"]
+dest_files=["res://.godot/imported/Barrel_01_Barrel_01_explosive_diff.jpg-fdea8967f73b05044937b10fd56b2507.s3tc.ctex", "res://.godot/imported/Barrel_01_Barrel_01_explosive_diff.jpg-fdea8967f73b05044937b10fd56b2507.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

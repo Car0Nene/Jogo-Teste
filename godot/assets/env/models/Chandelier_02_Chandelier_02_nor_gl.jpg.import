@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://5qpyp36xv0sb"
-path="res://.godot/imported/Chandelier_02_Chandelier_02_nor_gl.jpg-c223ebb9c438d5d37267c074463de3ef.ctex"
+path.s3tc="res://.godot/imported/Chandelier_02_Chandelier_02_nor_gl.jpg-c223ebb9c438d5d37267c074463de3ef.s3tc.ctex"
+path.etc2="res://.godot/imported/Chandelier_02_Chandelier_02_nor_gl.jpg-c223ebb9c438d5d37267c074463de3ef.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "394aafbc83b0127cce97899ed55a0694"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/Chandelier_02_Chandelier_02_nor_gl.jpg"
-dest_files=["res://.godot/imported/Chandelier_02_Chandelier_02_nor_gl.jpg-c223ebb9c438d5d37267c074463de3ef.ctex"]
+dest_files=["res://.godot/imported/Chandelier_02_Chandelier_02_nor_gl.jpg-c223ebb9c438d5d37267c074463de3ef.s3tc.ctex", "res://.godot/imported/Chandelier_02_Chandelier_02_nor_gl.jpg-c223ebb9c438d5d37267c074463de3ef.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

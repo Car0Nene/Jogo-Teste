@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cddwyvloupyax"
-path="res://.godot/imported/side_table_01_side_table_01_BaseColor.jpg-8e26f0c0a003501aa3bb05007e9a8dad.ctex"
+path.s3tc="res://.godot/imported/side_table_01_side_table_01_BaseColor.jpg-8e26f0c0a003501aa3bb05007e9a8dad.s3tc.ctex"
+path.etc2="res://.godot/imported/side_table_01_side_table_01_BaseColor.jpg-8e26f0c0a003501aa3bb05007e9a8dad.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "2bafba9cfa9f6aee76b081264a5727da"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/side_table_01_side_table_01_BaseColor.jpg"
-dest_files=["res://.godot/imported/side_table_01_side_table_01_BaseColor.jpg-8e26f0c0a003501aa3bb05007e9a8dad.ctex"]
+dest_files=["res://.godot/imported/side_table_01_side_table_01_BaseColor.jpg-8e26f0c0a003501aa3bb05007e9a8dad.s3tc.ctex", "res://.godot/imported/side_table_01_side_table_01_BaseColor.jpg-8e26f0c0a003501aa3bb05007e9a8dad.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

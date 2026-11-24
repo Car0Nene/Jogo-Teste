@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://2v4eos4nnib4"
-path="res://.godot/imported/bar_balcao_bar_balcao_rm.jpg-4ee8353af0aa821237460f8db708557d.ctex"
+path.s3tc="res://.godot/imported/bar_balcao_bar_balcao_rm.jpg-4ee8353af0aa821237460f8db708557d.s3tc.ctex"
+path.etc2="res://.godot/imported/bar_balcao_bar_balcao_rm.jpg-4ee8353af0aa821237460f8db708557d.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "6e83c5472e3696f91a4b056bf475225b"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/props/bar_balcao_bar_balcao_rm.jpg"
-dest_files=["res://.godot/imported/bar_balcao_bar_balcao_rm.jpg-4ee8353af0aa821237460f8db708557d.ctex"]
+dest_files=["res://.godot/imported/bar_balcao_bar_balcao_rm.jpg-4ee8353af0aa821237460f8db708557d.s3tc.ctex", "res://.godot/imported/bar_balcao_bar_balcao_rm.jpg-4ee8353af0aa821237460f8db708557d.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

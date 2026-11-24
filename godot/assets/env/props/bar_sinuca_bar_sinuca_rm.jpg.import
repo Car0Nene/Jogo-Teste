@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b5xgpbdgnxdg1"
-path="res://.godot/imported/bar_sinuca_bar_sinuca_rm.jpg-2dce9ca0e88b80a5ef502bff25da0e63.ctex"
+path.s3tc="res://.godot/imported/bar_sinuca_bar_sinuca_rm.jpg-2dce9ca0e88b80a5ef502bff25da0e63.s3tc.ctex"
+path.etc2="res://.godot/imported/bar_sinuca_bar_sinuca_rm.jpg-2dce9ca0e88b80a5ef502bff25da0e63.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "fa55d1bf796fae8da108fd38814c089e"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/props/bar_sinuca_bar_sinuca_rm.jpg"
-dest_files=["res://.godot/imported/bar_sinuca_bar_sinuca_rm.jpg-2dce9ca0e88b80a5ef502bff25da0e63.ctex"]
+dest_files=["res://.godot/imported/bar_sinuca_bar_sinuca_rm.jpg-2dce9ca0e88b80a5ef502bff25da0e63.s3tc.ctex", "res://.godot/imported/bar_sinuca_bar_sinuca_rm.jpg-2dce9ca0e88b80a5ef502bff25da0e63.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

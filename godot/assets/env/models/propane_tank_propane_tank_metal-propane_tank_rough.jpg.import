@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bshr82np1ydxy"
-path="res://.godot/imported/propane_tank_propane_tank_metal-propane_tank_rough.jpg-5f1a8a1e58562c530ad9d7b97a10af70.ctex"
+path.s3tc="res://.godot/imported/propane_tank_propane_tank_metal-propane_tank_rough.jpg-5f1a8a1e58562c530ad9d7b97a10af70.s3tc.ctex"
+path.etc2="res://.godot/imported/propane_tank_propane_tank_metal-propane_tank_rough.jpg-5f1a8a1e58562c530ad9d7b97a10af70.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "b4edd4706448f4a2b4c8265b10f9dbe2"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/propane_tank_propane_tank_metal-propane_tank_rough.jpg"
-dest_files=["res://.godot/imported/propane_tank_propane_tank_metal-propane_tank_rough.jpg-5f1a8a1e58562c530ad9d7b97a10af70.ctex"]
+dest_files=["res://.godot/imported/propane_tank_propane_tank_metal-propane_tank_rough.jpg-5f1a8a1e58562c530ad9d7b97a10af70.s3tc.ctex", "res://.godot/imported/propane_tank_propane_tank_metal-propane_tank_rough.jpg-5f1a8a1e58562c530ad9d7b97a10af70.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

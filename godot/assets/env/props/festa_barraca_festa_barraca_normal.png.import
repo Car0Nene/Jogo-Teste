@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dbse58outvadq"
-path="res://.godot/imported/festa_barraca_festa_barraca_normal.png-0aba6fee03c7375aa7499b0f925ce645.ctex"
+path.s3tc="res://.godot/imported/festa_barraca_festa_barraca_normal.png-0aba6fee03c7375aa7499b0f925ce645.s3tc.ctex"
+path.etc2="res://.godot/imported/festa_barraca_festa_barraca_normal.png-0aba6fee03c7375aa7499b0f925ce645.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "84fcd95b9496398508c3182a8c6ba2d9"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/props/festa_barraca_festa_barraca_normal.png"
-dest_files=["res://.godot/imported/festa_barraca_festa_barraca_normal.png-0aba6fee03c7375aa7499b0f925ce645.ctex"]
+dest_files=["res://.godot/imported/festa_barraca_festa_barraca_normal.png-0aba6fee03c7375aa7499b0f925ce645.s3tc.ctex", "res://.godot/imported/festa_barraca_festa_barraca_normal.png-0aba6fee03c7375aa7499b0f925ce645.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

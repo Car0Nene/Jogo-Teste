@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://br7dp1dapubu1"
-path="res://.godot/imported/Chandelier_02_Chandelier_02_diff.jpg-ce83de554eb960fbbcc748a11a6c28fc.ctex"
+path.s3tc="res://.godot/imported/Chandelier_02_Chandelier_02_diff.jpg-ce83de554eb960fbbcc748a11a6c28fc.s3tc.ctex"
+path.etc2="res://.godot/imported/Chandelier_02_Chandelier_02_diff.jpg-ce83de554eb960fbbcc748a11a6c28fc.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "dbc51bf3d30ba3008a7ce8e41e82b977"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/Chandelier_02_Chandelier_02_diff.jpg"
-dest_files=["res://.godot/imported/Chandelier_02_Chandelier_02_diff.jpg-ce83de554eb960fbbcc748a11a6c28fc.ctex"]
+dest_files=["res://.godot/imported/Chandelier_02_Chandelier_02_diff.jpg-ce83de554eb960fbbcc748a11a6c28fc.s3tc.ctex", "res://.godot/imported/Chandelier_02_Chandelier_02_diff.jpg-ce83de554eb960fbbcc748a11a6c28fc.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

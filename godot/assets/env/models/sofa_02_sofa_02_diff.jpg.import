@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bpef1vmqw3f13"
-path="res://.godot/imported/sofa_02_sofa_02_diff.jpg-1c1d86ab549b621c45dd63876056bce6.ctex"
+path.s3tc="res://.godot/imported/sofa_02_sofa_02_diff.jpg-1c1d86ab549b621c45dd63876056bce6.s3tc.ctex"
+path.etc2="res://.godot/imported/sofa_02_sofa_02_diff.jpg-1c1d86ab549b621c45dd63876056bce6.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "ca176351ad89570f97679a8c5ff2e146"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/sofa_02_sofa_02_diff.jpg"
-dest_files=["res://.godot/imported/sofa_02_sofa_02_diff.jpg-1c1d86ab549b621c45dd63876056bce6.ctex"]
+dest_files=["res://.godot/imported/sofa_02_sofa_02_diff.jpg-1c1d86ab549b621c45dd63876056bce6.s3tc.ctex", "res://.godot/imported/sofa_02_sofa_02_diff.jpg-1c1d86ab549b621c45dd63876056bce6.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

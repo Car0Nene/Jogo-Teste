@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bb7jxdetstksx"
-path="res://.godot/imported/boombox_boombox_speakers_metal-boombox_speakers_rough.jpg-bb250dbe385115a151c5ff7b2143ff78.ctex"
+path.s3tc="res://.godot/imported/boombox_boombox_speakers_metal-boombox_speakers_rough.jpg-bb250dbe385115a151c5ff7b2143ff78.s3tc.ctex"
+path.etc2="res://.godot/imported/boombox_boombox_speakers_metal-boombox_speakers_rough.jpg-bb250dbe385115a151c5ff7b2143ff78.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "a019ddd8bcea38a88bda5da8375c34c5"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/boombox_boombox_speakers_metal-boombox_speakers_rough.jpg"
-dest_files=["res://.godot/imported/boombox_boombox_speakers_metal-boombox_speakers_rough.jpg-bb250dbe385115a151c5ff7b2143ff78.ctex"]
+dest_files=["res://.godot/imported/boombox_boombox_speakers_metal-boombox_speakers_rough.jpg-bb250dbe385115a151c5ff7b2143ff78.s3tc.ctex", "res://.godot/imported/boombox_boombox_speakers_metal-boombox_speakers_rough.jpg-bb250dbe385115a151c5ff7b2143ff78.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

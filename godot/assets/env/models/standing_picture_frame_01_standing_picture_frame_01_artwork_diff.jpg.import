@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cp7oaiekephfl"
-path="res://.godot/imported/standing_picture_frame_01_standing_picture_frame_01_artwork_diff.jpg-68d28af0e7e22887a0251969cb995786.ctex"
+path.s3tc="res://.godot/imported/standing_picture_frame_01_standing_picture_frame_01_artwork_diff.jpg-68d28af0e7e22887a0251969cb995786.s3tc.ctex"
+path.etc2="res://.godot/imported/standing_picture_frame_01_standing_picture_frame_01_artwork_diff.jpg-68d28af0e7e22887a0251969cb995786.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "a342cb2454bbaf5a0f3217bb517a00c3"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/standing_picture_frame_01_standing_picture_frame_01_artwork_diff.jpg"
-dest_files=["res://.godot/imported/standing_picture_frame_01_standing_picture_frame_01_artwork_diff.jpg-68d28af0e7e22887a0251969cb995786.ctex"]
+dest_files=["res://.godot/imported/standing_picture_frame_01_standing_picture_frame_01_artwork_diff.jpg-68d28af0e7e22887a0251969cb995786.s3tc.ctex", "res://.godot/imported/standing_picture_frame_01_standing_picture_frame_01_artwork_diff.jpg-68d28af0e7e22887a0251969cb995786.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

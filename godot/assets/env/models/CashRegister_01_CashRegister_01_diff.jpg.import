@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://d12i25814t6by"
-path="res://.godot/imported/CashRegister_01_CashRegister_01_diff.jpg-a9cf961a0df1c6205f49cbbd90056bd2.ctex"
+path.s3tc="res://.godot/imported/CashRegister_01_CashRegister_01_diff.jpg-a9cf961a0df1c6205f49cbbd90056bd2.s3tc.ctex"
+path.etc2="res://.godot/imported/CashRegister_01_CashRegister_01_diff.jpg-a9cf961a0df1c6205f49cbbd90056bd2.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "cf94fe79a407cc229a494a9dde7caefc"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/CashRegister_01_CashRegister_01_diff.jpg"
-dest_files=["res://.godot/imported/CashRegister_01_CashRegister_01_diff.jpg-a9cf961a0df1c6205f49cbbd90056bd2.ctex"]
+dest_files=["res://.godot/imported/CashRegister_01_CashRegister_01_diff.jpg-a9cf961a0df1c6205f49cbbd90056bd2.s3tc.ctex", "res://.godot/imported/CashRegister_01_CashRegister_01_diff.jpg-a9cf961a0df1c6205f49cbbd90056bd2.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://1x5t85x3wybl"
-path="res://.godot/imported/strawberry_chocolate_cake_strawberry_chocolate_cake_metal-strawberry_chocolate_cake_rough.jpg-0488884dab87d23b7200796275c17b8e.ctex"
+path.s3tc="res://.godot/imported/strawberry_chocolate_cake_strawberry_chocolate_cake_metal-strawberry_chocolate_cake_rough.jpg-0488884dab87d23b7200796275c17b8e.s3tc.ctex"
+path.etc2="res://.godot/imported/strawberry_chocolate_cake_strawberry_chocolate_cake_metal-strawberry_chocolate_cake_rough.jpg-0488884dab87d23b7200796275c17b8e.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "8f97b0f9bc7cf4908c333563aa57422c"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/strawberry_chocolate_cake_strawberry_chocolate_cake_metal-strawberry_chocolate_cake_rough.jpg"
-dest_files=["res://.godot/imported/strawberry_chocolate_cake_strawberry_chocolate_cake_metal-strawberry_chocolate_cake_rough.jpg-0488884dab87d23b7200796275c17b8e.ctex"]
+dest_files=["res://.godot/imported/strawberry_chocolate_cake_strawberry_chocolate_cake_metal-strawberry_chocolate_cake_rough.jpg-0488884dab87d23b7200796275c17b8e.s3tc.ctex", "res://.godot/imported/strawberry_chocolate_cake_strawberry_chocolate_cake_metal-strawberry_chocolate_cake_rough.jpg-0488884dab87d23b7200796275c17b8e.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

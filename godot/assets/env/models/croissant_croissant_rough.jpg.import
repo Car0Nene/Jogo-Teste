@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dl60lgtsp11gl"
-path="res://.godot/imported/croissant_croissant_rough.jpg-6b3d91d97dd4c10f1ddb951c5ef68d72.ctex"
+path.s3tc="res://.godot/imported/croissant_croissant_rough.jpg-6b3d91d97dd4c10f1ddb951c5ef68d72.s3tc.ctex"
+path.etc2="res://.godot/imported/croissant_croissant_rough.jpg-6b3d91d97dd4c10f1ddb951c5ef68d72.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "0bc3a774ecc127837a7131d4ec5ca228"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/croissant_croissant_rough.jpg"
-dest_files=["res://.godot/imported/croissant_croissant_rough.jpg-6b3d91d97dd4c10f1ddb951c5ef68d72.ctex"]
+dest_files=["res://.godot/imported/croissant_croissant_rough.jpg-6b3d91d97dd4c10f1ddb951c5ef68d72.s3tc.ctex", "res://.godot/imported/croissant_croissant_rough.jpg-6b3d91d97dd4c10f1ddb951c5ef68d72.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

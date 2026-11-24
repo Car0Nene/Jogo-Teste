@@ -3,19 +3,21 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dk8ruqhj3rw61"
-path="res://.godot/imported/clay_roof_tiles_Diffuse.jpg-34a5b803d23c53ce44aba8fd776bb1aa.ctex"
+path.s3tc="res://.godot/imported/clay_roof_tiles_Diffuse.jpg-34a5b803d23c53ce44aba8fd776bb1aa.s3tc.ctex"
+path.etc2="res://.godot/imported/clay_roof_tiles_Diffuse.jpg-34a5b803d23c53ce44aba8fd776bb1aa.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/env/textures/clay_roof_tiles/clay_roof_tiles_Diffuse.jpg"
-dest_files=["res://.godot/imported/clay_roof_tiles_Diffuse.jpg-34a5b803d23c53ce44aba8fd776bb1aa.ctex"]
+dest_files=["res://.godot/imported/clay_roof_tiles_Diffuse.jpg-34a5b803d23c53ce44aba8fd776bb1aa.s3tc.ctex", "res://.godot/imported/clay_roof_tiles_Diffuse.jpg-34a5b803d23c53ce44aba8fd776bb1aa.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

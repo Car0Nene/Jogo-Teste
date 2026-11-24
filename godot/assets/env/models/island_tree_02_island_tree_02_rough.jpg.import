@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cb13i7pmlugwg"
-path="res://.godot/imported/island_tree_02_island_tree_02_rough.jpg-fd03b04460a370a99b19e02f02169009.ctex"
+path.s3tc="res://.godot/imported/island_tree_02_island_tree_02_rough.jpg-fd03b04460a370a99b19e02f02169009.s3tc.ctex"
+path.etc2="res://.godot/imported/island_tree_02_island_tree_02_rough.jpg-fd03b04460a370a99b19e02f02169009.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "90f843ee2d280a06fe58db4a1216e125"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/island_tree_02_island_tree_02_rough.jpg"
-dest_files=["res://.godot/imported/island_tree_02_island_tree_02_rough.jpg-fd03b04460a370a99b19e02f02169009.ctex"]
+dest_files=["res://.godot/imported/island_tree_02_island_tree_02_rough.jpg-fd03b04460a370a99b19e02f02169009.s3tc.ctex", "res://.godot/imported/island_tree_02_island_tree_02_rough.jpg-fd03b04460a370a99b19e02f02169009.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

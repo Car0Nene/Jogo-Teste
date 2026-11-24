@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dhw3uv83tlvlm"
-path="res://.godot/imported/plastic_crate_01_plastic_crate_01_nor_gl.jpg-3ce23cd4305a7c4008f423294be155ee.ctex"
+path.s3tc="res://.godot/imported/plastic_crate_01_plastic_crate_01_nor_gl.jpg-3ce23cd4305a7c4008f423294be155ee.s3tc.ctex"
+path.etc2="res://.godot/imported/plastic_crate_01_plastic_crate_01_nor_gl.jpg-3ce23cd4305a7c4008f423294be155ee.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "03ef8caeb511d79f95f28884a7af3175"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/plastic_crate_01_plastic_crate_01_nor_gl.jpg"
-dest_files=["res://.godot/imported/plastic_crate_01_plastic_crate_01_nor_gl.jpg-3ce23cd4305a7c4008f423294be155ee.ctex"]
+dest_files=["res://.godot/imported/plastic_crate_01_plastic_crate_01_nor_gl.jpg-3ce23cd4305a7c4008f423294be155ee.s3tc.ctex", "res://.godot/imported/plastic_crate_01_plastic_crate_01_nor_gl.jpg-3ce23cd4305a7c4008f423294be155ee.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

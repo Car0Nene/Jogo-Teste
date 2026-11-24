@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dnbg16lsg5avk"
-path="res://.godot/imported/metal_stool_01_metal_stool_01_diff.jpg-d5057817786d17ccc3772a5bbebb54df.ctex"
+path.s3tc="res://.godot/imported/metal_stool_01_metal_stool_01_diff.jpg-d5057817786d17ccc3772a5bbebb54df.s3tc.ctex"
+path.etc2="res://.godot/imported/metal_stool_01_metal_stool_01_diff.jpg-d5057817786d17ccc3772a5bbebb54df.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "5fb6b34a3d10b86ceb32cceccea07dd1"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/metal_stool_01_metal_stool_01_diff.jpg"
-dest_files=["res://.godot/imported/metal_stool_01_metal_stool_01_diff.jpg-d5057817786d17ccc3772a5bbebb54df.ctex"]
+dest_files=["res://.godot/imported/metal_stool_01_metal_stool_01_diff.jpg-d5057817786d17ccc3772a5bbebb54df.s3tc.ctex", "res://.godot/imported/metal_stool_01_metal_stool_01_diff.jpg-d5057817786d17ccc3772a5bbebb54df.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://m4opa74h65ox"
-path="res://.godot/imported/hamburger_buns_hamburger_buns_diff.jpg-e3abfb02e3ea629652fb1395b79a8d29.ctex"
+path.s3tc="res://.godot/imported/hamburger_buns_hamburger_buns_diff.jpg-e3abfb02e3ea629652fb1395b79a8d29.s3tc.ctex"
+path.etc2="res://.godot/imported/hamburger_buns_hamburger_buns_diff.jpg-e3abfb02e3ea629652fb1395b79a8d29.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "0886f266931840bdc641ac696046cc48"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/hamburger_buns_hamburger_buns_diff.jpg"
-dest_files=["res://.godot/imported/hamburger_buns_hamburger_buns_diff.jpg-e3abfb02e3ea629652fb1395b79a8d29.ctex"]
+dest_files=["res://.godot/imported/hamburger_buns_hamburger_buns_diff.jpg-e3abfb02e3ea629652fb1395b79a8d29.s3tc.ctex", "res://.godot/imported/hamburger_buns_hamburger_buns_diff.jpg-e3abfb02e3ea629652fb1395b79a8d29.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b3pamvqyqp33m"
-path="res://.godot/imported/propane_tank_propane_tank_diff.jpg-6817f79d33e64380439adb30e05bdaf7.ctex"
+path.s3tc="res://.godot/imported/propane_tank_propane_tank_diff.jpg-6817f79d33e64380439adb30e05bdaf7.s3tc.ctex"
+path.etc2="res://.godot/imported/propane_tank_propane_tank_diff.jpg-6817f79d33e64380439adb30e05bdaf7.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "9c2580a0e3a7651be12ab4f15fee272f"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/propane_tank_propane_tank_diff.jpg"
-dest_files=["res://.godot/imported/propane_tank_propane_tank_diff.jpg-6817f79d33e64380439adb30e05bdaf7.ctex"]
+dest_files=["res://.godot/imported/propane_tank_propane_tank_diff.jpg-6817f79d33e64380439adb30e05bdaf7.s3tc.ctex", "res://.godot/imported/propane_tank_propane_tank_diff.jpg-6817f79d33e64380439adb30e05bdaf7.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

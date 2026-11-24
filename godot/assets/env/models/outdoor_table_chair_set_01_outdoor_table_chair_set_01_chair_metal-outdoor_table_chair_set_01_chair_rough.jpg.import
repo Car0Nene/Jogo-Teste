@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cudbm36wama6p"
-path="res://.godot/imported/outdoor_table_chair_set_01_outdoor_table_chair_set_01_chair_metal-outdoor_table_chair_set_01_chair_rough.jpg-c31d914c4c8bee860eccfeda3ad5bf73.ctex"
+path.s3tc="res://.godot/imported/outdoor_table_chair_set_01_outdoor_table_chair_set_01_chair_metal-outdoor_table_chair_set_01_chair_rough.jpg-c31d914c4c8bee860eccfeda3ad5bf73.s3tc.ctex"
+path.etc2="res://.godot/imported/outdoor_table_chair_set_01_outdoor_table_chair_set_01_chair_metal-outdoor_table_chair_set_01_chair_rough.jpg-c31d914c4c8bee860eccfeda3ad5bf73.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "f637222ca40e2a0feba67988123e5a10"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/outdoor_table_chair_set_01_outdoor_table_chair_set_01_chair_metal-outdoor_table_chair_set_01_chair_rough.jpg"
-dest_files=["res://.godot/imported/outdoor_table_chair_set_01_outdoor_table_chair_set_01_chair_metal-outdoor_table_chair_set_01_chair_rough.jpg-c31d914c4c8bee860eccfeda3ad5bf73.ctex"]
+dest_files=["res://.godot/imported/outdoor_table_chair_set_01_outdoor_table_chair_set_01_chair_metal-outdoor_table_chair_set_01_chair_rough.jpg-c31d914c4c8bee860eccfeda3ad5bf73.s3tc.ctex", "res://.godot/imported/outdoor_table_chair_set_01_outdoor_table_chair_set_01_chair_metal-outdoor_table_chair_set_01_chair_rough.jpg-c31d914c4c8bee860eccfeda3ad5bf73.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

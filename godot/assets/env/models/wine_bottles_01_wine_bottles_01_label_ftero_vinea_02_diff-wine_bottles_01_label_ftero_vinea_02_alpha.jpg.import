@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dj5bem85fyxh"
-path="res://.godot/imported/wine_bottles_01_wine_bottles_01_label_ftero_vinea_02_diff-wine_bottles_01_label_ftero_vinea_02_alpha.jpg-9b44bf90cf24819fbd3f0ad8953742ba.ctex"
+path.s3tc="res://.godot/imported/wine_bottles_01_wine_bottles_01_label_ftero_vinea_02_diff-wine_bottles_01_label_ftero_vinea_02_alpha.jpg-9b44bf90cf24819fbd3f0ad8953742ba.s3tc.ctex"
+path.etc2="res://.godot/imported/wine_bottles_01_wine_bottles_01_label_ftero_vinea_02_diff-wine_bottles_01_label_ftero_vinea_02_alpha.jpg-9b44bf90cf24819fbd3f0ad8953742ba.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "7c0b075841badfa77f13311ac70af3e2"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/wine_bottles_01_wine_bottles_01_label_ftero_vinea_02_diff-wine_bottles_01_label_ftero_vinea_02_alpha.jpg"
-dest_files=["res://.godot/imported/wine_bottles_01_wine_bottles_01_label_ftero_vinea_02_diff-wine_bottles_01_label_ftero_vinea_02_alpha.jpg-9b44bf90cf24819fbd3f0ad8953742ba.ctex"]
+dest_files=["res://.godot/imported/wine_bottles_01_wine_bottles_01_label_ftero_vinea_02_diff-wine_bottles_01_label_ftero_vinea_02_alpha.jpg-9b44bf90cf24819fbd3f0ad8953742ba.s3tc.ctex", "res://.godot/imported/wine_bottles_01_wine_bottles_01_label_ftero_vinea_02_diff-wine_bottles_01_label_ftero_vinea_02_alpha.jpg-9b44bf90cf24819fbd3f0ad8953742ba.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bklvb1mymqdq6"
-path="res://.godot/imported/island_tree_02_island_tree_02_branches_diff.jpg-320f80c09a790a23e754ba17a59f606e.ctex"
+path.s3tc="res://.godot/imported/island_tree_02_island_tree_02_branches_diff.jpg-320f80c09a790a23e754ba17a59f606e.s3tc.ctex"
+path.etc2="res://.godot/imported/island_tree_02_island_tree_02_branches_diff.jpg-320f80c09a790a23e754ba17a59f606e.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "2a7a2057d8c6b8eac17042c59c6d10f9"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/island_tree_02_island_tree_02_branches_diff.jpg"
-dest_files=["res://.godot/imported/island_tree_02_island_tree_02_branches_diff.jpg-320f80c09a790a23e754ba17a59f606e.ctex"]
+dest_files=["res://.godot/imported/island_tree_02_island_tree_02_branches_diff.jpg-320f80c09a790a23e754ba17a59f606e.s3tc.ctex", "res://.godot/imported/island_tree_02_island_tree_02_branches_diff.jpg-320f80c09a790a23e754ba17a59f606e.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

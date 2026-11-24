@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cyc6uppt0axwd"
-path="res://.godot/imported/coffee_table_round_01_coffee_table_round_01_metal.png-coffee_table_round_01_rough.jpg-ea7a26a055376eb090a2f05e6fa2478e.ctex"
+path.s3tc="res://.godot/imported/coffee_table_round_01_coffee_table_round_01_metal.png-coffee_table_round_01_rough.jpg-ea7a26a055376eb090a2f05e6fa2478e.s3tc.ctex"
+path.etc2="res://.godot/imported/coffee_table_round_01_coffee_table_round_01_metal.png-coffee_table_round_01_rough.jpg-ea7a26a055376eb090a2f05e6fa2478e.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "82fcb15d5dd2788ed5c5f4691b7944f4"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/coffee_table_round_01_coffee_table_round_01_metal.png-coffee_table_round_01_rough.jpg"
-dest_files=["res://.godot/imported/coffee_table_round_01_coffee_table_round_01_metal.png-coffee_table_round_01_rough.jpg-ea7a26a055376eb090a2f05e6fa2478e.ctex"]
+dest_files=["res://.godot/imported/coffee_table_round_01_coffee_table_round_01_metal.png-coffee_table_round_01_rough.jpg-ea7a26a055376eb090a2f05e6fa2478e.s3tc.ctex", "res://.godot/imported/coffee_table_round_01_coffee_table_round_01_metal.png-coffee_table_round_01_rough.jpg-ea7a26a055376eb090a2f05e6fa2478e.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

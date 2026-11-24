@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://fvlpxyy0fhsj"
-path="res://.godot/imported/garden_hose_wall_mounted_01_garden_hose_wall_mounted_01_metal-garden_hose_wall_mounted_01_rough.jpg-fd2245234da7b86b2f289f0ea0ccd723.ctex"
+path.s3tc="res://.godot/imported/garden_hose_wall_mounted_01_garden_hose_wall_mounted_01_metal-garden_hose_wall_mounted_01_rough.jpg-fd2245234da7b86b2f289f0ea0ccd723.s3tc.ctex"
+path.etc2="res://.godot/imported/garden_hose_wall_mounted_01_garden_hose_wall_mounted_01_metal-garden_hose_wall_mounted_01_rough.jpg-fd2245234da7b86b2f289f0ea0ccd723.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "28a268f9e9a2fc1b6a0154f599d7d7f3"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/garden_hose_wall_mounted_01_garden_hose_wall_mounted_01_metal-garden_hose_wall_mounted_01_rough.jpg"
-dest_files=["res://.godot/imported/garden_hose_wall_mounted_01_garden_hose_wall_mounted_01_metal-garden_hose_wall_mounted_01_rough.jpg-fd2245234da7b86b2f289f0ea0ccd723.ctex"]
+dest_files=["res://.godot/imported/garden_hose_wall_mounted_01_garden_hose_wall_mounted_01_metal-garden_hose_wall_mounted_01_rough.jpg-fd2245234da7b86b2f289f0ea0ccd723.s3tc.ctex", "res://.godot/imported/garden_hose_wall_mounted_01_garden_hose_wall_mounted_01_metal-garden_hose_wall_mounted_01_rough.jpg-fd2245234da7b86b2f289f0ea0ccd723.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

@@ -3,19 +3,21 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bx8fcw2g45cyu"
-path="res://.godot/imported/coast_sand_01_Diffuse.jpg-a14a2cedc74a209c42a0c017b5efa618.ctex"
+path.s3tc="res://.godot/imported/coast_sand_01_Diffuse.jpg-a14a2cedc74a209c42a0c017b5efa618.s3tc.ctex"
+path.etc2="res://.godot/imported/coast_sand_01_Diffuse.jpg-a14a2cedc74a209c42a0c017b5efa618.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/env/textures/coast_sand_01/coast_sand_01_Diffuse.jpg"
-dest_files=["res://.godot/imported/coast_sand_01_Diffuse.jpg-a14a2cedc74a209c42a0c017b5efa618.ctex"]
+dest_files=["res://.godot/imported/coast_sand_01_Diffuse.jpg-a14a2cedc74a209c42a0c017b5efa618.s3tc.ctex", "res://.godot/imported/coast_sand_01_Diffuse.jpg-a14a2cedc74a209c42a0c017b5efa618.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

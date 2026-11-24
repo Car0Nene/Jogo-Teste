@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bts6bsvr22acq"
-path="res://.godot/imported/strawberry_chocolate_cake_strawberry_chocolate_cake_diff.jpg-307112903d76ccdcdca445072694b8de.ctex"
+path.s3tc="res://.godot/imported/strawberry_chocolate_cake_strawberry_chocolate_cake_diff.jpg-307112903d76ccdcdca445072694b8de.s3tc.ctex"
+path.etc2="res://.godot/imported/strawberry_chocolate_cake_strawberry_chocolate_cake_diff.jpg-307112903d76ccdcdca445072694b8de.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "ff0ff31fea55090ac769ad0b101e405c"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/strawberry_chocolate_cake_strawberry_chocolate_cake_diff.jpg"
-dest_files=["res://.godot/imported/strawberry_chocolate_cake_strawberry_chocolate_cake_diff.jpg-307112903d76ccdcdca445072694b8de.ctex"]
+dest_files=["res://.godot/imported/strawberry_chocolate_cake_strawberry_chocolate_cake_diff.jpg-307112903d76ccdcdca445072694b8de.s3tc.ctex", "res://.godot/imported/strawberry_chocolate_cake_strawberry_chocolate_cake_diff.jpg-307112903d76ccdcdca445072694b8de.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://5j4v3few4t1f"
-path="res://.godot/imported/ceiling_fan_ceiling_fan_diff.jpg-e16a8d0e2a3584e0e93f616e87026ce9.ctex"
+path.s3tc="res://.godot/imported/ceiling_fan_ceiling_fan_diff.jpg-e16a8d0e2a3584e0e93f616e87026ce9.s3tc.ctex"
+path.etc2="res://.godot/imported/ceiling_fan_ceiling_fan_diff.jpg-e16a8d0e2a3584e0e93f616e87026ce9.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "434cf1c21456fc14ac9e073beee3c0f0"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/ceiling_fan_ceiling_fan_diff.jpg"
-dest_files=["res://.godot/imported/ceiling_fan_ceiling_fan_diff.jpg-e16a8d0e2a3584e0e93f616e87026ce9.ctex"]
+dest_files=["res://.godot/imported/ceiling_fan_ceiling_fan_diff.jpg-e16a8d0e2a3584e0e93f616e87026ce9.s3tc.ctex", "res://.godot/imported/ceiling_fan_ceiling_fan_diff.jpg-e16a8d0e2a3584e0e93f616e87026ce9.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

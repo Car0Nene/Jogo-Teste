@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cfsaawgchwu4k"
-path="res://.godot/imported/WoodenChair_01_WoodenChair_01_metallic-WoodenChair_01_roughness.jpg-824070116edc776e047dc14485e82696.ctex"
+path.s3tc="res://.godot/imported/WoodenChair_01_WoodenChair_01_metallic-WoodenChair_01_roughness.jpg-824070116edc776e047dc14485e82696.s3tc.ctex"
+path.etc2="res://.godot/imported/WoodenChair_01_WoodenChair_01_metallic-WoodenChair_01_roughness.jpg-824070116edc776e047dc14485e82696.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "eafe1f24d5b013cacbfc2465510a0f21"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/WoodenChair_01_WoodenChair_01_metallic-WoodenChair_01_roughness.jpg"
-dest_files=["res://.godot/imported/WoodenChair_01_WoodenChair_01_metallic-WoodenChair_01_roughness.jpg-824070116edc776e047dc14485e82696.ctex"]
+dest_files=["res://.godot/imported/WoodenChair_01_WoodenChair_01_metallic-WoodenChair_01_roughness.jpg-824070116edc776e047dc14485e82696.s3tc.ctex", "res://.godot/imported/WoodenChair_01_WoodenChair_01_metallic-WoodenChair_01_roughness.jpg-824070116edc776e047dc14485e82696.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

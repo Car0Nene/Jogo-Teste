@@ -3,19 +3,21 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ci1rp3waf6tk7"
-path="res://.godot/imported/brick_pavement_Rough.jpg-7788b7b85c670e8622f9a998106488f7.ctex"
+path.s3tc="res://.godot/imported/brick_pavement_Rough.jpg-7788b7b85c670e8622f9a998106488f7.s3tc.ctex"
+path.etc2="res://.godot/imported/brick_pavement_Rough.jpg-7788b7b85c670e8622f9a998106488f7.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/env/textures/brick_pavement/brick_pavement_Rough.jpg"
-dest_files=["res://.godot/imported/brick_pavement_Rough.jpg-7788b7b85c670e8622f9a998106488f7.ctex"]
+dest_files=["res://.godot/imported/brick_pavement_Rough.jpg-7788b7b85c670e8622f9a998106488f7.s3tc.ctex", "res://.godot/imported/brick_pavement_Rough.jpg-7788b7b85c670e8622f9a998106488f7.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

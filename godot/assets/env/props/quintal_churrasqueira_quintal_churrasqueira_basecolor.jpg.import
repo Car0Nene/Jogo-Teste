@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dcgfrxsa713ew"
-path="res://.godot/imported/quintal_churrasqueira_quintal_churrasqueira_basecolor.jpg-72bf0b892646f8bc19f47ed7ce5f1508.ctex"
+path.s3tc="res://.godot/imported/quintal_churrasqueira_quintal_churrasqueira_basecolor.jpg-72bf0b892646f8bc19f47ed7ce5f1508.s3tc.ctex"
+path.etc2="res://.godot/imported/quintal_churrasqueira_quintal_churrasqueira_basecolor.jpg-72bf0b892646f8bc19f47ed7ce5f1508.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "5c74fe753995ecddff27caa260196ac7"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/props/quintal_churrasqueira_quintal_churrasqueira_basecolor.jpg"
-dest_files=["res://.godot/imported/quintal_churrasqueira_quintal_churrasqueira_basecolor.jpg-72bf0b892646f8bc19f47ed7ce5f1508.ctex"]
+dest_files=["res://.godot/imported/quintal_churrasqueira_quintal_churrasqueira_basecolor.jpg-72bf0b892646f8bc19f47ed7ce5f1508.s3tc.ctex", "res://.godot/imported/quintal_churrasqueira_quintal_churrasqueira_basecolor.jpg-72bf0b892646f8bc19f47ed7ce5f1508.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

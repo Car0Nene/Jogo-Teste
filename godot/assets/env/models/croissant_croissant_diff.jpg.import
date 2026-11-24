@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dvvwtsg3ai1ur"
-path="res://.godot/imported/croissant_croissant_diff.jpg-4a159002605184ade9ec4464f7cd0738.ctex"
+path.s3tc="res://.godot/imported/croissant_croissant_diff.jpg-4a159002605184ade9ec4464f7cd0738.s3tc.ctex"
+path.etc2="res://.godot/imported/croissant_croissant_diff.jpg-4a159002605184ade9ec4464f7cd0738.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "7047757bba5d9fa45744f5b74e832ab8"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/croissant_croissant_diff.jpg"
-dest_files=["res://.godot/imported/croissant_croissant_diff.jpg-4a159002605184ade9ec4464f7cd0738.ctex"]
+dest_files=["res://.godot/imported/croissant_croissant_diff.jpg-4a159002605184ade9ec4464f7cd0738.s3tc.ctex", "res://.godot/imported/croissant_croissant_diff.jpg-4a159002605184ade9ec4464f7cd0738.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

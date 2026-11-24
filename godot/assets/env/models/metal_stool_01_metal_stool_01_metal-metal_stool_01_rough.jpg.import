@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b426juvg6t61w"
-path="res://.godot/imported/metal_stool_01_metal_stool_01_metal-metal_stool_01_rough.jpg-f2e33041cf5bb20f9e0082b08376c61a.ctex"
+path.s3tc="res://.godot/imported/metal_stool_01_metal_stool_01_metal-metal_stool_01_rough.jpg-f2e33041cf5bb20f9e0082b08376c61a.s3tc.ctex"
+path.etc2="res://.godot/imported/metal_stool_01_metal_stool_01_metal-metal_stool_01_rough.jpg-f2e33041cf5bb20f9e0082b08376c61a.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "f1d54cea22f0ae8b82b7fc8ccf9c2472"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/metal_stool_01_metal_stool_01_metal-metal_stool_01_rough.jpg"
-dest_files=["res://.godot/imported/metal_stool_01_metal_stool_01_metal-metal_stool_01_rough.jpg-f2e33041cf5bb20f9e0082b08376c61a.ctex"]
+dest_files=["res://.godot/imported/metal_stool_01_metal_stool_01_metal-metal_stool_01_rough.jpg-f2e33041cf5bb20f9e0082b08376c61a.s3tc.ctex", "res://.godot/imported/metal_stool_01_metal_stool_01_metal-metal_stool_01_rough.jpg-f2e33041cf5bb20f9e0082b08376c61a.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

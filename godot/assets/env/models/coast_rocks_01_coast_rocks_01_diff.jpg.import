@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dyysisarp56iv"
-path="res://.godot/imported/coast_rocks_01_coast_rocks_01_diff.jpg-6af1ee25b18e89a1d0b77c1b6deb8b9e.ctex"
+path.s3tc="res://.godot/imported/coast_rocks_01_coast_rocks_01_diff.jpg-6af1ee25b18e89a1d0b77c1b6deb8b9e.s3tc.ctex"
+path.etc2="res://.godot/imported/coast_rocks_01_coast_rocks_01_diff.jpg-6af1ee25b18e89a1d0b77c1b6deb8b9e.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "636792499554242f758438e9af21f952"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/coast_rocks_01_coast_rocks_01_diff.jpg"
-dest_files=["res://.godot/imported/coast_rocks_01_coast_rocks_01_diff.jpg-6af1ee25b18e89a1d0b77c1b6deb8b9e.ctex"]
+dest_files=["res://.godot/imported/coast_rocks_01_coast_rocks_01_diff.jpg-6af1ee25b18e89a1d0b77c1b6deb8b9e.s3tc.ctex", "res://.godot/imported/coast_rocks_01_coast_rocks_01_diff.jpg-6af1ee25b18e89a1d0b77c1b6deb8b9e.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

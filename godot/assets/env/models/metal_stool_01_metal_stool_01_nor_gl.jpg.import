@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c44jmcb4g8cnn"
-path="res://.godot/imported/metal_stool_01_metal_stool_01_nor_gl.jpg-d4e239b37dd87d130cd10d5df233cc94.ctex"
+path.s3tc="res://.godot/imported/metal_stool_01_metal_stool_01_nor_gl.jpg-d4e239b37dd87d130cd10d5df233cc94.s3tc.ctex"
+path.etc2="res://.godot/imported/metal_stool_01_metal_stool_01_nor_gl.jpg-d4e239b37dd87d130cd10d5df233cc94.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "82dac20b1d080b2c76c28244f2dc40eb"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/metal_stool_01_metal_stool_01_nor_gl.jpg"
-dest_files=["res://.godot/imported/metal_stool_01_metal_stool_01_nor_gl.jpg-d4e239b37dd87d130cd10d5df233cc94.ctex"]
+dest_files=["res://.godot/imported/metal_stool_01_metal_stool_01_nor_gl.jpg-d4e239b37dd87d130cd10d5df233cc94.s3tc.ctex", "res://.godot/imported/metal_stool_01_metal_stool_01_nor_gl.jpg-d4e239b37dd87d130cd10d5df233cc94.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

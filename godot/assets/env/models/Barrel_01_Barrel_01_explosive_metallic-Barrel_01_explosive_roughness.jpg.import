@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c1bwfg0sf8xqa"
-path="res://.godot/imported/Barrel_01_Barrel_01_explosive_metallic-Barrel_01_explosive_roughness.jpg-47fe5e09bbe9d5e6fd81c282ce780e9e.ctex"
+path.s3tc="res://.godot/imported/Barrel_01_Barrel_01_explosive_metallic-Barrel_01_explosive_roughness.jpg-47fe5e09bbe9d5e6fd81c282ce780e9e.s3tc.ctex"
+path.etc2="res://.godot/imported/Barrel_01_Barrel_01_explosive_metallic-Barrel_01_explosive_roughness.jpg-47fe5e09bbe9d5e6fd81c282ce780e9e.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "3e395bbaefdda04a67b90389d958ac22"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/Barrel_01_Barrel_01_explosive_metallic-Barrel_01_explosive_roughness.jpg"
-dest_files=["res://.godot/imported/Barrel_01_Barrel_01_explosive_metallic-Barrel_01_explosive_roughness.jpg-47fe5e09bbe9d5e6fd81c282ce780e9e.ctex"]
+dest_files=["res://.godot/imported/Barrel_01_Barrel_01_explosive_metallic-Barrel_01_explosive_roughness.jpg-47fe5e09bbe9d5e6fd81c282ce780e9e.s3tc.ctex", "res://.godot/imported/Barrel_01_Barrel_01_explosive_metallic-Barrel_01_explosive_roughness.jpg-47fe5e09bbe9d5e6fd81c282ce780e9e.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

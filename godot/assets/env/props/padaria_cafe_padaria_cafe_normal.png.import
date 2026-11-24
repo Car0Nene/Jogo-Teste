@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dliyy10qi5c1d"
-path="res://.godot/imported/padaria_cafe_padaria_cafe_normal.png-dc48c665320b53017083e6f852f19203.ctex"
+path.s3tc="res://.godot/imported/padaria_cafe_padaria_cafe_normal.png-dc48c665320b53017083e6f852f19203.s3tc.ctex"
+path.etc2="res://.godot/imported/padaria_cafe_padaria_cafe_normal.png-dc48c665320b53017083e6f852f19203.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "299ed7970bd3ec399e089effc645d49b"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/props/padaria_cafe_padaria_cafe_normal.png"
-dest_files=["res://.godot/imported/padaria_cafe_padaria_cafe_normal.png-dc48c665320b53017083e6f852f19203.ctex"]
+dest_files=["res://.godot/imported/padaria_cafe_padaria_cafe_normal.png-dc48c665320b53017083e6f852f19203.s3tc.ctex", "res://.godot/imported/padaria_cafe_padaria_cafe_normal.png-dc48c665320b53017083e6f852f19203.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

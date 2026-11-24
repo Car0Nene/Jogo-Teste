@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cfy2pgxosxi32"
-path="res://.godot/imported/caged_hanging_light_caged_hanging_light_metal-caged_hanging_light_rough.jpg-f8f531fff0cb36886e06cd71889e3698.ctex"
+path.s3tc="res://.godot/imported/caged_hanging_light_caged_hanging_light_metal-caged_hanging_light_rough.jpg-f8f531fff0cb36886e06cd71889e3698.s3tc.ctex"
+path.etc2="res://.godot/imported/caged_hanging_light_caged_hanging_light_metal-caged_hanging_light_rough.jpg-f8f531fff0cb36886e06cd71889e3698.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "6cf51642a76cc25694daafed38b1af55"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/caged_hanging_light_caged_hanging_light_metal-caged_hanging_light_rough.jpg"
-dest_files=["res://.godot/imported/caged_hanging_light_caged_hanging_light_metal-caged_hanging_light_rough.jpg-f8f531fff0cb36886e06cd71889e3698.ctex"]
+dest_files=["res://.godot/imported/caged_hanging_light_caged_hanging_light_metal-caged_hanging_light_rough.jpg-f8f531fff0cb36886e06cd71889e3698.s3tc.ctex", "res://.godot/imported/caged_hanging_light_caged_hanging_light_metal-caged_hanging_light_rough.jpg-f8f531fff0cb36886e06cd71889e3698.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

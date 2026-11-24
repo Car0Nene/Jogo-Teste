@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bqv4uli4reioq"
-path="res://.godot/imported/bar_chair_round_01_bar_chair_round_01_metal-bar_chair_round_01_rough.jpg-6957938d5871ebb4e0265b078b3b2bc7.ctex"
+path.s3tc="res://.godot/imported/bar_chair_round_01_bar_chair_round_01_metal-bar_chair_round_01_rough.jpg-6957938d5871ebb4e0265b078b3b2bc7.s3tc.ctex"
+path.etc2="res://.godot/imported/bar_chair_round_01_bar_chair_round_01_metal-bar_chair_round_01_rough.jpg-6957938d5871ebb4e0265b078b3b2bc7.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "19d69a947c61ffe2c0aac32f66769c12"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/bar_chair_round_01_bar_chair_round_01_metal-bar_chair_round_01_rough.jpg"
-dest_files=["res://.godot/imported/bar_chair_round_01_bar_chair_round_01_metal-bar_chair_round_01_rough.jpg-6957938d5871ebb4e0265b078b3b2bc7.ctex"]
+dest_files=["res://.godot/imported/bar_chair_round_01_bar_chair_round_01_metal-bar_chair_round_01_rough.jpg-6957938d5871ebb4e0265b078b3b2bc7.s3tc.ctex", "res://.godot/imported/bar_chair_round_01_bar_chair_round_01_metal-bar_chair_round_01_rough.jpg-6957938d5871ebb4e0265b078b3b2bc7.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

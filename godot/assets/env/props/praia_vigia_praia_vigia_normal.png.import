@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://5nwhacvvh5ln"
-path="res://.godot/imported/praia_vigia_praia_vigia_normal.png-279d696fd81d50f421e3685ff34d25fb.ctex"
+path.s3tc="res://.godot/imported/praia_vigia_praia_vigia_normal.png-279d696fd81d50f421e3685ff34d25fb.s3tc.ctex"
+path.etc2="res://.godot/imported/praia_vigia_praia_vigia_normal.png-279d696fd81d50f421e3685ff34d25fb.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "5bb6439f32367a78430e5c1ba5f7c5fc"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/props/praia_vigia_praia_vigia_normal.png"
-dest_files=["res://.godot/imported/praia_vigia_praia_vigia_normal.png-279d696fd81d50f421e3685ff34d25fb.ctex"]
+dest_files=["res://.godot/imported/praia_vigia_praia_vigia_normal.png-279d696fd81d50f421e3685ff34d25fb.s3tc.ctex", "res://.godot/imported/praia_vigia_praia_vigia_normal.png-279d696fd81d50f421e3685ff34d25fb.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

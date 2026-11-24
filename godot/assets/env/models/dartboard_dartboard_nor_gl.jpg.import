@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://d2ag07811e56d"
-path="res://.godot/imported/dartboard_dartboard_nor_gl.jpg-55c884bdee6ae1ec114e3a72250bdf17.ctex"
+path.s3tc="res://.godot/imported/dartboard_dartboard_nor_gl.jpg-55c884bdee6ae1ec114e3a72250bdf17.s3tc.ctex"
+path.etc2="res://.godot/imported/dartboard_dartboard_nor_gl.jpg-55c884bdee6ae1ec114e3a72250bdf17.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "c3ab25ff209849a8e6ad9d80801aabe6"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/models/dartboard_dartboard_nor_gl.jpg"
-dest_files=["res://.godot/imported/dartboard_dartboard_nor_gl.jpg-55c884bdee6ae1ec114e3a72250bdf17.ctex"]
+dest_files=["res://.godot/imported/dartboard_dartboard_nor_gl.jpg-55c884bdee6ae1ec114e3a72250bdf17.s3tc.ctex", "res://.godot/imported/dartboard_dartboard_nor_gl.jpg-55c884bdee6ae1ec114e3a72250bdf17.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

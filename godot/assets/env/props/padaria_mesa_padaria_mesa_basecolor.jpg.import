@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://eapbohlskuqm"
-path="res://.godot/imported/padaria_mesa_padaria_mesa_basecolor.jpg-3bdfab9abf6ff4d8821bb2d21fe28642.ctex"
+path.s3tc="res://.godot/imported/padaria_mesa_padaria_mesa_basecolor.jpg-3bdfab9abf6ff4d8821bb2d21fe28642.s3tc.ctex"
+path.etc2="res://.godot/imported/padaria_mesa_padaria_mesa_basecolor.jpg-3bdfab9abf6ff4d8821bb2d21fe28642.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "27cb0dab8ec3ea98c09dca46f6ecac66"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/env/props/padaria_mesa_padaria_mesa_basecolor.jpg"
-dest_files=["res://.godot/imported/padaria_mesa_padaria_mesa_basecolor.jpg-3bdfab9abf6ff4d8821bb2d21fe28642.ctex"]
+dest_files=["res://.godot/imported/padaria_mesa_padaria_mesa_basecolor.jpg-3bdfab9abf6ff4d8821bb2d21fe28642.s3tc.ctex", "res://.godot/imported/padaria_mesa_padaria_mesa_basecolor.jpg-3bdfab9abf6ff4d8821bb2d21fe28642.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
