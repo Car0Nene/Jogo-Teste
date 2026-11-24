@@ -37,6 +37,11 @@ func _ready() -> void:
 	if ResourceLoader.exists(PROBE):
 		_done()
 		return
+	# Web: o index.html já baixou o pacote para /tmp antes de iniciar o motor
+	for pre in ["/tmp/" + ENV_PACK]:
+		if FileAccess.file_exists(pre) and ProjectSettings.load_resource_pack(pre) and ResourceLoader.exists(PROBE):
+			_done()
+			return
 	if FileAccess.file_exists(_dest) and ProjectSettings.load_resource_pack(_dest) and ResourceLoader.exists(PROBE):
 		_done()
 		return
