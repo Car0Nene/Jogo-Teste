@@ -53,6 +53,7 @@ var _down_kind := 0               # 0 knockdown normal, 1 KO
 
 var model: FighterModel
 var _shadow: MeshInstance3D
+var _aura: Node3D = null  # Aura de buff ativo
 
 
 func _ready() -> void:
@@ -430,6 +431,15 @@ func _set_form(f: StringName) -> void:
 		model.set_facing(facing)
 	model.scale = Vector3.ONE * float(info.get("scale", 1.0))
 	if prev != f:
+		# Limpar aura anterior
+		if _aura:
+			_aura.queue_free()
+			_aura = null
+		# Criar aura nova se entrando em buff
+		if f != &"":
+			var col: Color = info.get("color", Color.WHITE)
+			var dur: float = info.get("duration", 8.0)
+			_aura = Vfx.aura(self, col, dur, model.height_scale)
 		form_changed.emit(self, f)
 
 

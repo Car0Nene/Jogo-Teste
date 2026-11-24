@@ -1,9 +1,12 @@
 class_name Vfx
 extends Node3D
 ## Efeitos visuais da luta: faíscas de impacto, anel de choque, poeira, aura de especial.
-## Texturas são geradas por código (sem arquivos), em cache estático.
+## OTIMIZADO: Object pooling para hit(), material cache, texturas cacheadas.
 
 static var _tex := {}
+static var _mat_cache := {}
+static var _hit_pool: Array[Vfx] = []
+const HIT_POOL_SIZE := 8  # Pré-aloca 8 hit effects
 
 
 # ------------------------------------------------------------------ texturas
@@ -37,7 +40,11 @@ static func tex(kind: StringName) -> Texture2D:
 	return t
 
 
+# ------------------------------------------------------------------ material cache
 static func _billboard_mat(kind: StringName, color: Color, energy := 3.0) -> StandardMaterial3D:
+	var cache_key := "%s_%.2f_%.2f_%.2f_%.2f" % [kind, color.r, color.g, color.b, energy]
+	if _mat_cache.has(cache_key):
+		return _mat_cache[cache_key]
 	var m := StandardMaterial3D.new()
 	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
@@ -48,6 +55,10 @@ static func _billboard_mat(kind: StringName, color: Color, energy := 3.0) -> Sta
 	m.vertex_color_use_as_albedo = true
 	m.disable_receive_shadows = true
 	m.no_depth_test = false
+	_mat_cache[cache_key] = m
+	if _mat_cache.size() > 128:  # Limpar cache se ficar muito grande
+		var keys = _mat_cache.keys()
+		_mat_cache.erase(keys[0])
 	return m
 
 
@@ -76,15 +87,34 @@ static func _alpha_ramp() -> GradientTexture1D:
 	return gt
 
 
-# ------------------------------------------------------------------ impacto
+static func _init_hit_pool() -> void:
+	if _hit_pool.size() >= HIT_POOL_SIZE:
+		return
+	for i in range(HIT_POOL_SIZE - _hit_pool.size()):
+		var vfx := Vfx.new()
+		_hit_pool.append(vfx)
+
+
+# ------------------------------------------------------------------ impacto (pooled)
 static func hit(parent: Node, at: Vector3, color: Color, heavy: bool, dir := 1) -> void:
-	var fx := Vfx.new()
+	_init_hit_pool()
+	var fx: Vfx
+	if _hit_pool.size() > 0:
+		fx = _hit_pool.pop_back()
+		if fx.is_inside_tree():
+			fx.get_parent().remove_child(fx)
+	else:
+		fx = Vfx.new()
 	parent.add_child(fx)
 	fx.global_position = at
 	fx._build_hit(color, heavy, dir)
 
 
 func _build_hit(color: Color, heavy: bool, dir: int) -> void:
+	# Limpa filhos anteriores se reutilizando
+	for child in get_children():
+		child.queue_free()
+	
 	var s := 1.0 if not heavy else 1.7
 	# estrela central
 	var star := MeshInstance3D.new()
@@ -141,7 +171,12 @@ func _build_hit(color: Color, heavy: bool, dir: int) -> void:
 	tw.tween_property(rm, "albedo_color:a", 0.0, 0.22)
 	tw.tween_property(light, "light_energy", 0.0, 0.25)
 	tw.chain().tween_interval(0.5)
-	tw.chain().tween_callback(queue_free)
+	tw.chain().tween_callback(func():
+		if is_inside_tree():
+			get_parent().remove_child(self)
+			_hit_pool.append(self)
+	)
+
 
 
 func _puffs(color: Color, amount: int, size: float, speed: float) -> void:
