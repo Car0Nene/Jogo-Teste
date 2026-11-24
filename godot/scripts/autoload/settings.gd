@@ -32,6 +32,10 @@ var key_overrides := {}   # "p1_punch" -> keycode
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	# padrão por plataforma (vale só na primeira vez; depois vale o que o jogador salvar)
+	if OS.has_feature("mobile") or OS.has_feature("web"):
+		data["video"]["quality"] = 0
+		data["video"]["render_scale"] = 0.8
 	_load()
 	_register_inputs()
 	apply()

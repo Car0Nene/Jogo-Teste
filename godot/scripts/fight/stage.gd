@@ -185,7 +185,7 @@ func _environment() -> void:
 	env.fog_light_color = L.fog
 	env.fog_density = L.get("fog_density", 0.008)
 	env.fog_sky_affect = 0.15
-	env.fog_aerial_perspective = 0.4
+	env.fog_aerial_perspective = 0.4 if _quality() >= 1 else 0.0
 	env.adjustment_enabled = true
 	env.adjustment_saturation = 1.06
 	env.adjustment_contrast = 1.04
@@ -199,8 +199,8 @@ func _environment() -> void:
 	sun.rotation_degrees = L.sun_rot
 	sun.shadow_enabled = _quality() >= 1
 	sun.shadow_blur = 1.2
-	sun.directional_shadow_max_distance = 26.0
-	sun.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS
+	sun.directional_shadow_max_distance = 26.0 if _quality() >= 2 else 14.0
+	sun.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS if _quality() >= 2 else DirectionalLight3D.SHADOW_ORTHOGONAL
 	add_child(sun)
 	# luz de recorte (rim) atrás dos lutadores: separa os personagens do fundo
 	var rim := DirectionalLight3D.new()
@@ -243,6 +243,7 @@ func _solid(c: Color, rough := 0.7, emit := 0.0) -> StandardMaterial3D:
 
 
 func _box(size: Vector3, at: Vector3, mat: Material, shadow := true) -> MeshInstance3D:
+	shadow = shadow and _quality() >= 1
 	var mi := MeshInstance3D.new()
 	var bm := BoxMesh.new()
 	bm.size = size
@@ -291,8 +292,10 @@ func _prop(path: String, at: Vector3, height: float, rot_y: float) -> Node3D:
 	n.position = Vector3(-(box.position.x + box.size.x * 0.5), -box.position.y, -(box.position.z + box.size.z * 0.5))
 	holder.position = at
 	holder.rotation_degrees.y = rot_y
+	# sombras dos objetos de cenário só na qualidade Alta (no celular pesam muito)
+	var shadows := _quality() >= 2
 	for mi in n.find_children("*", "MeshInstance3D", true, false):
-		(mi as MeshInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+		(mi as MeshInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if shadows else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	return holder
 
 
@@ -388,7 +391,7 @@ func _string(a: Vector3, b: Vector3, sag: float, count: int, colors: Array, flag
 			s.position = path[i] - Vector3(0, 0.06, 0)
 			s.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			add_child(s)
-			if i % 4 == 0 and _quality() >= 1:
+			if i % 6 == 0 and _quality() >= 2:
 				_lamp(s.position, c, 0.6, 3.0, false)
 
 

@@ -1,8 +1,12 @@
 extends Control
 ## Tela "VERSUS" antes da luta.
 
+var _load_bar: ProgressBar
+
+
 func _ready() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
+	Game.preload_fight()
 	var a := Game.fighter(Game.p1_fighter)
 	var b := Game.fighter(Game.p2_fighter)
 	var bg := ColorRect.new()
@@ -60,5 +64,23 @@ func _ready() -> void:
 		lad.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		add_child(lad)
 	Audio.sfx(&"special")
+	_load_bar = ProgressBar.new()
+	_load_bar.show_percentage = false
+	_load_bar.custom_minimum_size = Vector2(500, 10)
+	_load_bar.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
+	_load_bar.position = Vector2(-250, -40)
+	_load_bar.modulate.a = 0.6
+	add_child(_load_bar)
 	await get_tree().create_timer(2.6).timeout
+	# espera a pré-carga (no máximo ~15 s) antes de ir para a luta
+	var waited := 0.0
+	while Game.preload_progress() < 1.0 and waited < 15.0:
+		await get_tree().create_timer(0.1).timeout
+		waited += 0.1
+	Game.finish_preload()
 	Scenes.go("res://scenes/fight.tscn")
+
+
+func _process(_dt: float) -> void:
+	if _load_bar:
+		_load_bar.value = Game.preload_progress() * 100.0

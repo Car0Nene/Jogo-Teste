@@ -130,7 +130,7 @@ func _build_hit(color: Color, heavy: bool, dir: int) -> void:
 		_puffs(color.darkened(0.2), 6, 0.5, 1.5)
 	var light := OmniLight3D.new()
 	light.light_color = color
-	light.light_energy = 4.0 if heavy else 2.0
+	light.light_energy = (4.0 if heavy else 2.0) if int(Settings.get_value("video", "quality")) >= 1 else 0.0
 	light.omni_range = 3.0
 	add_child(light)
 	var tw := create_tween().set_parallel(true)
@@ -232,3 +232,17 @@ func _build_aura(color: Color, duration: float, height: float) -> void:
 	tw.tween_property(light, "light_energy", 0.0, 0.4)
 	tw.tween_interval(0.5)
 	tw.tween_callback(queue_free)
+
+
+## Desenha uma vez cada efeito (quase invisível) para o motor compilar os shaders
+## antes da luta — evita a "engasgada" no primeiro golpe/especial.
+static func warmup(parent: Node3D, at: Vector3) -> void:
+	var holder := Node3D.new()
+	parent.add_child(holder)
+	holder.global_position = at
+	holder.scale = Vector3.ONE * 0.01
+	hit(holder, at, Color.WHITE, true)
+	hit(holder, at, Color.WHITE, false)
+	dust(holder, at, true)
+	aura(holder, Color.WHITE, 0.3)
+	parent.get_tree().create_timer(0.6).timeout.connect(holder.queue_free)
