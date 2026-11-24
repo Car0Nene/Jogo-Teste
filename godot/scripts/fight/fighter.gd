@@ -307,16 +307,27 @@ func _start_move(n: StringName) -> bool:
 
 
 func _check_hit() -> void:
+	var hb := hitbox()
+	var m := move
+	var p3 := Vector3(hb.center.x, hb.center.y, 0.0)
+	if opponent.hurt_test(hb.center, hb.radius):
+		opponent.take_hit(self, m, Vector3(p3.x, p3.y, 0.25))
+
+
+## Hitbox do golpe atual: esfera presa ao osso do golpe (centro no plano da luta).
+## "active" = está nos quadros ativos de um golpe corpo a corpo.
+func hitbox() -> Dictionary:
+	if move == null or state != S.ATTACK:
+		return {"active": false, "center": Vector2.ZERO, "radius": 0.0, "bone": &""}
 	var m := move
 	var bone := m.hitbox_bone
 	var meta: Dictionary = META.get(String(m.anim), {})
 	if meta.has("bone") and bone == &"auto":
 		bone = StringName(meta["bone"])
 	var p3 := model.bone_world(bone)
-	var hb := Vector2(p3.x, p3.y)
-	var r := m.hitbox_radius * model.height_scale / 1.7 * _form_mult("reach", 0.5)
-	if opponent.hurt_test(hb, r):
-		opponent.take_hit(self, m, Vector3(p3.x, p3.y, 0.25))
+	var active := m.kind == MoveData.Kind.MELEE and state_frame > m.startup and state_frame <= m.startup + m.active
+	return {"active": active, "center": Vector2(p3.x, p3.y),
+		"radius": m.hitbox_radius * model.height_scale / 1.7 * _form_mult("reach", 0.5), "bone": bone}
 
 
 ## Hurtbox = dois retângulos (tronco/cabeça e pernas) montados a partir dos ossos.
@@ -341,7 +352,9 @@ func hurt_rects() -> Array[Rect2]:
 
 
 func take_hit(attacker: Fighter, m: MoveData, at: Vector3) -> void:
-	attacker.move_hit = true
+	# só marca "acertou" se for o golpe em curso (projétil atrasado não conta)
+	if attacker.move == m and attacker.state == S.ATTACK:
+		attacker.move_hit = true
 	var dmg_mult := attacker._form_mult("atk") * data.defense * _form_mult("taken")
 	var can_block := state in [S.IDLE, S.WALK, S.CROUCH, S.BLOCKSTUN] and pos.y <= 0.0
 	var holding := controller.is_blocking(self) if controller else false
@@ -352,7 +365,8 @@ func take_hit(attacker: Fighter, m: MoveData, at: Vector3) -> void:
 	if training_infinite and state == S.IDLE and Game.mode == Game.Mode.TRAINING:
 		pass
 	if blocked:
-		attacker.move_blocked = true
+		if attacker.move == m and attacker.state == S.ATTACK:
+			attacker.move_blocked = true
 		hp = maxf(1.0, hp - m.damage * 0.12 * dmg_mult)
 		_stun = m.blockstun
 		_blocking_low = crouch_block
@@ -426,8 +440,15 @@ func _set_form(f: StringName) -> void:
 	form_frames = int(info.get("duration", 8.0) * 60.0) if f != &"" else 0
 	var new_model: PackedScene = info.get("model", null)
 	if new_model != null or (prev != &"" and data.forms.get(prev, {}).get("model", null) != null):
+		# troca só o visual: a animação em curso (ex.: power_up da transformação) continua de onde estava
+		var cur_anim := model.current_anim()
+		var cur_pos := model.anim.current_animation_position if model.anim.is_playing() else 0.0
+		var cur_speed := model.anim.speed_scale
 		model.setup(new_model if new_model else data.model, data.height_m)
 		model.set_facing(facing)
+		if cur_anim != "":
+			model.play(cur_anim, cur_speed, 0.0, true)
+			model.seek(cur_pos)
 	model.scale = Vector3.ONE * float(info.get("scale", 1.0))
 	if prev != f:
 		form_changed.emit(self, f)
@@ -555,14 +576,14 @@ func play_intro() -> void:
 
 
 ## Fala do lutador, posicionada no estéreo conforme o lado da tela.
-func say(event: StringName, fallback: StringName = &"") -> void:
+func say(event: StringName, fallback: StringName = &"") -> float:
 	var v: AudioStream = data.voices.get(event, data.voices.get(fallback))
 	if v == null:
-		return
+		return 0.0
 	var pan := 0.0
 	var cam := get_viewport().get_camera_3d()
 	if cam:
 		var rel := global_position - cam.global_position
 		var depth := maxf(0.5, -rel.dot(cam.global_transform.basis.z))
 		pan = clampf(rel.dot(cam.global_transform.basis.x) / (depth * 0.6), -1.0, 1.0)
-	Audio.voice(v, player_index, pan * 0.7)
+	return Audio.voice(v, player_index, pan * 0.7, event)

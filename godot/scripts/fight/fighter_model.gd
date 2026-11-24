@@ -49,6 +49,11 @@ func play(n: String, speed := 1.0, blend := BLEND, restart := false) -> void:
 	anim.speed_scale = speed
 
 
+## Nome da animação atual sem o prefixo da biblioteca ("" se nenhuma).
+func current_anim() -> String:
+	return _current.trim_prefix("fight/") if _current != "" else ""
+
+
 func seek(t: float) -> void:
 	anim.seek(t, true)
 

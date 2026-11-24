@@ -14,6 +14,7 @@ var menu: FightMenu
 var phase: Phase = Phase.INTRO
 var round_no := 1
 var wins := [0, 0]
+var draws := 0
 var time_left := 99.0
 var _paused := false
 
@@ -43,10 +44,14 @@ func _ready() -> void:
 	cam.current = true
 	cam.a = p1
 	cam.b = p2
+	var dbg := DebugOverlay.new()
+	dbg.fighters = [p1, p2]
+	add_child(dbg)
 	hud = FightHud.new()
 	add_child(hud)
 	hud.bind(p1, p2)
 	touch = TouchControls.new()
+	touch.two_players = Game.mode == Game.Mode.VERSUS_2P
 	add_child(touch)
 	menu = FightMenu.new()
 	add_child(menu)
@@ -78,14 +83,15 @@ func _wait(s: float) -> void:
 
 func _intro() -> void:
 	phase = Phase.INTRO
+	Vfx.warmup(self, Vector3(0, 1.0, 0))
 	hud.visible = false
 	touch.set_active(false)
 	for f in [p1, p2]:
 		cam.cinematic_target = f
 		f.play_intro()
 		hud.banner(f.data.display_name, f.data.accent, f.data.title)
-		f.say(&"intro", &"select")
-		await _wait(1.6)
+		var dur: float = f.say(&"intro", &"select")
+		await _wait(clampf(dur + 0.25, 1.6, 3.5))
 		if not is_inside_tree(): return
 	cam.cinematic_target = null
 	hud.visible = true
@@ -168,10 +174,10 @@ func _end_round(winner: Fighter) -> void:
 	await _wait(1.0)
 	if not is_inside_tree(): return
 	if winner == null:
-		hud.banner("EMPATE", Color.WHITE)
+		# empate no round não dá ponto a ninguém: joga-se mais um round
+		hud.banner("EMPATE", Color.WHITE, "Round extra!")
 		_announcer("tie")
-		wins[0] += 1
-		wins[1] += 1
+		draws += 1
 	else:
 		wins[0 if winner == p1 else 1] += 1
 		winner.set_win()
@@ -186,7 +192,8 @@ func _end_round(winner: Fighter) -> void:
 	if not is_inside_tree(): return
 	cam.cinematic_target = null
 	var need := int(Settings.get_value("game", "rounds"))
-	if wins[0] >= need or wins[1] >= need:
+	var max_rounds := need * 2 - 1 + 2   # melhor de N + até 2 rounds extras por empate
+	if wins[0] >= need or wins[1] >= need or round_no >= max_rounds:
 		_match_end()
 	else:
 		round_no += 1
@@ -196,6 +203,12 @@ func _end_round(winner: Fighter) -> void:
 func _match_end() -> void:
 	phase = Phase.MATCH_END
 	hud.hide_banner()
+	if wins[0] == wins[1]:
+		# empate na partida: ninguém vence (nunca escolher P2 por padrão)
+		cam.cinematic_target = null
+		_announcer("tie")
+		menu.open_results("EMPATE! NINGUÉM VENCEU", false)
+		return
 	var p1_won: bool = wins[0] > wins[1]
 	var winner := p1 if p1_won else p2
 	cam.cinematic_target = winner
