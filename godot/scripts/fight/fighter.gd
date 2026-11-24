@@ -285,7 +285,7 @@ func _start_move(n: StringName) -> bool:
 		vel.x = 0.0
 	Audio.sfx(m.sfx)
 	if m.voice != &"" and data.voices.has(m.voice):
-		Audio.voice(data.voices[m.voice])
+		say(m.voice)
 	# sincroniza a animação: o "impacto" medido cai no 1º quadro ativo
 	var meta: Dictionary = META.get(String(m.anim), {})
 	var impact: float = meta.get("impact", 0.25)
@@ -545,3 +545,17 @@ func play_intro() -> void:
 	_enter(S.INTRO)
 	var intro := "granny_taunt" if data.id == &"juraci" else ("taunt" if player_index == 1 else "power_up")
 	model.play(intro, 1.0, 0.1, true)
+
+
+## Fala do lutador, posicionada no estéreo conforme o lado da tela.
+func say(event: StringName, fallback: StringName = &"") -> void:
+	var v: AudioStream = data.voices.get(event, data.voices.get(fallback))
+	if v == null:
+		return
+	var pan := 0.0
+	var cam := get_viewport().get_camera_3d()
+	if cam:
+		var rel := global_position - cam.global_position
+		var depth := maxf(0.5, -rel.dot(cam.global_transform.basis.z))
+		pan = clampf(rel.dot(cam.global_transform.basis.x) / (depth * 0.6), -1.0, 1.0)
+	Audio.voice(v, player_index, pan * 0.7)

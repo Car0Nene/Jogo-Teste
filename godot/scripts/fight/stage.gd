@@ -31,6 +31,9 @@ var _rng := RandomNumberGenerator.new()
 func _ready() -> void:
 	_rng.seed = hash(stage_id)
 	_theme = THEMES.get(stage_id, THEMES[&"padaria"])
+	var room: Array = {&"padaria": [0.4, 0.16], &"bar": [0.5, 0.2], &"festa": [0.45, 0.14],
+		&"quintal": [0.2, 0.07], &"praia": [0.15, 0.05]}.get(stage_id, [0.3, 0.1])
+	Audio.set_room(room[0], room[1])
 	_environment()
 	_backdrop()
 	_floor()

@@ -83,8 +83,7 @@ func _intro() -> void:
 		cam.cinematic_target = f
 		f.play_intro()
 		hud.banner(f.data.display_name, f.data.accent, f.data.title)
-		var v: AudioStream = f.data.voices.get(&"intro", f.data.voices.get(&"select"))
-		if v: Audio.voice(v)
+		f.say(&"intro", &"select")
 		await _wait(1.6)
 		if not is_inside_tree(): return
 	cam.cinematic_target = null
@@ -150,8 +149,7 @@ func _on_ko(loser: Fighter) -> void:
 		return
 	phase = Phase.ROUND_END
 	Audio.sfx(&"ko")
-	if loser.data.voices.has(&"ko"):
-		Audio.voice(loser.data.voices[&"ko"])
+	loser.say(&"ko")
 	hud.banner("K.O.", Color("ff3b30"))
 	Engine.time_scale = 0.3
 	cam.impact(14.0)
@@ -175,8 +173,7 @@ func _end_round(winner: Fighter) -> void:
 	else:
 		wins[0 if winner == p1 else 1] += 1
 		winner.set_win()
-		if winner.data.voices.has(&"win"):
-			Audio.voice(winner.data.voices[&"win"])
+		winner.say(&"win")
 		var loser := p2 if winner == p1 else p1
 		if not loser.is_down():
 			loser.set_lose_time()
