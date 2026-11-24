@@ -178,7 +178,7 @@ func _environment() -> void:
 	env.glow_intensity = 0.55 if not L.get("night", false) else 0.9
 	env.glow_bloom = 0.05 if not L.get("night", false) else 0.12
 	env.glow_hdr_threshold = 1.1
-	env.ssao_enabled = _quality() >= 2
+	env.ssao_enabled = _quality() >= 2 and RenderingServer.get_current_rendering_method() == "forward_plus"
 	env.ssao_radius = 0.8
 	env.ssao_intensity = 1.4
 	env.fog_enabled = true
