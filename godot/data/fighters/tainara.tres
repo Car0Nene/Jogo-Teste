@@ -1,0 +1,256 @@
+[gd_resource type="Resource" script_class="FighterData" format=3]
+
+[ext_resource type="PackedScene" path="res://assets/characters/tainara/tainara.glb" id="1_drjca"]
+[ext_resource type="Script" path="res://scripts/data/move_data.gd" id="2_lu5b6"]
+[ext_resource type="Texture2D" path="res://assets/ui/portraits/tainara.png" id="3_hb5ue"]
+[ext_resource type="Script" path="res://scripts/data/fighter_data.gd" id="4_hd27b"]
+[ext_resource type="AudioStream" path="res://assets/audio/voice/tainara.mp3" id="5_ma6e5"]
+
+[sub_resource type="Resource" id="Resource_0x627"]
+script = ExtResource("2_lu5b6")
+display_name = "Jab"
+startup = 5
+recovery = 9
+damage = 32.0
+hitbox_bone = &"auto"
+hitbox_radius = 0.15
+hitstun = 15
+blockstun = 9
+hitstop = 5
+pushback = 1.6
+meter_gain = 5.0
+
+[sub_resource type="Resource" id="Resource_ox7bf"]
+script = ExtResource("2_lu5b6")
+display_name = "Direto"
+anim = &"cross"
+startup = 8
+recovery = 14
+damage = 55.0
+hitbox_bone = &"auto"
+hitstun = 18
+blockstun = 11
+hitstop = 7
+lunge = 1.2
+meter_gain = 7.0
+sfx = &"whoosh_heavy"
+
+[sub_resource type="Resource" id="Resource_t6ei5"]
+script = ExtResource("2_lu5b6")
+display_name = "Gancho"
+anim = &"hook"
+startup = 10
+active = 4
+recovery = 18
+damage = 72.0
+hitbox_bone = &"auto"
+hitbox_radius = 0.18
+hitstun = 22
+blockstun = 12
+hitstop = 9
+pushback = 3.0
+meter_gain = 9.0
+sfx = &"whoosh_heavy"
+
+[sub_resource type="Resource" id="Resource_c0cmc"]
+script = ExtResource("2_lu5b6")
+display_name = "Uppercut"
+anim = &"uppercut"
+startup = 9
+active = 5
+recovery = 22
+damage = 78.0
+level = 1
+hitbox_radius = 0.2
+hitstun = 24
+blockstun = 12
+hitstop = 9
+pushback = 1.2
+knockdown = true
+launch = 6.4
+meter_gain = 9.0
+sfx = &"whoosh_heavy"
+
+[sub_resource type="Resource" id="Resource_3x4r1"]
+script = ExtResource("2_lu5b6")
+display_name = "Chute"
+anim = &"kick_mid"
+startup = 9
+active = 4
+recovery = 16
+damage = 58.0
+level = 1
+hitbox_bone = &"auto"
+hitbox_radius = 0.18
+hitstun = 18
+blockstun = 11
+hitstop = 7
+pushback = 2.4
+meter_gain = 7.0
+
+[sub_resource type="Resource" id="Resource_fqm24"]
+script = ExtResource("2_lu5b6")
+display_name = "Chute Alto"
+anim = &"low_kick"
+startup = 13
+active = 4
+recovery = 20
+damage = 80.0
+hitbox_bone = &"auto"
+hitbox_radius = 0.2
+hitstun = 22
+blockstun = 13
+hitstop = 10
+pushback = 3.4
+lunge = 0.8
+meter_gain = 10.0
+sfx = &"whoosh_heavy"
+
+[sub_resource type="Resource" id="Resource_qnug1"]
+script = ExtResource("2_lu5b6")
+display_name = "Chute Baixo"
+anim = &"roundhouse"
+startup = 8
+recovery = 15
+damage = 45.0
+level = 2
+hitbox_bone = &"auto"
+hitbox_radius = 0.18
+pushback = 2.0
+
+[sub_resource type="Resource" id="Resource_6xln8"]
+script = ExtResource("2_lu5b6")
+display_name = "Rasteira"
+anim = &"sweep"
+startup = 11
+active = 4
+recovery = 24
+damage = 66.0
+level = 2
+hitbox_bone = &"RightFoot"
+hitbox_radius = 0.22
+hitstun = 20
+blockstun = 12
+hitstop = 8
+pushback = 1.6
+knockdown = true
+launch = 2.2
+meter_gain = 8.0
+sfx = &"whoosh_heavy"
+
+[sub_resource type="Resource" id="Resource_o2tf8"]
+script = ExtResource("2_lu5b6")
+display_name = "Soco Aéreo"
+startup = 5
+active = 8
+recovery = 0
+damage = 46.0
+level = 3
+hitbox_bone = &"auto"
+hitbox_radius = 0.2
+hitstun = 18
+hitstop = 7
+pushback = 1.8
+air = true
+
+[sub_resource type="Resource" id="Resource_rusla"]
+script = ExtResource("2_lu5b6")
+display_name = "Voadora"
+anim = &"kick_mid"
+active = 10
+recovery = 0
+damage = 62.0
+level = 3
+hitbox_bone = &"auto"
+hitbox_radius = 0.24
+hitstun = 20
+blockstun = 12
+hitstop = 8
+pushback = 2.4
+meter_gain = 8.0
+air = true
+sfx = &"whoosh_heavy"
+
+[sub_resource type="Resource" id="Resource_8hlkc"]
+script = ExtResource("2_lu5b6")
+display_name = "Poder do Arroz"
+kind = 2
+anim = &"power_up"
+startup = 24
+active = 1
+recovery = 30
+damage = 0.0
+meter_gain = 0.0
+meter_cost = 50.0
+sfx = &"special"
+buff_form = &"arroz"
+voice = &"special"
+
+[sub_resource type="Resource" id="Resource_kogsy"]
+script = ExtResource("2_lu5b6")
+display_name = "Cuidado em Dobro"
+kind = 1
+anim = &"cast"
+startup = 18
+active = 1
+recovery = 26
+damage = 100.0
+level = 2
+hitstun = 26
+blockstun = 16
+hitstop = 10
+pushback = 3.0
+knockdown = true
+launch = 4.0
+meter_gain = 0.0
+meter_cost = 50.0
+sfx = &"special"
+projectile_kind = &"wave"
+projectile_color = Color(0.98039216, 0.8, 0.08235294, 1)
+projectile_speed = 5.5
+voice = &"sub_special"
+
+[resource]
+script = ExtResource("4_hd27b")
+id = &"tainara"
+display_name = "TAINARA"
+title = "Guardiã do Arroz"
+quote = "Com arroz eu fico invencível!"
+bio = "Ativa o Poder do Arroz dourado ou manda o Cuidado em Dobro pela arena."
+model = ExtResource("1_drjca")
+portrait = ExtResource("3_hb5ue")
+accent = Color(0.21960784, 0.7411765, 0.972549, 1)
+height_m = 1.64
+walk_speed = 1.85
+special_name = "Poder do Arroz"
+special_desc = "Aura dourada: +32% de ataque e velocidade."
+sub_special_name = "Cuidado em Dobro"
+sub_special_desc = "Onda dourada rasteira que atravessa a arena."
+moves = {
+&"air_kick": SubResource("Resource_rusla"),
+&"air_punch": SubResource("Resource_o2tf8"),
+&"cross": SubResource("Resource_ox7bf"),
+&"high_kick": SubResource("Resource_fqm24"),
+&"hook": SubResource("Resource_t6ei5"),
+&"jab": SubResource("Resource_0x627"),
+&"kick": SubResource("Resource_3x4r1"),
+&"low_kick": SubResource("Resource_qnug1"),
+&"special": SubResource("Resource_8hlkc"),
+&"sub_special": SubResource("Resource_kogsy"),
+&"sweep": SubResource("Resource_6xln8"),
+&"uppercut": SubResource("Resource_c0cmc")
+}
+forms = {
+&"arroz": {
+"atk": 1.32,
+"color": Color(0.98039216, 0.8, 0.08235294, 1),
+"duration": 10.0,
+"label": "PODER DO ARROZ",
+"speed": 1.1,
+"taken": 0.88
+}
+}
+voices = {
+&"select": ExtResource("5_ma6e5"),
+&"special": ExtResource("5_ma6e5")
+}

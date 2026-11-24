@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="StageData" format=3]
+
+[ext_resource type="AudioStream" path="res://assets/audio/music/family-fighter-3.mp3" id="1_fktc8"]
+[ext_resource type="Texture2D" path="res://assets/stages/praia.webp" id="2_24pi2"]
+[ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="3_mlp0u"]
+
+[resource]
+script = ExtResource("3_mlp0u")
+id = &"praia"
+display_name = "Praia • Calçadão"
+subtitle = "Natal na praia"
+preview = ExtResource("2_24pi2")
+music = ExtResource("1_fktc8")

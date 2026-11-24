@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="StageData" format=3]
+
+[ext_resource type="AudioStream" path="res://assets/audio/music/family-fighter-2.mp3" id="1_5bkgs"]
+[ext_resource type="Texture2D" path="res://assets/stages/quintal.webp" id="2_wvni2"]
+[ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="3_fbwaj"]
+
+[resource]
+script = ExtResource("3_fbwaj")
+id = &"quintal"
+display_name = "Quintal da Família"
+subtitle = "Domingo de churrasco"
+preview = ExtResource("2_wvni2")
+music = ExtResource("1_5bkgs")

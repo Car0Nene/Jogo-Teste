@@ -1,0 +1,254 @@
+[gd_resource type="Resource" script_class="FighterData" format=3]
+
+[ext_resource type="PackedScene" path="res://assets/characters/gabi/gabi.glb" id="1_7ex7i"]
+[ext_resource type="Script" path="res://scripts/data/move_data.gd" id="2_xfj1r"]
+[ext_resource type="Texture2D" path="res://assets/ui/portraits/gabi.png" id="3_7lufe"]
+[ext_resource type="Script" path="res://scripts/data/fighter_data.gd" id="4_u6d83"]
+[ext_resource type="AudioStream" path="res://assets/audio/voice/gabi.mp3" id="5_jcl7e"]
+
+[sub_resource type="Resource" id="Resource_tw08c"]
+script = ExtResource("2_xfj1r")
+display_name = "Jab"
+startup = 5
+recovery = 9
+damage = 32.0
+hitbox_bone = &"auto"
+hitbox_radius = 0.15
+hitstun = 15
+blockstun = 9
+hitstop = 5
+pushback = 1.6
+meter_gain = 5.0
+
+[sub_resource type="Resource" id="Resource_ou3us"]
+script = ExtResource("2_xfj1r")
+display_name = "Direto"
+anim = &"cross"
+startup = 8
+recovery = 14
+damage = 55.0
+hitbox_bone = &"auto"
+hitstun = 18
+blockstun = 11
+hitstop = 7
+lunge = 1.2
+meter_gain = 7.0
+sfx = &"whoosh_heavy"
+
+[sub_resource type="Resource" id="Resource_qt6xb"]
+script = ExtResource("2_xfj1r")
+display_name = "Gancho"
+anim = &"hook"
+startup = 10
+active = 4
+recovery = 18
+damage = 72.0
+hitbox_bone = &"auto"
+hitbox_radius = 0.18
+hitstun = 22
+blockstun = 12
+hitstop = 9
+pushback = 3.0
+meter_gain = 9.0
+sfx = &"whoosh_heavy"
+
+[sub_resource type="Resource" id="Resource_vp5c1"]
+script = ExtResource("2_xfj1r")
+display_name = "Uppercut"
+anim = &"uppercut"
+startup = 9
+active = 5
+recovery = 22
+damage = 78.0
+level = 1
+hitbox_radius = 0.2
+hitstun = 24
+blockstun = 12
+hitstop = 9
+pushback = 1.2
+knockdown = true
+launch = 6.4
+meter_gain = 9.0
+sfx = &"whoosh_heavy"
+
+[sub_resource type="Resource" id="Resource_yxi2l"]
+script = ExtResource("2_xfj1r")
+display_name = "Chute"
+anim = &"kick_mid"
+startup = 9
+active = 4
+recovery = 16
+damage = 58.0
+level = 1
+hitbox_bone = &"auto"
+hitbox_radius = 0.18
+hitstun = 18
+blockstun = 11
+hitstop = 7
+pushback = 2.4
+meter_gain = 7.0
+
+[sub_resource type="Resource" id="Resource_sul3u"]
+script = ExtResource("2_xfj1r")
+display_name = "Chute Alto"
+anim = &"low_kick"
+startup = 13
+active = 4
+recovery = 20
+damage = 80.0
+hitbox_bone = &"auto"
+hitbox_radius = 0.2
+hitstun = 22
+blockstun = 13
+hitstop = 10
+pushback = 3.4
+lunge = 0.8
+meter_gain = 10.0
+sfx = &"whoosh_heavy"
+
+[sub_resource type="Resource" id="Resource_3mve2"]
+script = ExtResource("2_xfj1r")
+display_name = "Chute Baixo"
+anim = &"roundhouse"
+startup = 8
+recovery = 15
+damage = 45.0
+level = 2
+hitbox_bone = &"auto"
+hitbox_radius = 0.18
+pushback = 2.0
+
+[sub_resource type="Resource" id="Resource_jkqpi"]
+script = ExtResource("2_xfj1r")
+display_name = "Rasteira"
+anim = &"sweep"
+startup = 11
+active = 4
+recovery = 24
+damage = 66.0
+level = 2
+hitbox_bone = &"RightFoot"
+hitbox_radius = 0.22
+hitstun = 20
+blockstun = 12
+hitstop = 8
+pushback = 1.6
+knockdown = true
+launch = 2.2
+meter_gain = 8.0
+sfx = &"whoosh_heavy"
+
+[sub_resource type="Resource" id="Resource_vfxcj"]
+script = ExtResource("2_xfj1r")
+display_name = "Soco Aéreo"
+startup = 5
+active = 8
+recovery = 0
+damage = 46.0
+level = 3
+hitbox_bone = &"auto"
+hitbox_radius = 0.2
+hitstun = 18
+hitstop = 7
+pushback = 1.8
+air = true
+
+[sub_resource type="Resource" id="Resource_i6i3x"]
+script = ExtResource("2_xfj1r")
+display_name = "Voadora"
+anim = &"kick_mid"
+active = 10
+recovery = 0
+damage = 62.0
+level = 3
+hitbox_bone = &"auto"
+hitbox_radius = 0.24
+hitstun = 20
+blockstun = 12
+hitstop = 8
+pushback = 2.4
+meter_gain = 8.0
+air = true
+sfx = &"whoosh_heavy"
+
+[sub_resource type="Resource" id="Resource_3iaen"]
+script = ExtResource("2_xfj1r")
+display_name = "Super L + Brigadeiros"
+kind = 1
+anim = &"cast"
+startup = 18
+active = 1
+recovery = 26
+damage = 130.0
+level = 1
+hitstun = 26
+blockstun = 16
+hitstop = 10
+pushback = 3.0
+knockdown = true
+launch = 4.0
+meter_gain = 0.0
+meter_cost = 50.0
+sfx = &"special"
+projectile_color = Color(0.9372549, 0.26666668, 0.26666668, 1)
+projectile_speed = 7.5
+voice = &"special"
+
+[sub_resource type="Resource" id="Resource_ekrhq"]
+script = ExtResource("2_xfj1r")
+display_name = "Canto Musical"
+kind = 1
+anim = &"taunt"
+startup = 18
+active = 1
+recovery = 26
+damage = 85.0
+level = 1
+hitstun = 34
+blockstun = 16
+hitstop = 10
+pushback = 3.0
+launch = 4.0
+meter_gain = 0.0
+meter_cost = 50.0
+sfx = &"special"
+projectile_kind = &"notes"
+projectile_color = Color(0.95686275, 0.44705883, 0.7137255, 1)
+projectile_speed = 5.0
+voice = &"sub_special"
+
+[resource]
+script = ExtResource("4_u6d83")
+id = &"gabi"
+display_name = "GABI"
+title = "Estrela do Super L"
+quote = "Faz o L!"
+bio = "Dispara um Super L gigante com chuva de brigadeiros, ou encanta com o Canto Musical."
+model = ExtResource("1_7ex7i")
+portrait = ExtResource("3_7lufe")
+accent = Color(0.9372549, 0.26666668, 0.26666668, 1)
+height_m = 1.62
+max_hp = 980.0
+walk_speed = 1.85
+special_name = "Super L + Brigadeiros"
+special_desc = "Um L gigante de energia com chuva de brigadeiros!"
+sub_special_name = "Canto Musical"
+sub_special_desc = "Notas musicais luminosas varrem o adversário."
+moves = {
+&"air_kick": SubResource("Resource_i6i3x"),
+&"air_punch": SubResource("Resource_vfxcj"),
+&"cross": SubResource("Resource_ou3us"),
+&"high_kick": SubResource("Resource_sul3u"),
+&"hook": SubResource("Resource_qt6xb"),
+&"jab": SubResource("Resource_tw08c"),
+&"kick": SubResource("Resource_yxi2l"),
+&"low_kick": SubResource("Resource_3mve2"),
+&"special": SubResource("Resource_3iaen"),
+&"sub_special": SubResource("Resource_ekrhq"),
+&"sweep": SubResource("Resource_jkqpi"),
+&"uppercut": SubResource("Resource_vp5c1")
+}
+voices = {
+&"select": ExtResource("5_jcl7e"),
+&"special": ExtResource("5_jcl7e")
+}

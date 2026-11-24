@@ -1,0 +1,282 @@
+[gd_resource type="Resource" script_class="FighterData" format=3]
+
+[ext_resource type="PackedScene" path="res://assets/characters/pedro/pedro.glb" id="1_gl5w4"]
+[ext_resource type="Script" path="res://scripts/data/move_data.gd" id="2_ur2uw"]
+[ext_resource type="Texture2D" path="res://assets/ui/portraits/pedro.png" id="3_v02on"]
+[ext_resource type="Script" path="res://scripts/data/fighter_data.gd" id="4_k1s6t"]
+[ext_resource type="AudioStream" path="res://assets/audio/voice/pedro.mp3" id="5_e4kwo"]
+
+[sub_resource type="Resource" id="Resource_4gpqb"]
+script = ExtResource("2_ur2uw")
+display_name = "Jab"
+startup = 5
+recovery = 9
+damage = 32.0
+hitbox_bone = &"auto"
+hitbox_radius = 0.15
+hitstun = 15
+blockstun = 9
+hitstop = 5
+pushback = 1.6
+meter_gain = 5.0
+
+[sub_resource type="Resource" id="Resource_fbcra"]
+script = ExtResource("2_ur2uw")
+display_name = "Direto"
+anim = &"cross"
+startup = 8
+recovery = 14
+damage = 55.0
+hitbox_bone = &"auto"
+hitstun = 18
+blockstun = 11
+hitstop = 7
+lunge = 1.2
+meter_gain = 7.0
+sfx = &"whoosh_heavy"
+
+[sub_resource type="Resource" id="Resource_ev512"]
+script = ExtResource("2_ur2uw")
+display_name = "Gancho"
+anim = &"hook"
+startup = 10
+active = 4
+recovery = 18
+damage = 72.0
+hitbox_bone = &"auto"
+hitbox_radius = 0.18
+hitstun = 22
+blockstun = 12
+hitstop = 9
+pushback = 3.0
+meter_gain = 9.0
+sfx = &"whoosh_heavy"
+
+[sub_resource type="Resource" id="Resource_nd7db"]
+script = ExtResource("2_ur2uw")
+display_name = "Uppercut"
+anim = &"uppercut"
+startup = 9
+active = 5
+recovery = 22
+damage = 78.0
+level = 1
+hitbox_radius = 0.2
+hitstun = 24
+blockstun = 12
+hitstop = 9
+pushback = 1.2
+knockdown = true
+launch = 6.4
+meter_gain = 9.0
+sfx = &"whoosh_heavy"
+
+[sub_resource type="Resource" id="Resource_su2ek"]
+script = ExtResource("2_ur2uw")
+display_name = "Chute"
+anim = &"kick_mid"
+startup = 9
+active = 4
+recovery = 16
+damage = 58.0
+level = 1
+hitbox_bone = &"auto"
+hitbox_radius = 0.18
+hitstun = 18
+blockstun = 11
+hitstop = 7
+pushback = 2.4
+meter_gain = 7.0
+
+[sub_resource type="Resource" id="Resource_1urr8"]
+script = ExtResource("2_ur2uw")
+display_name = "Chute Alto"
+anim = &"low_kick"
+startup = 13
+active = 4
+recovery = 20
+damage = 80.0
+hitbox_bone = &"auto"
+hitbox_radius = 0.2
+hitstun = 22
+blockstun = 13
+hitstop = 10
+pushback = 3.4
+lunge = 0.8
+meter_gain = 10.0
+sfx = &"whoosh_heavy"
+
+[sub_resource type="Resource" id="Resource_1g035"]
+script = ExtResource("2_ur2uw")
+display_name = "Chute Baixo"
+anim = &"roundhouse"
+startup = 8
+recovery = 15
+damage = 45.0
+level = 2
+hitbox_bone = &"auto"
+hitbox_radius = 0.18
+pushback = 2.0
+
+[sub_resource type="Resource" id="Resource_1ro28"]
+script = ExtResource("2_ur2uw")
+display_name = "Rasteira"
+anim = &"sweep"
+startup = 11
+active = 4
+recovery = 24
+damage = 66.0
+level = 2
+hitbox_bone = &"RightFoot"
+hitbox_radius = 0.22
+hitstun = 20
+blockstun = 12
+hitstop = 8
+pushback = 1.6
+knockdown = true
+launch = 2.2
+meter_gain = 8.0
+sfx = &"whoosh_heavy"
+
+[sub_resource type="Resource" id="Resource_ib7y0"]
+script = ExtResource("2_ur2uw")
+display_name = "Soco Aéreo"
+startup = 5
+active = 8
+recovery = 0
+damage = 46.0
+level = 3
+hitbox_bone = &"auto"
+hitbox_radius = 0.2
+hitstun = 18
+hitstop = 7
+pushback = 1.8
+air = true
+
+[sub_resource type="Resource" id="Resource_yao2j"]
+script = ExtResource("2_ur2uw")
+display_name = "Voadora"
+anim = &"kick_mid"
+active = 10
+recovery = 0
+damage = 62.0
+level = 3
+hitbox_bone = &"auto"
+hitbox_radius = 0.24
+hitstun = 20
+blockstun = 12
+hitstop = 8
+pushback = 2.4
+meter_gain = 8.0
+air = true
+sfx = &"whoosh_heavy"
+
+[sub_resource type="Resource" id="Resource_3n8eg"]
+script = ExtResource("2_ur2uw")
+display_name = "Monstrão Heineken"
+kind = 2
+anim = &"drink"
+startup = 24
+active = 1
+recovery = 30
+damage = 0.0
+meter_gain = 0.0
+meter_cost = 50.0
+sfx = &"special"
+buff_form = &"hulk"
+voice = &"special"
+
+[sub_resource type="Resource" id="Resource_ku4ru"]
+script = ExtResource("2_ur2uw")
+display_name = "Aura Verde"
+kind = 1
+anim = &"cast"
+startup = 18
+active = 1
+recovery = 26
+damage = 140.0
+level = 1
+hitstun = 26
+blockstun = 16
+hitstop = 10
+pushback = 3.0
+knockdown = true
+launch = 4.0
+meter_gain = 0.0
+meter_cost = 50.0
+sfx = &"special"
+projectile_color = Color(0.13333334, 0.77254903, 0.36862746, 1)
+projectile_speed = 8.0
+voice = &"special"
+
+[sub_resource type="Resource" id="Resource_5vs4j"]
+script = ExtResource("2_ur2uw")
+display_name = "Fumaça de Cigarro"
+kind = 1
+anim = &"throw_obj"
+startup = 18
+active = 1
+recovery = 26
+damage = 70.0
+level = 1
+hitstun = 40
+blockstun = 16
+hitstop = 10
+pushback = 3.0
+launch = 4.0
+meter_gain = 0.0
+meter_cost = 50.0
+sfx = &"special"
+projectile_kind = &"smoke"
+projectile_color = Color(0.81960785, 0.8352941, 0.85882354, 1)
+projectile_speed = 2.6
+voice = &"sub_special"
+
+[resource]
+script = ExtResource("4_k1s6t")
+id = &"pedro"
+display_name = "PEDRO"
+title = "O Monstrão da Resenha"
+quote = "Fuma, bebe e vence!"
+bio = "Bebe uma Heineken e vira o Monstrão Verde! Transformado, dispara rajada com aura verde."
+model = ExtResource("1_gl5w4")
+portrait = ExtResource("3_v02on")
+accent = Color(0.13333334, 0.77254903, 0.36862746, 1)
+height_m = 1.78
+max_hp = 1100.0
+walk_speed = 1.75
+back_speed = 1.4
+special_name = "Monstrão / Aura Verde"
+special_desc = "Vira o Monstrão; transformado, dispara a Aura Verde."
+sub_special_name = "Fumaça de Cigarro"
+sub_special_desc = "Nuvem densa e lenta que deixa o rival tonto."
+moves = {
+&"air_kick": SubResource("Resource_yao2j"),
+&"air_punch": SubResource("Resource_ib7y0"),
+&"cross": SubResource("Resource_fbcra"),
+&"high_kick": SubResource("Resource_1urr8"),
+&"hook": SubResource("Resource_ev512"),
+&"jab": SubResource("Resource_4gpqb"),
+&"kick": SubResource("Resource_su2ek"),
+&"low_kick": SubResource("Resource_1g035"),
+&"special": SubResource("Resource_3n8eg"),
+&"special@hulk": SubResource("Resource_ku4ru"),
+&"sub_special": SubResource("Resource_5vs4j"),
+&"sweep": SubResource("Resource_1ro28"),
+&"uppercut": SubResource("Resource_nd7db")
+}
+forms = {
+&"hulk": {
+"atk": 1.34,
+"color": Color(0.08627451, 0.6392157, 0.2901961, 1),
+"duration": 10.0,
+"label": "MONSTRÃO HEINEKEN",
+"scale": 1.15,
+"speed": 0.92,
+"taken": 0.8
+}
+}
+voices = {
+&"select": ExtResource("5_e4kwo"),
+&"special": ExtResource("5_e4kwo")
+}

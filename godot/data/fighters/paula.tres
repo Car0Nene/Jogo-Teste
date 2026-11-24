@@ -1,0 +1,257 @@
+[gd_resource type="Resource" script_class="FighterData" format=3]
+
+[ext_resource type="PackedScene" path="res://assets/characters/paula/paula.glb" id="1_khp04"]
+[ext_resource type="Script" path="res://scripts/data/move_data.gd" id="2_mkryw"]
+[ext_resource type="Texture2D" path="res://assets/ui/portraits/paula.png" id="3_2141d"]
+[ext_resource type="Script" path="res://scripts/data/fighter_data.gd" id="4_p3idr"]
+[ext_resource type="AudioStream" path="res://assets/audio/voice/paula.mp3" id="5_j1bpw"]
+
+[sub_resource type="Resource" id="Resource_ut5u1"]
+script = ExtResource("2_mkryw")
+display_name = "Jab"
+startup = 5
+recovery = 9
+damage = 32.0
+hitbox_bone = &"auto"
+hitbox_radius = 0.15
+hitstun = 15
+blockstun = 9
+hitstop = 5
+pushback = 1.6
+meter_gain = 5.0
+
+[sub_resource type="Resource" id="Resource_acfnl"]
+script = ExtResource("2_mkryw")
+display_name = "Direto"
+anim = &"cross"
+startup = 8
+recovery = 14
+damage = 55.0
+hitbox_bone = &"auto"
+hitstun = 18
+blockstun = 11
+hitstop = 7
+lunge = 1.2
+meter_gain = 7.0
+sfx = &"whoosh_heavy"
+
+[sub_resource type="Resource" id="Resource_m68od"]
+script = ExtResource("2_mkryw")
+display_name = "Gancho"
+anim = &"hook"
+startup = 10
+active = 4
+recovery = 18
+damage = 72.0
+hitbox_bone = &"auto"
+hitbox_radius = 0.18
+hitstun = 22
+blockstun = 12
+hitstop = 9
+pushback = 3.0
+meter_gain = 9.0
+sfx = &"whoosh_heavy"
+
+[sub_resource type="Resource" id="Resource_cgrwv"]
+script = ExtResource("2_mkryw")
+display_name = "Uppercut"
+anim = &"uppercut"
+startup = 9
+active = 5
+recovery = 22
+damage = 78.0
+level = 1
+hitbox_radius = 0.2
+hitstun = 24
+blockstun = 12
+hitstop = 9
+pushback = 1.2
+knockdown = true
+launch = 6.4
+meter_gain = 9.0
+sfx = &"whoosh_heavy"
+
+[sub_resource type="Resource" id="Resource_84ghc"]
+script = ExtResource("2_mkryw")
+display_name = "Chute"
+anim = &"kick_mid"
+startup = 9
+active = 4
+recovery = 16
+damage = 58.0
+level = 1
+hitbox_bone = &"auto"
+hitbox_radius = 0.18
+hitstun = 18
+blockstun = 11
+hitstop = 7
+pushback = 2.4
+meter_gain = 7.0
+
+[sub_resource type="Resource" id="Resource_0a6qm"]
+script = ExtResource("2_mkryw")
+display_name = "Chute Alto"
+anim = &"low_kick"
+startup = 13
+active = 4
+recovery = 20
+damage = 80.0
+hitbox_bone = &"auto"
+hitbox_radius = 0.2
+hitstun = 22
+blockstun = 13
+hitstop = 10
+pushback = 3.4
+lunge = 0.8
+meter_gain = 10.0
+sfx = &"whoosh_heavy"
+
+[sub_resource type="Resource" id="Resource_mxawb"]
+script = ExtResource("2_mkryw")
+display_name = "Chute Baixo"
+anim = &"roundhouse"
+startup = 8
+recovery = 15
+damage = 45.0
+level = 2
+hitbox_bone = &"auto"
+hitbox_radius = 0.18
+pushback = 2.0
+
+[sub_resource type="Resource" id="Resource_fbcbf"]
+script = ExtResource("2_mkryw")
+display_name = "Rasteira"
+anim = &"sweep"
+startup = 11
+active = 4
+recovery = 24
+damage = 66.0
+level = 2
+hitbox_bone = &"RightFoot"
+hitbox_radius = 0.22
+hitstun = 20
+blockstun = 12
+hitstop = 8
+pushback = 1.6
+knockdown = true
+launch = 2.2
+meter_gain = 8.0
+sfx = &"whoosh_heavy"
+
+[sub_resource type="Resource" id="Resource_hf4km"]
+script = ExtResource("2_mkryw")
+display_name = "Soco Aéreo"
+startup = 5
+active = 8
+recovery = 0
+damage = 46.0
+level = 3
+hitbox_bone = &"auto"
+hitbox_radius = 0.2
+hitstun = 18
+hitstop = 7
+pushback = 1.8
+air = true
+
+[sub_resource type="Resource" id="Resource_b4t23"]
+script = ExtResource("2_mkryw")
+display_name = "Voadora"
+anim = &"kick_mid"
+active = 10
+recovery = 0
+damage = 62.0
+level = 3
+hitbox_bone = &"auto"
+hitbox_radius = 0.24
+hitstun = 20
+blockstun = 12
+hitstop = 8
+pushback = 2.4
+meter_gain = 8.0
+air = true
+sfx = &"whoosh_heavy"
+
+[sub_resource type="Resource" id="Resource_fb8ts"]
+script = ExtResource("2_mkryw")
+display_name = "Super Almoço"
+kind = 1
+anim = &"throw_obj"
+startup = 18
+active = 1
+recovery = 26
+damage = 50.0
+level = 1
+hitstun = 26
+blockstun = 16
+hitstop = 10
+pushback = 3.0
+knockdown = true
+launch = 4.0
+meter_gain = 0.0
+meter_cost = 50.0
+sfx = &"special"
+projectile_kind = &"plates"
+projectile_color = Color(0.9843137, 0.7490196, 0.14117648, 1)
+projectile_hits = 3
+voice = &"special"
+
+[sub_resource type="Resource" id="Resource_jkxuc"]
+script = ExtResource("2_mkryw")
+display_name = "Fúria do Bar Simone"
+kind = 2
+anim = &"power_up"
+startup = 24
+active = 1
+recovery = 30
+damage = 0.0
+meter_gain = 0.0
+meter_cost = 50.0
+sfx = &"special"
+buff_form = &"furia"
+voice = &"sub_special"
+
+[resource]
+script = ExtResource("4_p3idr")
+id = &"paula"
+display_name = "PAULA"
+title = "Dona da Espátula"
+quote = "Aqui em casa quem manda sou eu!"
+bio = "Dispara uma avalanche de Super Almoço ou desperta a Fúria do Bar Simone."
+model = ExtResource("1_khp04")
+portrait = ExtResource("3_2141d")
+accent = Color(0.8509804, 0.27450982, 0.9372549, 1)
+height_m = 1.63
+walk_speed = 1.75
+back_speed = 1.45
+special_name = "Super Almoço"
+special_desc = "Pratos e comida voando na direção do rival!"
+sub_special_name = "Fúria do Bar Simone"
+sub_special_desc = "+38% de poder por alguns segundos."
+moves = {
+&"air_kick": SubResource("Resource_b4t23"),
+&"air_punch": SubResource("Resource_hf4km"),
+&"cross": SubResource("Resource_acfnl"),
+&"high_kick": SubResource("Resource_0a6qm"),
+&"hook": SubResource("Resource_m68od"),
+&"jab": SubResource("Resource_ut5u1"),
+&"kick": SubResource("Resource_84ghc"),
+&"low_kick": SubResource("Resource_mxawb"),
+&"special": SubResource("Resource_fb8ts"),
+&"sub_special": SubResource("Resource_jkxuc"),
+&"sweep": SubResource("Resource_fbcbf"),
+&"uppercut": SubResource("Resource_cgrwv")
+}
+forms = {
+&"furia": {
+"atk": 1.38,
+"color": Color(0.8509804, 0.27450982, 0.9372549, 1),
+"duration": 9.0,
+"label": "FÚRIA DO BAR SIMONE",
+"speed": 1.1,
+"taken": 0.85
+}
+}
+voices = {
+&"select": ExtResource("5_j1bpw"),
+&"special": ExtResource("5_j1bpw")
+}

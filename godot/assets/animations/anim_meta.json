@@ -1,0 +1,86 @@
+{
+  "cast": {
+    "bone": "RightHand",
+    "height": 0.608,
+    "impact": 1.35,
+    "length": 2.7,
+    "reach": 0.48
+  },
+  "cross": {
+    "bone": "RightHand",
+    "height": 0.658,
+    "impact": 0.361,
+    "length": 0.867,
+    "reach": 0.404
+  },
+  "hook": {
+    "bone": "LeftHand",
+    "height": 0.722,
+    "impact": 0.5,
+    "length": 2.0,
+    "reach": 0.431
+  },
+  "hurricane_kick": {
+    "bone": "LeftFoot",
+    "height": 0.559,
+    "impact": 0.917,
+    "length": 1.833,
+    "reach": 0.484
+  },
+  "jab": {
+    "bone": "LeftHand",
+    "height": 0.754,
+    "impact": 0.4,
+    "length": 1.5,
+    "reach": 0.422
+  },
+  "kick_mid": {
+    "bone": "RightFoot",
+    "height": 0.788,
+    "impact": 0.75,
+    "length": 1.667,
+    "reach": 0.42
+  },
+  "low_kick": {
+    "bone": "LeftFoot",
+    "height": 0.682,
+    "impact": 0.64,
+    "length": 1.6,
+    "reach": 0.467
+  },
+  "punch_combo": {
+    "bone": "LeftHand",
+    "height": 0.838,
+    "impact": 0.623,
+    "length": 2.2,
+    "reach": 0.399
+  },
+  "roundhouse": {
+    "bone": "RightFoot",
+    "height": 0.335,
+    "impact": 0.6,
+    "length": 1.5,
+    "reach": 0.477
+  },
+  "sweep": {
+    "bone": "RightFoot",
+    "height": 0.069,
+    "impact": 0.867,
+    "length": 1.733,
+    "reach": 0.369
+  },
+  "throw_obj": {
+    "bone": "RightHand",
+    "height": 0.794,
+    "impact": 0.88,
+    "length": 2.2,
+    "reach": 0.34
+  },
+  "uppercut": {
+    "bone": "RightHand",
+    "height": 0.508,
+    "impact": 0.697,
+    "length": 2.2,
+    "reach": 0.301
+  }
+}

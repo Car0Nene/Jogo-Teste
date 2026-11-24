@@ -1,0 +1,265 @@
+[gd_resource type="Resource" script_class="FighterData" format=3]
+
+[ext_resource type="PackedScene" path="res://assets/characters/juraci/juraci.glb" id="1_m1cci"]
+[ext_resource type="Script" path="res://scripts/data/move_data.gd" id="2_784xf"]
+[ext_resource type="Texture2D" path="res://assets/ui/portraits/juraci.png" id="3_mkpqo"]
+[ext_resource type="Script" path="res://scripts/data/fighter_data.gd" id="4_u6v36"]
+[ext_resource type="AudioStream" path="res://assets/audio/voice/juraci/special.mp3" id="5_6luyu"]
+[ext_resource type="AudioStream" path="res://assets/audio/voice/juraci/select.mp3" id="6_5do00"]
+[ext_resource type="AudioStream" path="res://assets/audio/voice/juraci/intro.mp3" id="7_n2cu3"]
+[ext_resource type="AudioStream" path="res://assets/audio/voice/juraci/sub_special.mp3" id="8_l4x6j"]
+[ext_resource type="AudioStream" path="res://assets/audio/voice/juraci/win.mp3" id="9_x2dmd"]
+[ext_resource type="AudioStream" path="res://assets/audio/voice/juraci/ko.mp3" id="10_gmoib"]
+
+[sub_resource type="Resource" id="Resource_v3kcb"]
+script = ExtResource("2_784xf")
+display_name = "Jab"
+startup = 5
+recovery = 9
+damage = 32.0
+hitbox_bone = &"auto"
+hitbox_radius = 0.15
+hitstun = 15
+blockstun = 9
+hitstop = 5
+pushback = 1.6
+meter_gain = 5.0
+
+[sub_resource type="Resource" id="Resource_a54li"]
+script = ExtResource("2_784xf")
+display_name = "Direto"
+anim = &"cross"
+startup = 8
+recovery = 14
+damage = 55.0
+hitbox_bone = &"auto"
+hitstun = 18
+blockstun = 11
+hitstop = 7
+lunge = 1.2
+meter_gain = 7.0
+sfx = &"whoosh_heavy"
+
+[sub_resource type="Resource" id="Resource_r2au7"]
+script = ExtResource("2_784xf")
+display_name = "Gancho"
+anim = &"hook"
+startup = 10
+active = 4
+recovery = 18
+damage = 72.0
+hitbox_bone = &"auto"
+hitbox_radius = 0.18
+hitstun = 22
+blockstun = 12
+hitstop = 9
+pushback = 3.0
+meter_gain = 9.0
+sfx = &"whoosh_heavy"
+
+[sub_resource type="Resource" id="Resource_gubxa"]
+script = ExtResource("2_784xf")
+display_name = "Uppercut"
+anim = &"uppercut"
+startup = 9
+active = 5
+recovery = 22
+damage = 78.0
+level = 1
+hitbox_radius = 0.2
+hitstun = 24
+blockstun = 12
+hitstop = 9
+pushback = 1.2
+knockdown = true
+launch = 6.4
+meter_gain = 9.0
+sfx = &"whoosh_heavy"
+
+[sub_resource type="Resource" id="Resource_aqx5k"]
+script = ExtResource("2_784xf")
+display_name = "Chute"
+anim = &"kick_mid"
+startup = 9
+active = 4
+recovery = 16
+damage = 58.0
+level = 1
+hitbox_bone = &"auto"
+hitbox_radius = 0.18
+hitstun = 18
+blockstun = 11
+hitstop = 7
+pushback = 2.4
+meter_gain = 7.0
+
+[sub_resource type="Resource" id="Resource_sgng4"]
+script = ExtResource("2_784xf")
+display_name = "Chute Alto"
+anim = &"low_kick"
+startup = 13
+active = 4
+recovery = 20
+damage = 80.0
+hitbox_bone = &"auto"
+hitbox_radius = 0.2
+hitstun = 22
+blockstun = 13
+hitstop = 10
+pushback = 3.4
+lunge = 0.8
+meter_gain = 10.0
+sfx = &"whoosh_heavy"
+
+[sub_resource type="Resource" id="Resource_o8qor"]
+script = ExtResource("2_784xf")
+display_name = "Chute Baixo"
+anim = &"roundhouse"
+startup = 8
+recovery = 15
+damage = 45.0
+level = 2
+hitbox_bone = &"auto"
+hitbox_radius = 0.18
+pushback = 2.0
+
+[sub_resource type="Resource" id="Resource_ow6wf"]
+script = ExtResource("2_784xf")
+display_name = "Rasteira"
+anim = &"sweep"
+startup = 11
+active = 4
+recovery = 24
+damage = 66.0
+level = 2
+hitbox_bone = &"RightFoot"
+hitbox_radius = 0.22
+hitstun = 20
+blockstun = 12
+hitstop = 8
+pushback = 1.6
+knockdown = true
+launch = 2.2
+meter_gain = 8.0
+sfx = &"whoosh_heavy"
+
+[sub_resource type="Resource" id="Resource_bsh6y"]
+script = ExtResource("2_784xf")
+display_name = "Soco Aéreo"
+startup = 5
+active = 8
+recovery = 0
+damage = 46.0
+level = 3
+hitbox_bone = &"auto"
+hitbox_radius = 0.2
+hitstun = 18
+hitstop = 7
+pushback = 1.8
+air = true
+
+[sub_resource type="Resource" id="Resource_utrgg"]
+script = ExtResource("2_784xf")
+display_name = "Voadora"
+anim = &"kick_mid"
+active = 10
+recovery = 0
+damage = 62.0
+level = 3
+hitbox_bone = &"auto"
+hitbox_radius = 0.24
+hitstun = 20
+blockstun = 12
+hitstop = 8
+pushback = 2.4
+meter_gain = 8.0
+air = true
+sfx = &"whoosh_heavy"
+
+[sub_resource type="Resource" id="Resource_38jvd"]
+script = ExtResource("2_784xf")
+display_name = "Super Bolo de Cenoura"
+kind = 1
+anim = &"throw_obj"
+startup = 18
+active = 1
+recovery = 26
+damage = 125.0
+level = 1
+hitstun = 26
+blockstun = 16
+hitstop = 10
+pushback = 3.0
+knockdown = true
+launch = 4.0
+meter_gain = 0.0
+meter_cost = 50.0
+sfx = &"special"
+projectile_kind = &"cake"
+projectile_color = Color(0.9607843, 0.61960787, 0.043137256, 1)
+projectile_speed = 6.5
+voice = &"special"
+
+[sub_resource type="Resource" id="Resource_14uci"]
+script = ExtResource("2_784xf")
+display_name = "Chama o Dadá!"
+kind = 1
+anim = &"cast"
+startup = 18
+active = 1
+recovery = 26
+damage = 90.0
+level = 2
+hitstun = 26
+blockstun = 16
+hitstop = 10
+pushback = 3.0
+knockdown = true
+launch = 4.0
+meter_gain = 0.0
+meter_cost = 50.0
+sfx = &"special"
+projectile_kind = &"wave"
+projectile_color = Color(0.21960784, 0.7411765, 0.972549, 1)
+projectile_speed = 5.0
+voice = &"sub_special"
+
+[resource]
+script = ExtResource("4_u6v36")
+id = &"juraci"
+display_name = "JURACI"
+title = "Mestra da Padaria"
+quote = "Bolos são minha vida!"
+bio = "Rápida e esperta. Dispara o Super Bolo de Cenoura ou chama o Dadá para lavar a louça e molhar a arena."
+model = ExtResource("1_m1cci")
+portrait = ExtResource("3_mkpqo")
+accent = Color(0.9254902, 0.28235295, 0.6, 1)
+height_m = 1.56
+max_hp = 950.0
+walk_speed = 1.85
+special_name = "Super Bolo de Cenoura"
+special_desc = "Bolo voador com cobertura de chocolate que derruba."
+sub_special_name = "Chama o Dadá!"
+sub_special_desc = "Uma onda de água rasteira escorrega o rival."
+moves = {
+&"air_kick": SubResource("Resource_utrgg"),
+&"air_punch": SubResource("Resource_bsh6y"),
+&"cross": SubResource("Resource_a54li"),
+&"high_kick": SubResource("Resource_sgng4"),
+&"hook": SubResource("Resource_r2au7"),
+&"jab": SubResource("Resource_v3kcb"),
+&"kick": SubResource("Resource_aqx5k"),
+&"low_kick": SubResource("Resource_o8qor"),
+&"special": SubResource("Resource_38jvd"),
+&"sub_special": SubResource("Resource_14uci"),
+&"sweep": SubResource("Resource_ow6wf"),
+&"uppercut": SubResource("Resource_gubxa")
+}
+voices = {
+&"intro": ExtResource("7_n2cu3"),
+&"ko": ExtResource("10_gmoib"),
+&"select": ExtResource("6_5do00"),
+&"special": ExtResource("5_6luyu"),
+&"sub_special": ExtResource("8_l4x6j"),
+&"win": ExtResource("9_x2dmd")
+}

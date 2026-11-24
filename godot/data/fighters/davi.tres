@@ -1,0 +1,258 @@
+[gd_resource type="Resource" script_class="FighterData" format=3]
+
+[ext_resource type="PackedScene" path="res://assets/characters/davi/davi.glb" id="1_upq6v"]
+[ext_resource type="Script" path="res://scripts/data/move_data.gd" id="2_247jq"]
+[ext_resource type="Texture2D" path="res://assets/ui/portraits/davi.png" id="3_654x4"]
+[ext_resource type="Script" path="res://scripts/data/fighter_data.gd" id="4_3dnd3"]
+[ext_resource type="AudioStream" path="res://assets/audio/voice/davi.wav" id="5_nok7k"]
+
+[sub_resource type="Resource" id="Resource_qv3ng"]
+script = ExtResource("2_247jq")
+display_name = "Jab"
+startup = 5
+recovery = 9
+damage = 32.0
+hitbox_bone = &"auto"
+hitbox_radius = 0.15
+hitstun = 15
+blockstun = 9
+hitstop = 5
+pushback = 1.6
+meter_gain = 5.0
+
+[sub_resource type="Resource" id="Resource_gjqwr"]
+script = ExtResource("2_247jq")
+display_name = "Direto"
+anim = &"cross"
+startup = 8
+recovery = 14
+damage = 55.0
+hitbox_bone = &"auto"
+hitstun = 18
+blockstun = 11
+hitstop = 7
+lunge = 1.2
+meter_gain = 7.0
+sfx = &"whoosh_heavy"
+
+[sub_resource type="Resource" id="Resource_sy44t"]
+script = ExtResource("2_247jq")
+display_name = "Gancho"
+anim = &"hook"
+startup = 10
+active = 4
+recovery = 18
+damage = 72.0
+hitbox_bone = &"auto"
+hitbox_radius = 0.18
+hitstun = 22
+blockstun = 12
+hitstop = 9
+pushback = 3.0
+meter_gain = 9.0
+sfx = &"whoosh_heavy"
+
+[sub_resource type="Resource" id="Resource_ngq88"]
+script = ExtResource("2_247jq")
+display_name = "Uppercut"
+anim = &"uppercut"
+startup = 9
+active = 5
+recovery = 22
+damage = 78.0
+level = 1
+hitbox_radius = 0.2
+hitstun = 24
+blockstun = 12
+hitstop = 9
+pushback = 1.2
+knockdown = true
+launch = 6.4
+meter_gain = 9.0
+sfx = &"whoosh_heavy"
+
+[sub_resource type="Resource" id="Resource_gmyhl"]
+script = ExtResource("2_247jq")
+display_name = "Chute"
+anim = &"kick_mid"
+startup = 9
+active = 4
+recovery = 16
+damage = 58.0
+level = 1
+hitbox_bone = &"auto"
+hitbox_radius = 0.18
+hitstun = 18
+blockstun = 11
+hitstop = 7
+pushback = 2.4
+meter_gain = 7.0
+
+[sub_resource type="Resource" id="Resource_fouuh"]
+script = ExtResource("2_247jq")
+display_name = "Chute Alto"
+anim = &"low_kick"
+startup = 13
+active = 4
+recovery = 20
+damage = 80.0
+hitbox_bone = &"auto"
+hitbox_radius = 0.2
+hitstun = 22
+blockstun = 13
+hitstop = 10
+pushback = 3.4
+lunge = 0.8
+meter_gain = 10.0
+sfx = &"whoosh_heavy"
+
+[sub_resource type="Resource" id="Resource_mxv2m"]
+script = ExtResource("2_247jq")
+display_name = "Chute Baixo"
+anim = &"roundhouse"
+startup = 8
+recovery = 15
+damage = 45.0
+level = 2
+hitbox_bone = &"auto"
+hitbox_radius = 0.18
+pushback = 2.0
+
+[sub_resource type="Resource" id="Resource_5k7tn"]
+script = ExtResource("2_247jq")
+display_name = "Rasteira"
+anim = &"sweep"
+startup = 11
+active = 4
+recovery = 24
+damage = 66.0
+level = 2
+hitbox_bone = &"RightFoot"
+hitbox_radius = 0.22
+hitstun = 20
+blockstun = 12
+hitstop = 8
+pushback = 1.6
+knockdown = true
+launch = 2.2
+meter_gain = 8.0
+sfx = &"whoosh_heavy"
+
+[sub_resource type="Resource" id="Resource_kxgom"]
+script = ExtResource("2_247jq")
+display_name = "Soco Aéreo"
+startup = 5
+active = 8
+recovery = 0
+damage = 46.0
+level = 3
+hitbox_bone = &"auto"
+hitbox_radius = 0.2
+hitstun = 18
+hitstop = 7
+pushback = 1.8
+air = true
+
+[sub_resource type="Resource" id="Resource_s2kbc"]
+script = ExtResource("2_247jq")
+display_name = "Voadora"
+anim = &"kick_mid"
+active = 10
+recovery = 0
+damage = 62.0
+level = 3
+hitbox_bone = &"auto"
+hitbox_radius = 0.24
+hitstun = 20
+blockstun = 12
+hitstop = 8
+pushback = 2.4
+meter_gain = 8.0
+air = true
+sfx = &"whoosh_heavy"
+
+[sub_resource type="Resource" id="Resource_0w2wd"]
+script = ExtResource("2_247jq")
+display_name = "Craque Alviverde"
+kind = 1
+anim = &"kick_mid"
+startup = 18
+active = 1
+recovery = 26
+damage = 115.0
+level = 1
+hitstun = 26
+blockstun = 16
+hitstop = 10
+pushback = 3.0
+knockdown = true
+launch = 4.0
+meter_gain = 0.0
+meter_cost = 50.0
+sfx = &"special"
+projectile_kind = &"ball"
+projectile_color = Color(0.08627451, 0.6392157, 0.2901961, 1)
+projectile_speed = 9.0
+voice = &"special"
+
+[sub_resource type="Resource" id="Resource_bq88l"]
+script = ExtResource("2_247jq")
+display_name = "Transformação Roxa"
+kind = 2
+anim = &"power_up"
+startup = 24
+active = 1
+recovery = 30
+damage = 0.0
+meter_gain = 0.0
+meter_cost = 50.0
+sfx = &"special"
+buff_form = &"roxa"
+voice = &"sub_special"
+
+[resource]
+script = ExtResource("4_3dnd3")
+id = &"davi"
+display_name = "DAVI"
+title = "Craque do Videogame"
+quote = "Vamos jogar videogame!"
+bio = "Brincalhão e ágil. Chuta a bola com efeito ou ativa a Transformação Roxa."
+model = ExtResource("1_upq6v")
+portrait = ExtResource("3_654x4")
+accent = Color(0.13333334, 0.77254903, 0.36862746, 1)
+height_m = 1.5
+max_hp = 900.0
+walk_speed = 2.05
+back_speed = 1.7
+special_name = "Craque Alviverde"
+special_desc = "Chute de bola com efeito direto no rival."
+sub_special_name = "Transformação Roxa"
+sub_special_desc = "Aura roxa: força e velocidade por tempo limitado."
+moves = {
+&"air_kick": SubResource("Resource_s2kbc"),
+&"air_punch": SubResource("Resource_kxgom"),
+&"cross": SubResource("Resource_gjqwr"),
+&"high_kick": SubResource("Resource_fouuh"),
+&"hook": SubResource("Resource_sy44t"),
+&"jab": SubResource("Resource_qv3ng"),
+&"kick": SubResource("Resource_gmyhl"),
+&"low_kick": SubResource("Resource_mxv2m"),
+&"special": SubResource("Resource_0w2wd"),
+&"sub_special": SubResource("Resource_bq88l"),
+&"sweep": SubResource("Resource_5k7tn"),
+&"uppercut": SubResource("Resource_ngq88")
+}
+forms = {
+&"roxa": {
+"atk": 1.18,
+"color": Color(0.65882355, 0.33333334, 0.96862745, 1),
+"duration": 10.0,
+"label": "TRANSFORMAÇÃO ROXA",
+"speed": 1.18,
+"taken": 0.95
+}
+}
+voices = {
+&"select": ExtResource("5_nok7k"),
+&"special": ExtResource("5_nok7k")
+}

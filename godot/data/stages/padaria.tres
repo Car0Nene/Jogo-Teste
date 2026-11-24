@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="StageData" format=3]
+
+[ext_resource type="AudioStream" path="res://assets/audio/music/bolo-da-juraci.mp3" id="1_878b0"]
+[ext_resource type="Texture2D" path="res://assets/stages/padaria.webp" id="2_m8ucf"]
+[ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="3_4covy"]
+
+[resource]
+script = ExtResource("3_4covy")
+id = &"padaria"
+display_name = "Padaria da Juju"
+subtitle = "Bolos da Juju • Pães quentes"
+preview = ExtResource("2_m8ucf")
+music = ExtResource("1_878b0")

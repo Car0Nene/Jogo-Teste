@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="StageData" format=3]
+
+[ext_resource type="AudioStream" path="res://assets/audio/music/family-fighter-3.mp3" id="1_oe8vm"]
+[ext_resource type="Texture2D" path="res://assets/stages/festa.webp" id="2_165ok"]
+[ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="3_8qydt"]
+
+[resource]
+script = ExtResource("3_8qydt")
+id = &"festa"
+display_name = "Festa Junina"
+subtitle = "Arraiá da família"
+preview = ExtResource("2_165ok")
+music = ExtResource("1_oe8vm")

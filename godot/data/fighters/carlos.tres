@@ -1,0 +1,268 @@
+[gd_resource type="Resource" script_class="FighterData" format=3]
+
+[ext_resource type="PackedScene" path="res://assets/characters/carlos_batizado/carlos_batizado.glb" id="1_3hx7d"]
+[ext_resource type="PackedScene" path="res://assets/characters/carlos/carlos.glb" id="2_607da"]
+[ext_resource type="Script" path="res://scripts/data/move_data.gd" id="3_ovy4n"]
+[ext_resource type="Texture2D" path="res://assets/ui/portraits/carlos.png" id="4_0i3cl"]
+[ext_resource type="Script" path="res://scripts/data/fighter_data.gd" id="5_2ihes"]
+[ext_resource type="AudioStream" path="res://assets/audio/voice/carlos.mp3" id="6_13qmw"]
+
+[sub_resource type="Resource" id="Resource_ixxi1"]
+script = ExtResource("3_ovy4n")
+display_name = "Jab"
+startup = 5
+recovery = 9
+damage = 32.0
+hitbox_bone = &"auto"
+hitbox_radius = 0.15
+hitstun = 15
+blockstun = 9
+hitstop = 5
+pushback = 1.6
+meter_gain = 5.0
+
+[sub_resource type="Resource" id="Resource_18dpy"]
+script = ExtResource("3_ovy4n")
+display_name = "Direto"
+anim = &"cross"
+startup = 8
+recovery = 14
+damage = 55.0
+hitbox_bone = &"auto"
+hitstun = 18
+blockstun = 11
+hitstop = 7
+lunge = 1.2
+meter_gain = 7.0
+sfx = &"whoosh_heavy"
+
+[sub_resource type="Resource" id="Resource_geii2"]
+script = ExtResource("3_ovy4n")
+display_name = "Gancho"
+anim = &"hook"
+startup = 10
+active = 4
+recovery = 18
+damage = 72.0
+hitbox_bone = &"auto"
+hitbox_radius = 0.18
+hitstun = 22
+blockstun = 12
+hitstop = 9
+pushback = 3.0
+meter_gain = 9.0
+sfx = &"whoosh_heavy"
+
+[sub_resource type="Resource" id="Resource_7fm0g"]
+script = ExtResource("3_ovy4n")
+display_name = "Uppercut"
+anim = &"uppercut"
+startup = 9
+active = 5
+recovery = 22
+damage = 78.0
+level = 1
+hitbox_radius = 0.2
+hitstun = 24
+blockstun = 12
+hitstop = 9
+pushback = 1.2
+knockdown = true
+launch = 6.4
+meter_gain = 9.0
+sfx = &"whoosh_heavy"
+
+[sub_resource type="Resource" id="Resource_mcoti"]
+script = ExtResource("3_ovy4n")
+display_name = "Chute"
+anim = &"kick_mid"
+startup = 9
+active = 4
+recovery = 16
+damage = 58.0
+level = 1
+hitbox_bone = &"auto"
+hitbox_radius = 0.18
+hitstun = 18
+blockstun = 11
+hitstop = 7
+pushback = 2.4
+meter_gain = 7.0
+
+[sub_resource type="Resource" id="Resource_nno8d"]
+script = ExtResource("3_ovy4n")
+display_name = "Chute Alto"
+anim = &"low_kick"
+startup = 13
+active = 4
+recovery = 20
+damage = 80.0
+hitbox_bone = &"auto"
+hitbox_radius = 0.2
+hitstun = 22
+blockstun = 13
+hitstop = 10
+pushback = 3.4
+lunge = 0.8
+meter_gain = 10.0
+sfx = &"whoosh_heavy"
+
+[sub_resource type="Resource" id="Resource_04wri"]
+script = ExtResource("3_ovy4n")
+display_name = "Chute Baixo"
+anim = &"roundhouse"
+startup = 8
+recovery = 15
+damage = 45.0
+level = 2
+hitbox_bone = &"auto"
+hitbox_radius = 0.18
+pushback = 2.0
+
+[sub_resource type="Resource" id="Resource_nxrbv"]
+script = ExtResource("3_ovy4n")
+display_name = "Rasteira"
+anim = &"sweep"
+startup = 11
+active = 4
+recovery = 24
+damage = 66.0
+level = 2
+hitbox_bone = &"RightFoot"
+hitbox_radius = 0.22
+hitstun = 20
+blockstun = 12
+hitstop = 8
+pushback = 1.6
+knockdown = true
+launch = 2.2
+meter_gain = 8.0
+sfx = &"whoosh_heavy"
+
+[sub_resource type="Resource" id="Resource_hcrwt"]
+script = ExtResource("3_ovy4n")
+display_name = "Soco Aéreo"
+startup = 5
+active = 8
+recovery = 0
+damage = 46.0
+level = 3
+hitbox_bone = &"auto"
+hitbox_radius = 0.2
+hitstun = 18
+hitstop = 7
+pushback = 1.8
+air = true
+
+[sub_resource type="Resource" id="Resource_f733h"]
+script = ExtResource("3_ovy4n")
+display_name = "Voadora"
+anim = &"kick_mid"
+active = 10
+recovery = 0
+damage = 62.0
+level = 3
+hitbox_bone = &"auto"
+hitbox_radius = 0.24
+hitstun = 20
+blockstun = 12
+hitstop = 8
+pushback = 2.4
+meter_gain = 8.0
+air = true
+sfx = &"whoosh_heavy"
+
+[sub_resource type="Resource" id="Resource_qm2em"]
+script = ExtResource("3_ovy4n")
+display_name = "Gordão / Modo Fé"
+kind = 2
+anim = &"power_up"
+startup = 24
+active = 1
+recovery = 30
+damage = 0.0
+meter_gain = 0.0
+meter_cost = 50.0
+sfx = &"special"
+buff_form = &"cycle"
+voice = &"special"
+
+[sub_resource type="Resource" id="Resource_8t6v5"]
+script = ExtResource("3_ovy4n")
+display_name = "Combo do Chute"
+anim = &"hurricane_kick"
+startup = 12
+active = 12
+recovery = 24
+damage = 130.0
+level = 1
+hitbox_bone = &"auto"
+hitbox_radius = 0.28
+hitstun = 28
+blockstun = 16
+hitstop = 12
+pushback = 3.5
+knockdown = true
+launch = 5.5
+lunge = 2.4
+meter_gain = 0.0
+meter_cost = 50.0
+sfx = &"special"
+voice = &"sub_special"
+
+[resource]
+script = ExtResource("5_2ihes")
+id = &"carlos"
+display_name = "CARLOS"
+title = "Rei do Combo & Pizza"
+quote = "Tô firme! Tô forte!"
+bio = "Forte e versátil. Alterna entre Gordão (+força) e Modo Fé (+defesa) e encaixa o Combo do Chute."
+model = ExtResource("2_607da")
+portrait = ExtResource("4_0i3cl")
+accent = Color(0.9607843, 0.61960787, 0.043137256, 1)
+height_m = 1.76
+max_hp = 1050.0
+walk_speed = 1.8
+back_speed = 1.45
+special_name = "Gordão / Modo Fé"
+special_desc = "Alterna entre Gordão (+força) e Modo Fé, batizado e protegido."
+sub_special_name = "Combo do Chute"
+sub_special_desc = "Sequência de chutes giratórios que derruba."
+moves = {
+&"air_kick": SubResource("Resource_f733h"),
+&"air_punch": SubResource("Resource_hcrwt"),
+&"cross": SubResource("Resource_18dpy"),
+&"high_kick": SubResource("Resource_nno8d"),
+&"hook": SubResource("Resource_geii2"),
+&"jab": SubResource("Resource_ixxi1"),
+&"kick": SubResource("Resource_mcoti"),
+&"low_kick": SubResource("Resource_04wri"),
+&"special": SubResource("Resource_qm2em"),
+&"sub_special": SubResource("Resource_8t6v5"),
+&"sweep": SubResource("Resource_nxrbv"),
+&"uppercut": SubResource("Resource_7fm0g")
+}
+forms = {
+&"fe": {
+"atk": 1.05,
+"color": Color(0.99607843, 0.9529412, 0.78039217, 1),
+"duration": 9.0,
+"label": "MODO FÉ +DEFESA",
+"model": ExtResource("1_3hx7d"),
+"speed": 1.05,
+"taken": 0.55
+},
+&"gordao": {
+"atk": 1.3,
+"color": Color(0.9843137, 0.57254905, 0.23529412, 1),
+"duration": 9.0,
+"label": "GORDÃO +FORÇA",
+"scale": 1.08,
+"speed": 0.85,
+"taken": 0.9
+}
+}
+voices = {
+&"select": ExtResource("6_13qmw"),
+&"special": ExtResource("6_13qmw")
+}

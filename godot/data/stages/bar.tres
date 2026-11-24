@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="StageData" format=3]
+
+[ext_resource type="AudioStream" path="res://assets/audio/music/family-fighter-2.mp3" id="1_kmyha"]
+[ext_resource type="Texture2D" path="res://assets/stages/bar.webp" id="2_ek7f5"]
+[ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="3_as6t4"]
+
+[resource]
+script = ExtResource("3_as6t4")
+id = &"bar"
+display_name = "Bar da Simone"
+subtitle = "Cerveja gelada e resenha"
+preview = ExtResource("2_ek7f5")
+music = ExtResource("1_kmyha")
