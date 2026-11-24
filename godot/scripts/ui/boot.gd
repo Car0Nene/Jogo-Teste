@@ -48,6 +48,7 @@ func _download() -> void:
 	_http = HTTPRequest.new()
 	_http.download_file = _dest
 	_http.use_threads = false
+	_http.accept_gzip = false  # no navegador o fetch já descompacta
 	add_child(_http)
 	_http.request_completed.connect(_on_done)
 	var base := ""
