@@ -13,11 +13,11 @@ Jogo de luta 3D da família, feito em **Godot 4.7** — inspirado em Tekken, Mor
 
 | Ação | Jogador 1 | Jogador 2 | Controle |
 |---|---|---|---|
-| Andar / pular / agachar | W A S D | Setas | Analógico / D-pad |
+| Andar / pular / agachar | W A S D | Setas | D-pad |
 | Soco | J | Num 1 | X / □ |
 | Chute | K | Num 2 | A / ✕ |
-| Defesa | I | Num 3 | RB / R1 |
-| Especial (↓ + especial = sub-especial) | L | Num 4 | Y / △ |
+| Defesa | I | Num 5 | RB / R1 |
+| Especial (↓ + especial = sub-especial) | L | Num 3 | Y / △ |
 
 No celular aparecem botões de toque automaticamente. Teclas remapeáveis em **Configurações → Controles**.
 
