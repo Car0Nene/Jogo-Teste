@@ -70,6 +70,8 @@ func _ready() -> void:
 	add_child(hint)
 	_cursor = maxi(0, Game.STAGES.find(Game.stage))
 	_refresh()
+	# Pré-carrega cenários para evitar travamentos posteriores
+	call_deferred("_preload_stages")
 
 
 func _refresh() -> void:
@@ -107,3 +109,8 @@ func _confirm() -> void:
 	Audio.sfx(&"select")
 	Game.stage = Game.STAGES[_cursor]
 	Scenes.go("res://scenes/vs_screen.tscn")
+
+
+func _preload_stages() -> void:
+	ResourcePreloader.preload_all_stages()
+
