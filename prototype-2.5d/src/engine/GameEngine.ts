@@ -203,6 +203,10 @@ export class GameEngine {
   private sparkMaterialCache = new Map<number, THREE.MeshBasicMaterial>();
   private heartMaterialCache = new Map<number, THREE.MeshBasicMaterial>();
 
+  // === FIX FOR PROBLEM 6: Object pool for spark particles ===
+  private sparkPool: SparkParticle[] = [];
+  private sparkPoolSize = 200;
+
   private heldKeys = new Set<string>();
   private virtualHolds: [Set<string>, Set<string>] = [new Set(), new Set()];
   private keyBindings: Player1KeyBindings = { ...DEFAULT_KEY_BINDINGS };
@@ -307,6 +311,9 @@ export class GameEngine {
       this.renderer.compile(this.scene, this.camera);
     }
 
+    // === FIX FOR PROBLEM 6: Initialize spark pool early ===
+    this.initSparkPool();
+
     this.bindEvents();
     this.lastTimestamp = performance.now();
     this.startLoop();
@@ -369,6 +376,27 @@ export class GameEngine {
     const h = Math.max(1, this.container?.clientHeight || innerHeight);
     if (w * h * ratio * ratio > this.maxPixels) ratio = Math.max(0.65, Math.sqrt(this.maxPixels / (w * h)));
     return ratio;
+  }
+
+  /**
+   * === FIX FOR PROBLEM 6: Initialize spark object pool ===
+   * Pre-allocates meshes for spark particles to avoid allocation during impact
+   */
+  private initSparkPool() {
+    for (let i = 0; i < this.sparkPoolSize; i++) {
+      const isHeart = i % 10 === 0; // 10% hearts, 90% sparks
+      const mesh = new THREE.Mesh(isHeart ? this.heartGeo : this.sparkGeo, this.getSparkMaterial(0xffffff, isHeart));
+      mesh.visible = false;
+      this.scene.add(mesh);
+      this.sparkPool.push({
+        mesh,
+        vx: 0,
+        vy: 0,
+        vz: 0,
+        life: 0,
+        maxLife: 0,
+      });
+    }
   }
 
   private handleKeyDown = (e: KeyboardEvent) => {
@@ -790,9 +818,11 @@ export class GameEngine {
       this.disposeMesh(b.mesh);
     }
     this.bursts = [];
+    
+    // === FIX FOR PROBLEM 6: Return sparks to pool instead of disposing ===
     for (const s of this.sparks) {
-      this.scene.remove(s.mesh);
-      this.disposeMesh(s.mesh);
+      s.mesh.visible = false;
+      this.sparkPool.push(s);
     }
     this.sparks = [];
   }
@@ -1237,20 +1267,39 @@ export class GameEngine {
 
   private spawnSparks(x: number, y: number, colorHex: number, count = 10, hearts = false) {
     const mat = this.getSparkMaterial(colorHex, hearts);
+    
+    // === FIX FOR PROBLEM 6: Use spark object pool instead of allocating ===
     for (let i = 0; i < count; i++) {
-      const m = new THREE.Mesh(hearts ? this.heartGeo : this.sparkGeo, mat);
-      m.position.set(x, y, (Math.random() - 0.5) * 0.4);
-      this.scene.add(m);
+      let spark = this.sparkPool.pop();
+      
+      // If pool exhausted, create new (shouldn't happen with 200 pool size)
+      if (!spark) {
+        const m = new THREE.Mesh(hearts ? this.heartGeo : this.sparkGeo, mat);
+        this.scene.add(m);
+        spark = {
+          mesh: m,
+          vx: 0,
+          vy: 0,
+          vz: 0,
+          life: 0,
+          maxLife: 0,
+        };
+      }
+
+      // Reset and initialize spark
+      spark.mesh.material = mat;
+      spark.mesh.position.set(x, y, (Math.random() - 0.5) * 0.4);
+      spark.mesh.visible = true;
+      
       const a = Math.random() * Math.PI * 2;
       const spd = 2.5 + Math.random() * 5.2;
-      this.sparks.push({
-        mesh: m,
-        vx: Math.cos(a) * spd,
-        vy: Math.sin(a) * spd + 1.5,
-        vz: (Math.random() - 0.5) * 2.5,
-        life: 0.36 + Math.random() * 0.18,
-        maxLife: 0.5,
-      });
+      spark.vx = Math.cos(a) * spd;
+      spark.vy = Math.sin(a) * spd + 1.5;
+      spark.vz = (Math.random() - 0.5) * 2.5;
+      spark.life = 0.36 + Math.random() * 0.18;
+      spark.maxLife = 0.5;
+      
+      this.sparks.push(spark);
     }
   }
 
@@ -2027,8 +2076,9 @@ export class GameEngine {
       const sc = Math.max(0.01, s.life / s.maxLife);
       s.mesh.scale.setScalar(sc);
       if (s.life <= 0) {
-        this.scene.remove(s.mesh);
-        this.disposeMesh(s.mesh);
+        // === FIX FOR PROBLEM 6: Return spark to pool for reuse ===
+        s.mesh.visible = false;
+        this.sparkPool.push(s);
         this.sparks.splice(i, 1);
       }
     }
