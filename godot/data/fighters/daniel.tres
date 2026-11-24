@@ -1,13 +1,18 @@
 [gd_resource type="Resource" script_class="FighterData" format=3]
 
-[ext_resource type="PackedScene" path="res://assets/characters/daniel/daniel.glb" id="1_p33ru"]
-[ext_resource type="Script" path="res://scripts/data/move_data.gd" id="2_rus60"]
-[ext_resource type="Texture2D" path="res://assets/ui/portraits/daniel.png" id="3_byotd"]
-[ext_resource type="Script" path="res://scripts/data/fighter_data.gd" id="4_k787n"]
-[ext_resource type="AudioStream" path="res://assets/audio/voice/daniel.mp3" id="5_gel7a"]
+[ext_resource type="PackedScene" path="res://assets/characters/daniel/daniel.glb" id="1_glied"]
+[ext_resource type="Script" path="res://scripts/data/move_data.gd" id="2_kpw4y"]
+[ext_resource type="Texture2D" path="res://assets/ui/portraits/daniel.png" id="3_utduw"]
+[ext_resource type="Script" path="res://scripts/data/fighter_data.gd" id="4_7tisj"]
+[ext_resource type="AudioStream" path="res://assets/audio/voice/daniel/special.mp3" id="5_04yd7"]
+[ext_resource type="AudioStream" path="res://assets/audio/voice/daniel/select.mp3" id="6_p8nyk"]
+[ext_resource type="AudioStream" path="res://assets/audio/voice/daniel/intro.mp3" id="7_eujj8"]
+[ext_resource type="AudioStream" path="res://assets/audio/voice/daniel/sub_special.mp3" id="8_iiqw6"]
+[ext_resource type="AudioStream" path="res://assets/audio/voice/daniel/win.mp3" id="9_g74ky"]
+[ext_resource type="AudioStream" path="res://assets/audio/voice/daniel/ko.mp3" id="10_mbcof"]
 
-[sub_resource type="Resource" id="Resource_glied"]
-script = ExtResource("2_rus60")
+[sub_resource type="Resource" id="Resource_xbs04"]
+script = ExtResource("2_kpw4y")
 display_name = "Jab"
 startup = 5
 recovery = 9
@@ -20,8 +25,8 @@ hitstop = 5
 pushback = 1.6
 meter_gain = 5.0
 
-[sub_resource type="Resource" id="Resource_kpw4y"]
-script = ExtResource("2_rus60")
+[sub_resource type="Resource" id="Resource_rsdis"]
+script = ExtResource("2_kpw4y")
 display_name = "Direto"
 anim = &"cross"
 startup = 8
@@ -35,8 +40,8 @@ lunge = 1.2
 meter_gain = 7.0
 sfx = &"whoosh_heavy"
 
-[sub_resource type="Resource" id="Resource_utduw"]
-script = ExtResource("2_rus60")
+[sub_resource type="Resource" id="Resource_ynpbp"]
+script = ExtResource("2_kpw4y")
 display_name = "Gancho"
 anim = &"hook"
 startup = 10
@@ -52,8 +57,8 @@ pushback = 3.0
 meter_gain = 9.0
 sfx = &"whoosh_heavy"
 
-[sub_resource type="Resource" id="Resource_7tisj"]
-script = ExtResource("2_rus60")
+[sub_resource type="Resource" id="Resource_vspwl"]
+script = ExtResource("2_kpw4y")
 display_name = "Uppercut"
 anim = &"uppercut"
 startup = 9
@@ -71,8 +76,8 @@ launch = 6.4
 meter_gain = 9.0
 sfx = &"whoosh_heavy"
 
-[sub_resource type="Resource" id="Resource_04yd7"]
-script = ExtResource("2_rus60")
+[sub_resource type="Resource" id="Resource_x2uqm"]
+script = ExtResource("2_kpw4y")
 display_name = "Chute"
 anim = &"kick_mid"
 startup = 9
@@ -88,8 +93,8 @@ hitstop = 7
 pushback = 2.4
 meter_gain = 7.0
 
-[sub_resource type="Resource" id="Resource_p8nyk"]
-script = ExtResource("2_rus60")
+[sub_resource type="Resource" id="Resource_wt6gy"]
+script = ExtResource("2_kpw4y")
 display_name = "Chute Alto"
 anim = &"low_kick"
 startup = 13
@@ -106,8 +111,8 @@ lunge = 0.8
 meter_gain = 10.0
 sfx = &"whoosh_heavy"
 
-[sub_resource type="Resource" id="Resource_eujj8"]
-script = ExtResource("2_rus60")
+[sub_resource type="Resource" id="Resource_ed2qu"]
+script = ExtResource("2_kpw4y")
 display_name = "Chute Baixo"
 anim = &"roundhouse"
 startup = 8
@@ -118,8 +123,8 @@ hitbox_bone = &"auto"
 hitbox_radius = 0.18
 pushback = 2.0
 
-[sub_resource type="Resource" id="Resource_iiqw6"]
-script = ExtResource("2_rus60")
+[sub_resource type="Resource" id="Resource_5e75q"]
+script = ExtResource("2_kpw4y")
 display_name = "Rasteira"
 anim = &"sweep"
 startup = 11
@@ -138,8 +143,8 @@ launch = 2.2
 meter_gain = 8.0
 sfx = &"whoosh_heavy"
 
-[sub_resource type="Resource" id="Resource_g74ky"]
-script = ExtResource("2_rus60")
+[sub_resource type="Resource" id="Resource_aym4s"]
+script = ExtResource("2_kpw4y")
 display_name = "Soco Aéreo"
 startup = 5
 active = 8
@@ -153,8 +158,8 @@ hitstop = 7
 pushback = 1.8
 air = true
 
-[sub_resource type="Resource" id="Resource_mbcof"]
-script = ExtResource("2_rus60")
+[sub_resource type="Resource" id="Resource_qvuxu"]
+script = ExtResource("2_kpw4y")
 display_name = "Voadora"
 anim = &"kick_mid"
 active = 10
@@ -171,8 +176,8 @@ meter_gain = 8.0
 air = true
 sfx = &"whoosh_heavy"
 
-[sub_resource type="Resource" id="Resource_xbs04"]
-script = ExtResource("2_rus60")
+[sub_resource type="Resource" id="Resource_qhmk1"]
+script = ExtResource("2_kpw4y")
 display_name = "Modo Natal Praia!"
 kind = 2
 anim = &"dance"
@@ -186,8 +191,8 @@ sfx = &"special"
 buff_form = &"praia"
 voice = &"special"
 
-[sub_resource type="Resource" id="Resource_rsdis"]
-script = ExtResource("2_rus60")
+[sub_resource type="Resource" id="Resource_ex1u8"]
+script = ExtResource("2_kpw4y")
 display_name = "Dancinha Musical"
 kind = 1
 anim = &"dance"
@@ -210,14 +215,14 @@ projectile_speed = 5.5
 voice = &"sub_special"
 
 [resource]
-script = ExtResource("4_k787n")
+script = ExtResource("4_7tisj")
 id = &"daniel"
 display_name = "DANIEL"
 title = "Agente Natal Praia"
 quote = "Partiu praia?"
 bio = "Ágil e imprevisível. Ativa o Modo Natal Praia com velocidade máxima ou solta a Dancinha Musical."
-model = ExtResource("1_p33ru")
-portrait = ExtResource("3_byotd")
+model = ExtResource("1_glied")
+portrait = ExtResource("3_utduw")
 accent = Color(0.9254902, 0.28235295, 0.6, 1)
 height_m = 1.74
 max_hp = 960.0
@@ -228,18 +233,18 @@ special_desc = "Velocidade máxima de verão."
 sub_special_name = "Dancinha Musical"
 sub_special_desc = "Onda rítmica de notas que atinge à distância."
 moves = {
-&"air_kick": SubResource("Resource_mbcof"),
-&"air_punch": SubResource("Resource_g74ky"),
-&"cross": SubResource("Resource_kpw4y"),
-&"high_kick": SubResource("Resource_p8nyk"),
-&"hook": SubResource("Resource_utduw"),
-&"jab": SubResource("Resource_glied"),
-&"kick": SubResource("Resource_04yd7"),
-&"low_kick": SubResource("Resource_eujj8"),
-&"special": SubResource("Resource_xbs04"),
-&"sub_special": SubResource("Resource_rsdis"),
-&"sweep": SubResource("Resource_iiqw6"),
-&"uppercut": SubResource("Resource_7tisj")
+&"air_kick": SubResource("Resource_qvuxu"),
+&"air_punch": SubResource("Resource_aym4s"),
+&"cross": SubResource("Resource_rsdis"),
+&"high_kick": SubResource("Resource_wt6gy"),
+&"hook": SubResource("Resource_ynpbp"),
+&"jab": SubResource("Resource_xbs04"),
+&"kick": SubResource("Resource_x2uqm"),
+&"low_kick": SubResource("Resource_ed2qu"),
+&"special": SubResource("Resource_qhmk1"),
+&"sub_special": SubResource("Resource_ex1u8"),
+&"sweep": SubResource("Resource_5e75q"),
+&"uppercut": SubResource("Resource_vspwl")
 }
 forms = {
 &"praia": {
@@ -252,6 +257,10 @@ forms = {
 }
 }
 voices = {
-&"select": ExtResource("5_gel7a"),
-&"special": ExtResource("5_gel7a")
+&"intro": ExtResource("7_eujj8"),
+&"ko": ExtResource("10_mbcof"),
+&"select": ExtResource("6_p8nyk"),
+&"special": ExtResource("5_04yd7"),
+&"sub_special": ExtResource("8_iiqw6"),
+&"win": ExtResource("9_g74ky")
 }

@@ -1,13 +1,18 @@
 [gd_resource type="Resource" script_class="FighterData" format=3]
 
-[ext_resource type="PackedScene" path="res://assets/characters/tainara/tainara.glb" id="1_drjca"]
-[ext_resource type="Script" path="res://scripts/data/move_data.gd" id="2_lu5b6"]
-[ext_resource type="Texture2D" path="res://assets/ui/portraits/tainara.png" id="3_hb5ue"]
-[ext_resource type="Script" path="res://scripts/data/fighter_data.gd" id="4_hd27b"]
-[ext_resource type="AudioStream" path="res://assets/audio/voice/tainara.mp3" id="5_ma6e5"]
+[ext_resource type="PackedScene" path="res://assets/characters/tainara/tainara.glb" id="1_0x627"]
+[ext_resource type="Script" path="res://scripts/data/move_data.gd" id="2_ox7bf"]
+[ext_resource type="Texture2D" path="res://assets/ui/portraits/tainara.png" id="3_t6ei5"]
+[ext_resource type="Script" path="res://scripts/data/fighter_data.gd" id="4_c0cmc"]
+[ext_resource type="AudioStream" path="res://assets/audio/voice/tainara/special.mp3" id="5_3x4r1"]
+[ext_resource type="AudioStream" path="res://assets/audio/voice/tainara/select.mp3" id="6_fqm24"]
+[ext_resource type="AudioStream" path="res://assets/audio/voice/tainara/intro.mp3" id="7_qnug1"]
+[ext_resource type="AudioStream" path="res://assets/audio/voice/tainara/sub_special.mp3" id="8_6xln8"]
+[ext_resource type="AudioStream" path="res://assets/audio/voice/tainara/win.mp3" id="9_o2tf8"]
+[ext_resource type="AudioStream" path="res://assets/audio/voice/tainara/ko.mp3" id="10_rusla"]
 
-[sub_resource type="Resource" id="Resource_0x627"]
-script = ExtResource("2_lu5b6")
+[sub_resource type="Resource" id="Resource_8hlkc"]
+script = ExtResource("2_ox7bf")
 display_name = "Jab"
 startup = 5
 recovery = 9
@@ -20,8 +25,8 @@ hitstop = 5
 pushback = 1.6
 meter_gain = 5.0
 
-[sub_resource type="Resource" id="Resource_ox7bf"]
-script = ExtResource("2_lu5b6")
+[sub_resource type="Resource" id="Resource_kogsy"]
+script = ExtResource("2_ox7bf")
 display_name = "Direto"
 anim = &"cross"
 startup = 8
@@ -35,8 +40,8 @@ lunge = 1.2
 meter_gain = 7.0
 sfx = &"whoosh_heavy"
 
-[sub_resource type="Resource" id="Resource_t6ei5"]
-script = ExtResource("2_lu5b6")
+[sub_resource type="Resource" id="Resource_toxh3"]
+script = ExtResource("2_ox7bf")
 display_name = "Gancho"
 anim = &"hook"
 startup = 10
@@ -52,8 +57,8 @@ pushback = 3.0
 meter_gain = 9.0
 sfx = &"whoosh_heavy"
 
-[sub_resource type="Resource" id="Resource_c0cmc"]
-script = ExtResource("2_lu5b6")
+[sub_resource type="Resource" id="Resource_i2roh"]
+script = ExtResource("2_ox7bf")
 display_name = "Uppercut"
 anim = &"uppercut"
 startup = 9
@@ -71,8 +76,8 @@ launch = 6.4
 meter_gain = 9.0
 sfx = &"whoosh_heavy"
 
-[sub_resource type="Resource" id="Resource_3x4r1"]
-script = ExtResource("2_lu5b6")
+[sub_resource type="Resource" id="Resource_iiwvy"]
+script = ExtResource("2_ox7bf")
 display_name = "Chute"
 anim = &"kick_mid"
 startup = 9
@@ -88,8 +93,8 @@ hitstop = 7
 pushback = 2.4
 meter_gain = 7.0
 
-[sub_resource type="Resource" id="Resource_fqm24"]
-script = ExtResource("2_lu5b6")
+[sub_resource type="Resource" id="Resource_45d5k"]
+script = ExtResource("2_ox7bf")
 display_name = "Chute Alto"
 anim = &"low_kick"
 startup = 13
@@ -106,8 +111,8 @@ lunge = 0.8
 meter_gain = 10.0
 sfx = &"whoosh_heavy"
 
-[sub_resource type="Resource" id="Resource_qnug1"]
-script = ExtResource("2_lu5b6")
+[sub_resource type="Resource" id="Resource_87k8v"]
+script = ExtResource("2_ox7bf")
 display_name = "Chute Baixo"
 anim = &"roundhouse"
 startup = 8
@@ -118,8 +123,8 @@ hitbox_bone = &"auto"
 hitbox_radius = 0.18
 pushback = 2.0
 
-[sub_resource type="Resource" id="Resource_6xln8"]
-script = ExtResource("2_lu5b6")
+[sub_resource type="Resource" id="Resource_3xphm"]
+script = ExtResource("2_ox7bf")
 display_name = "Rasteira"
 anim = &"sweep"
 startup = 11
@@ -138,8 +143,8 @@ launch = 2.2
 meter_gain = 8.0
 sfx = &"whoosh_heavy"
 
-[sub_resource type="Resource" id="Resource_o2tf8"]
-script = ExtResource("2_lu5b6")
+[sub_resource type="Resource" id="Resource_kl7av"]
+script = ExtResource("2_ox7bf")
 display_name = "Soco Aéreo"
 startup = 5
 active = 8
@@ -153,8 +158,8 @@ hitstop = 7
 pushback = 1.8
 air = true
 
-[sub_resource type="Resource" id="Resource_rusla"]
-script = ExtResource("2_lu5b6")
+[sub_resource type="Resource" id="Resource_ikkpt"]
+script = ExtResource("2_ox7bf")
 display_name = "Voadora"
 anim = &"kick_mid"
 active = 10
@@ -171,8 +176,8 @@ meter_gain = 8.0
 air = true
 sfx = &"whoosh_heavy"
 
-[sub_resource type="Resource" id="Resource_8hlkc"]
-script = ExtResource("2_lu5b6")
+[sub_resource type="Resource" id="Resource_krdcx"]
+script = ExtResource("2_ox7bf")
 display_name = "Poder do Arroz"
 kind = 2
 anim = &"power_up"
@@ -186,8 +191,8 @@ sfx = &"special"
 buff_form = &"arroz"
 voice = &"special"
 
-[sub_resource type="Resource" id="Resource_kogsy"]
-script = ExtResource("2_lu5b6")
+[sub_resource type="Resource" id="Resource_0oxkj"]
+script = ExtResource("2_ox7bf")
 display_name = "Cuidado em Dobro"
 kind = 1
 anim = &"cast"
@@ -211,14 +216,14 @@ projectile_speed = 5.5
 voice = &"sub_special"
 
 [resource]
-script = ExtResource("4_hd27b")
+script = ExtResource("4_c0cmc")
 id = &"tainara"
 display_name = "TAINARA"
 title = "Guardiã do Arroz"
 quote = "Com arroz eu fico invencível!"
 bio = "Ativa o Poder do Arroz dourado ou manda o Cuidado em Dobro pela arena."
-model = ExtResource("1_drjca")
-portrait = ExtResource("3_hb5ue")
+model = ExtResource("1_0x627")
+portrait = ExtResource("3_t6ei5")
 accent = Color(0.21960784, 0.7411765, 0.972549, 1)
 height_m = 1.64
 walk_speed = 1.85
@@ -227,18 +232,18 @@ special_desc = "Aura dourada: +32% de ataque e velocidade."
 sub_special_name = "Cuidado em Dobro"
 sub_special_desc = "Onda dourada rasteira que atravessa a arena."
 moves = {
-&"air_kick": SubResource("Resource_rusla"),
-&"air_punch": SubResource("Resource_o2tf8"),
-&"cross": SubResource("Resource_ox7bf"),
-&"high_kick": SubResource("Resource_fqm24"),
-&"hook": SubResource("Resource_t6ei5"),
-&"jab": SubResource("Resource_0x627"),
-&"kick": SubResource("Resource_3x4r1"),
-&"low_kick": SubResource("Resource_qnug1"),
-&"special": SubResource("Resource_8hlkc"),
-&"sub_special": SubResource("Resource_kogsy"),
-&"sweep": SubResource("Resource_6xln8"),
-&"uppercut": SubResource("Resource_c0cmc")
+&"air_kick": SubResource("Resource_ikkpt"),
+&"air_punch": SubResource("Resource_kl7av"),
+&"cross": SubResource("Resource_kogsy"),
+&"high_kick": SubResource("Resource_45d5k"),
+&"hook": SubResource("Resource_toxh3"),
+&"jab": SubResource("Resource_8hlkc"),
+&"kick": SubResource("Resource_iiwvy"),
+&"low_kick": SubResource("Resource_87k8v"),
+&"special": SubResource("Resource_krdcx"),
+&"sub_special": SubResource("Resource_0oxkj"),
+&"sweep": SubResource("Resource_3xphm"),
+&"uppercut": SubResource("Resource_i2roh")
 }
 forms = {
 &"arroz": {
@@ -251,6 +256,10 @@ forms = {
 }
 }
 voices = {
-&"select": ExtResource("5_ma6e5"),
-&"special": ExtResource("5_ma6e5")
+&"intro": ExtResource("7_qnug1"),
+&"ko": ExtResource("10_rusla"),
+&"select": ExtResource("6_fqm24"),
+&"special": ExtResource("5_3x4r1"),
+&"sub_special": ExtResource("8_6xln8"),
+&"win": ExtResource("9_o2tf8")
 }

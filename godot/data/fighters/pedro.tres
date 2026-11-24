@@ -1,13 +1,18 @@
 [gd_resource type="Resource" script_class="FighterData" format=3]
 
-[ext_resource type="PackedScene" path="res://assets/characters/pedro/pedro.glb" id="1_gl5w4"]
-[ext_resource type="Script" path="res://scripts/data/move_data.gd" id="2_ur2uw"]
-[ext_resource type="Texture2D" path="res://assets/ui/portraits/pedro.png" id="3_v02on"]
-[ext_resource type="Script" path="res://scripts/data/fighter_data.gd" id="4_k1s6t"]
-[ext_resource type="AudioStream" path="res://assets/audio/voice/pedro.mp3" id="5_e4kwo"]
+[ext_resource type="PackedScene" path="res://assets/characters/pedro/pedro.glb" id="1_4gpqb"]
+[ext_resource type="Script" path="res://scripts/data/move_data.gd" id="2_fbcra"]
+[ext_resource type="Texture2D" path="res://assets/ui/portraits/pedro.png" id="3_ev512"]
+[ext_resource type="Script" path="res://scripts/data/fighter_data.gd" id="4_nd7db"]
+[ext_resource type="AudioStream" path="res://assets/audio/voice/pedro/special.mp3" id="5_su2ek"]
+[ext_resource type="AudioStream" path="res://assets/audio/voice/pedro/select.mp3" id="6_1urr8"]
+[ext_resource type="AudioStream" path="res://assets/audio/voice/pedro/intro.mp3" id="7_1g035"]
+[ext_resource type="AudioStream" path="res://assets/audio/voice/pedro/sub_special.mp3" id="8_1ro28"]
+[ext_resource type="AudioStream" path="res://assets/audio/voice/pedro/win.mp3" id="9_ib7y0"]
+[ext_resource type="AudioStream" path="res://assets/audio/voice/pedro/ko.mp3" id="10_yao2j"]
 
-[sub_resource type="Resource" id="Resource_4gpqb"]
-script = ExtResource("2_ur2uw")
+[sub_resource type="Resource" id="Resource_3n8eg"]
+script = ExtResource("2_fbcra")
 display_name = "Jab"
 startup = 5
 recovery = 9
@@ -20,8 +25,8 @@ hitstop = 5
 pushback = 1.6
 meter_gain = 5.0
 
-[sub_resource type="Resource" id="Resource_fbcra"]
-script = ExtResource("2_ur2uw")
+[sub_resource type="Resource" id="Resource_ku4ru"]
+script = ExtResource("2_fbcra")
 display_name = "Direto"
 anim = &"cross"
 startup = 8
@@ -35,8 +40,8 @@ lunge = 1.2
 meter_gain = 7.0
 sfx = &"whoosh_heavy"
 
-[sub_resource type="Resource" id="Resource_ev512"]
-script = ExtResource("2_ur2uw")
+[sub_resource type="Resource" id="Resource_5vs4j"]
+script = ExtResource("2_fbcra")
 display_name = "Gancho"
 anim = &"hook"
 startup = 10
@@ -52,8 +57,8 @@ pushback = 3.0
 meter_gain = 9.0
 sfx = &"whoosh_heavy"
 
-[sub_resource type="Resource" id="Resource_nd7db"]
-script = ExtResource("2_ur2uw")
+[sub_resource type="Resource" id="Resource_qq5he"]
+script = ExtResource("2_fbcra")
 display_name = "Uppercut"
 anim = &"uppercut"
 startup = 9
@@ -71,8 +76,8 @@ launch = 6.4
 meter_gain = 9.0
 sfx = &"whoosh_heavy"
 
-[sub_resource type="Resource" id="Resource_su2ek"]
-script = ExtResource("2_ur2uw")
+[sub_resource type="Resource" id="Resource_2ncw1"]
+script = ExtResource("2_fbcra")
 display_name = "Chute"
 anim = &"kick_mid"
 startup = 9
@@ -88,8 +93,8 @@ hitstop = 7
 pushback = 2.4
 meter_gain = 7.0
 
-[sub_resource type="Resource" id="Resource_1urr8"]
-script = ExtResource("2_ur2uw")
+[sub_resource type="Resource" id="Resource_rkgxf"]
+script = ExtResource("2_fbcra")
 display_name = "Chute Alto"
 anim = &"low_kick"
 startup = 13
@@ -106,8 +111,8 @@ lunge = 0.8
 meter_gain = 10.0
 sfx = &"whoosh_heavy"
 
-[sub_resource type="Resource" id="Resource_1g035"]
-script = ExtResource("2_ur2uw")
+[sub_resource type="Resource" id="Resource_fc6vg"]
+script = ExtResource("2_fbcra")
 display_name = "Chute Baixo"
 anim = &"roundhouse"
 startup = 8
@@ -118,8 +123,8 @@ hitbox_bone = &"auto"
 hitbox_radius = 0.18
 pushback = 2.0
 
-[sub_resource type="Resource" id="Resource_1ro28"]
-script = ExtResource("2_ur2uw")
+[sub_resource type="Resource" id="Resource_n60it"]
+script = ExtResource("2_fbcra")
 display_name = "Rasteira"
 anim = &"sweep"
 startup = 11
@@ -138,8 +143,8 @@ launch = 2.2
 meter_gain = 8.0
 sfx = &"whoosh_heavy"
 
-[sub_resource type="Resource" id="Resource_ib7y0"]
-script = ExtResource("2_ur2uw")
+[sub_resource type="Resource" id="Resource_w0bc7"]
+script = ExtResource("2_fbcra")
 display_name = "Soco Aéreo"
 startup = 5
 active = 8
@@ -153,8 +158,8 @@ hitstop = 7
 pushback = 1.8
 air = true
 
-[sub_resource type="Resource" id="Resource_yao2j"]
-script = ExtResource("2_ur2uw")
+[sub_resource type="Resource" id="Resource_xduqr"]
+script = ExtResource("2_fbcra")
 display_name = "Voadora"
 anim = &"kick_mid"
 active = 10
@@ -171,8 +176,8 @@ meter_gain = 8.0
 air = true
 sfx = &"whoosh_heavy"
 
-[sub_resource type="Resource" id="Resource_3n8eg"]
-script = ExtResource("2_ur2uw")
+[sub_resource type="Resource" id="Resource_nmqyp"]
+script = ExtResource("2_fbcra")
 display_name = "Monstrão Heineken"
 kind = 2
 anim = &"drink"
@@ -186,8 +191,8 @@ sfx = &"special"
 buff_form = &"hulk"
 voice = &"special"
 
-[sub_resource type="Resource" id="Resource_ku4ru"]
-script = ExtResource("2_ur2uw")
+[sub_resource type="Resource" id="Resource_yklth"]
+script = ExtResource("2_fbcra")
 display_name = "Aura Verde"
 kind = 1
 anim = &"cast"
@@ -209,8 +214,8 @@ projectile_color = Color(0.13333334, 0.77254903, 0.36862746, 1)
 projectile_speed = 8.0
 voice = &"special"
 
-[sub_resource type="Resource" id="Resource_5vs4j"]
-script = ExtResource("2_ur2uw")
+[sub_resource type="Resource" id="Resource_ufspq"]
+script = ExtResource("2_fbcra")
 display_name = "Fumaça de Cigarro"
 kind = 1
 anim = &"throw_obj"
@@ -233,14 +238,14 @@ projectile_speed = 2.6
 voice = &"sub_special"
 
 [resource]
-script = ExtResource("4_k1s6t")
+script = ExtResource("4_nd7db")
 id = &"pedro"
 display_name = "PEDRO"
 title = "O Monstrão da Resenha"
 quote = "Fuma, bebe e vence!"
 bio = "Bebe uma Heineken e vira o Monstrão Verde! Transformado, dispara rajada com aura verde."
-model = ExtResource("1_gl5w4")
-portrait = ExtResource("3_v02on")
+model = ExtResource("1_4gpqb")
+portrait = ExtResource("3_ev512")
 accent = Color(0.13333334, 0.77254903, 0.36862746, 1)
 height_m = 1.78
 max_hp = 1100.0
@@ -251,19 +256,19 @@ special_desc = "Vira o Monstrão; transformado, dispara a Aura Verde."
 sub_special_name = "Fumaça de Cigarro"
 sub_special_desc = "Nuvem densa e lenta que deixa o rival tonto."
 moves = {
-&"air_kick": SubResource("Resource_yao2j"),
-&"air_punch": SubResource("Resource_ib7y0"),
-&"cross": SubResource("Resource_fbcra"),
-&"high_kick": SubResource("Resource_1urr8"),
-&"hook": SubResource("Resource_ev512"),
-&"jab": SubResource("Resource_4gpqb"),
-&"kick": SubResource("Resource_su2ek"),
-&"low_kick": SubResource("Resource_1g035"),
-&"special": SubResource("Resource_3n8eg"),
-&"special@hulk": SubResource("Resource_ku4ru"),
-&"sub_special": SubResource("Resource_5vs4j"),
-&"sweep": SubResource("Resource_1ro28"),
-&"uppercut": SubResource("Resource_nd7db")
+&"air_kick": SubResource("Resource_xduqr"),
+&"air_punch": SubResource("Resource_w0bc7"),
+&"cross": SubResource("Resource_ku4ru"),
+&"high_kick": SubResource("Resource_rkgxf"),
+&"hook": SubResource("Resource_5vs4j"),
+&"jab": SubResource("Resource_3n8eg"),
+&"kick": SubResource("Resource_2ncw1"),
+&"low_kick": SubResource("Resource_fc6vg"),
+&"special": SubResource("Resource_nmqyp"),
+&"special@hulk": SubResource("Resource_yklth"),
+&"sub_special": SubResource("Resource_ufspq"),
+&"sweep": SubResource("Resource_n60it"),
+&"uppercut": SubResource("Resource_qq5he")
 }
 forms = {
 &"hulk": {
@@ -277,6 +282,10 @@ forms = {
 }
 }
 voices = {
-&"select": ExtResource("5_e4kwo"),
-&"special": ExtResource("5_e4kwo")
+&"intro": ExtResource("7_1g035"),
+&"ko": ExtResource("10_yao2j"),
+&"select": ExtResource("6_1urr8"),
+&"special": ExtResource("5_su2ek"),
+&"sub_special": ExtResource("8_1ro28"),
+&"win": ExtResource("9_ib7y0")
 }
