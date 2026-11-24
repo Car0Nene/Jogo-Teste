@@ -19,6 +19,7 @@ import {
 import { STAGES, StageId } from '../data/stages';
 import { STAGE_MUSIC, soundEngine } from './audio';
 import { diagnostics } from './diagnostics';
+import { testRunner } from './testRunner'; // === PHASE 5: Testing ===
 import { getInitialAtlasTier } from './graphicsProfile';
 import {
   AnimState,
