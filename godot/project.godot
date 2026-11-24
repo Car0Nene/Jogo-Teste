@@ -18,6 +18,7 @@ Game="*res://scripts/autoload/game.gd"
 Audio="*res://scripts/autoload/audio.gd"
 UI="*res://scripts/autoload/ui.gd"
 Scenes="*res://scripts/autoload/scenes.gd"
+GraphicsQuality="*res://scripts/autoload/graphics_quality.gd"
 
 [display]
 
