@@ -55,6 +55,14 @@ func _ready() -> void:
 	menu.to_select.connect(func(): Scenes.go("res://scenes/character_select.tscn"))
 	menu.to_menu.connect(func(): Scenes.go("res://scenes/main_menu.tscn"))
 	menu.next_fight.connect(_arcade_next)
+	
+	# Debug profiler
+	var debug_enabled := Settings.get_value("debug", "profiler", false)
+	if debug_enabled:
+		var prof := Profiler.new()
+		prof.enabled = true
+		add_child(prof)
+	
 	_intro()
 
 
