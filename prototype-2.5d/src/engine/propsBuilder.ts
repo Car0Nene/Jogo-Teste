@@ -22,6 +22,11 @@ let sharedSpecialTex: THREE.Texture | null = null;
 let sharedSpecialDepthMat: THREE.MeshDepthMaterial | null = null;
 let sharedGlowTex: THREE.Texture | null = null;
 
+// === BURST MESH CACHE (FIX FOR PROBLEM 2) ===
+let cachedBurstMesh: THREE.Group | null = null;
+let cachedBurstGeometry: THREE.PlaneGeometry | null = null;
+let cachedBurstMaterial: THREE.MeshBasicMaterial | null = null;
+
 function getSpecialTexture(): THREE.Texture {
   if (sharedSpecialTex) return sharedSpecialTex;
   const tex = new THREE.TextureLoader().load(assetUrl('/assets/sprites/specials-hd.webp'));
@@ -139,6 +144,12 @@ export function setProjectileFacing(group: THREE.Group, facing: 1 | -1) {
 }
 
 export function buildBurstMesh(): THREE.Group {
+  // === FIX FOR PROBLEM 2: Reuse cached burst mesh template ===
+  // Clone cached geometry/material instead of creating new each time
+  if (cachedBurstMesh) {
+    return cachedBurstMesh.clone();
+  }
+
   const g = new THREE.Group();
   const [, , aw, ah] = SPECIAL_ATLAS.burst;
   const h = 1.45;
@@ -157,6 +168,12 @@ export function buildBurstMesh(): THREE.Group {
   quad.name = 'spriteQuad';
   quad.position.z = 0.28;
   g.add(quad);
+
+  // Cache for future uses
+  cachedBurstMesh = g;
+  cachedBurstGeometry = geo;
+  cachedBurstMaterial = mat;
+
   return g;
 }
 

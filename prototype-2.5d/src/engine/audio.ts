@@ -98,6 +98,11 @@ class SoundEngine {
   private trackLevel = 1;
   private musicPaused = false;
   private activeVoices = new Set<HTMLAudioElement>();
+
+  // === FIX FOR PROBLEM 3: Pre-load audio for combat ===
+  private audioClipCache = new Map<string, HTMLAudioElement[]>();
+  private audioClipsBeingPreloaded = new Set<string>();
+  private maxClipsPerUrl = 2;
   private currentAnnouncer: HTMLAudioElement | null = null;
   private currentDaviVoice: HTMLAudioElement | null = null;
   private lastVoiceTime = 0;
@@ -298,6 +303,77 @@ class SoundEngine {
     this.currentDaviVoice = null;
   }
 
+  /**
+   * === FIX FOR PROBLEM 3: Pre-load audio clips to avoid sync load ===
+   * Call during scene setup to pre-cache common combat audio
+   */
+  public preloadCombatAudio() {
+    // Pre-load all fighter clips used in combat
+    const toPreload = [
+      CLIPS.cao?.lick,
+      CLIPS.cao?.protect,
+      CLIPS.dada?.reply,
+      CLIPS.pedro?.drink,
+      CLIPS.pedro?.combo,
+      CLIPS.carlos?.pizzaAmor,
+      CLIPS.franciely?.isso,
+      CLIPS.gabi?.amor,
+      CLIPS.paula?.lunch,
+      CLIPS.tainara?.arroz,
+      CLIPS.daniel?.praia,
+      CLIPS.davi?.preguica,
+      CLIPS.davi?.outra,
+      CLIPS.narrator?.victory,
+    ].filter(url => url);
+
+    for (const url of toPreload) {
+      if (url) this.preloadClip(url);
+    }
+  }
+
+  /**
+   * Pre-load a single audio clip
+   */
+  private preloadClip(url: string) {
+    if (this.audioClipCache.has(url) || this.audioClipsBeingPreloaded.has(url)) return;
+
+    this.audioClipsBeingPreloaded.add(url);
+    for (let i = 0; i < this.maxClipsPerUrl; i++) {
+      const el = new Audio(url);
+      el.preload = 'auto';
+      el.addEventListener(
+        'canplay',
+        () => {
+          this.audioClipsBeingPreloaded.delete(url);
+        },
+        { once: true }
+      );
+      
+      if (!this.audioClipCache.has(url)) {
+        this.audioClipCache.set(url, []);
+      }
+      this.audioClipCache.get(url)!.push(el);
+    }
+  }
+
+  /**
+   * Get a cached audio element or fall back to creating new
+   */
+  private getCachedOrNewAudio(url: string): HTMLAudioElement {
+    const cached = this.audioClipCache.get(url);
+    if (cached && cached.length > 0) {
+      const el = cached.pop()!;
+      if (el.paused) {
+        el.currentTime = 0;
+        return el;
+      } else {
+        cached.push(el); // Put back if still playing
+      }
+    }
+    // Fall back to new instance
+    return new Audio(url);
+  }
+
   private playVoiceFile(url: string, volume = 0.85, isAnnouncer = false): HTMLAudioElement | null {
     if (this.muted || typeof window === 'undefined') return null;
     if (this.currentDaviVoice && this.activeVoices.has(this.currentDaviVoice)) return null;
@@ -311,7 +387,8 @@ class SoundEngine {
       this.currentAnnouncer = null;
     }
 
-    const el = new Audio(url);
+    // === FIX: Use cached audio or create new ===
+    const el = this.getCachedOrNewAudio(url);
     el.preload = 'auto';
     el.volume = scaledVol;
     this.activeVoices.add(el);
@@ -322,6 +399,13 @@ class SoundEngine {
       if (!this.activeVoices.delete(el)) return;
       el.onended = null;
       el.onerror = null;
+      // Try to cache for reuse
+      if (el.src && !this.audioClipCache.get(el.src)?.includes(el)) {
+        const urlMatch = Array.from(this.audioClipCache.keys()).find(url => el.src.includes(url));
+        if (urlMatch) {
+          this.audioClipCache.get(urlMatch)?.push(el);
+        }
+      }
     };
     el.onended = cleanup;
     el.onerror = cleanup;
@@ -657,6 +741,13 @@ class SoundEngine {
       osc.start(t0);
       osc.stop(t0 + 0.36);
     });
+  }
+
+  /**
+   * Get count of currently active voice/audio elements (for diagnostics)
+   */
+  public getActiveVoiceCount(): number {
+    return this.activeVoices.size;
   }
 }
 

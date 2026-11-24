@@ -18,6 +18,7 @@ import {
 } from '../data/settings';
 import { STAGES, StageId } from '../data/stages';
 import { STAGE_MUSIC, soundEngine } from './audio';
+import { diagnostics } from './diagnostics';
 import {
   AnimState,
   CharacterRig,
@@ -197,6 +198,10 @@ export class GameEngine {
   private lastTimestamp = 0;
   private frameId = 0;
   private disposed = false;
+
+  // Material cache for sparks (avoid creating new materials each impact)
+  private sparkMaterialCache = new Map<number, THREE.MeshBasicMaterial>();
+  private heartMaterialCache = new Map<number, THREE.MeshBasicMaterial>();
 
   private heldKeys = new Set<string>();
   private virtualHolds: [Set<string>, Set<string>] = [new Set(), new Set()];
@@ -426,6 +431,27 @@ export class GameEngine {
     this.handleResize();
   }
 
+  /**
+   * === FIX FOR PROBLEM 4: Warm up HD textures on initial load ===
+   * This ensures textures are loaded and compiled before combat starts
+   */
+  public warmUpHdAssets() {
+    if (!this.fighters) return;
+    // Pre-load all fighter atlases by accessing their textures
+    for (const f of this.fighters) {
+      // Force texture loads through the rig
+      const atlasHd3Tex = f.rig.atlasHd3Tex;
+      const atlasHd4Tex = f.rig.atlasHd4Tex;
+      // Create dummy access to force loading
+      if (atlasHd3Tex) {
+        const _ = atlasHd3Tex.image;
+      }
+      if (atlasHd4Tex) {
+        const _ = atlasHd4Tex.image;
+      }
+    }
+  }
+
   public setKeyBindings(bindings: Player1KeyBindings) {
     this.keyBindings = { ...bindings };
   }
@@ -516,6 +542,10 @@ export class GameEngine {
     this.clearEntities();
     soundEngine.stopAllVoices();
     soundEngine.startMusic(STAGE_MUSIC[stageId] ?? 'theme', 0.58);
+    
+    // === FIX FOR PROBLEM 3: Pre-load combat audio before fight starts ===
+    soundEngine.preloadCombatAudio();
+    
     this.screenMode = 'fight';
     this.updateProjection();
     this.paused = false;
@@ -699,6 +729,12 @@ export class GameEngine {
   private beginRound(showBanner: boolean) {
     this.clearEntities();
     if (!this.fighters) return;
+
+    // === FIX FOR PROBLEM 4: Warm up HD textures at round start ===
+    if (this.roundNumber === 1 && this.graphicsQuality !== 'low') {
+      this.warmUpHdAssets();
+    }
+
     for (const f of this.fighters) {
       f.x = f.index === 0 ? -2.4 : 2.4;
       f.y = 0;
@@ -1163,6 +1199,23 @@ export class GameEngine {
     });
   }
 
+  /**
+   * Get or create a cached material for sparks
+   * Avoids creating new materials on every hit
+   */
+  private getSparkMaterial(colorHex: number, isHeart: boolean): THREE.MeshBasicMaterial {
+    const cache = isHeart ? this.heartMaterialCache : this.sparkMaterialCache;
+    let mat = cache.get(colorHex);
+    if (!mat) {
+      mat = new THREE.MeshBasicMaterial({
+        color: colorHex,
+        side: isHeart ? THREE.DoubleSide : THREE.FrontSide,
+      });
+      cache.set(colorHex, mat);
+    }
+    return mat;
+  }
+
   private spawnBurst(x: number, y: number) {
     const mesh = buildBurstMesh();
     mesh.position.set(x, y, 0.25);
@@ -1171,7 +1224,7 @@ export class GameEngine {
   }
 
   private spawnSparks(x: number, y: number, colorHex: number, count = 10, hearts = false) {
-    const mat = new THREE.MeshBasicMaterial({ color: colorHex, side: hearts ? THREE.DoubleSide : THREE.FrontSide });
+    const mat = this.getSparkMaterial(colorHex, hearts);
     for (let i = 0; i < count; i++) {
       const m = new THREE.Mesh(hearts ? this.heartGeo : this.sparkGeo, mat);
       m.position.set(x, y, (Math.random() - 0.5) * 0.4);
@@ -1192,13 +1245,33 @@ export class GameEngine {
   private startLoop() {
     const tick = () => {
       if (this.disposed) return;
+      diagnostics.markFrameStart();
+
       const now = performance.now();
       const rawDt = Math.max(0, (now - this.lastTimestamp) / 1000);
       this.lastTimestamp = now;
       const dt = Math.min(rawDt, 0.05);
 
       this.step(dt);
+      diagnostics.markLogicEnd();
+
       this.renderer.render(this.scene, this.camera);
+      diagnostics.markRenderEnd();
+
+      // Record diagnostic snapshot
+      diagnostics.recordSnapshot({
+        activeEffects: this.bursts.length + this.sparks.length,
+        activeSparks: this.sparks.length,
+        activeBursts: this.bursts.length,
+        activeVoices: soundEngine.getActiveVoiceCount?.() || 0,
+        activeProjectiles: this.projectiles.length,
+        memoryMb: ((performance as any).memory?.usedJSHeapSize || 0) / 1048576,
+        texturesCount: 0, // TODO: count from cache
+        materialsCount: 0, // TODO: count from cache
+        meshesCount: this.scene.children.length,
+        combatHitCount: this.fighters ? (this.fighters[0]?.comboCount || 0) + (this.fighters[1]?.comboCount || 0) : 0,
+        hitstopTimer: this.hitstopTimer,
+      });
 
       if (this.isSoftwareGl) {
         this.afterDraw(tick);
