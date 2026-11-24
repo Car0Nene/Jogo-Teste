@@ -3,7 +3,7 @@ extends Node3D
 
 var _cursor := [0, 1]
 var _locked := [false, false]
-var _picking := 0                # quem está escolhendo (modos contra CPU: 0 e depois 1)
+var _picking := 0
 var _models: Array[FighterModel] = [null, null]
 var _cards: Array[Panel] = []
 var _info: Array[VBoxContainer] = []
@@ -22,8 +22,6 @@ func _ready() -> void:
 	_refresh(1)
 	_info[1].visible = Game.mode != Game.Mode.ARCADE
 	if _models[1]: _models[1].visible = Game.mode != Game.Mode.ARCADE
-	# Pré-carrega todos os modelos para evitar travamentos posteriores
-	call_deferred("_preload_models")
 
 
 func _build_studio() -> void:
@@ -238,8 +236,4 @@ func _back(p: int) -> void:
 		_refresh(0)
 	else:
 		Scenes.go("res://scenes/main_menu.tscn")
-
-
-func _preload_models() -> void:
-	ResourcePreloader.preload_all_fighters()
 
