@@ -208,7 +208,7 @@ func _confirm(p: int) -> void:
 	Audio.sfx(&"select")
 	var d := Game.fighter(Game.ROSTER[_cursor[p]])
 	var v: AudioStream = d.voices.get(&"select", d.voices.get(&"special"))
-	if v: Audio.voice(v)
+	if v: Audio.voice(v, 1, 0.0, &"select")
 	_refresh(p)
 	if Game.mode == Game.Mode.ARCADE:
 		Game.start_arcade(Game.ROSTER[_cursor[0]])

@@ -21,6 +21,7 @@ func _ready() -> void:
 	_voice = AudioStreamPlayer.new()
 	_voice.bus = "Voice"
 	add_child(_voice)
+	_voice.finished.connect(_on_announcer_done)
 	for i in 2:
 		var vp := AudioStreamPlayer.new()
 		vp.bus = "Voice%d" % (i + 1)
@@ -63,15 +64,15 @@ func stop_music(fade := 0.6) -> void:
 	tw.tween_callback(_music.stop)
 
 
-func sfx(name: StringName, pitch := 1.0) -> void:
+func sfx(sfx_name: StringName, pitch := 1.0) -> void:
 	var stream: AudioStream = null
 	for ext in ["ogg", "wav", "mp3"]:
-		var path := "res://assets/audio/sfx/%s.%s" % [name, ext]
+		var path := "res://assets/audio/sfx/%s.%s" % [sfx_name, ext]
 		if ResourceLoader.exists(path):
 			stream = load(path)
 			break
 	if stream == null:
-		stream = _synth.get(name)
+		stream = _synth.get(sfx_name)
 	if stream == null:
 		return
 	var p := _sfx[_next]
@@ -81,18 +82,41 @@ func sfx(name: StringName, pitch := 1.0) -> void:
 	p.play()
 
 
-## Fala do locutor (centro) ou de um lutador. slot 1/2 = P1/P2; pan de -1 (esq.) a 1 (dir.).
-func voice(stream: AudioStream, slot := 0, pan := 0.0) -> void:
+## Prioridade das falas: maior interrompe menor; igual/menor espera ou é descartada.
+const VOICE_PRIORITY := {&"select": 1, &"intro": 1, &"sub_special": 2, &"special": 3, &"win": 4, &"ko": 5}
+var _slot_prio := [0, 0, 0]
+var _announcer_queue: Array[AudioStream] = []
+
+
+## Fala do locutor (slot 0, em fila) ou de um lutador (slot 1/2, por prioridade).
+## pan de -1 (esq.) a 1 (dir.). Retorna a duração em segundos (0 se não tocou).
+func voice(stream: AudioStream, slot := 0, pan := 0.0, event: StringName = &"") -> float:
 	if stream == null:
-		return
-	var p := _voice
-	if slot in [1, 2]:
-		p = _fvoice[slot - 1]
-		var bus := AudioServer.get_bus_index("Voice%d" % slot)
-		var fx := AudioServer.get_bus_effect(bus, 0) as AudioEffectPanner
-		if fx: fx.pan = clampf(pan, -0.75, 0.75)
+		return 0.0
+	if slot == 0:
+		if _voice.playing:
+			_announcer_queue.append(stream)
+			return stream.get_length()
+		_voice.stream = stream
+		_voice.play()
+		return stream.get_length()
+	var p := _fvoice[slot - 1]
+	var prio: int = VOICE_PRIORITY.get(event, 2)
+	if p.playing and prio < _slot_prio[slot]:
+		return 0.0
+	_slot_prio[slot] = prio
+	var bus := AudioServer.get_bus_index("Voice%d" % slot)
+	var fx := AudioServer.get_bus_effect(bus, 0) as AudioEffectPanner
+	if fx: fx.pan = clampf(pan, -0.75, 0.75)
 	p.stream = stream
 	p.play()
+	return stream.get_length()
+
+
+func _on_announcer_done() -> void:
+	if not _announcer_queue.is_empty():
+		_voice.stream = _announcer_queue.pop_front()
+		_voice.play()
 
 
 ## Ambiência da arena: room 0..1 (tamanho), wet 0..1 (quanto de eco). Cola a voz no cenário.
