@@ -399,7 +399,7 @@ func _build_padaria() -> void:
 	# fachada da padaria ao fundo (parede com vitrines e porta)
 	_box(Vector3(30, 6.5, 0.4), Vector3(0, 3.25, -7.6), wall)
 	_box(Vector3(30, 0.7, 0.5), Vector3(0, 0.35, -7.35), wood)              # rodapé de madeira
-	var interior := _solid(Color("3a2416"), 0.9)
+	var interior := _solid(Color("8a5a34"), 0.9, 0.35)
 	for x in [-6.0, 6.0]:
 		_box(Vector3(5.0, 2.2, 0.05), Vector3(x, 1.85, -7.37), interior)       # interior escuro
 		_box(Vector3(5.0, 2.2, 0.06), Vector3(x, 1.85, -7.33), _glass())         # vitrine
@@ -410,7 +410,7 @@ func _build_padaria() -> void:
 	_box(Vector3(2.0, 2.8, 0.06), Vector3(0, 1.4, -7.33), _glass())             # porta de vidro
 	# toldo listrado
 	for i in 16:
-		var stripe := _box(Vector3(1.0, 0.06, 1.6), Vector3(-7.5 + i * 1.0, 3.55, -6.75),
+		var stripe := _box(Vector3(1.0, 0.06, 1.6), Vector3(-7.5 + i * 1.0, 3.3, -6.8),
 			_solid(Color("e8473f") if i % 2 == 0 else Color("fff3e0"), 0.8))
 		stripe.rotation_degrees.x = 18
 	# letreiro neon
@@ -420,8 +420,8 @@ func _build_padaria() -> void:
 	sign.outline_size = 24
 	sign.modulate = Color("ffe08a")
 	sign.outline_modulate = Color("8a3b12")
-	sign.position = Vector3(0, 4.35, -7.35)
-	sign.pixel_size = 0.006
+	sign.position = Vector3(0, 3.62, -7.35)
+	sign.pixel_size = 0.0045
 	add_child(sign)
 	_lamp(Vector3(0, 4.1, -6.4), Color("ffd79a"), 1.4, 7.0, false)
 	# calçada da frente e meio-fio
@@ -484,11 +484,11 @@ func _build_bar() -> void:
 	_box(Vector3(30, 0.3, 14), Vector3(0, 5.6, -1.0), wood, false)             # teto
 	_box(Vector3(30, 1.1, 0.12), Vector3(0, 0.55, -6.95), wood)                # lambri
 	# letreiros neon
-	for s in [["BAR DA SIMONE", Vector3(-3.2, 3.35, -6.95), Color("ff4fd8")], ["CERVEJA GELADA", Vector3(6.0, 2.9, -6.95), Color("4fd1ff")]]:
+	for s in [["BAR DA SIMONE", Vector3(-3.2, 3.05, -6.95), Color("ff4fd8")], ["CERVEJA GELADA", Vector3(6.4, 2.6, -6.95), Color("4fd1ff")]]:
 		var l := Label3D.new()
 		l.text = s[0]
 		l.font_size = 120
-		l.pixel_size = 0.006
+		l.pixel_size = 0.0042
 		l.modulate = (s[2] as Color) * 2.2
 		l.outline_size = 0
 		l.position = s[1]
@@ -512,7 +512,7 @@ func _build_praia() -> void:
 
 func _glass() -> StandardMaterial3D:
 	var g := StandardMaterial3D.new()
-	g.albedo_color = Color(0.55, 0.7, 0.8, 0.35)
+	g.albedo_color = Color(0.75, 0.85, 0.9, 0.18)
 	g.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	g.metallic = 0.6
 	g.roughness = 0.05

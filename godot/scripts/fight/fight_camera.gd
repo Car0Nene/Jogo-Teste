@@ -41,7 +41,7 @@ func _process(dt: float) -> void:
 		var mid := (a.pos.x + b.pos.x) * 0.5
 		var sep := absf(a.pos.x - b.pos.x)
 		var high := maxf(a.pos.y, b.pos.y)
-		var dist := clampf(3.4 + sep * 0.75, 4.2, 8.5) - punch * 0.8
+		var dist := clampf(3.8 + sep * 0.75, 4.8, 9.0) - punch * 0.8
 		target = Vector3(mid, 1.35 + high * 0.35, dist)
 		look = Vector3(mid, 1.05 + high * 0.3, 0.0)
 	else:
