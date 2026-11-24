@@ -1,6 +1,7 @@
 extends Node
 ## Música e efeitos. Efeitos sem arquivo são sintetizados (troque colocando .ogg/.wav
 ## em assets/audio/sfx/<nome>.*).
+## OTIMIZADO: Pré-carregamento de SFX para evitar bloqueio no frame de combate.
 
 var _music: AudioStreamPlayer
 var _sfx: Array[AudioStreamPlayer] = []
@@ -9,7 +10,14 @@ var _fvoice: Array[AudioStreamPlayer] = []  # lutadores P1/P2 (panorâmica pela 
 var _reverb: AudioEffectReverb
 var _next := 0
 var _synth := {}
+var _audio_cache := {}  # Cache de SFX carregados
 const RATE := 22050
+
+# SFX que são usados frequentemente em combate (pré-carrega na inicialização)
+const COMBAT_SFX := [
+	&"hit_light", &"hit_heavy", &"block", &"jump", &"land", &"fall",
+	&"special", &"whoosh_light", &"whoosh_heavy", &"ko", &"select", &"move", &"back"
+]
 
 
 func _ready() -> void:
@@ -40,6 +48,8 @@ func _ready() -> void:
 		&"move": _tone(500, 500, 0.03, 0, 0.2), &"back": _tone(500, 300, 0.07, 0, 0.25),
 		&"bell": _tone(880, 880, 0.5, 1, 0.45), &"fall": _tone(120, 50, 0.25, 3, 0.7),
 	}
+	# Pré-carrega SFX de combate (async para não bloquear o boot)
+	call_deferred(&"_preload_sfx")
 
 
 func music(stream: AudioStream, fade := 0.6) -> void:
@@ -64,12 +74,15 @@ func stop_music(fade := 0.6) -> void:
 
 
 func sfx(name: StringName, pitch := 1.0) -> void:
-	var stream: AudioStream = null
-	for ext in ["ogg", "wav", "mp3"]:
-		var path := "res://assets/audio/sfx/%s.%s" % [name, ext]
-		if ResourceLoader.exists(path):
-			stream = load(path)
-			break
+	var stream: AudioStream = _audio_cache.get(name)
+	if stream == null:
+		# Tenta carregar do cache global (se já foi carregado)
+		for ext in ["ogg", "wav", "mp3"]:
+			var path := "res://assets/audio/sfx/%s.%s" % [name, ext]
+			if ResourceLoader.exists(path):
+				stream = load(path)
+				_audio_cache[name] = stream
+				break
 	if stream == null:
 		stream = _synth.get(name)
 	if stream == null:
@@ -79,6 +92,16 @@ func sfx(name: StringName, pitch := 1.0) -> void:
 	p.stream = stream
 	p.pitch_scale = pitch * randf_range(0.94, 1.06)
 	p.play()
+
+
+func _preload_sfx() -> void:
+	for sfx_name in COMBAT_SFX:
+		for ext in ["ogg", "wav", "mp3"]:
+			var path := "res://assets/audio/sfx/%s.%s" % [sfx_name, ext]
+			if ResourceLoader.exists(path):
+				var stream = load(path)
+				_audio_cache[sfx_name] = stream
+				break
 
 
 ## Fala do locutor (centro) ou de um lutador. slot 1/2 = P1/P2; pan de -1 (esq.) a 1 (dir.).
