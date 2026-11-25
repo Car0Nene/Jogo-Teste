@@ -49,12 +49,12 @@ test('loads the game and accepts fight controls at this viewport', async ({ page
       const style = getComputedStyle(img);
       return [style.objectFit, style.objectPosition];
     })).toEqual(['cover', '50% 0%']);
-    const bounds = await image.locator('xpath=..').boundingBox();
-    const cardBounds = await image.locator('xpath=../..').boundingBox();
-    expect(bounds.x).toBeGreaterThanOrEqual(cardBounds.x - 1);
-    expect(bounds.y).toBeGreaterThanOrEqual(cardBounds.y - 1);
-    expect(bounds.x + bounds.width).toBeLessThanOrEqual(cardBounds.x + cardBounds.width + 1);
-    expect(bounds.y + bounds.height).toBeLessThanOrEqual(cardBounds.y + cardBounds.height + 1);
+    // card e retrato medidos no mesmo quadro (evita corrida com reflow de fonte/grade)
+    await expect.poll(() => image.evaluate((img) => {
+      const p = img.parentElement.getBoundingClientRect();
+      const c = img.parentElement.parentElement.getBoundingClientRect();
+      return p.left >= c.left - 1 && p.top >= c.top - 1 && p.right <= c.right + 1 && p.bottom <= c.bottom + 1;
+    })).toBeTruthy();
   }
 
   const fighters = [
