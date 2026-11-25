@@ -27,6 +27,7 @@ import { StageSelectScreen } from './components/menu/StageSelectScreen';
 import { accountService } from './services/account';
 import { AccountModal } from './components/AccountModal';
 import { platform, usePlatform } from './platform/platform';
+import { BootIntro, shouldShowBootIntro } from './components/menu/BootIntro';
 
 const platformState = () => platform.state;
 
@@ -44,6 +45,7 @@ export default function App() {
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   const [screen, setScreen] = useState<AppScreen>('title');
+  const [bootIntro, setBootIntro] = useState(shouldShowBootIntro);
   const [gameMode, setGameMode] = useState<GameMode>('cpu');
   const [difficulty, setDifficulty] = useState<CpuDifficulty>('normal');
   const [p1Id, setP1Id] = useState<FighterId>('pedro');
@@ -441,6 +443,7 @@ export default function App() {
         />
       )}
       {accountOpen && <AccountModal onClose={() => setAccountOpen(false)} />}
+      {bootIntro && <BootIntro onDone={() => setBootIntro(false)} />}
     </div>
   );
 }

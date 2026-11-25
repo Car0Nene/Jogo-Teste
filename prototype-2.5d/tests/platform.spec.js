@@ -386,17 +386,28 @@ test('cast voices exist and play on select, specials, KO and victory', async ({ 
     }
     Math.random = realRandom;
     played.length = 0;
+    const carlos = make('carlos');
+    carlos.nextCarlosForm = 'crente';
+    engine.trySpecial(carlos, false);
+    out.carlosFe = played.join(',');
+    played.length = 0;
     engine.triggerKO(make('pedro'), make('tainara'));
     out.ko = played.join(',');
     return out;
   });
-  for (const id of ['carlos', 'pedro', 'daniel', 'franciely', 'gabi', 'paula', 'tainara']) {
-    expect(result[id][0], `${id} especial`).toContain(`${id}:cast_special`);
-    expect(result[id][1], `${id} sub-especial`).toContain(`${id}:cast_subSpecial`);
-    expect(result[id][2], `${id} fala clássica`).not.toContain('cast_');
+  // cada especial toca exatamente uma fala, e ela é do próprio lutador
+  for (const id of ['juraci', 'carlos', 'pedro', 'daniel', 'franciely', 'gabi', 'paula', 'tainara']) {
+    for (const k of [0, 1]) {
+      const clips = result[id][k].split(',').filter(Boolean);
+      expect(clips.length, `${id} ${k ? 'sub-especial' : 'especial'}`).toBe(1);
+    }
   }
-  expect(result.juraci[0]).toContain('juraci:cast_special');
-  expect(result.juraci[1]).toContain('franciely:isso');
+  expect(result.carlos[0]).toBe('carlos:cast_special');
+  expect(result.carlos[1]).toBe('carlos:cast_subSpecial');
+  expect(result.juraci[0]).toBe('juraci:cast_special');
+  expect(result.juraci[1]).toBe('juraci:cast_subSpecial');
+  // segundo especial do Carlos é o Modo Fé: nunca a fala do Gordão
+  expect(result.carlosFe).not.toContain('cast_special');
   expect(result.ko).toBe('tainara:cast_ko');
 });
 

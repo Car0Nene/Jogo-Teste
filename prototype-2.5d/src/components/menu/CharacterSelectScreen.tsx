@@ -141,7 +141,7 @@ export function CharacterSelectScreen({
   }, []);
 
   return (
-    <div className="ff-character-select-screen fixed inset-0 z-10 flex flex-col justify-between gap-2 overflow-hidden overscroll-none p-[clamp(6px,1.1vmin,16px)] pointer-events-none animate-screen-in">
+    <div className="ff-character-select-screen ff-select-arcade fixed inset-0 z-10 flex flex-col justify-between gap-2 overflow-hidden overscroll-none p-[clamp(6px,1.1vmin,16px)] pointer-events-none animate-screen-in">
       {/* Top Header Strip */}
       <header className="ff-character-select-header flex flex-wrap items-center justify-between gap-2 pointer-events-auto shrink-0">
         <div className="flex items-center gap-2.5">
@@ -322,6 +322,10 @@ export function CharacterSelectScreen({
                   </button>
                 );
               })}
+              {/* moldura em cruz (estilo arcade): casas vazias decorativas em volta do elenco */}
+              {Array.from({ length: 12 }, (_, i) => (
+                <span key={`e${i}`} className="ff-roster-empty" aria-hidden />
+              ))}
             </div>
             <div className="ff-character-versus" aria-label={`${p1Spec.name} contra ${p2Spec.name}`}>
               <span>{p1Spec.name}</span>

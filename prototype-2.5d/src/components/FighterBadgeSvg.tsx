@@ -262,6 +262,8 @@ export function TitleLockupSvg() {
         stroke="#1c0d09"
         strokeWidth="7"
         paintOrder="stroke"
+        textLength="596"
+        lengthAdjust="spacingAndGlyphs"
         style={{
           fontFamily: 'var(--font-display)',
           fontWeight: 800,

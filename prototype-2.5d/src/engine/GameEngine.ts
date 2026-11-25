@@ -992,7 +992,11 @@ export class GameEngine {
           f.formTimer = 8;
         }
         if (!finisher) this.setBark(f, 'special');
-        this.speak(f, 'davi', finisher ? 'videogame' : 'outra', 2500);
+        if (!this.speak(f, 'davi', finisher ? 'videogame' : 'outra', finisher ? 0 : 2500) && finisher) {
+          // voz ocupada: mostra a frase do golpe final mesmo assim
+          f.bark = clipText('davi', 'videogame') ?? 'Vamos jogar videogame.';
+          f.barkTimer = 2.4;
+        }
         this.spawnSparks(f.x, f.y + 1.1, finisher ? 0x22c55e : 0xec4899, 20, !finisher);
         if (finisher) {
           this.spawnSparks(f.x, f.y + 1.1, 0xffffff, 8);
