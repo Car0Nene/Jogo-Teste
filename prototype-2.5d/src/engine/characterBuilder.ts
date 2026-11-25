@@ -760,6 +760,8 @@ export function applyRigFormAndFlash(
 ) {
   const f = FORMS[formId];
   const d = 1 - Math.exp(-10 * dt);
+  // forma com roupa própria desenhada (ex.: Modo Fé de terno): brilho leve para não lavar as cores
+  const ownOutfit = formId !== 'normal' && !!HD_FORM_ANIMS[`${rig.id}@${formId}`];
 
   if (rig.haloMesh) {
     rig.haloMesh.visible = formId === 'crente';
@@ -777,7 +779,7 @@ export function applyRigFormAndFlash(
     const pulse = 1 + Math.sin(time * 7) * 0.1;
     rig.auraRing.scale.set(pulse, pulse, 1);
     rig.auraLight.color.setHex(f.auraHex);
-    rig.auraLight.intensity = 2.0 + Math.sin(time * 10) * 0.55;
+    rig.auraLight.intensity = (ownOutfit ? 0.7 : 2.0) + Math.sin(time * 10) * (ownOutfit ? 0.2 : 0.55);
   } else {
     auraMat.opacity = THREE.MathUtils.lerp(auraMat.opacity, 0, d);
     rig.auraLight.intensity = THREE.MathUtils.lerp(rig.auraLight.intensity, 0, d);
@@ -792,7 +794,7 @@ export function applyRigFormAndFlash(
     rig.spriteMat.emissiveIntensity = 0.85;
   } else if (activeAura) {
     rig.spriteMat.emissive.setHex(f.auraHex);
-    rig.spriteMat.emissiveIntensity = 0.14;
+    rig.spriteMat.emissiveIntensity = ownOutfit ? 0.03 : 0.14;
   } else {
     rig.spriteMat.emissive.setHex(0x000000);
     rig.spriteMat.emissiveIntensity = 0;

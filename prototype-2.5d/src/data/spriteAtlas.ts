@@ -25,7 +25,7 @@ export const CHAR_SPRITE_SCALE: Record<FighterId, number> = {
   gabi: 1.19,
   paula: 1.20,
   tainara: 1.23,
-  davi: 1.1,
+  davi: 0.96,
 };
 
 export const SELECT_POSES: Record<FighterId, { anim: string; frame: number }> = {
@@ -320,7 +320,10 @@ export const SPRITE_ATLAS: Record<FighterId | 'cao', SpriteAnimMap> = {
     getup: [[1813,1718,211,250,121.7,250,1],[1377,1718,432,340,224.5,340,1]],
     win: [[2281,0,245,564,150.2,564,1],[1284,637,345,541,111,541,1]],
   },
-  davi: DAVI_ATLAS,
+  // Davi: animações base novas (feitas a partir da foto), especiais antigos mantidos
+  davi: HD_ANIMS.davi
+    ? { ...DAVI_ATLAS, ...HD_ANIMS.davi }
+    : DAVI_ATLAS,
   cao: {"idle":[[1130,589,216,182,107.1,179.9]],"special":[[1350,589,251,182,132.1,182]],"win":[[1605,589,216,182,107.1,179.9]],"run":[[0,960,343,180,182.5,177.8]],"walk":[[1158,960,224,179,114.9,176.8]],"jump":[[1386,960,242,179,97.8,176.8]],"heavy":[[995,1326,239,175,117,174.7]],"medium":[[536,1859,239,170,133.6,169.5]],"light":[[370,2033,205,167,108.7,167.4]],"guard":[[0,2536,255,157,111.8,157]],"crouch":[[994,2536,267,156,135.1,156.1]]},
 };
 
