@@ -16,7 +16,8 @@ export type ProjectileKind =
   | 'superL'
   | 'brigadeiro'
   | 'food'
-  | 'notes';
+  | 'notes'
+  | 'cigarette';
 
 let sharedSpecialTex: THREE.Texture | null = null;
 let sharedSpecialDepthMat: THREE.MeshDepthMaterial | null = null;
@@ -79,9 +80,104 @@ const PROJECTILE_VISUAL: Record<
   brigadeiro: { targetHeight: 0.78, emissive: 0xfbbf24, emissiveIntensity: 0.1 },
   food: { targetHeight: 0.86, emissive: 0xfdba74, emissiveIntensity: 0.12 },
   notes: { targetHeight: 0.96, emissive: 0xff6fd8, emissiveIntensity: 0.4, glowHex: 0xf472b6 },
+  cigarette: { targetHeight: 0.5, emissive: 0xff7a1a, emissiveIntensity: 0.35, glowHex: 0xff6a00 },
 };
 
+let sharedCigaretteTex: THREE.Texture | null = null;
+
+/** Cigarro aceso desenhado em canvas: brasa à direita (frente), filtro laranja e rastro de fumaça atrás. */
+function getCigaretteTexture(): THREE.Texture {
+  if (sharedCigaretteTex) return sharedCigaretteTex;
+  const W = 512;
+  const H = 128;
+  const c = document.createElement('canvas');
+  c.width = W;
+  c.height = H;
+  const g = c.getContext('2d')!;
+  const cy = H / 2;
+  // rastro de fumaça (atrás, à esquerda)
+  for (let i = 0; i < 16; i++) {
+    const k = i / 15;
+    const x = 230 - k * 220;
+    const y = cy + Math.sin(k * 7) * 14 * k;
+    const r = 8 + k * 22;
+    const grad = g.createRadialGradient(x, y, 0, x, y, r);
+    grad.addColorStop(0, `rgba(215,215,220,${0.5 * (1 - k)})`);
+    grad.addColorStop(1, 'rgba(215,215,220,0)');
+    g.fillStyle = grad;
+    g.beginPath();
+    g.arc(x, y, r, 0, Math.PI * 2);
+    g.fill();
+  }
+  const x0 = 210;
+  const x1 = 470;
+  const half = 13;
+  // filtro
+  const filt = g.createLinearGradient(0, cy - half, 0, cy + half);
+  filt.addColorStop(0, '#f3b35b');
+  filt.addColorStop(0.5, '#d9862c');
+  filt.addColorStop(1, '#a25c16');
+  g.fillStyle = filt;
+  g.fillRect(x0, cy - half, 80, half * 2);
+  g.fillStyle = 'rgba(120,60,10,0.35)';
+  for (let i = 0; i < 26; i++) g.fillRect(x0 + 4 + ((i * 37) % 72), cy - half + ((i * 53) % 24), 3, 2);
+  // papel
+  const paper = g.createLinearGradient(0, cy - half, 0, cy + half);
+  paper.addColorStop(0, '#ffffff');
+  paper.addColorStop(0.55, '#ecebe6');
+  paper.addColorStop(1, '#bdbbb2');
+  g.fillStyle = paper;
+  g.fillRect(x0 + 80, cy - half, x1 - x0 - 80, half * 2);
+  g.fillStyle = 'rgba(0,0,0,0.12)';
+  g.fillRect(x0 + 80, cy - half, 3, half * 2);
+  // cinza + brasa
+  g.fillStyle = '#5b5752';
+  g.fillRect(x1, cy - half, 10, half * 2);
+  const ember = g.createRadialGradient(x1 + 14, cy, 2, x1 + 14, cy, 26);
+  ember.addColorStop(0, '#fff6c2');
+  ember.addColorStop(0.3, '#ffb020');
+  ember.addColorStop(0.65, '#ff4d00');
+  ember.addColorStop(1, 'rgba(255,60,0,0)');
+  g.fillStyle = ember;
+  g.beginPath();
+  g.arc(x1 + 14, cy, 26, 0, Math.PI * 2);
+  g.fill();
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  sharedCigaretteTex = tex;
+  return tex;
+}
+
+function buildCigaretteMesh(): THREE.Group {
+  const g = new THREE.Group();
+  const vis = PROJECTILE_VISUAL.cigarette;
+  const h = vis.targetHeight;
+  const w = h * 4;
+  const tex = getCigaretteTexture();
+  const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false, side: THREE.DoubleSide });
+  const quad = new THREE.Mesh(new THREE.PlaneGeometry(w, h), mat);
+  quad.name = 'spriteQuad';
+  g.add(quad);
+  const glow = new THREE.Sprite(
+    new THREE.SpriteMaterial({
+      map: getSharedGlowTexture(),
+      color: vis.glowHex,
+      transparent: true,
+      opacity: 0.85,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+    })
+  );
+  glow.name = 'ember';
+  glow.scale.set(0.9, 0.9, 1);
+  glow.position.set(w * 0.43, 0, 0.02);
+  g.add(glow);
+  g.userData.spriteId = 'cigarette';
+  return g;
+}
+
 export function buildProjectileMesh(kind: ProjectileKind): THREE.Group {
+  if (kind === 'cigarette') return buildCigaretteMesh();
   const g = new THREE.Group();
   const vis = PROJECTILE_VISUAL[kind];
   const [, , aw, ah] = SPECIAL_ATLAS[kind];
@@ -136,6 +232,8 @@ export function setProjectileFacing(group: THREE.Group, facing: 1 | -1) {
   if (quad) {
     quad.scale.x = facing;
   }
+  const ember = group.getObjectByName('ember');
+  if (ember) ember.position.x = Math.abs(ember.position.x) * facing;
 }
 
 export function buildBurstMesh(): THREE.Group {

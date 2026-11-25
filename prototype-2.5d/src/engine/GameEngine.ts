@@ -107,6 +107,8 @@ interface FighterRuntime {
   daviIdleTime: number;
   daviVoiceCooldown: number;
   daviSpecialCooldown: number;
+  /** Super Bundada: onda de impacto já disparada neste golpe */
+  bundadaFxDone?: boolean;
 }
 
 interface ActiveProjectile {
@@ -123,6 +125,8 @@ interface ActiveProjectile {
   radius: number;
   life: number;
   gravity: number;
+  /** segundos até sair da mão do dono (rajada); enquanto > 0 fica invisível e parado */
+  delay?: number;
 }
 
 interface ActiveCameo {
@@ -563,7 +567,7 @@ export class GameEngine {
     soundEngine.stopAllVoices();
     soundEngine.preloadFighterVoices([p1, p2, 'narrator']);
     void soundEngine.preloadSfx();
-    this.warmupEffects(['cake', 'beerBlast', 'smoke', 'milk', 'superL', 'brigadeiro', 'food', 'notes']);
+    this.warmupEffects(['cake', 'beerBlast', 'smoke', 'milk', 'superL', 'brigadeiro', 'food', 'notes', 'cigarette']);
     this.warmupFighterTextures();
     soundEngine.startMusic(STAGE_MUSIC[stageId] ?? 'theme', 0.58);
     this.screenMode = 'fight';
@@ -1070,10 +1074,14 @@ export class GameEngine {
           this.setBark(f, 'special');
         }
       } else {
-        moveAnim = 'smoke';
+        // Super Cigarro: rajada de cigarros acesos, estilo hadouken (5 em sequência)
+        moveAnim = 'light';
         this.setBark(f, 'subSpecial');
         this.castVoice(f, 'subSpecial');
-        this.spawnProjectile('smoke', f, 6.2, 0, 75, false, 0.46, 0);
+        for (let i = 0; i < 5; i++) {
+          const last = i === 4;
+          this.spawnProjectile('cigarette', f, 12.5, 0, last ? 28 : 18, last, 0.34, 0, undefined, 1.35 + (i % 3) * 0.2, 0.12 + i * 0.09);
+        }
       }
     } else if (f.id === 'daniel') {
       if (!actualSub) {
@@ -1082,10 +1090,21 @@ export class GameEngine {
         this.setBark(f, 'special');
         this.spawnCameo('dog', f);
       } else {
-        moveAnim = 'dance';
+        // Super Bundada: rebola, a bunda cresce gigante e dá a bundada (golpe corpo a corpo forte)
         this.castVoice(f, 'subSpecial');
         this.setBark(f, 'subSpecial');
-        this.spawnProjectile('notes', f, 9.6, 0, 78, false, 0.38, 0);
+        this.spawnSparks(f.x, f.y + 1.0, 0xff6fd8, 14, true);
+        this.startAttackMove(f, {
+          id: 'special', label: 'Super Bundada',
+          startup: 0.62, active: 0.16, recovery: 0.42,
+          damage: 118, minRange: 0, range: 2.55,
+          hitstun: 0.5, blockstun: 0.28, push: 6.2, hitstop: 0.14,
+          lunge: 0, heavy: true, knockdown: true,
+        });
+        f.activeMoveAnim = 'bundada';
+        f.bundadaFxDone = false;
+        this.emitHud();
+        return;
       }
     } else if (f.id === 'franciely') {
       if (!actualSub) {
@@ -1206,7 +1225,8 @@ export class GameEngine {
     radius: number,
     gravity: number,
     overrideX?: number,
-    overrideY?: number
+    overrideY?: number,
+    delay = 0
   ) {
     const mesh = buildProjectileMesh(kind);
     setProjectileFacing(mesh, owner.facing);
@@ -1227,9 +1247,11 @@ export class GameEngine {
       damage,
       knockdown,
       radius,
-      life: 2.3,
+      life: 2.3 + delay,
       gravity,
+      delay,
     });
+    if (delay > 0) mesh.visible = false;
   }
 
   private spawnCameo(kind: 'dog' | 'dada' | 'kid', owner: FighterRuntime) {
@@ -1763,6 +1785,18 @@ export class GameEngine {
       const activeEnd = m.startup + m.active;
       const total = activeEnd + m.recovery;
 
+      if (f.activeMoveAnim === 'bundada' && !f.bundadaFxDone && f.moveElapsed >= activeStart) {
+        // a bundada gigante bate no chão: onda rosa, tremor e poeira
+        f.bundadaFxDone = true;
+        const bx = f.x + f.facing * 1.1;
+        this.spawnBurst(bx, f.y + 0.9);
+        this.spawnSparks(bx, f.y + 0.9, 0xff6fd8, 22, true);
+        this.spawnSparks(bx, f.y + 0.5, 0xffffff, 10);
+        this.shakeTimer = 0.28;
+        this.shakeAmp = 0.3;
+        soundEngine.playSwing(true);
+      }
+
       if (!f.moveHitConnected && m.damage > 0 && f.moveElapsed >= activeStart && f.moveElapsed <= activeEnd) {
         const dist = Math.abs(opp.x - f.x);
         const dirToOpp = Math.sign(opp.x - f.x) || f.facing;
@@ -1915,12 +1949,28 @@ export class GameEngine {
     if (!this.fighters) return;
     for (let i = this.projectiles.length - 1; i >= 0; i--) {
       const p = this.projectiles[i];
+      if (p.delay && p.delay > 0) {
+        p.delay -= dt;
+        p.life -= dt;
+        const owner = this.fighters[p.ownerIndex];
+        if (p.delay > 0) continue;
+        // sai da mão de quem lançou, onde ele estiver agora
+        p.facing = owner.facing;
+        p.vx = Math.abs(p.vx) * owner.facing;
+        p.x = owner.x + owner.facing * 0.85;
+        setProjectileFacing(p.mesh, owner.facing);
+        p.mesh.visible = true;
+        if (p.kind === 'cigarette') soundEngine.playSwing(false);
+      }
       p.life -= dt;
       p.vy -= p.gravity * dt;
       p.x += p.vx * dt;
       p.y += p.vy * dt;
       p.mesh.position.set(p.x, p.y, 0.08);
-      if (p.kind === 'cake' || p.kind === 'brigadeiro' || p.kind === 'food') {
+      if (p.kind === 'cigarette') {
+        p.mesh.rotation.z = Math.sin(this.worldTime * 18 + i * 1.7) * 0.05;
+        p.mesh.position.y = p.y + Math.sin(this.worldTime * 9 + i) * 0.05;
+      } else if (p.kind === 'cake' || p.kind === 'brigadeiro' || p.kind === 'food') {
         p.mesh.rotation.z += dt * 4.5 * p.facing;
       } else {
         p.mesh.rotation.z = Math.sin(this.worldTime * 10 + i) * 0.08;
@@ -1929,7 +1979,13 @@ export class GameEngine {
       const target = this.fighters[p.ownerIndex === 0 ? 1 : 0];
       const owner = this.fighters[p.ownerIndex];
       const hitDist = Math.hypot(p.x - target.x, p.y - (target.y + 1.0));
-      if (hitDist <= p.radius + 0.48) {
+      // cigarros voam em alturas diferentes: acertam o corpo inteiro (canela até a cabeça)
+      const bodyHit =
+        p.kind === 'cigarette' &&
+        Math.abs(p.x - target.x) <= p.radius + 0.42 &&
+        p.y >= target.y + 0.25 &&
+        p.y <= target.y + 2.1;
+      if (bodyHit || hitDist <= p.radius + 0.48) {
         this.spawnBurst(p.x, p.y);
         this.applyHit(owner, target, p.damage, 4.2, 0.08, true, p.knockdown);
         this.removeFx(p.mesh);

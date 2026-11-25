@@ -47,10 +47,17 @@ SHEETS = {
 }
 # Formas com roupa própria: folhas extras <forma>-<folha>.png; as animações ganham o prefixo "<forma>:".
 FORMS = {'carlos': {'crente': ['locomocao', 'golpes'], 'gordao': ['locomocao', 'golpes']}}
+# Folhas extras opcionais de golpes especiais (uma animação pode ocupar várias linhas, em ordem).
+# ref_n: só os primeiros N quadros da régua contam (ex.: os quadros "normais" antes da deformação);
+# anchor_low: fração da altura a partir da qual se calcula a âncora X (0.85 = só os pés).
+EXTRA = {
+    'daniel': {'bundada': {'rows': [[('bundada', 4)], [('bundada', 4)], [('bundada', 4)]],
+                           'ref': 'bundada', 'ref_n': 4, 'anchor_low': 0.85}},
+}
 # quadros usados de cada animação (índices dentro da linha) — permite descartar um quadro ruim
 PICK = {}
 # quadros que o gerador desenhou virados para a esquerda: (lutador, animação) -> índices a espelhar
-FLIP = {}
+FLIP = {('daniel', 'bundada'): (9, 10)}  # bundada saiu com o bumbum para a esquerda
 
 
 def load_sheet(path):
@@ -69,7 +76,7 @@ def load_sheet(path):
     return rows
 
 
-def prepare(im, factor):
+def prepare(im, factor, anchor_low=0.55):
     w, h = max(1, round(im.width * factor)), max(1, round(im.height * factor))
     im = im.resize((w, h), Image.LANCZOS)
     if factor > 1.15:
@@ -78,7 +85,7 @@ def prepare(im, factor):
     a = np.array(im.getchannel('A')).astype(np.float32)
     ys, xs = np.nonzero(a > 20)
     # âncora X: centro de massa da metade de baixo (pés/quadril), estável entre quadros
-    low = ys > im.height * 0.55
+    low = ys > im.height * anchor_low
     if low.sum() > 50:
         ys, xs = ys[low], xs[low]
     ax = float((xs * a[ys, xs]).sum() / a[ys, xs].sum())
@@ -91,9 +98,12 @@ def build(fid):
     jobs = [(sheet, cfg, '') for sheet, cfg in SHEETS.items()]
     for form, sheets in FORMS.get(fid, {}).items():
         jobs += [(f'{form}-{sh}', SHEETS[sh], f'{form}:') for sh in sheets]
+    jobs += [(sh, cfg, '') for sh, cfg in EXTRA.get(fid, {}).items()]
     for sheet, cfg, prefix in jobs:
         path = src / f'{sheet}.png'
         if not path.exists():
+            if sheet in EXTRA.get(fid, {}):
+                continue
             problems.append(f'{sheet}: arquivo ausente')
             continue
         rows = load_sheet(path)
@@ -107,9 +117,11 @@ def build(fid):
                 continue
             i = 0
             for anim, n in spec_row:
-                got[anim] = frames[i:i + n]
+                got.setdefault(anim, []).extend(frames[i:i + n])
                 i += n
         ref = got.get(cfg['ref'])
+        if ref and cfg.get('ref_n'):
+            ref = ref[:cfg['ref_n']]
         if not ref:
             problems.append(f'{sheet}: sem régua ({cfg["ref"]}), folha ignorada')
             continue
@@ -119,7 +131,7 @@ def build(fid):
             sel = [frames[k] for k in keep] if keep else frames
             flip = FLIP.get((fid, prefix + anim), ())
             sel = [f.transpose(Image.FLIP_LEFT_RIGHT) if k in flip else f for k, f in enumerate(sel)]
-            anims[prefix + anim] = [prepare(f, factor) for f in sel]
+            anims[prefix + anim] = [prepare(f, factor, cfg.get('anchor_low', 0.55)) for f in sel]
     if not anims:
         raise SystemExit(f'{fid}: nenhuma folha utilizável — ' + '; '.join(problems))
     # empacota em prateleiras (mais altos primeiro)

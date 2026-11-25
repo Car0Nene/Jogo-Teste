@@ -377,9 +377,9 @@ export const FIGHTERS: Record<FighterId, FighterSpec> = {
     jumpVel: 12.2,
     gravity: 32,
     specialName: 'Monstrão / Aura Verde',
-    subSpecialName: 'Fumaça de Cigarro',
+    subSpecialName: 'Super Cigarro',
     specialSummary: 'Vira Monstrão verde ou dispara Heineken com aura esmeralda.',
-    subSpecialSummary: 'Nuvem densa de fumaça que faz o oponente tossir.',
+    subSpecialSummary: 'Rajada de cigarros acesos voando no adversário, estilo hadouken.',
     appearance: {
       skin: 0xb67044,
       shirt: 0x14151a,
@@ -419,9 +419,9 @@ export const FIGHTERS: Record<FighterId, FighterSpec> = {
     jumpVel: 12.8,
     gravity: 32,
     specialName: 'Modo Natal Praia!',
-    subSpecialName: 'Dancinha Musical',
+    subSpecialName: 'Super Bundada',
     specialSummary: 'Impulso veloz de verão + assistência do Cão fiel.',
-    subSpecialSummary: 'Onda rítmica de notas musicais que atinge à distância.',
+    subSpecialSummary: 'Rebola, a bunda fica gigante e dá uma bundada que derruba.',
     appearance: {
       skin: 0xd99b6a,
       shirt: 0xd99b6a,
@@ -800,12 +800,12 @@ export const FIGHTER_BARKS: Record<
   },
   pedro: {
     special: ['MONSTRÃÃÃO! Heineken dá força!', 'Heineken com aura verde!'],
-    subSpecial: ['Quer uma tragada?', 'Toma fumaça!'],
+    subSpecial: ['Super cigarro! Traga essa!', 'Toma cigarro!'],
     win: ['Fuma, bebe e vence!', 'Ninguém segura o Monstrão!'],
   },
   daniel: {
     special: ['PARTIU PRAIA!', 'Modo Natal Praia ativado!'],
-    subSpecial: ['Sente o ritmo do verão!', 'Olha o passinho!'],
+    subSpecial: ['Segura essa... Super bundada!', 'Olha a bundada!'],
     win: ['Agora sim, partiu praia!', 'Valeu, amigão!'],
   },
   franciely: {

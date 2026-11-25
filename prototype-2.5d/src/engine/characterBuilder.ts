@@ -735,6 +735,15 @@ function resolveSpritePose(
             : 'heavy'
           : state);
       const frames = S[animKey] || S.special || S.heavy || fallback;
+      if (animKey === 'bundada' && S.bundada && S.bundada.length >= 12) {
+        // 0-3 rebolando, 4-7 a bunda crescendo (durante o startup), 8-11 bundada e volta
+        const su = ctx.moveTiming?.startup ?? 0.6;
+        const rest = (ctx.moveTiming?.active ?? 0.16) + (ctx.moveTiming?.recovery ?? 0.4);
+        const idx = t < su ? Math.floor((t / su) * 8) : 8 + Math.floor(clamp((t - su) / rest, 0, 0.999) * 4);
+        pose.frame = S.bundada[Math.min(11, idx)];
+        if (t >= su && t < su + 0.12) pose.dx = Math.sin(t * 90) * 3;
+        break;
+      }
       pose.frame = attackFrame(frames, t, ctx.moveTiming);
 
       // Procedural anticipation/strike follow-through

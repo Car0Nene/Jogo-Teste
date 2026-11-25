@@ -331,6 +331,8 @@ export const SPRITE_ATLAS: Record<FighterId | 'cao', SpriteAnimMap> = {
 if (HD_ANIMS.pedro) Object.assign(SPRITE_ATLAS.pedro, HD_ANIMS.pedro);
 // Carlos: o golpe do sub-especial (combo do chute) usa o chute da arte nova, não a pose antiga
 if (HD_ANIMS.carlos?.medium) SPRITE_ATLAS.carlos.special = HD_ANIMS.carlos.medium;
+// Daniel: a dancinha (Modo Natal Praia) usa o rebolado da arte nova da Super Bundada
+if (HD_ANIMS.daniel?.bundada) SPRITE_ATLAS.daniel.dance = HD_ANIMS.daniel.bundada.slice(0, 4);
 
 export const BASE_SPRITE_HEIGHT: Record<FighterId, number> = Object.fromEntries(
   (['juraci','carlos','pedro','daniel','franciely','gabi','paula','tainara','davi'] as FighterId[]).map((id) => {
