@@ -39,6 +39,10 @@ export interface MoveSpec {
   heavy?: boolean;
   knockdown?: boolean;
   chainTo?: 'medium' | 'heavy' | 'combo';
+  /** animação própria do golpe (chave do atlas) */
+  anim?: string;
+  /** golpe de finalização: câmera de foco e efeitos próprios */
+  finisher?: 'bundada' | 'cigarro';
 }
 
 export interface FighterAppearance {
@@ -377,9 +381,9 @@ export const FIGHTERS: Record<FighterId, FighterSpec> = {
     jumpVel: 12.2,
     gravity: 32,
     specialName: 'Monstrão / Aura Verde',
-    subSpecialName: 'Super Cigarro',
+    subSpecialName: 'Fumaça de Cigarro',
     specialSummary: 'Vira Monstrão verde ou dispara Heineken com aura esmeralda.',
-    subSpecialSummary: 'Rajada de cigarros acesos voando no adversário, estilo hadouken.',
+    subSpecialSummary: 'Nuvem densa de fumaça que faz o oponente tossir.',
     appearance: {
       skin: 0xb67044,
       shirt: 0x14151a,
@@ -400,7 +404,9 @@ export const FIGHTERS: Record<FighterId, FighterSpec> = {
     moves: {
       light: { id: 'light', label: 'Direto Pesado', startup: 0.07, active: 0.09, recovery: 0.12, damage: 44, minRange: 0.2, range: 1.62, hitstun: 0.26, blockstun: 0.16, push: 2.3, hitstop: 0.05, chainTo: 'medium' },
       medium: { id: 'medium', label: 'Cotovelada', startup: 0.1, active: 0.1, recovery: 0.17, damage: 64, minRange: 0.2, range: 1.86, hitstun: 0.32, blockstun: 0.18, push: 2.9, hitstop: 0.065, chainTo: 'heavy' },
-      heavy: { id: 'heavy', label: 'Chutão do Monstrão', startup: 0.15, active: 0.12, recovery: 0.27, damage: 94, minRange: 0.2, range: 2.25, hitstun: 0.44, blockstun: 0.22, push: 4.5, hitstop: 0.085, lunge: 1.6, heavy: true },
+      heavy: { id: 'heavy', label: 'Chutão do Monstrão', startup: 0.15, active: 0.12, recovery: 0.27, damage: 94, minRange: 0.2, range: 2.25, hitstun: 0.44, blockstun: 0.22, push: 4.5, hitstop: 0.085, lunge: 1.6, heavy: true, chainTo: 'combo' },
+      // finalização do combo (Leve, Leve, Forte, Forte): rajada de cigarros acesos, estilo hadouken
+      combo: { id: 'combo', label: 'Super Cigarro', startup: 0.22, active: 0.5, recovery: 0.34, damage: 0, minRange: 0, range: 0, hitstun: 0, blockstun: 0, push: 0, hitstop: 0, anim: 'light', finisher: 'cigarro' },
       air: { id: 'air', label: 'Joelhada Voadora', startup: 0.07, active: 0.22, recovery: 0.1, damage: 60, minRange: 0.1, range: 1.75, hitstun: 0.32, blockstun: 0.18, push: 2.4, hitstop: 0.06 },
     },
   },
@@ -419,9 +425,9 @@ export const FIGHTERS: Record<FighterId, FighterSpec> = {
     jumpVel: 12.8,
     gravity: 32,
     specialName: 'Modo Natal Praia!',
-    subSpecialName: 'Super Bundada',
+    subSpecialName: 'Dancinha Musical',
     specialSummary: 'Impulso veloz de verão + assistência do Cão fiel.',
-    subSpecialSummary: 'Rebola, a bunda fica gigante e dá uma bundada que derruba.',
+    subSpecialSummary: 'Onda rítmica de notas musicais que atinge à distância.',
     appearance: {
       skin: 0xd99b6a,
       shirt: 0xd99b6a,
@@ -444,7 +450,9 @@ export const FIGHTERS: Record<FighterId, FighterSpec> = {
     moves: {
       light: { id: 'light', label: 'Soco Praia', startup: 0.055, active: 0.085, recovery: 0.11, damage: 40, minRange: 0.2, range: 1.55, hitstun: 0.25, blockstun: 0.15, push: 2.2, hitstop: 0.045, chainTo: 'medium' },
       medium: { id: 'medium', label: 'Giro Tropical', startup: 0.09, active: 0.09, recovery: 0.16, damage: 60, minRange: 0.2, range: 1.85, hitstun: 0.31, blockstun: 0.18, push: 2.8, hitstop: 0.06, chainTo: 'heavy' },
-      heavy: { id: 'heavy', label: 'Chute Calçadão', startup: 0.13, active: 0.11, recovery: 0.25, damage: 88, minRange: 0.2, range: 2.2, hitstun: 0.42, blockstun: 0.22, push: 4.2, hitstop: 0.08, lunge: 1.8, heavy: true },
+      heavy: { id: 'heavy', label: 'Chute Calçadão', startup: 0.13, active: 0.11, recovery: 0.25, damage: 88, minRange: 0.2, range: 2.2, hitstun: 0.42, blockstun: 0.22, push: 4.2, hitstop: 0.08, lunge: 1.8, heavy: true, chainTo: 'combo' },
+      // finalização do combo (Leve, Leve, Forte, Forte): rebola, a bunda cresce gigante e dá a bundada
+      combo: { id: 'combo', label: 'Super Bundada', startup: 0.6, active: 0.16, recovery: 0.4, damage: 96, minRange: 0, range: 2.6, hitstun: 0.5, blockstun: 0.28, push: 6.2, hitstop: 0.16, heavy: true, knockdown: true, anim: 'bundada', finisher: 'bundada' },
       air: { id: 'air', label: 'Salto Acrobático', startup: 0.065, active: 0.22, recovery: 0.1, damage: 56, minRange: 0.1, range: 1.7, hitstun: 0.32, blockstun: 0.18, push: 2.3, hitstop: 0.055 },
     },
   },
@@ -800,12 +808,12 @@ export const FIGHTER_BARKS: Record<
   },
   pedro: {
     special: ['MONSTRÃÃÃO! Heineken dá força!', 'Heineken com aura verde!'],
-    subSpecial: ['Super cigarro! Traga essa!', 'Toma cigarro!'],
+    subSpecial: ['Quer uma tragada?', 'Toma fumaça!'],
     win: ['Fuma, bebe e vence!', 'Ninguém segura o Monstrão!'],
   },
   daniel: {
     special: ['PARTIU PRAIA!', 'Modo Natal Praia ativado!'],
-    subSpecial: ['Segura essa... Super bundada!', 'Olha a bundada!'],
+    subSpecial: ['Sente o ritmo do verão!', 'Olha o passinho!'],
     win: ['Agora sim, partiu praia!', 'Valeu, amigão!'],
   },
   franciely: {

@@ -267,11 +267,14 @@ export const SPRITE_ATLAS: Record<FighterId | 'cao', SpriteAnimMap> = {
     gordao: [CARLOS_SP.gordao_pizza, CARLOS_SP.gordao_stance, CARLOS_SP.gordao_punch],
     crente: [CARLOS_SP.crente_pray, CARLOS_SP.crente_halo],
   }, 'carlos'),
-  daniel: buildHdFighterAnims(DANIEL_HD, {
-    dance: [DANIEL_SP.dance1, DANIEL_SP.dance2],
-    praia: [DANIEL_SP.praia_idle, DANIEL_SP.praia_palm, DANIEL_SP.praia_kick],
-    hurt: [DANIEL_SP.hurt],
-  }, 'daniel'),
+  // Modo Natal Praia usa a arte HD normal (as poses antigas eram de baixa resolução e borravam)
+  daniel: HD_ANIMS.daniel
+    ? buildHdFighterAnims(DANIEL_HD, {}, 'daniel')
+    : buildHdFighterAnims(DANIEL_HD, {
+        dance: [DANIEL_SP.dance1, DANIEL_SP.dance2],
+        praia: [DANIEL_SP.praia_idle, DANIEL_SP.praia_palm, DANIEL_SP.praia_kick],
+        hurt: [DANIEL_SP.hurt],
+      }, 'daniel'),
   franciely: buildHdFighterAnims(FRANCIELY_HD, {
     brava: [FRANCIELY_SP.brava1, FRANCIELY_SP.brava2],
     mama: [FRANCIELY_SP.mama1, FRANCIELY_SP.mama2],

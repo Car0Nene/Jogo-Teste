@@ -51,10 +51,12 @@ const CLIPS: Record<string, Record<string, string>> = {
     combo: assetUrl('/assets/voice/pedro-domingo.mp3'),
     drink: assetUrl('/assets/voice/pedro-cerveja.mp3'),
     fumaBebe: assetUrl('/assets/voice/generated/pedro-fuma-bebe-vence.mp3'),
+    cigarro: assetUrl('/assets/voice/elenco/pedro/cigarro.mp3'),
   },
   daniel: {
     praia: assetUrl('/assets/voice/daniel-praia.mp3'),
     preparativos: assetUrl('/assets/voice/generated/daniel-preparativos-praia.mp3'),
+    bundada: assetUrl('/assets/voice/elenco/daniel/bundada.mp3'),
   },
   gabi: {
     sing: assetUrl('/assets/voice/gabi-canto.mp3'),

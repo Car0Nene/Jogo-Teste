@@ -206,6 +206,10 @@ export class GameEngine {
   private superTimer = 0;
   private superDuration = 0;
   private superFocusX = 0;
+  /** câmera de golpe de finalização: aproxima baixo, entre o atacante e o alvo */
+  private finTimer = 0;
+  private finDuration = 0;
+  private finFocusX = 0;
   private superCutin: HudSnapshot['superCutin'] = null;
   private superCutinTimer = 0;
   private superKey = 0;
@@ -919,7 +923,7 @@ export class GameEngine {
     f.state = 'attack';
     f.stateTimer = 0;
     f.activeMove = move;
-    f.activeMoveAnim = undefined;
+    f.activeMoveAnim = move.anim;
     f.moveElapsed = 0;
     f.moveHitConnected = false;
     f.bufferedAttack = null;
@@ -927,6 +931,43 @@ export class GameEngine {
       f.vx = f.facing * move.lunge;
     }
     soundEngine.playSwing(Boolean(move.heavy));
+    if (move.finisher) this.beginFinisher(f, move);
+  }
+
+  /**
+   * Golpe de finalização de combo (não gasta especial): câmera de foco baixa e próxima,
+   * faixa com o nome do golpe, fala própria e o efeito do golpe.
+   */
+  private beginFinisher(f: FighterRuntime, move: MoveSpec) {
+    const opp = this.fighters?.[f.index === 0 ? 1 : 0];
+    const total = move.startup + move.active + move.recovery;
+    this.finTimer = this.finDuration = total + 0.35;
+    this.finFocusX = opp ? f.x + (opp.x - f.x) * 0.4 : f.x;
+    this.hitstopTimer = Math.max(this.hitstopTimer, 0.1);
+    this.superKey++;
+    this.superCutin = {
+      slot: f.index === 0 ? 'p1' : 'p2',
+      fighterId: f.id,
+      name: FIGHTERS[f.id].name,
+      move: move.label,
+      full: false,
+      key: this.superKey,
+    };
+    this.superCutinTimer = 1.0;
+    if (!this.speak(f, f.id, move.finisher === 'bundada' ? 'bundada' : 'cigarro', 0)) {
+      f.bark = move.finisher === 'bundada' ? 'Segura essa... Super bundada!' : 'Super cigarro! Traga essa!';
+      f.barkTimer = 2.2;
+    }
+    if (move.finisher === 'bundada') {
+      f.bundadaFxDone = false;
+      this.spawnSparks(f.x, f.y + 1.0, 0xff6fd8, 14, true);
+    } else {
+      for (let i = 0; i < 5; i++) {
+        const last = i === 4;
+        this.spawnProjectile('cigarette', f, 12.5, 0, last ? 22 : 14, last, 0.34, 0, undefined, 1.35 + (i % 3) * 0.2, move.startup + i * 0.09);
+      }
+    }
+    this.emitHud();
   }
 
   private setBark(f: FighterRuntime, category: 'special' | 'subSpecial' | 'win') {
@@ -1074,14 +1115,10 @@ export class GameEngine {
           this.setBark(f, 'special');
         }
       } else {
-        // Super Cigarro: rajada de cigarros acesos, estilo hadouken (5 em sequência)
-        moveAnim = 'light';
+        moveAnim = 'smoke';
         this.setBark(f, 'subSpecial');
         this.castVoice(f, 'subSpecial');
-        for (let i = 0; i < 5; i++) {
-          const last = i === 4;
-          this.spawnProjectile('cigarette', f, 12.5, 0, last ? 28 : 18, last, 0.34, 0, undefined, 1.35 + (i % 3) * 0.2, 0.12 + i * 0.09);
-        }
+        this.spawnProjectile('smoke', f, 6.2, 0, 75, false, 0.46, 0);
       }
     } else if (f.id === 'daniel') {
       if (!actualSub) {
@@ -1090,21 +1127,10 @@ export class GameEngine {
         this.setBark(f, 'special');
         this.spawnCameo('dog', f);
       } else {
-        // Super Bundada: rebola, a bunda cresce gigante e dá a bundada (golpe corpo a corpo forte)
+        moveAnim = 'dance';
         this.castVoice(f, 'subSpecial');
         this.setBark(f, 'subSpecial');
-        this.spawnSparks(f.x, f.y + 1.0, 0xff6fd8, 14, true);
-        this.startAttackMove(f, {
-          id: 'special', label: 'Super Bundada',
-          startup: 0.62, active: 0.16, recovery: 0.42,
-          damage: 118, minRange: 0, range: 2.55,
-          hitstun: 0.5, blockstun: 0.28, push: 6.2, hitstop: 0.14,
-          lunge: 0, heavy: true, knockdown: true,
-        });
-        f.activeMoveAnim = 'bundada';
-        f.bundadaFxDone = false;
-        this.emitHud();
-        return;
+        this.spawnProjectile('notes', f, 9.6, 0, 78, false, 0.38, 0);
       }
     } else if (f.id === 'franciely') {
       if (!actualSub) {
@@ -2155,6 +2181,17 @@ export class GameEngine {
       camX = THREE.MathUtils.lerp(midX, this.superFocusX, 0.75 * k);
       camZ = zDist * (1 - 0.28 * k);
     }
+    let camDrop = 0;
+    if (this.finTimer > 0 && this.superTimer <= 0) {
+      this.finTimer = Math.max(0, this.finTimer - dt);
+      const p = 1 - this.finTimer / Math.max(0.001, this.finDuration);
+      // entra rápido, segura no golpe e sai suave
+      const k = p < 0.2 ? p / 0.2 : p > 0.8 ? (1 - p) / 0.2 : 1;
+      const e = k * k * (3 - 2 * k);
+      camX = THREE.MathUtils.lerp(midX, this.finFocusX, 0.85 * e);
+      camZ = zDist * (1 - 0.36 * e);
+      camDrop = 0.45 * e;
+    }
     if (this.superCutinTimer > 0) {
       this.superCutinTimer = Math.max(0, this.superCutinTimer - dt);
       if (this.superCutinTimer === 0) {
@@ -2165,7 +2202,7 @@ export class GameEngine {
 
     this._camTarget.set(
       camX * 0.85 + sx,
-      1.74 + maxY * 0.32 + sy + Math.max(0, camZ - 10) * 0.11,
+      1.74 + maxY * 0.32 + sy + Math.max(0, camZ - 10) * 0.11 - camDrop,
       camZ
     );
     this._camLook.set(camX * 0.9, 1.08 + maxY * 0.25, -0.4);
