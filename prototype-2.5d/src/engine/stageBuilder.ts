@@ -23,6 +23,7 @@ import {
   createSurfWaveTexture,
   createWoodPlankTextures,
 } from './proceduralTextures';
+import { PAINTED_STAGES, buildPaintedLayers } from './paintedStage';
 
 export interface BuiltStage {
   id: StageId;
@@ -490,7 +491,12 @@ export function buildStage(id: StageId, anisotropy: number): BuiltStage {
   const glowTex = track(createSoftGlowTexture());
   let backdrop: THREE.Mesh;
 
-  if (id === 'bar') {
+  const painted = PAINTED_STAGES[id];
+  if (painted) {
+    // cenário pintado 2.5D (fundo + chão + objetos recortados)
+    backdrop = buildPaintedLayers(id, painted, group, anisotropy, track);
+    farParallaxNodes.push({ node: backdrop, factor: 0.08 });
+  } else if (id === 'bar') {
     // =========================================================================
     // BAR DA SIMONE — True 5-Layer 2.5D Urban Nightlife Arena
     // =========================================================================
