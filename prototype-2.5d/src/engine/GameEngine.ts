@@ -175,6 +175,9 @@ export class GameEngine {
   private cameos: ActiveCameo[] = [];
   private bursts: Array<{ mesh: THREE.Group; life: number; maxLife: number }> = [];
   private sparks: SparkParticle[] = [];
+  private sparkMats = new Map<string, THREE.MeshBasicMaterial>();
+  private sparkPool: THREE.Mesh[] = [];
+  private fxKeepAlive: THREE.Group | null = null;
   private sparkGeo: THREE.SphereGeometry;
   private heartGeo: THREE.ShapeGeometry;
 
@@ -528,6 +531,8 @@ export class GameEngine {
     this.clearEntities();
     soundEngine.stopAllVoices();
     soundEngine.preloadFighterVoices([p1, p2, 'narrator']);
+    this.warmupEffects(['cake', 'beerBlast', 'smoke', 'milk', 'superL', 'brigadeiro', 'food', 'notes']);
+    this.warmupFighterTextures();
     soundEngine.startMusic(STAGE_MUSIC[stageId] ?? 'theme', 0.58);
     this.screenMode = 'fight';
     this.updateProjection();
@@ -752,13 +757,13 @@ export class GameEngine {
   }
 
   private clearEntities() {
-    for (const p of this.projectiles) this.scene.remove(p.mesh);
+    for (const p of this.projectiles) this.removeFx(p.mesh);
     this.projectiles = [];
-    for (const c of this.cameos) this.scene.remove(c.mesh);
+    for (const c of this.cameos) this.removeFx(c.mesh);
     this.cameos = [];
-    for (const b of this.bursts) this.scene.remove(b.mesh);
+    for (const b of this.bursts) this.removeFx(b.mesh);
     this.bursts = [];
-    for (const s of this.sparks) this.scene.remove(s.mesh);
+    for (const s of this.sparks) this.releaseSpark(s.mesh);
     this.sparks = [];
   }
 
@@ -1185,10 +1190,93 @@ export class GameEngine {
     this.bursts.push({ mesh, life: 0.24, maxLife: 0.24 });
   }
 
+  private sparkMaterial(colorHex: number, hearts: boolean): THREE.MeshBasicMaterial {
+    const key = `${colorHex}:${hearts ? 1 : 0}`;
+    let mat = this.sparkMats.get(key);
+    if (!mat) {
+      mat = new THREE.MeshBasicMaterial({ color: colorHex, side: hearts ? THREE.DoubleSide : THREE.FrontSide });
+      this.sparkMats.set(key, mat);
+    }
+    return mat;
+  }
+
+  private releaseSpark(m: THREE.Mesh) {
+    this.scene.remove(m);
+    if (this.sparkPool.length < 160) this.sparkPool.push(m);
+  }
+
+  /** Tira um efeito de cena e libera geometria/material (texturas são compartilhadas e ficam). */
+  private removeFx(obj: THREE.Object3D) {
+    this.scene.remove(obj);
+    obj.traverse((o) => {
+      const mesh = o as THREE.Mesh;
+      if (!mesh.isMesh) return;
+      if (mesh.geometry && mesh.geometry !== this.sparkGeo && mesh.geometry !== this.heartGeo) mesh.geometry.dispose();
+      const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+      for (const m of mats) m?.dispose();
+    });
+  }
+
+  /**
+   * Compila antes da luta os shaders de faísca, explosão e projéteis destes lutadores,
+   * para o primeiro golpe forte/especial não travar a tela.
+   */
+  private warmupEffects(kinds: ProjectileKind[]) {
+    const holder = new THREE.Group();
+    holder.position.set(0, -50, 0);
+    holder.add(buildBurstMesh());
+    for (const k of kinds) holder.add(buildProjectileMesh(k));
+    for (const hex of [0x93c5fd, 0xff9f1c, 0xfef08a]) holder.add(new THREE.Mesh(this.sparkGeo, this.sparkMaterial(hex, false)));
+    holder.add(new THREE.Mesh(this.heartGeo, this.sparkMaterial(0xec4899, true)));
+    this.scene.add(holder);
+    try {
+      this.renderer.compile(this.scene, this.camera);
+      // texturas dos efeitos: envia para a GPU já (quando a imagem terminar de baixar)
+      const maps = new Set<THREE.Texture>();
+      holder.traverse((o) => {
+        const mat = (o as THREE.Mesh).material as THREE.MeshBasicMaterial | undefined;
+        if (mat && !Array.isArray(mat) && mat.map) maps.add(mat.map);
+      });
+      const upload = (tex: THREE.Texture, tries: number) => {
+        const img = tex.image as { complete?: boolean; width?: number } | undefined;
+        if (img && (img.complete || img.width)) this.renderer.initTexture(tex);
+        else if (tries > 0 && !this.disposed) setTimeout(() => upload(tex, tries - 1), 250);
+      };
+      for (const tex of maps) upload(tex, 40);
+    } finally {
+      // Fica fora de cena mas NÃO é liberado: enquanto estes materiais existirem, o three.js
+      // mantém os shaders compilados, e os efeitos criados durante a luta reaproveitam.
+      this.scene.remove(holder);
+      if (this.fxKeepAlive) this.removeFx(this.fxKeepAlive);
+      this.fxKeepAlive = holder;
+    }
+  }
+
+  /** Envia para a GPU, antes da luta, os atlas dos lutadores (golpes, especiais, transformações). */
+  private warmupFighterTextures() {
+    if (!this.fighters) return;
+    const texs: (THREE.Texture | undefined)[] = [];
+    for (const f of this.fighters) {
+      const r = f.rig;
+      texs.push(r.atlasTex, r.atlasHdTex, r.atlasHd2Tex, r.atlasHd3Tex, r.atlasHd4Tex, r.atlasHd6Tex, r.daviTex);
+    }
+    const upload = (tex: THREE.Texture, tries: number) => {
+      const img = tex.image as { complete?: boolean; width?: number } | undefined;
+      if (img && (img.complete || img.width)) this.renderer.initTexture(tex);
+      else if (tries > 0 && !this.disposed) setTimeout(() => upload(tex, tries - 1), 250);
+    };
+    for (const t of new Set(texs)) if (t) upload(t, 40);
+  }
+
   private spawnSparks(x: number, y: number, colorHex: number, count = 10, hearts = false) {
-    const mat = new THREE.MeshBasicMaterial({ color: colorHex, side: hearts ? THREE.DoubleSide : THREE.FrontSide });
+    const mat = this.sparkMaterial(colorHex, hearts);
+    const geo = hearts ? this.heartGeo : this.sparkGeo;
     for (let i = 0; i < count; i++) {
-      const m = new THREE.Mesh(hearts ? this.heartGeo : this.sparkGeo, mat);
+      const pooled = this.sparkPool.pop();
+      const m = pooled ?? new THREE.Mesh(geo, mat);
+      m.geometry = geo;
+      m.material = mat;
+      m.scale.setScalar(1);
       m.position.set(x, y, (Math.random() - 0.5) * 0.4);
       this.scene.add(m);
       const a = Math.random() * Math.PI * 2;
@@ -1768,13 +1856,13 @@ export class GameEngine {
       if (hitDist <= p.radius + 0.48) {
         this.spawnBurst(p.x, p.y);
         this.applyHit(owner, target, p.damage, 4.2, 0.08, true, p.knockdown);
-        this.scene.remove(p.mesh);
+        this.removeFx(p.mesh);
         this.projectiles.splice(i, 1);
         continue;
       }
 
       if (p.life <= 0 || Math.abs(p.x) > 12 || p.y < 0.05) {
-        this.scene.remove(p.mesh);
+        this.removeFx(p.mesh);
         this.projectiles.splice(i, 1);
       }
     }
@@ -1816,7 +1904,7 @@ export class GameEngine {
       }
 
       if (c.life <= 0 || Math.abs(c.x) > 12) {
-        this.scene.remove(c.mesh);
+        this.removeFx(c.mesh);
         this.cameos.splice(i, 1);
       }
     }
@@ -1944,7 +2032,7 @@ export class GameEngine {
       const sc = 0.7 + Math.sin(t * Math.PI) * 0.55;
       b.mesh.scale.setScalar(sc);
       if (b.life <= 0) {
-        this.scene.remove(b.mesh);
+        this.removeFx(b.mesh);
         this.bursts.splice(i, 1);
       }
     }
@@ -1958,7 +2046,7 @@ export class GameEngine {
       const sc = Math.max(0.01, s.life / s.maxLife);
       s.mesh.scale.setScalar(sc);
       if (s.life <= 0) {
-        this.scene.remove(s.mesh);
+        this.releaseSpark(s.mesh);
         this.sparks.splice(i, 1);
       }
     }
@@ -2022,6 +2110,8 @@ export class GameEngine {
     this.currentStage?.dispose();
     this.shadowTex.dispose();
     this.sparkGeo.dispose();
+    for (const m of this.sparkMats.values()) m.dispose();
+    if (this.fxKeepAlive) this.removeFx(this.fxKeepAlive);
     this.heartGeo.dispose();
     this.renderer.dispose();
     if (this.renderer.domElement.parentNode === this.container) {
