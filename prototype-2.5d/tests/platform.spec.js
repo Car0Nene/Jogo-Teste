@@ -125,8 +125,8 @@ test('loads the game and accepts fight controls at this viewport', async ({ page
   const introPortraits = page.locator('.ff-match-intro .ff-intro-portrait img');
   await expect(introPortraits).toHaveCount(2);
   await expect.poll(() => introPortraits.first().evaluate((img) => img.complete && img.naturalWidth > 0)).toBeTruthy();
-  expect(await introPortraits.first().evaluate((img) => getComputedStyle(img).objectFit)).toBe('contain');
-  expect(await introPortraits.last().evaluate((img) => getComputedStyle(img).objectFit)).toBe('contain');
+  await expect.poll(() => introPortraits.first().evaluate((img) => getComputedStyle(img).objectFit)).toBe('contain');
+  await expect.poll(() => introPortraits.last().evaluate((img) => getComputedStyle(img).objectFit)).toBe('contain');
   await page.keyboard.press('Enter');
   await expect(page.locator('.ff-match-intro')).toHaveCount(0);
 
