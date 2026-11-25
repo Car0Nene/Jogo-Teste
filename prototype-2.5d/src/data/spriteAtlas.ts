@@ -135,7 +135,7 @@ const CARLOS_SP = {
   gordao_punch: [502, 22, 434, 356, 170.6, 356, 4] as SpriteFrame,
   crente_pray: [8, 493, 200, 292, 90.5, 292, 4] as SpriteFrame,
   crente_halo: [216, 386, 373, 399, 202.1, 399, 4] as SpriteFrame,
-  flying_kick: [597, 493, 424, 292, 212, 292, 4] as SpriteFrame,
+  flying_kick: [597, 493, 424, 292, 212, 292, 4] as SpriteFrame, // espelhado no atlas: o original chutava para a esquerda
 };
 
 const DANIEL_SP = {
