@@ -399,3 +399,24 @@ test('cast voices exist and play on select, specials, KO and victory', async ({ 
   expect(result.juraci[1]).toContain('franciely:isso');
   expect(result.ko).toBe('tainara:cast_ko');
 });
+
+test('every adult fighter has the full Pedro-standard animation set and impact sounds load', async ({ page, request }, testInfo) => {
+  test.skip(testInfo.project.name !== 'desktop-chromium');
+  const ids = ['carlos', 'juraci', 'daniel', 'franciely', 'gabi', 'paula', 'tainara'];
+  const anims = ['idle', 'walk', 'run', 'light', 'medium', 'heavy', 'jump', 'flykick', 'crouch', 'guard', 'hurt', 'knockdown', 'getup', 'win'];
+  await page.goto('/');
+  const data = await page.evaluate(async () => {
+    const { HD_ANIMS, HD_ANIM_VERSION } = await import('/src/data/hdAnimAtlas.ts');
+    return { HD_ANIMS, HD_ANIM_VERSION };
+  });
+  for (const id of ids) {
+    expect(data.HD_ANIM_VERSION[id], id).toBeTruthy();
+    for (const a of anims) expect(data.HD_ANIMS[id]?.[a]?.length ?? 0, `${id}.${a}`).toBeGreaterThanOrEqual(2);
+    const res = await request.get(`/assets/sprites/${id}-anim-hd.webp`);
+    expect(res.status(), `${id} atlas`).toBe(200);
+  }
+  for (const sfx of ['hit_light', 'hit_heavy', 'kick', 'block', 'whoosh_light', 'whoosh_heavy', 'fall']) {
+    const res = await request.get(`/assets/sfx/${sfx}.mp3`);
+    expect(res.status(), sfx).toBe(200);
+  }
+});
