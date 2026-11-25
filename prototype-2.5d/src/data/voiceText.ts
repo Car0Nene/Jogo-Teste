@@ -1,5 +1,12 @@
 /** Transcrição exata de cada fala (ElevenLabs Scribe) — o texto da tela sempre mostra o que é falado. */
 export const VOICE_TEXT: Record<string, string> = {
+  "/assets/voice/elenco/juraci/chinelo.mp3": "Vem cá, menino! Olha o chinelo!",
+  "/assets/voice/elenco/carlos/pizza.mp3": "Entrega expressa! Pizza na cara!",
+  "/assets/voice/elenco/franciely/conta3.mp3": "Vou contar até três! Um... dois... TRÊS!",
+  "/assets/voice/elenco/gabi/selfie.mp3": "Peraí, deixa eu tirar uma selfie!",
+  "/assets/voice/elenco/paula/panela.mp3": "Olha a panela! Bem na cabeça!",
+  "/assets/voice/elenco/tainara/arroz.mp3": "Queimou o arroz! A culpa é sua!",
+  "/assets/voice/elenco/davi/controle.mp3": "Deu lag! Toma o controle!",
   "/assets/voice/daniel-praia.mp3": "Praia, praia, quem vai à praia? Eu vou fazer as malas.",
   "/assets/voice/davi-outra.wav": "Já tô com outra.",
   "/assets/voice/davi-preguica.wav": "Agora tô com preguiça.",

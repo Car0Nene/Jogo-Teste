@@ -22,6 +22,9 @@ export type FormId =
   | 'ricePower'
   | 'daviPurple';
 
+/** Golpes cômicos (Frente + Leve), cada um com câmera de cinema, fala e efeito próprios. */
+export type GagId = 'bundada' | 'cigarro' | 'chinelo' | 'pizza' | 'conta3' | 'selfie' | 'panela' | 'arroz' | 'controle';
+
 export interface MoveSpec {
   id: 'light' | 'medium' | 'heavy' | 'air' | 'combo' | 'special' | 'subSpecial';
   label: string;
@@ -42,7 +45,7 @@ export interface MoveSpec {
   /** animação própria do golpe (chave do atlas) */
   anim?: string;
   /** golpe de finalização: câmera de foco e efeitos próprios */
-  finisher?: 'bundada' | 'cigarro';
+  finisher?: GagId;
 }
 
 export interface FighterAppearance {
@@ -116,6 +119,8 @@ export interface FighterSpec {
     heavy: MoveSpec;
     air: MoveSpec;
     combo?: MoveSpec;
+    /** golpe cômico cinematográfico: Frente + Leve */
+    gag?: MoveSpec;
   };
 }
 
@@ -786,6 +791,24 @@ export function pickIntroDialogue(p1: FighterId, p2: FighterId): DialogueExchang
   ];
   return generics[Math.floor(Math.random() * generics.length)];
 }
+
+const gagMove = (label: string, finisher: GagId, anim: string, startup: number, active: number, recovery: number): MoveSpec => ({
+  id: 'combo', label, startup, active, recovery, damage: 0, minRange: 0, range: 0, hitstun: 0, blockstun: 0, push: 0, hitstop: 0, anim, finisher,
+});
+
+/** Golpe cômico de cada um (Frente + Leve). Daniel e Pedro reaproveitam a finalização do combo. */
+export const GAG_MOVES: Record<FighterId, MoveSpec> = {
+  daniel: FIGHTERS.daniel.moves.combo!,
+  pedro: FIGHTERS.pedro.moves.combo!,
+  juraci: gagMove('Chinelada Bumerangue', 'chinelo', 'medium', 0.3, 0.3, 0.4),
+  carlos: gagMove('Pizza na Cara', 'pizza', 'light', 0.28, 0.3, 0.4),
+  franciely: gagMove('Vou Contar Até Três', 'conta3', 'light', 0.3, 1.25, 0.3),
+  gabi: gagMove('Flash da Selfie', 'selfie', 'win', 0.55, 0.12, 0.45),
+  paula: gagMove('Panelada do Céu', 'panela', 'win', 0.35, 0.45, 0.35),
+  tainara: gagMove('Arroz Queimado', 'arroz', 'light', 0.26, 0.3, 0.4),
+  davi: gagMove('Deu Lag!', 'controle', 'light', 0.26, 0.3, 0.42),
+};
+for (const id of Object.keys(GAG_MOVES) as FighterId[]) FIGHTERS[id].moves.gag = GAG_MOVES[id];
 
 export const FIGHTER_BARKS: Record<
   FighterId,

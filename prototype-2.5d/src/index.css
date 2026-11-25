@@ -1474,3 +1474,7 @@
 .ff-cine-bars > i:first-child { top: 0; transform-origin: top; }
 .ff-cine-bars > i:last-child { bottom: 0; transform-origin: bottom; }
 @keyframes ffCineIn { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+
+/* flash da selfie */
+.ff-photo-flash { position: absolute; inset: 0; z-index: 45; pointer-events: none; background: #fff; animation: ffPhotoFlash .55s ease-out forwards; }
+@keyframes ffPhotoFlash { 0% { opacity: 0; } 8% { opacity: 1; } 100% { opacity: 0; } }

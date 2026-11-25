@@ -32,6 +32,7 @@ import {
   buildBurstMesh,
   buildCameoMesh,
   buildProjectileMesh,
+  buildPopText,
   setProjectileFacing,
   updateCameoVisual,
 } from './propsBuilder';
@@ -69,6 +70,8 @@ export interface HudSnapshot {
   superCutin: { slot: 'p1' | 'p2'; fighterId: FighterId; name: string; move: string; full: boolean; key: number } | null;
   /** golpe cinematográfico em andamento: faixas pretas de cinema na tela */
   cinematic: boolean;
+  /** muda a cada flash branco de tela (selfie) */
+  flashKey: number;
 }
 
 interface FighterRuntime {
@@ -129,6 +132,17 @@ interface ActiveProjectile {
   gravity: number;
   /** segundos até sair da mão do dono (rajada); enquanto > 0 fica invisível e parado */
   delay?: number;
+  /** chinelo bumerangue: segundos de voo até voltar */
+  boomerang?: number;
+  returned?: boolean;
+  age?: number;
+  /** panela: ao sair, nasce em cima da cabeça do alvo */
+  dropOnTarget?: boolean;
+}
+
+interface PopText {
+  sprite: THREE.Sprite;
+  life: number;
 }
 
 interface ActiveCameo {
@@ -182,6 +196,8 @@ export class GameEngine {
   private fighters: [FighterRuntime, FighterRuntime] | null = null;
 
   private projectiles: ActiveProjectile[] = [];
+  private popTexts: PopText[] = [];
+  private flashKey = 0;
   private cameos: ActiveCameo[] = [];
   private bursts: Array<{ mesh: THREE.Group; life: number; maxLife: number }> = [];
   private sparks: SparkParticle[] = [];
@@ -515,7 +531,7 @@ export class GameEngine {
     if (!soundEngine.playClip(who, key, throttleMs)) return false;
     const text = clipText(who, key);
     if (text) {
-      const SPEAKER: Record<string, string> = { franciely: 'Franciely', dada: 'Dadá', cao: 'Cão', narrator: '' };
+      const SPEAKER: Record<string, string> = { franciely: 'Franciely', dada: 'Dadá', cao: 'Doguinho', narrator: '' };
       f.bark = who === f.id || who === 'narrator' ? text : `${SPEAKER[who] ?? who}: ${text}`;
       f.barkTimer = Math.max(2.2, Math.min(4, 0.9 + text.length * 0.055));
       f.barkVoicedAt = performance.now();
@@ -576,7 +592,7 @@ export class GameEngine {
     soundEngine.stopAllVoices();
     soundEngine.preloadFighterVoices([p1, p2, 'narrator']);
     void soundEngine.preloadSfx();
-    this.warmupEffects(['cake', 'beerBlast', 'smoke', 'milk', 'superL', 'brigadeiro', 'food', 'notes', 'cigarette']);
+    this.warmupEffects(['cake', 'beerBlast', 'smoke', 'milk', 'superL', 'brigadeiro', 'food', 'notes', 'cigarette', 'chinelo', 'pizza', 'pan', 'rice', 'controller', 'count1', 'count2', 'count3']);
     this.warmupFighterTextures();
     soundEngine.startMusic(STAGE_MUSIC[stageId] ?? 'theme', 0.58);
     this.screenMode = 'fight';
@@ -803,6 +819,8 @@ export class GameEngine {
 
   private clearEntities() {
     for (const p of this.projectiles) this.removeFx(p.mesh);
+    for (const t of this.popTexts) this.scene.remove(t.sprite);
+    this.popTexts = [];
     this.projectiles = [];
     for (const c of this.cameos) this.removeFx(c.mesh);
     this.cameos = [];
@@ -917,8 +935,8 @@ export class GameEngine {
       return;
     }
 
-    // golpe cinematográfico: frente + Leve juntos (Super Bundada do Daniel, Super Cigarro do Pedro)
-    const fin = spec.moves.combo;
+    // golpe cômico cinematográfico: Frente + Leve juntos (cada lutador tem o seu)
+    const fin = spec.moves.gag;
     if (btn === 'light' && f.y <= 0.08 && fin?.finisher && this.isHeld(f.index, f.facing === 1 ? 'right' : 'left')) {
       this.startAttackMove(f, fin);
       return;
@@ -969,20 +987,103 @@ export class GameEngine {
       key: this.superKey,
     };
     this.superCutinTimer = 1.0;
-    if (!this.speak(f, f.id, move.finisher === 'bundada' ? 'bundada' : 'cigarro', 0)) {
-      f.bark = move.finisher === 'bundada' ? 'Segura essa... Super bundada!' : 'Super cigarro! Traga essa!';
+    const gag = move.finisher!;
+    const voiceKey = gag === 'arroz' ? 'arrozQueimado' : gag;
+    if (!this.speak(f, f.id, voiceKey, 0)) {
+      f.bark = clipText(f.id, voiceKey) ?? move.label + '!';
       f.barkTimer = 2.2;
     }
-    if (move.finisher === 'bundada') {
-      f.bundadaFxDone = false;
-      this.spawnSparks(f.x, f.y + 1.0, 0xff6fd8, 14, true);
-    } else {
-      for (let i = 0; i < 5; i++) {
-        const last = i === 4;
-        this.spawnProjectile('cigarette', f, 12.5, 0, last ? 22 : 14, last, 0.34, 0, undefined, 1.35 + (i % 3) * 0.2, move.startup + i * 0.09);
+    const t0 = move.startup;
+    const handY = f.y + 1.4;
+    f.bundadaFxDone = false;
+    switch (gag) {
+      case 'bundada':
+        this.spawnSparks(f.x, f.y + 1.0, 0xff6fd8, 14, true);
+        break;
+      case 'cigarro':
+        for (let i = 0; i < 5; i++) {
+          const last = i === 4;
+          this.spawnProjectile('cigarette', f, 12.5, 0, last ? 22 : 14, last, 0.34, 0, undefined, 1.35 + (i % 3) * 0.2, t0 + i * 0.09);
+        }
+        break;
+      case 'chinelo': {
+        const p = this.spawnProjectile('chinelo', f, 11, 0, 72, true, 0.36, 0, undefined, handY, t0);
+        p.boomerang = 0.62;
+        break;
       }
+      case 'pizza':
+        this.spawnProjectile('pizza', f, 9.5, 0, 76, true, 0.44, 0, undefined, handY + 0.05, t0);
+        break;
+      case 'conta3':
+        this.spawnPop('UM...', f.x, f.y + 1.75, '#facc15');
+        this.spawnProjectile('count1', f, 7, 0, 12, false, 0.4, 0, undefined, handY, t0);
+        this.spawnProjectile('count2', f, 7, 0, 12, false, 0.42, 0, undefined, handY, t0 + 0.45);
+        this.spawnProjectile('count3', f, 8.5, 0, 56, true, 0.5, 0, undefined, handY, t0 + 0.9);
+        break;
+      case 'selfie':
+        this.spawnPop('SORRIA!', f.x + f.facing * 0.4, f.y + 1.75, '#f9a8d4');
+        break;
+      case 'panela': {
+        const p = this.spawnProjectile('pan', f, 0, -1, 74, true, 0.45, 26, undefined, undefined, t0);
+        p.dropOnTarget = true;
+        break;
+      }
+      case 'arroz':
+        this.spawnPop('QUEIMOU!', f.x + f.facing * 0.5, f.y + 1.75, '#f97316');
+        this.spawnSparks(f.x + f.facing * 0.8, handY, 0x292524, 10);
+        for (let i = 0; i < 10; i++) {
+          this.spawnProjectile('rice', f, 8 + Math.random() * 4.5, 0.8 + Math.random() * 3.8, 8, false, 0.2, 9, undefined, handY - 0.1 + Math.random() * 0.3, t0 + i * 0.03);
+        }
+        break;
+      case 'controle':
+        this.spawnProjectile('controller', f, 10, 3.4, 66, true, 0.38, 9, undefined, handY, t0);
+        break;
     }
     this.emitHud();
+  }
+
+  /** Reação cômica quando um objeto acerta: onomatopeia, som e estrelinhas. */
+  private gagImpact(kind: ProjectileKind, x: number, y: number, target: FighterRuntime) {
+    const pops: Partial<Record<ProjectileKind, [string, string]>> = {
+      chinelo: ['PAFT!', '#60a5fa'],
+      pizza: ['SPLAT!', '#fbbf24'],
+      pan: ['BOING!', '#e5e7eb'],
+      controller: ['LAG!', '#a78bfa'],
+      count3: ['TRÊS!!', '#ef4444'],
+    };
+    const pop = pops[kind];
+    if (!pop) return;
+    this.spawnPop(pop[0], x, Math.min(y + 0.5, 1.9), pop[1]);
+    if (kind === 'pan' || kind === 'chinelo') soundEngine.playBoing();
+    if (kind === 'pan' || kind === 'controller') {
+      // fica tonto: estrelinhas e um tempinho a mais parado
+      this.spawnSparks(target.x, target.y + 2.0, 0xfde047, 12);
+      if (target.state === 'hitstun') target.stateTimer = -0.5;
+    }
+  }
+
+  private spawnPop(text: string, x: number, y: number, color: string) {
+    const sprite = buildPopText(text, color);
+    sprite.position.set(x, y, 0.3);
+    this.scene.add(sprite);
+    this.popTexts.push({ sprite, life: 0.95 });
+  }
+
+  private stepPopTexts(dt: number) {
+    for (let i = this.popTexts.length - 1; i >= 0; i--) {
+      const t = this.popTexts[i];
+      t.life -= dt;
+      t.sprite.position.y += dt * 0.4;
+      const k = Math.min(1, (0.95 - t.life) / 0.12);
+      const s = 0.6 + 0.4 * k + Math.max(0, 0.15 * Math.sin(k * Math.PI));
+      t.sprite.scale.set(1.9 * s, 1.9 * (180 / 512) * s, 1);
+      (t.sprite.material as THREE.SpriteMaterial).opacity = Math.min(1, t.life / 0.3);
+      if (t.life <= 0) {
+        this.scene.remove(t.sprite);
+        (t.sprite.material as THREE.SpriteMaterial).dispose();
+        this.popTexts.splice(i, 1);
+      }
+    }
   }
 
   private setBark(f: FighterRuntime, category: 'special' | 'subSpecial' | 'win') {
@@ -1276,7 +1377,7 @@ export class GameEngine {
     mesh.position.set(startX, startY, 0.08);
     this.scene.add(mesh);
 
-    this.projectiles.push({
+    const proj: ActiveProjectile = {
       mesh,
       kind,
       ownerIndex: owner.index,
@@ -1291,8 +1392,11 @@ export class GameEngine {
       life: 2.3 + delay,
       gravity,
       delay,
-    });
+      age: 0,
+    };
+    this.projectiles.push(proj);
     if (delay > 0) mesh.visible = false;
+    return proj;
   }
 
   private spawnCameo(kind: 'dog' | 'dada' | 'kid', owner: FighterRuntime) {
@@ -1654,6 +1758,7 @@ export class GameEngine {
       this.resolveBodyPush(f1, f2);
       this.stepProjectiles(dt);
       this.stepCameos(dt);
+      this.stepPopTexts(dt);
     } else if (this.matchPhase === 'ko') {
       this.phaseTimer -= dt;
       if (this.phaseTimer <= 0) {
@@ -1757,12 +1862,12 @@ export class GameEngine {
         } else if (cpu.id !== 'davi' && cpu.meter >= 50 && dist > 1.8 && Math.random() < aggr * 0.32) {
           this.trySpecial(cpu, true);
         } else if (
-          FIGHTERS[cpu.id].moves.combo?.finisher &&
-          (cpu.id === 'pedro' ? dist > 2.6 && dist < 7 : dist <= 2.4) &&
-          Math.random() < aggr * 0.12
+          FIGHTERS[cpu.id].moves.gag &&
+          (['bundada', 'selfie'].includes(FIGHTERS[cpu.id].moves.gag!.finisher!) ? dist <= 2.4 : dist > 2.4 && dist < 7.5) &&
+          Math.random() < aggr * 0.1
         ) {
-          // golpe cinematográfico da CPU (bundada de perto, cigarros de longe)
-          this.startAttackMove(cpu, FIGHTERS[cpu.id].moves.combo!);
+          // golpe cômico da CPU (bundada/selfie de perto, os arremessos de longe)
+          this.startAttackMove(cpu, FIGHTERS[cpu.id].moves.gag!);
         } else if (dist <= 2.15 && Math.random() < aggr) {
           this.tryAttack(cpu, Math.random() < 0.55 ? 'light' : 'heavy');
         } else if (dist > 3.2 && Math.random() < 0.12 * aggr) {
@@ -1837,6 +1942,23 @@ export class GameEngine {
       const activeEnd = m.startup + m.active;
       const total = activeEnd + m.recovery;
 
+      if (m.finisher === 'selfie' && !f.bundadaFxDone && f.moveElapsed >= activeStart) {
+        // flash da selfie: cega quem estiver na frente (até uns 6,5 m) e deixa tonto
+        f.bundadaFxDone = true;
+        soundEngine.playShutter();
+        this.flashKey++;
+        this.emitHud();
+        this.spawnPop('CLICK!', f.x + f.facing * 0.6, f.y + 1.7, '#ffffff');
+        const d = (opp.x - f.x) * f.facing;
+        if (d > 0 && d < 6.5 && Math.abs(opp.y - f.y) < 1.6) {
+          this.applyHit(f, opp, 48, 1.2, 0.1, true, false);
+          if (opp.state === 'hitstun') {
+            opp.stateTimer = -1.0;
+            this.spawnSparks(opp.x, opp.y + 2.0, 0xfde047, 14);
+            this.spawnPop('TONTO!', opp.x, opp.y + 1.8, '#fde047');
+          }
+        }
+      }
       if (f.activeMoveAnim === 'bundada' && !f.bundadaFxDone && f.moveElapsed >= activeStart) {
         // a bundada gigante bate no chão: onda rosa, tremor e poeira
         f.bundadaFxDone = true;
@@ -1847,6 +1969,7 @@ export class GameEngine {
         this.shakeTimer = 0.28;
         this.shakeAmp = 0.3;
         soundEngine.playSwing(true);
+        this.spawnPop('BUNDADA!', bx, f.y + 1.75, '#f472b6');
       }
 
       if (!f.moveHitConnected && m.damage > 0 && f.moveElapsed >= activeStart && f.moveElapsed <= activeEnd) {
@@ -2010,18 +2133,40 @@ export class GameEngine {
         p.facing = owner.facing;
         p.vx = Math.abs(p.vx) * owner.facing;
         p.x = owner.x + owner.facing * 0.85;
+        if (p.dropOnTarget) {
+          const tgt = this.fighters[p.ownerIndex === 0 ? 1 : 0];
+          p.x = tgt.x;
+          p.y = tgt.y + 4.4;
+        }
         setProjectileFacing(p.mesh, owner.facing);
         p.mesh.visible = true;
-        if (p.kind === 'cigarette') soundEngine.playSwing(false);
+        soundEngine.playSwing(p.kind === 'pan');
       }
       p.life -= dt;
       p.vy -= p.gravity * dt;
       p.x += p.vx * dt;
       p.y += p.vy * dt;
       p.mesh.position.set(p.x, p.y, 0.08);
+      p.age = (p.age ?? 0) + dt;
+      if (p.boomerang && !p.returned && p.age >= p.boomerang) {
+        // o chinelo faz a curva e volta para a mão de quem jogou
+        p.returned = true;
+        p.vx = -p.vx;
+        p.facing = (p.facing * -1) as 1 | -1;
+      }
       if (p.kind === 'cigarette') {
         p.mesh.rotation.z = Math.sin(this.worldTime * 18 + i * 1.7) * 0.05;
         p.mesh.position.y = p.y + Math.sin(this.worldTime * 9 + i) * 0.05;
+      } else if (p.kind === 'chinelo' || p.kind === 'controller' || p.kind === 'rice') {
+        p.mesh.rotation.z -= dt * (p.kind === 'chinelo' ? 20 : 11) * p.facing;
+      } else if (p.kind === 'pizza') {
+        p.mesh.rotation.z -= dt * 13 * p.facing;
+        p.mesh.position.y = p.y + Math.sin(p.age * 14) * 0.06;
+      } else if (p.kind === 'pan') {
+        p.mesh.rotation.z = Math.PI + Math.sin(p.age * 20) * 0.08;
+      } else if (p.kind === 'count1' || p.kind === 'count2' || p.kind === 'count3') {
+        const pulse = 1 + Math.sin(p.age * 16) * 0.12;
+        p.mesh.scale.set(pulse, pulse, 1);
       } else if (p.kind === 'cake' || p.kind === 'brigadeiro' || p.kind === 'food') {
         p.mesh.rotation.z += dt * 4.5 * p.facing;
       } else {
@@ -2033,13 +2178,20 @@ export class GameEngine {
       const hitDist = Math.hypot(p.x - target.x, p.y - (target.y + 1.0));
       // cigarros voam em alturas diferentes: acertam o corpo inteiro (canela até a cabeça)
       const bodyHit =
-        p.kind === 'cigarette' &&
+        ['cigarette', 'chinelo', 'pizza', 'pan', 'rice', 'controller', 'count1', 'count2', 'count3'].includes(p.kind) &&
         Math.abs(p.x - target.x) <= p.radius + 0.42 &&
         p.y >= target.y + 0.25 &&
         p.y <= target.y + 2.1;
+      if (p.returned && Math.sign(owner.x - p.x) !== Math.sign(p.vx)) {
+        // o chinelo voltou para a mão
+        this.removeFx(p.mesh);
+        this.projectiles.splice(i, 1);
+        continue;
+      }
       if (bodyHit || hitDist <= p.radius + 0.48) {
         this.spawnBurst(p.x, p.y);
         this.applyHit(owner, target, p.damage, 4.2, 0.08, true, p.knockdown);
+        this.gagImpact(p.kind, p.x, p.y, target);
         this.removeFx(p.mesh);
         this.projectiles.splice(i, 1);
         continue;
@@ -2291,6 +2443,7 @@ export class GameEngine {
       introLine,
       superCutin: this.superCutin,
       cinematic: this.finTimer > 0,
+      flashKey: this.flashKey,
       p1: this.snapshotFighter(f1),
       p2: this.snapshotFighter(f2),
     });

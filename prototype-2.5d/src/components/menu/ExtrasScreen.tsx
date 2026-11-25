@@ -195,14 +195,13 @@ export function ExtrasScreen({ onBack }: ExtrasScreenProps) {
                   SUPORTE EXCLUSIVO · DANIEL
                 </div>
                 <h2 className="font-display font-extrabold text-3xl text-white mt-1">
-                  CÃO DO DANIEL
+                  DOGUINHO, O CÃO DO DANIEL
                 </h2>
                 <div className="my-4 bg-[#09070e] border border-white/10 p-4 flex items-center justify-center gap-4">
-                  <SpecialSpritePreview spriteId="dog_run" alt="Cão do Daniel correndo" className="w-28 h-24" />
-                  <SpecialSpritePreview spriteId="dog_attack" alt="Cão do Daniel atacando" className="w-28 h-24" />
+                  <img src={assetUrl('/assets/sprites/doguinho.webp')} alt="Doguinho, o cão do Daniel" className="h-40 w-auto object-contain" />
                 </div>
                 <p className="text-sm text-stone-300 leading-relaxed">
-                  Companheiro fiel que entra automaticamente em cena para proteger o Daniel e avançar sobre o adversário. É um personagem especial de suporte, não um lutador principal selecionável.
+                  O Doguinho, de camisetinha rosa, é o companheiro fiel que entra automaticamente em cena para proteger o Daniel e avançar sobre o adversário. É um personagem especial de suporte, não um lutador principal selecionável.
                 </p>
               </div>
               <button

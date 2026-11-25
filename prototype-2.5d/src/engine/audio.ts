@@ -36,11 +36,13 @@ type SfxSample = (typeof SFX_SAMPLES)[number];
 
 const CLIPS: Record<string, Record<string, string>> = {
   davi: {
+    controle: assetUrl('/assets/voice/elenco/davi/controle.mp3'),
     outra: assetUrl('/assets/voice/davi-outra.wav'),
     preguica: assetUrl('/assets/voice/davi-preguica.wav'),
     videogame: assetUrl('/assets/voice/davi-videogame.wav'),
   },
   franciely: {
+    conta3: assetUrl('/assets/voice/elenco/franciely/conta3.mp3'),
     isso: assetUrl('/assets/voice/franciely-isso.mp3'),
     ferrinho: assetUrl('/assets/voice/franciely-ferrinho.mp3'),
     desarma: assetUrl('/assets/voice/franciely-desarma.mp3'),
@@ -59,6 +61,7 @@ const CLIPS: Record<string, Record<string, string>> = {
     bundada: assetUrl('/assets/voice/elenco/daniel/bundada.mp3'),
   },
   gabi: {
+    selfie: assetUrl('/assets/voice/elenco/gabi/selfie.mp3'),
     sing: assetUrl('/assets/voice/gabi-canto.mp3'),
     amor: assetUrl('/assets/voice/generated/gabi-amor-e-luta.mp3'),
   },
@@ -66,17 +69,21 @@ const CLIPS: Record<string, Record<string, string>> = {
     reply: assetUrl('/assets/voice/generated/dada-aviso-chao-molhado.mp3'),
   },
   juraci: {
+    chinelo: assetUrl('/assets/voice/elenco/juraci/chinelo.mp3'),
     cozinha: assetUrl('/assets/voice/generated/juraci-mandando-na-cozinha.mp3'),
   },
   carlos: {
+    pizza: assetUrl('/assets/voice/elenco/carlos/pizza.mp3'),
     pizzaAmor: assetUrl('/assets/voice/generated/carlos-pedido-de-pizza-com-amor.mp3'),
     fe: assetUrl('/assets/voice/elenco/carlos/fe.mp3'),
   },
   paula: {
+    panela: assetUrl('/assets/voice/elenco/paula/panela.mp3'),
     lunch: assetUrl('/assets/voice/generated/paula-super-almoco.mp3'),
     bar: assetUrl('/assets/voice/generated/paula-bar-simone.mp3'),
   },
   tainara: {
+    arrozQueimado: assetUrl('/assets/voice/elenco/tainara/arroz.mp3'),
     trabalho: assetUrl('/assets/voice/tainara-trabalho.mp3'),
     cuidado: assetUrl('/assets/voice/generated/tainara-cuidado-em-dobro.mp3'),
     arroz: assetUrl('/assets/voice/generated/tainara-poder-do-arroz.mp3'),
@@ -609,6 +616,56 @@ class SoundEngine {
     osc.connect(gain).connect(dest);
     osc.start(now);
     osc.stop(now + 0.44);
+  }
+
+  /** BOING de desenho animado (panela na cabeça, chinelada) */
+  playBoing() {
+    const ctx = this.ensureContext();
+    const dest = this.getSfxDest();
+    if (!ctx || !dest) return;
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(110, now);
+    osc.frequency.exponentialRampToValueAtTime(520, now + 0.09);
+    osc.frequency.exponentialRampToValueAtTime(190, now + 0.55);
+    const lfo = ctx.createOscillator();
+    lfo.frequency.value = 22;
+    const lfoGain = ctx.createGain();
+    lfoGain.gain.value = 40;
+    lfo.connect(lfoGain).connect(osc.frequency);
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(0.3, now + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+    osc.connect(gain).connect(dest);
+    osc.start(now);
+    lfo.start(now);
+    osc.stop(now + 0.62);
+    lfo.stop(now + 0.62);
+  }
+
+  /** clique de câmera (flash da selfie) */
+  playShutter() {
+    const ctx = this.ensureContext();
+    const dest = this.getSfxDest();
+    if (!ctx || !dest) return;
+    const now = ctx.currentTime;
+    for (const [t0, f] of [[0, 3200], [0.07, 2100]] as const) {
+      const dur = 0.05;
+      const buf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * dur), ctx.sampleRate);
+      const data = buf.getChannelData(0);
+      for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (data.length * 0.2));
+      const src = ctx.createBufferSource();
+      src.buffer = buf;
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'bandpass';
+      filter.frequency.value = f;
+      const gain = ctx.createGain();
+      gain.gain.value = 0.35;
+      src.connect(filter).connect(gain).connect(dest);
+      src.start(now + t0);
+    }
   }
 
   playSplash() {

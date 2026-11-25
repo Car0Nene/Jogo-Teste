@@ -335,12 +335,8 @@ export function CharacterSelectScreen({
             {showDanielDog && (
               <div className="ff-character-support" aria-label="Suporte do Daniel">
                 <ShieldAlert className="h-3.5 w-3.5 shrink-0" />
-                <SpecialSpritePreview
-                  spriteId="dog_attack"
-                  alt="Cão do Daniel"
-                  className="h-8 w-9 shrink-0"
-                />
-                <span>O cão do Daniel ajuda automaticamente na luta</span>
+                <img src={assetUrl('/assets/sprites/doguinho.webp')} alt="Doguinho, o cão do Daniel" className="h-9 w-auto shrink-0 object-contain" />
+                <span>O Doguinho, cão do Daniel, ajuda na luta</span>
               </div>
             )}
           </section>

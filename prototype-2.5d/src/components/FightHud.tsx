@@ -187,7 +187,8 @@ function DesktopCommandBar({
         [[k(keyBindings.guard)], 'Defesa'],
       ];
   // golpe cinematográfico: frente + Leve
-  const finLabel = hud.p1.id === 'daniel' ? 'Bundada' : hud.p1.id === 'pedro' ? 'Cigarro' : null;
+  const GAG_HINT: Record<string, string> = { daniel: 'Bundada', pedro: 'Cigarro', juraci: 'Chinelo', carlos: 'Pizza', franciely: 'Conta até 3', gabi: 'Selfie', paula: 'Panela', tainara: 'Arroz', davi: 'Lag' };
+  const finLabel = GAG_HINT[hud.p1.id] ?? null;
   if (finLabel) keys.push([pad ? ['▶', 'A'] : [k(keyBindings.right), k(keyBindings.light)], finLabel]);
   const hold = (action: string) => ({
     onPointerDown: () => onVirtualHold(0, action, true),
@@ -284,6 +285,7 @@ export function FightHud({
         <FighterMeterBlock f={hud.p2} align="right" compact={compact} />
       </div>
 
+      {hud.flashKey > 0 && <div key={hud.flashKey} className="ff-photo-flash" aria-hidden="true" />}
       {hud.cinematic && (
         <div className="ff-cine-bars" aria-hidden="true">
           <i />
