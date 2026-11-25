@@ -17,7 +17,7 @@ import {
   ResolutionScale,
 } from '../data/settings';
 import { STAGES, StageId } from '../data/stages';
-import { STAGE_MUSIC, soundEngine } from './audio';
+import { CastVoiceEvent, STAGE_MUSIC, castKey, soundEngine } from './audio';
 import {
   AnimState,
   CharacterRig,
@@ -480,6 +480,17 @@ export class GameEngine {
     this.spawnFighters(p1, p2);
   }
 
+  /** Fala do elenco (ElevenLabs) para um momento da luta. */
+  private castVoice(f: FighterRuntime, event: CastVoiceEvent, throttleMs = 700) {
+    soundEngine.playClip(f.id, castKey(event), throttleMs);
+  }
+
+  /** Especial/sub-especial: alterna entre a fala clássica do golpe e a fala nova do elenco. */
+  private moveVoice(f: FighterRuntime, isSub: boolean, classicKey: string) {
+    if (Math.random() < 0.5) soundEngine.playClip(f.id, classicKey);
+    else this.castVoice(f, isSub ? 'subSpecial' : 'special');
+  }
+
   private playIntroVoice(speakerSlot: 'p1' | 'p2') {
     if (!this.fighters) return;
     const f = speakerSlot === 'p1' ? this.fighters[0] : this.fighters[1];
@@ -496,7 +507,8 @@ export class GameEngine {
       paula: ['lunch'],
       davi: ['videogame'],
     };
-    const list = introClips[f.id];
+    const old = introClips[f.id] ?? [];
+    const list = f.id === 'davi' || (old.length && Math.random() < 0.4) ? old : [castKey('intro')];
     if (list && list.length) {
       soundEngine.playClip(f.id, list[Math.floor(Math.random() * list.length)], 1200);
     }
@@ -515,6 +527,7 @@ export class GameEngine {
     this.spawnFighters(p1, p2);
     this.clearEntities();
     soundEngine.stopAllVoices();
+    soundEngine.preloadFighterVoices([p1, p2, 'narrator']);
     soundEngine.startMusic(STAGE_MUSIC[stageId] ?? 'theme', 0.58);
     this.screenMode = 'fight';
     this.updateProjection();
@@ -941,7 +954,7 @@ export class GameEngine {
       moveAnim = 'special';
       if (!actualSub) {
         this.setBark(f, 'special');
-        soundEngine.playClip('juraci', 'cozinha');
+        this.moveVoice(f, actualSub, 'cozinha');
         this.spawnProjectile('cake', f, 10.5, 0, 155, true, 0.44, 0);
       } else {
         this.setBark(f, 'subSpecial');
@@ -953,13 +966,15 @@ export class GameEngine {
         const next = f.nextCarlosForm;
         f.nextCarlosForm = next === 'gordao' ? 'crente' : 'gordao';
         this.activateTransform(f, next, 10);
-        if (next === 'crente') soundEngine.playBless();
-        else soundEngine.playClip('carlos', 'pizzaAmor');
+        if (next === 'crente') {
+          soundEngine.playBless();
+          soundEngine.playClip('carlos', castKey('special'));
+        } else this.moveVoice(f, actualSub, 'pizzaAmor');
         this.setBark(f, 'special');
       } else {
         moveAnim = 'special';
         this.setBark(f, 'subSpecial');
-        soundEngine.playClip('carlos', 'pizzaAmor');
+        this.moveVoice(f, actualSub, 'pizzaAmor');
         this.spawnProjectile('notes', f, 9.0, 0, 85, false, 0.4, 0);
       }
     } else if (f.id === 'pedro') {
@@ -967,39 +982,39 @@ export class GameEngine {
         if (f.form === 'hulk') {
           moveAnim = 'hulkBlast';
           this.setBark(f, 'special');
-          soundEngine.playClip('pedro', 'fumaBebe');
+          this.moveVoice(f, actualSub, 'fumaBebe');
           this.spawnProjectile('beerBlast', f, 11.5, 0, 130, true, 0.46, 0);
         } else {
           this.activateTransform(f, 'hulk', 10);
-          soundEngine.playClip('pedro', 'drink');
+          this.moveVoice(f, actualSub, 'drink');
           this.setBark(f, 'special');
         }
       } else {
         moveAnim = 'smoke';
         this.setBark(f, 'subSpecial');
-        soundEngine.playClip('pedro', 'combo');
+        this.moveVoice(f, actualSub, 'combo');
         this.spawnProjectile('smoke', f, 6.2, 0, 75, false, 0.46, 0);
       }
     } else if (f.id === 'daniel') {
       if (!actualSub) {
         this.activateTransform(f, 'praia', 10);
-        soundEngine.playClip('daniel', 'praia');
+        this.moveVoice(f, actualSub, 'praia');
         this.setBark(f, 'special');
         this.spawnCameo('dog', f);
       } else {
         moveAnim = 'dance';
-        soundEngine.playClip('daniel', 'preparativos');
+        this.moveVoice(f, actualSub, 'preparativos');
         this.setBark(f, 'subSpecial');
         this.spawnProjectile('notes', f, 9.6, 0, 78, false, 0.38, 0);
       }
     } else if (f.id === 'franciely') {
       if (!actualSub) {
         this.activateTransform(f, 'brava', 10);
-        soundEngine.playClip('franciely', 'cuidar');
+        this.moveVoice(f, actualSub, 'cuidar');
         this.setBark(f, 'special');
       } else {
         moveAnim = 'mama';
-        soundEngine.playClip('franciely', 'ferrinho');
+        this.moveVoice(f, actualSub, 'ferrinho');
         this.setBark(f, 'subSpecial');
         this.spawnProjectile('milk', f, 11.8, 0, 82, false, 0.38, 0);
       }
@@ -1007,7 +1022,7 @@ export class GameEngine {
       moveAnim = 'dance';
       if (!actualSub) {
         this.setBark(f, 'special');
-        soundEngine.playClip('gabi', 'amor');
+        this.moveVoice(f, actualSub, 'amor');
         this.spawnProjectile('superL', f, 10.2, 0, 125, true, 0.48, 0);
         const opp = this.fighters?.[f.index === 0 ? 1 : 0];
         const targetX = opp ? opp.x : f.x + f.facing * 3.5;
@@ -1027,14 +1042,14 @@ export class GameEngine {
         }
       } else {
         this.setBark(f, 'subSpecial');
-        soundEngine.playClip('gabi', 'sing');
+        this.moveVoice(f, actualSub, 'sing');
         this.spawnProjectile('notes', f, 9.5, 0, 80, false, 0.4, 0);
       }
     } else if (f.id === 'paula') {
       if (!actualSub) {
         moveAnim = 'special';
         this.setBark(f, 'special');
-        soundEngine.playClip('paula', 'lunch');
+        this.moveVoice(f, actualSub, 'lunch');
         for (let i = 0; i < 3; i++) {
           this.spawnProjectile(
             'food',
@@ -1051,17 +1066,17 @@ export class GameEngine {
         }
       } else {
         this.activateTransform(f, 'paulaFury', 9.5);
-        soundEngine.playClip('paula', 'bar');
+        this.moveVoice(f, actualSub, 'bar');
         this.setBark(f, 'subSpecial');
       }
     } else if (f.id === 'tainara') {
       if (!actualSub) {
         this.activateTransform(f, 'ricePower', 10);
-        soundEngine.playClip('tainara', 'arroz');
+        this.moveVoice(f, actualSub, 'arroz');
         this.setBark(f, 'special');
       } else {
         moveAnim = 'special';
-        soundEngine.playClip('tainara', 'cuidado');
+        this.moveVoice(f, actualSub, 'cuidado');
         this.setBark(f, 'subSpecial');
         this.spawnCameo('kid', f);
       }
@@ -1819,7 +1834,10 @@ export class GameEngine {
     loser.state = 'knockdown';
     loser.stateTimer = 0;
     soundEngine.playKO();
-    soundEngine.playClip('narrator', 'victory');
+    this.castVoice(loser, 'ko', 0);
+    setTimeout(() => {
+      if (!this.disposed) soundEngine.playClip('narrator', 'victory');
+    }, 1100);
     this.shakeTimer = 0.35;
     this.shakeAmp = 0.3;
     this.emitHud();
@@ -1865,7 +1883,7 @@ export class GameEngine {
         tainara: 'arroz',
         davi: 'videogame',
       };
-      const wk = winClips[winId];
+      const wk = Math.random() < 0.6 ? castKey('win') : winClips[winId];
       if (wk) {
         setTimeout(() => {
           if (!this.disposed) soundEngine.playClip(winId, wk, 0);

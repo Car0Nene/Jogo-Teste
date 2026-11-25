@@ -83,6 +83,29 @@ const CLIPS: Record<string, Record<string, string>> = {
   },
 };
 
+/** Falas do elenco por momento da luta (ElevenLabs, normalizadas em -16 LUFS). */
+export type CastVoiceEvent = 'select' | 'intro' | 'special' | 'subSpecial' | 'win' | 'ko';
+
+const CAST_IDS = ['juraci', 'carlos', 'pedro', 'daniel', 'franciely', 'gabi', 'paula', 'tainara', 'davi'];
+const CAST_FILES: Record<CastVoiceEvent, string> = {
+  select: 'select',
+  intro: 'intro',
+  special: 'special',
+  subSpecial: 'sub_special',
+  win: 'win',
+  ko: 'ko',
+};
+
+for (const id of CAST_IDS) {
+  const clips = (CLIPS[id] ??= {});
+  for (const [event, file] of Object.entries(CAST_FILES)) {
+    clips[`cast_${event}`] = assetUrl(`/assets/voice/elenco/${id}/${file}.mp3`);
+  }
+}
+
+/** Chave da fala do elenco para usar em playClip(id, castKey(evento)). */
+export const castKey = (event: CastVoiceEvent) => `cast_${event}`;
+
 class SoundEngine {
   private ctx: AudioContext | null = null;
   private sfxGain: GainNode | null = null;
@@ -328,6 +351,20 @@ class SoundEngine {
     setTimeout(cleanup, 12000);
     el.play().catch(cleanup);
     return el;
+  }
+
+  private preloaded = new Set<string>();
+
+  /** Baixa antes da luta as falas dos lutadores, para tocarem sem atraso. */
+  preloadFighterVoices(ids: string[]) {
+    if (typeof window === 'undefined' || typeof fetch !== 'function') return;
+    for (const id of ids) {
+      for (const url of Object.values(CLIPS[id] ?? {})) {
+        if (this.preloaded.has(url)) continue;
+        this.preloaded.add(url);
+        fetch(url).catch(() => this.preloaded.delete(url));
+      }
+    }
   }
 
   playAnnouncer(key: AnnouncerKey) {

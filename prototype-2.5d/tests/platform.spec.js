@@ -339,3 +339,63 @@ test('loads the HD move atlases and builds all detailed arenas', async ({ page }
   expect(result.atlasAvailable).toEqual(Array(15).fill(true));
   expect(result.parallaxUpdated).toEqual(Array(5).fill(true));
 });
+
+test('cast voices exist and play on select, specials, KO and victory', async ({ page, request }, testInfo) => {
+  test.skip(testInfo.project.name !== 'desktop-chromium');
+  const ids = ['juraci', 'carlos', 'pedro', 'daniel', 'franciely', 'gabi', 'paula', 'tainara', 'davi'];
+  const files = ['select', 'intro', 'special', 'sub_special', 'win', 'ko'];
+  for (const id of ids) {
+    for (const file of files) {
+      const res = await request.get(`/assets/voice/elenco/${id}/${file}.mp3`);
+      expect(res.status(), `${id}/${file}`).toBe(200);
+      expect((await res.body()).length, `${id}/${file}`).toBeGreaterThan(5000);
+    }
+  }
+  await page.goto('/');
+  const result = await page.evaluate(async () => {
+    const { GameEngine } = await import('/src/engine/GameEngine.ts');
+    const { soundEngine } = await import('/src/engine/audio.ts');
+    const played = [];
+    soundEngine.playClip = (who, key) => played.push(`${who}:${key}`);
+    soundEngine.playSpecial = () => {};
+    soundEngine.playBless = () => {};
+    soundEngine.playKO = () => {};
+    const engine = Object.create(GameEngine.prototype);
+    Object.assign(engine, {
+      matchPhase: 'fighting', gameMode: 'cpu', difficulty: 'normal', disposed: true,
+      emitHud() {}, spawnSparks() {}, spawnProjectile() {}, spawnCameo() {}, setBark() {},
+      activateTransform(f, form) { f.form = form; f.state = 'transform'; },
+    });
+    const make = (id) => ({
+      id, index: 0, x: 0, y: 0, vx: 0, vy: 0, facing: 1, hp: 1000, meter: 100, form: 'normal',
+      formTimer: 0, state: 'idle', stateTimer: 0, activeMove: null, moveElapsed: 0, roundsWon: 0,
+      comboCount: 0, comboResetTimer: 0, bark: null, barkTimer: 0, nextCarlosForm: 'gordao',
+      daviIdleTime: 0, daviVoiceCooldown: 0, daviSpecialCooldown: 0, hitInvuln: 0, slipTimer: 0,
+    });
+    const realRandom = Math.random;
+    const out = {};
+    for (const id of ['juraci', 'carlos', 'pedro', 'daniel', 'franciely', 'gabi', 'paula', 'tainara']) {
+      out[id] = [];
+      for (const [roll, sub] of [[0.9, false], [0.9, true], [0.1, false]]) {
+        Math.random = () => roll;
+        played.length = 0;
+        const f = make(id);
+        engine.trySpecial(f, sub);
+        out[id].push(played.join(','));
+      }
+    }
+    Math.random = realRandom;
+    played.length = 0;
+    engine.triggerKO(make('pedro'), make('tainara'));
+    out.ko = played.join(',');
+    return out;
+  });
+  for (const id of ['carlos', 'pedro', 'daniel', 'franciely', 'gabi', 'paula', 'tainara']) {
+    expect(result[id][0], `${id} especial`).toContain(`${id}:cast_special`);
+    expect(result[id][1], `${id} sub-especial`).toContain(`${id}:cast_subSpecial`);
+    expect(result[id][2], `${id} fala clássica`).not.toContain('cast_');
+  }
+  expect(result.juraci[0]).toContain('juraci:cast_special');
+  expect(result.juraci[1]).toContain('franciely:isso');
+  expect(result.ko).toBe('tainara:cast_ko');
+});

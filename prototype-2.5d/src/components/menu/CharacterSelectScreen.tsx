@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import { FIGHTERS, FIGHTER_LIST, FighterId } from '../../data/fighters';
 import { STAGE_LIST } from '../../data/stages';
-import { soundEngine } from '../../engine/audio';
+import { castKey, soundEngine } from '../../engine/audio';
 import { CpuDifficulty, GameMode } from '../../engine/GameEngine';
 import { AnimatedFighterCanvas, FighterPortrait } from '../FighterBadgeSvg';
 import { SpecialSpritePreview } from './SpecialSpritePreview';
@@ -35,17 +35,8 @@ interface CharacterSelectScreenProps {
   onProceedToStages: () => void;
 }
 
-const VOICE_SELECT_CLIP: Record<FighterId, string> = {
-  juraci: 'cozinha',
-  carlos: 'pizzaAmor',
-  pedro: 'fumaBebe',
-  daniel: 'praia',
-  franciely: 'cuidar',
-  gabi: 'amor',
-  paula: 'lunch',
-  tainara: 'arroz',
-  davi: 'videogame',
-};
+/** Fala de seleção do elenco (uma por lutador, gravada para este momento). */
+const VOICE_SELECT_CLIP = castKey('select');
 
 export function CharacterSelectScreen({
   gameMode,
@@ -78,14 +69,14 @@ export function CharacterSelectScreen({
       onSelectP1(id);
       if (autoConfirm) {
         setP1Locked(true);
-        soundEngine.playClip(id, VOICE_SELECT_CLIP[id], 250, true);
+        soundEngine.playClip(id, VOICE_SELECT_CLIP, 250, true);
         setPickSlot('p2');
       }
     } else {
       onSelectP2(id);
       if (autoConfirm) {
         setP2Locked(true);
-        soundEngine.playClip(id, VOICE_SELECT_CLIP[id], 250, true);
+        soundEngine.playClip(id, VOICE_SELECT_CLIP, 250, true);
       }
     }
   };
@@ -93,7 +84,7 @@ export function CharacterSelectScreen({
   const confirmActiveSlot = () => {
     const activeId = pickSlot === 'p1' ? p1Id : p2Id;
     soundEngine.playUi('select');
-    soundEngine.playClip(activeId, VOICE_SELECT_CLIP[activeId], 250, true);
+    soundEngine.playClip(activeId, VOICE_SELECT_CLIP, 250, true);
     if (pickSlot === 'p1') {
       setP1Locked(true);
       setPickSlot('p2');
