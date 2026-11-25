@@ -1417,7 +1417,7 @@
   .ff-select-arcade .ff-character-roster-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); grid-template-rows: repeat(5, auto); gap: 5px; }
   .ff-select-arcade .ff-character-roster-card,
   .ff-select-arcade .ff-roster-empty { height: auto; aspect-ratio: 1; }
-  .ff-select-arcade .ff-character-roster-card { padding: 0; border: 2px solid rgb(120 100 70 / 0.55); background: #0b090f; justify-content: flex-end; overflow: hidden; }
+  .ff-select-arcade .ff-character-roster-card { position: relative; padding: 0; border: 2px solid rgb(120 100 70 / 0.55); background: #0b090f; justify-content: flex-end; overflow: hidden; }
   .ff-select-arcade .ff-character-roster-card .ff-roster-portrait { position: absolute; inset: 0; height: auto; width: auto; }
   .ff-select-arcade .ff-character-roster-card .ff-roster-portrait img { object-position: center top; }
   .ff-select-arcade .ff-character-roster-name { position: relative; z-index: 1; padding: 2px 0; font-size: 9px; background: linear-gradient(0deg, rgb(0 0 0 / .85), transparent); }
