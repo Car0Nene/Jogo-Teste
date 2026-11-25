@@ -14,6 +14,7 @@ import {
   DAVI_ATLAS_SCALE,
   SELECT_POSES,
   SPRITE_ATLAS,
+  SpriteAnimMap,
   SpriteFrame,
 } from '../data/spriteAtlas';
 import { createContactShadowTexture } from './proceduralTextures';
@@ -457,6 +458,36 @@ interface PoseResult {
   sy: number;
 }
 
+/**
+ * Forma com roupa própria (Modo Fé, Gordão): toda animação que a forma não tem desenhada usa
+ * quadros da própria forma, para o personagem nunca "trocar de roupa" no meio de um golpe ou pulo.
+ */
+const formAnimCache = new Map<string, SpriteAnimMap>();
+function completeFormAnims(id: FighterId, form: string, fa: SpriteAnimMap): SpriteAnimMap {
+  const key = `${id}@${form}`;
+  const hit = formAnimCache.get(key);
+  if (hit) return hit;
+  const idle = fa.idle || [];
+  const pick = (...names: string[]) => names.map((n) => fa[n]).find((f) => f && f.length) || idle;
+  const out: SpriteAnimMap = { ...SPRITE_ATLAS[id] };
+  for (const k of Object.keys(out)) out[k] = idle;
+  Object.assign(out, {
+    jump: [idle[0], pick('run')[1] ?? idle[0]],
+    flykick: pick('medium'),
+    crouch: idle,
+    guard: idle,
+    hurt: idle,
+    knockdown: idle,
+    getup: idle,
+    win: pick('heavy'),
+    special: pick('heavy'),
+    combo: pick('medium'),
+  });
+  Object.assign(out, fa);
+  formAnimCache.set(key, out);
+  return out;
+}
+
 function resolveSpritePose(
   id: FighterId,
   state: AnimState,
@@ -466,7 +497,7 @@ function resolveSpritePose(
 ): PoseResult {
   // Forma com roupa própria (ex.: Modo Fé do Carlos): as animações dela substituem as do personagem base.
   const formAnims = ctx.form ? HD_FORM_ANIMS[`${id}@${ctx.form}`] : undefined;
-  const S = formAnims && state !== 'transform' ? { ...SPRITE_ATLAS[id], ...formAnims } : SPRITE_ATLAS[id];
+  const S = formAnims && state !== 'transform' ? completeFormAnims(id, ctx.form as string, formAnims) : SPRITE_ATLAS[id];
   const fallback = S.idle || [];
   const pose: PoseResult = {
     frame: fallback[0] || null,
@@ -502,7 +533,12 @@ function resolveSpritePose(
   if (state === 'transform') {
     const formKey = ctx.nextForm || ctx.form;
     const total = formKey === 'hulk' ? 1.3 : formKey === 'crente' ? 1.4 : 1.15;
-    const frames = S[formKey] && S[formKey].length ? S[formKey] : fallback;
+    const nextFormArt = HD_FORM_ANIMS[`${id}@${formKey}`];
+    const frames = nextFormArt?.idle?.length
+      ? [nextFormArt.idle[0], nextFormArt.idle[1] ?? nextFormArt.idle[0]]
+      : S[formKey] && S[formKey].length
+      ? S[formKey]
+      : fallback;
     switch (formKey) {
       case 'gordao':
         if (t < 0.65) {
@@ -570,7 +606,7 @@ function resolveSpritePose(
 
   // Big forms: Carlos Gordão & Pedro Monstrão
   const big =
-    ctx.form === 'gordao' && S.gordao
+    ctx.form === 'gordao' && S.gordao && !formAnims
       ? { idle: S.gordao[1] || S.gordao[0], windup: S.gordao[1] || S.gordao[0], pose: S.gordao[2] || S.gordao[1], hurt: S.hurt?.[0] || S.gordao[1] }
       : ctx.form === 'hulk' && S.hulk
       ? { idle: S.hulk[0], windup: S.hulk[0], pose: S.hulk[1] || S.hulk[0], hurt: S.hulk[0] }

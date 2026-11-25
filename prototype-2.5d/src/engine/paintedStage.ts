@@ -22,14 +22,17 @@ export interface PaintedStageLayout {
   /** repetição da textura do chão (lado a lado, profundidade) */
   floorRepeat: [number, number];
   floorTint?: number;
+  /** espelha a textura nas repetições (chão tirado da pintura do fundo) */
+  floorMirror?: boolean;
   props: PaintedProp[];
 }
 
 export const PAINTED_STAGES: Partial<Record<StageId, PaintedStageLayout>> = {
   bar: {
     bg: { z: -14, width: 33, tint: 0xf4eef6 },
-    floorRepeat: [24, 6.6],
-    floorTint: 0x8c8498,
+    floorRepeat: [2.4, 2.2],
+    floorTint: 0xb4a9bb,
+    floorMirror: true,
     props: [
       { obj: 0, x: -7.8, z: -5, h: 1.5 }, // mesa com cadeiras
       { obj: 1, x: 8.4, z: -5.5, h: 1.4 }, // engradados
@@ -81,7 +84,7 @@ export function buildPaintedLayers(
 
   // chão: do pé do fundo até perto da câmera, recebe as sombras dos lutadores
   const floorTex = track(loadTex(assetUrl(`${base}/chao.webp`), anisotropy));
-  floorTex.wrapS = floorTex.wrapT = THREE.RepeatWrapping;
+  floorTex.wrapS = floorTex.wrapT = layout.floorMirror ? THREE.MirroredRepeatWrapping : THREE.RepeatWrapping;
   floorTex.repeat.set(layout.floorRepeat[0], layout.floorRepeat[1]);
   const depth = 22;
   const floor = new THREE.Mesh(

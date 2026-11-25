@@ -46,7 +46,7 @@ SHEETS = {
     'dano': {'rows': [[('hurt', 4)], [('knockdown', 4)], [('getup', 2), ('win', 2)]], 'ref': 'win'},
 }
 # Formas com roupa própria: folhas extras <forma>-<folha>.png; as animações ganham o prefixo "<forma>:".
-FORMS = {'carlos': {'crente': ['locomocao', 'golpes']}}
+FORMS = {'carlos': {'crente': ['locomocao', 'golpes'], 'gordao': ['locomocao', 'golpes']}}
 # quadros usados de cada animação (índices dentro da linha) — permite descartar um quadro ruim
 PICK = {}
 # quadros que o gerador desenhou virados para a esquerda: (lutador, animação) -> índices a espelhar

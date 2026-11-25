@@ -40,6 +40,10 @@ def load_props(path):
     return out
 
 
+# chão tirado da própria pintura do fundo (faixa de calçada), para casar cor e luz com a fachada
+FLOOR_FROM_BACKGROUND = {'bar': (705, 880)}
+
+
 def build(sid):
     src = ROOT / 'art-source' / 'stages' / sid
     dst = APP / 'public' / 'assets' / 'stages' / 'painted' / sid
@@ -48,8 +52,12 @@ def build(sid):
     bg = Image.open(src / 'fundo.png').convert('RGB')
     bg.save(dst / 'fundo.webp', 'WEBP', quality=88, method=6)
 
-    floor = Image.open(src / 'chao.png').convert('RGB')
-    floor = floor.resize((1024, 1024), Image.LANCZOS)
+    band = FLOOR_FROM_BACKGROUND.get(sid)
+    if band and (src / 'fundo-original.png').exists():
+        orig = Image.open(src / 'fundo-original.png').convert('RGB')
+        floor = orig.crop((0, band[0], orig.width, band[1])).resize((2048, 512), Image.LANCZOS)
+    else:
+        floor = Image.open(src / 'chao.png').convert('RGB').resize((1024, 1024), Image.LANCZOS)
     floor.save(dst / 'chao.webp', 'WEBP', quality=86, method=6)
 
     props = []
@@ -61,7 +69,7 @@ def build(sid):
             im.save(dst / name, 'WEBP', quality=90, method=6, exact=True)
             props.append({'file': name, 'w': im.width, 'h': im.height})
     (dst / 'props.json').write_text(json.dumps({'background': list(bg.size), 'props': props}, indent=1), encoding='utf-8')
-    print(f'{sid}: fundo {bg.size}, chão 1024², {len(props)} objetos ->', dst.relative_to(ROOT))
+    print(f'{sid}: fundo {bg.size}, chão {floor.size}, {len(props)} objetos ->', dst.relative_to(ROOT))
 
 
 if __name__ == '__main__':
