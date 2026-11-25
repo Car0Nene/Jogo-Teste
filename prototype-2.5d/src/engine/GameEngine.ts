@@ -531,6 +531,7 @@ export class GameEngine {
     this.clearEntities();
     soundEngine.stopAllVoices();
     soundEngine.preloadFighterVoices([p1, p2, 'narrator']);
+    void soundEngine.preloadSfx();
     this.warmupEffects(['cake', 'beerBlast', 'smoke', 'milk', 'superL', 'brigadeiro', 'food', 'notes']);
     this.warmupFighterTextures();
     soundEngine.startMusic(STAGE_MUSIC[stageId] ?? 'theme', 0.58);

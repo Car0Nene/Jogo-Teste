@@ -29,6 +29,10 @@ const TRACK_PATHS: Record<MusicTrackId, string> = {
   ff3: assetUrl('/assets/music/family-fighter-3'),
 };
 
+/** Efeitos de impacto reais (ElevenLabs Sound Effects), em public/assets/sfx/<nome>.mp3. */
+const SFX_SAMPLES = ['hit_light', 'hit_heavy', 'kick', 'block', 'whoosh_light', 'whoosh_heavy', 'fall'] as const;
+type SfxSample = (typeof SFX_SAMPLES)[number];
+
 const CLIPS: Record<string, Record<string, string>> = {
   davi: {
     outra: assetUrl('/assets/voice/davi-outra.wav'),
@@ -411,10 +415,52 @@ class SoundEngine {
     osc.stop(now + 0.11);
   }
 
+  private samples = new Map<SfxSample, AudioBuffer>();
+  private samplesLoading: Promise<void> | null = null;
+  private hitAlt = false;
+
+  /** Baixa e decodifica os efeitos de impacto (uma vez). Chamado no início da luta. */
+  preloadSfx(): Promise<void> {
+    if (this.samplesLoading) return this.samplesLoading;
+    const ctx = this.ensureContext();
+    if (!ctx || typeof fetch !== 'function') return Promise.resolve();
+    this.samplesLoading = Promise.all(
+      SFX_SAMPLES.map(async (name) => {
+        try {
+          const res = await fetch(assetUrl(`/assets/sfx/${name}.mp3`));
+          if (!res.ok) return;
+          this.samples.set(name, await ctx.decodeAudioData(await res.arrayBuffer()));
+        } catch {
+          // sem a amostra, fica o som sintetizado
+        }
+      })
+    ).then(() => undefined);
+    return this.samplesLoading;
+  }
+
+  /** Toca uma amostra; devolve false se ela ainda não está pronta (aí usa-se o sintetizado). */
+  private playSample(name: SfxSample, gain = 1, rate = 1): boolean {
+    const buf = this.samples.get(name);
+    const ctx = this.ctx;
+    const dest = this.getSfxDest();
+    if (!buf || !ctx || !dest) return false;
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+    src.playbackRate.value = rate * (0.95 + Math.random() * 0.1);
+    const g = ctx.createGain();
+    g.gain.value = gain;
+    src.connect(g).connect(dest);
+    src.start();
+    return true;
+  }
+
   playHit(heavy = false, blocked = false) {
     const ctx = this.ensureContext();
     const dest = this.getSfxDest();
     if (!ctx || !dest) return;
+    this.hitAlt = !this.hitAlt;
+    const sample: SfxSample = blocked ? 'block' : heavy ? 'hit_heavy' : this.hitAlt ? 'hit_light' : 'kick';
+    if (this.playSample(sample, blocked ? 0.8 : heavy ? 1 : 0.85)) return;
     const now = ctx.currentTime;
 
     const osc = ctx.createOscillator();
@@ -450,6 +496,7 @@ class SoundEngine {
     const ctx = this.ensureContext();
     const dest = this.getSfxDest();
     if (!ctx || !dest) return;
+    if (this.playSample(heavy ? 'whoosh_heavy' : 'whoosh_light', 0.55)) return;
     const now = ctx.currentTime;
     const dur = heavy ? 0.16 : 0.09;
     const buf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * dur), ctx.sampleRate);
@@ -663,6 +710,7 @@ class SoundEngine {
     const ctx = this.ensureContext();
     const dest = this.getSfxDest();
     if (!ctx || !dest) return;
+    if (this.samples.has('fall')) setTimeout(() => this.playSample('fall', 0.9), 380);
     const now = ctx.currentTime;
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
