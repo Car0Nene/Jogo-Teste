@@ -30,6 +30,21 @@ export default defineConfig(() => {
         },
       },
     ],
+    build: {
+      // Bibliotecas em arquivos próprios: ficam no cache do navegador entre atualizações do jogo.
+      rolldownOptions: {
+        output: {
+          codeSplitting: {
+            groups: [
+              { name: 'vendor-three', test: /node_modules[\\/]three/ },
+              { name: 'vendor-react', test: /node_modules[\\/](react|react-dom|scheduler|motion|framer-motion|lucide-react)/ },
+              { name: 'vendor-supabase', test: /node_modules[\\/]@supabase/ },
+            ],
+          },
+        },
+      },
+      chunkSizeWarningLimit: 800,
+    },
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),
