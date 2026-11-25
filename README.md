@@ -41,6 +41,14 @@ As poses de combate são recortes da arte fornecida, não uma animação complet
 
 A aplicação usa os sprites e cenários existentes e preserva o fluxo de luta, a física e os controles. A evolução visual da interface inclui seleção adaptada à viewport e uma introdução cinematográfica curta antes da luta. Para arte de personagens redesenhada, poses de entrada próprias ou cenários com camadas separadas, ainda são necessários novos assets; as imagens-fonte atuais não fornecem esses elementos separados.
 
+## Diagnóstico e ferramentas
+
+- **Modo diagnóstico:** abra o jogo com `?diag=1` no endereço ou aperte **F3**. Mostra FPS, tempo e picos de frame, draw calls, memória da GPU (geometrias, texturas, shaders) e objetos na cena.
+- **Benchmark dos golpes:** com `npm run dev` rodando, `node tools/bench-hits.mjs <rótulo>` mede 10 golpes, 10 especiais, especiais simultâneos e uma luta longa, e aponta vazamentos e compilações de shader durante o combate.
+- **Animação dos lutadores:** cada lutador tem 4 folhas com fundo verde em `art-source/<id>-hd/` (movimentação, golpes, pulos/defesa, dano/vitória). `python3 tools/build_fighter_hd.py <id>` recorta, iguala a escala e gera `public/assets/sprites/<id>-anim-hd.webp` e `src/data/hdAnimAtlas.ts`. Para trocar um movimento, substitua a folha e rode de novo.
+- **Vozes do elenco:** `public/assets/voice/elenco/<id>/{select,intro,special,sub_special,win,ko}.mp3`, normalizadas em -16 LUFS.
+- **Sons de impacto:** `public/assets/sfx/`; sem eles, o jogo volta ao som sintetizado.
+
 ## GitHub Pages
 
 A raiz do branch `main` é a origem do Pages. O workflow compila `prototype-2.5d/` e sincroniza o resultado na raiz após as verificações passarem.
