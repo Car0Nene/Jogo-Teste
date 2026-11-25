@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { HD_ANIM_VERSION } from '../data/hdAnimAtlas';
 import { assetUrl } from '../assetUrl';
 import { FIGHTERS, FighterId, FORMS, FormId } from '../data/fighters';
 import { STAGES, StageId } from '../data/stages';
@@ -41,6 +42,7 @@ let sharedAtlasHdTex: THREE.Texture | null = null;
 let sharedAtlasHd2Tex: THREE.Texture | null = null;
 const sharedFighterHd3Tex: Partial<Record<FighterId, THREE.Texture>> = {};
 const sharedFighterHd4Tex: Partial<Record<FighterId, THREE.Texture>> = {};
+const sharedFighterHd6Tex: Partial<Record<FighterId, THREE.Texture>> = {};
 let sharedDaviTex: THREE.Texture | null = null;
 
 function configureSpriteTexture(tex: THREE.Texture, anisotropy: number): THREE.Texture {
@@ -79,6 +81,17 @@ function getFighterHd3Texture(id: FighterId, anisotropy: number): THREE.Texture 
   const loader = new THREE.TextureLoader();
   const tex = configureSpriteTexture(loader.load(assetUrl(`/assets/sprites/${id}-hd.webp`)), anisotropy);
   sharedFighterHd3Tex[id] = tex;
+  return tex;
+}
+
+/** Atlas de animação completa (padrão Pedro), gerado por tools/build_fighter_hd.py. */
+function getFighterHd6Texture(id: FighterId, anisotropy: number): THREE.Texture | undefined {
+  const version = HD_ANIM_VERSION[id];
+  if (!version) return undefined;
+  if (sharedFighterHd6Tex[id]) return sharedFighterHd6Tex[id];
+  const loader = new THREE.TextureLoader();
+  const tex = configureSpriteTexture(loader.load(assetUrl(`/assets/sprites/${id}-anim-hd.webp?v=${version}`)), anisotropy);
+  sharedFighterHd6Tex[id] = tex;
   return tex;
 }
 
@@ -150,8 +163,9 @@ export interface CharacterRig {
   atlasHd2Tex: THREE.Texture;
   atlasHd3Tex?: THREE.Texture;
   atlasHd4Tex?: THREE.Texture;
+  atlasHd6Tex?: THREE.Texture;
   daviTex?: THREE.Texture;
-  atlasTier: 0 | 1 | 2 | 3 | 4 | 5;
+  atlasTier: 0 | 1 | 2 | 3 | 4 | 5 | 6;
   baseScale: number;
   baseShadowOpacity: number;
   hitFlashTimer: number;
@@ -195,6 +209,7 @@ export function buildCharacterRig(
   const atlasHdTex = getAtlasTexture(1, anisotropy);
   const atlasHd2Tex = getAtlasTexture(2, anisotropy);
   const atlasHd3Tex = getFighterHd3Texture(id, anisotropy);
+  const atlasHd6Tex = getFighterHd6Texture(id, anisotropy);
   const atlasHd4Tex = getFighterHd4Texture(id, anisotropy);
   const daviTex = id === 'davi' ? getDaviTexture(anisotropy) : undefined;
 
@@ -377,6 +392,7 @@ export function buildCharacterRig(
     atlasHdTex,
     atlasHd2Tex,
     atlasHd3Tex,
+    atlasHd6Tex,
     atlasHd4Tex,
     daviTex,
     atlasTier: 0,
@@ -822,10 +838,12 @@ export function animateCharacterRig(
   if (!frame) return;
 
   const [sx, sy, sw, sh, ax, ay, hdFlag] = frame;
-  const tier: 0 | 1 | 2 | 3 | 4 | 5 =
-    hdFlag === 5 ? 5 : hdFlag === 4 ? 4 : hdFlag === 3 ? 3 : hdFlag === 2 ? 2 : hdFlag === 1 ? 1 : 0;
+  const tier: 0 | 1 | 2 | 3 | 4 | 5 | 6 =
+    hdFlag === 6 ? 6 : hdFlag === 5 ? 5 : hdFlag === 4 ? 4 : hdFlag === 3 ? 3 : hdFlag === 2 ? 2 : hdFlag === 1 ? 1 : 0;
   const tex =
-    tier === 5
+    tier === 6
+      ? rig.atlasHd6Tex
+      : tier === 5
       ? rig.daviTex
       : tier === 4 && rig.atlasHd4Tex
       ? rig.atlasHd4Tex
@@ -864,7 +882,9 @@ export function animateCharacterRig(
   const texW = img.width;
   const texH = img.height;
   const ad =
-    tier === 4
+    tier === 6
+      ? ATLAS_HD_SCALE
+      : tier === 4
       ? ATLAS_HD4_SCALE
       : tier === 3
       ? ATLAS_HD3_SCALE
@@ -878,7 +898,7 @@ export function animateCharacterRig(
 
   const keepIntentionalScale = ctx.form === 'gordao' || ctx.form === 'hulk' || state === 'crouch';
   const heightCorrection =
-    tier !== 1 && tier !== 3 && tier !== 4 && tier !== 5 && SCALE_STABLE_STATES.has(state) && !keepIntentionalScale
+    tier !== 1 && tier !== 3 && tier !== 4 && tier !== 5 && tier !== 6 && SCALE_STABLE_STATES.has(state) && !keepIntentionalScale
       ? clamp((BASE_SPRITE_HEIGHT[rig.id] || sh) / sh, 0.86, 1.14)
       : 1;
   const formScale = ctx.form === 'hulk' ? 1.1 : ctx.form === 'gordao' ? 1.05 : 1;

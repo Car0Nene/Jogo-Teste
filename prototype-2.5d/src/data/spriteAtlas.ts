@@ -1,5 +1,6 @@
 // 2D HD Semi-Realistic Sprite Atlas + Pedro HD + Cameo Dog
 import { FighterId } from './fighters';
+import { HD_ANIMS } from './hdAnimAtlas';
 
 // Frame tuple: [x, y, w, h, anchorX, anchorY, atlasTier?]
 // atlasTier: 0 = fighters.webp, 1 = pedro-hd.webp, 2 = fighters-hd.webp, 3/4 = per-fighter HD atlases, 5 = Davi's atlas
@@ -193,7 +194,20 @@ const PEDRO_SP = {
   hulk_blast: [774, 422, 580, 377, 133.4, 377, 4] as SpriteFrame,
 };
 
-function buildHdFighterAnims(p: SpriteFrame[], extras: SpriteAnimMap): SpriteAnimMap {
+// Animações que o atlas completo (padrão Pedro) substitui. As demais chaves dos extras
+// (especiais, formas, golpe forte característico, vitória alternativa) continuam valendo.
+const FULL_ANIM_KEYS = new Set(['idle', 'walk', 'run', 'jump', 'crouch', 'guard', 'light', 'medium', 'hurt', 'knockdown', 'getup', 'flykick']);
+
+function buildHdFighterAnims(p: SpriteFrame[], extras: SpriteAnimMap, id?: FighterId): SpriteAnimMap {
+  const full = id ? HD_ANIMS[id] : undefined;
+  if (full) {
+    const signature = Object.fromEntries(Object.entries(extras).filter(([k]) => !FULL_ANIM_KEYS.has(k)));
+    return { ...legacyHdAnims(p), ...full, ...signature };
+  }
+  return { ...legacyHdAnims(p), ...extras };
+}
+
+function legacyHdAnims(p: SpriteFrame[]): SpriteAnimMap {
   return {
     idle: [p[0]],
     walk: [p[1], p[0]],
@@ -206,7 +220,6 @@ function buildHdFighterAnims(p: SpriteFrame[], extras: SpriteAnimMap): SpriteAni
     heavy: [p[0], p[4]],
     hurt: [p[2]],
     win: [p[7]],
-    ...extras,
   };
 }
 
@@ -248,42 +261,42 @@ export const SPRITE_ATLAS: Record<FighterId | 'cao', SpriteAnimMap> = {
     medium: [JURACI_HD[2], JURACI_SP.pan_stance],
     win: [JURACI_HD[7], JURACI_SP.win_alt],
     hurt: [JURACI_SP.hurt],
-  }),
+  }, 'juraci'),
   carlos: buildHdFighterAnims(CARLOS_HD, {
     special: [CARLOS_HD[2], CARLOS_SP.flying_kick],
     gordao: [CARLOS_SP.gordao_pizza, CARLOS_SP.gordao_stance, CARLOS_SP.gordao_punch],
     crente: [CARLOS_SP.crente_pray, CARLOS_SP.crente_halo],
-  }),
+  }, 'carlos'),
   daniel: buildHdFighterAnims(DANIEL_HD, {
     dance: [DANIEL_SP.dance1, DANIEL_SP.dance2],
     praia: [DANIEL_SP.praia_idle, DANIEL_SP.praia_palm, DANIEL_SP.praia_kick],
     hurt: [DANIEL_SP.hurt],
-  }),
+  }, 'daniel'),
   franciely: buildHdFighterAnims(FRANCIELY_HD, {
     brava: [FRANCIELY_SP.brava1, FRANCIELY_SP.brava2],
     mama: [FRANCIELY_SP.mama1, FRANCIELY_SP.mama2],
     win: [FRANCIELY_HD[7], FRANCIELY_SP.win_alt],
     hurt: [FRANCIELY_SP.hurt],
-  }),
+  }, 'franciely'),
   gabi: buildHdFighterAnims(GABI_HD, {
     special: [GABI_SP.superl_up, GABI_SP.superl_cast],
     dance: [GABI_SP.mic1, GABI_SP.mic2],
     heavy: [GABI_HD[0], GABI_SP.hair_kick],
     hurt: [GABI_SP.hurt],
-  }),
+  }, 'gabi'),
   paula: buildHdFighterAnims(PAULA_HD, {
     special: [PAULA_SP.lunch1, PAULA_SP.lunch2],
     paulaFury: [PAULA_SP.fury1, PAULA_SP.fury2],
     win: [PAULA_HD[7], PAULA_SP.win_alt],
     hurt: [PAULA_SP.hurt],
-  }),
+  }, 'paula'),
   tainara: buildHdFighterAnims(TAINARA_HD, {
     special: [TAINARA_SP.cuidado1, TAINARA_SP.cuidado2],
     ricePower: [TAINARA_SP.rice1, TAINARA_SP.rice2],
     heavy: [TAINARA_HD[0], TAINARA_SP.skirt_kick],
     win: [TAINARA_HD[7], TAINARA_SP.win_alt],
     hurt: [TAINARA_SP.hurt],
-  }),
+  }, 'tainara'),
   pedro: {
     hulk: [PEDRO_SP.hulk_idle, PEDRO_SP.hulk_punch, PEDRO_SP.hulk_blast],
     escape: [[587,210,46,186,24.8,185.9],[1584,210,86,184,44.2,183.9],[931,402,79,183,40.8,182.9],[1234,0,76,192,31.8,191.8]],
