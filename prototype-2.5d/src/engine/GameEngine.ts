@@ -67,6 +67,8 @@ export interface HudSnapshot {
   p2: HudFighterSnapshot;
   /** Cena de especial (cut-in): quem soltou, nome do golpe; key muda a cada especial. */
   superCutin: { slot: 'p1' | 'p2'; fighterId: FighterId; name: string; move: string; full: boolean; key: number } | null;
+  /** golpe cinematográfico em andamento: faixas pretas de cinema na tela */
+  cinematic: boolean;
 }
 
 interface FighterRuntime {
@@ -210,6 +212,9 @@ export class GameEngine {
   private finTimer = 0;
   private finDuration = 0;
   private finFocusX = 0;
+  private finFacing: 1 | -1 = 1;
+  /** câmera lenta do golpe cinematográfico (segundos reais restantes) */
+  private slowmoTimer = 0;
   private superCutin: HudSnapshot['superCutin'] = null;
   private superCutinTimer = 0;
   private superKey = 0;
@@ -912,6 +917,13 @@ export class GameEngine {
       return;
     }
 
+    // golpe cinematográfico: frente + Leve juntos (Super Bundada do Daniel, Super Cigarro do Pedro)
+    const fin = spec.moves.combo;
+    if (btn === 'light' && f.y <= 0.08 && fin?.finisher && this.isHeld(f.index, f.facing === 1 ? 'right' : 'left')) {
+      this.startAttackMove(f, fin);
+      return;
+    }
+
     if (f.y > 0.08) {
       this.startAttackMove(f, spec.moves.air);
     } else {
@@ -943,7 +955,10 @@ export class GameEngine {
     const total = move.startup + move.active + move.recovery;
     this.finTimer = this.finDuration = total + 0.35;
     this.finFocusX = opp ? f.x + (opp.x - f.x) * 0.4 : f.x;
-    this.hitstopTimer = Math.max(this.hitstopTimer, 0.1);
+    this.finFacing = f.facing;
+    // preparação em câmera lenta (metade da velocidade), impacto em velocidade normal
+    this.slowmoTimer = move.startup * 2;
+    this.hitstopTimer = Math.max(this.hitstopTimer, 0.12);
     this.superKey++;
     this.superCutin = {
       slot: f.index === 0 ? 'p1' : 'p2',
@@ -1510,6 +1525,10 @@ export class GameEngine {
   }
 
   private step(dt: number) {
+    if (this.slowmoTimer > 0 && !this.paused) {
+      this.slowmoTimer = Math.max(0, this.slowmoTimer - dt);
+      dt *= 0.5;
+    }
     if (!this.paused) {
       this.worldTime += dt;
       this.currentStage?.update(this.worldTime, dt);
@@ -1737,6 +1756,13 @@ export class GameEngine {
           this.trySpecial(cpu, false);
         } else if (cpu.id !== 'davi' && cpu.meter >= 50 && dist > 1.8 && Math.random() < aggr * 0.32) {
           this.trySpecial(cpu, true);
+        } else if (
+          FIGHTERS[cpu.id].moves.combo?.finisher &&
+          (cpu.id === 'pedro' ? dist > 2.6 && dist < 7 : dist <= 2.4) &&
+          Math.random() < aggr * 0.12
+        ) {
+          // golpe cinematográfico da CPU (bundada de perto, cigarros de longe)
+          this.startAttackMove(cpu, FIGHTERS[cpu.id].moves.combo!);
         } else if (dist <= 2.15 && Math.random() < aggr) {
           this.tryAttack(cpu, Math.random() < 0.55 ? 'light' : 'heavy');
         } else if (dist > 3.2 && Math.random() < 0.12 * aggr) {
@@ -2182,15 +2208,19 @@ export class GameEngine {
       camZ = zDist * (1 - 0.28 * k);
     }
     let camDrop = 0;
+    let camOrbit = 0;
     if (this.finTimer > 0 && this.superTimer <= 0) {
       this.finTimer = Math.max(0, this.finTimer - dt);
       const p = 1 - this.finTimer / Math.max(0.001, this.finDuration);
       // entra rápido, segura no golpe e sai suave
       const k = p < 0.2 ? p / 0.2 : p > 0.8 ? (1 - p) / 0.2 : 1;
       const e = k * k * (3 - 2 * k);
-      camX = THREE.MathUtils.lerp(midX, this.finFocusX, 0.85 * e);
-      camZ = zDist * (1 - 0.36 * e);
-      camDrop = 0.45 * e;
+      camX = THREE.MathUtils.lerp(midX, this.finFocusX, 0.9 * e);
+      camZ = zDist * (1 - 0.46 * e);
+      camDrop = 0.6 * e;
+      // câmera gira para o lado de trás de quem ataca: enquadramento de cinema
+      camOrbit = -this.finFacing * 1.6 * e;
+      if (this.finTimer === 0) this.emitHud();
     }
     if (this.superCutinTimer > 0) {
       this.superCutinTimer = Math.max(0, this.superCutinTimer - dt);
@@ -2201,7 +2231,7 @@ export class GameEngine {
     }
 
     this._camTarget.set(
-      camX * 0.85 + sx,
+      camX * 0.85 + sx + camOrbit,
       1.74 + maxY * 0.32 + sy + Math.max(0, camZ - 10) * 0.11 - camDrop,
       camZ
     );
@@ -2260,6 +2290,7 @@ export class GameEngine {
       winnerIndex: this.winnerIndex,
       introLine,
       superCutin: this.superCutin,
+      cinematic: this.finTimer > 0,
       p1: this.snapshotFighter(f1),
       p2: this.snapshotFighter(f2),
     });

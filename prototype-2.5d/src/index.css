@@ -1467,3 +1467,10 @@
 
 /* retratos vêm dos sprites (olhando para a direita): o do jogador 2 vira para o centro */
 .ff-character-panel-p2 .ff-character-portrait > img:first-child { transform: scaleX(-1); }
+
+/* golpe cinematográfico: faixas de cinema */
+.ff-cine-bars { position: absolute; inset: 0; pointer-events: none; z-index: 40; }
+.ff-cine-bars > i { position: absolute; left: 0; right: 0; height: 14%; background: #000; animation: ffCineIn .22s ease-out both; }
+.ff-cine-bars > i:first-child { top: 0; transform-origin: top; }
+.ff-cine-bars > i:last-child { bottom: 0; transform-origin: bottom; }
+@keyframes ffCineIn { from { transform: scaleY(0); } to { transform: scaleY(1); } }

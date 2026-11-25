@@ -186,6 +186,9 @@ function DesktopCommandBar({
         [[k(keyBindings.down), k(keyBindings.special)], 'Sub'],
         [[k(keyBindings.guard)], 'Defesa'],
       ];
+  // golpe cinematográfico: frente + Leve
+  const finLabel = hud.p1.id === 'daniel' ? 'Bundada' : hud.p1.id === 'pedro' ? 'Cigarro' : null;
+  if (finLabel) keys.push([pad ? ['▶', 'A'] : [k(keyBindings.right), k(keyBindings.light)], finLabel]);
   const hold = (action: string) => ({
     onPointerDown: () => onVirtualHold(0, action, true),
     onPointerUp: () => onVirtualHold(0, action, false),
@@ -281,6 +284,12 @@ export function FightHud({
         <FighterMeterBlock f={hud.p2} align="right" compact={compact} />
       </div>
 
+      {hud.cinematic && (
+        <div className="ff-cine-bars" aria-hidden="true">
+          <i />
+          <i />
+        </div>
+      )}
       {hud.superCutin && <SuperCutin key={hud.superCutin.key} c={hud.superCutin} />}
 
       {/* Anúncios (banner, fala de abertura, fim de luta) */}
