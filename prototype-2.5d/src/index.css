@@ -1469,3 +1469,6 @@
     box-shadow: 0 0 0 3px #0b090f, 0 0 0 5px #fbbf24, 0 0 26px rgb(251 191 36 / .55);
   }
 }
+
+/* retratos vêm dos sprites (olhando para a direita): o do jogador 2 vira para o centro */
+.ff-character-panel-p2 .ff-character-portrait > img:first-child { transform: scaleX(-1); }

@@ -675,7 +675,7 @@ function resolveSpritePose(
       break;
     }
     case 'air': {
-      if (id === 'pedro' && S.flykick) pose.frame = pickFrame(S.flykick, 1);
+      if (S.flykick) pose.frame = pickFrame(S.flykick, 1);
       else if (id === 'juraci' || id === 'paula' || id === 'tainara') pose.frame = pickFrame(S.medium, 1) || pickFrame(S.medium, 0);
       else if (id === 'daniel') pose.frame = pickFrame(S.jump, 2);
       else if (id === 'gabi') pose.frame = pickFrame(S.heavy, 2);

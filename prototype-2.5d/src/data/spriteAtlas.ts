@@ -196,7 +196,7 @@ const PEDRO_SP = {
 
 // Animações que o atlas completo (padrão Pedro) substitui. As demais chaves dos extras
 // (especiais, formas, golpe forte característico, vitória alternativa) continuam valendo.
-const FULL_ANIM_KEYS = new Set(['idle', 'walk', 'run', 'jump', 'crouch', 'guard', 'light', 'medium', 'hurt', 'knockdown', 'getup', 'flykick']);
+const FULL_ANIM_KEYS = new Set(['idle', 'walk', 'run', 'jump', 'crouch', 'guard', 'light', 'medium', 'heavy', 'win', 'hurt', 'knockdown', 'getup', 'flykick']);
 
 function buildHdFighterAnims(p: SpriteFrame[], extras: SpriteAnimMap, id?: FighterId): SpriteAnimMap {
   const full = id ? HD_ANIMS[id] : undefined;
@@ -326,6 +326,9 @@ export const SPRITE_ATLAS: Record<FighterId | 'cao', SpriteAnimMap> = {
     : DAVI_ATLAS,
   cao: {"idle":[[1130,589,216,182,107.1,179.9]],"special":[[1350,589,251,182,132.1,182]],"win":[[1605,589,216,182,107.1,179.9]],"run":[[0,960,343,180,182.5,177.8]],"walk":[[1158,960,224,179,114.9,176.8]],"jump":[[1386,960,242,179,97.8,176.8]],"heavy":[[995,1326,239,175,117,174.7]],"medium":[[536,1859,239,170,133.6,169.5]],"light":[[370,2033,205,167,108.7,167.4]],"guard":[[0,2536,255,157,111.8,157]],"crouch":[[994,2536,267,156,135.1,156.1]]},
 };
+
+// Pedro: atlas antigo à mão (especiais/formas), animações base trocadas pelas novas feitas da foto
+if (HD_ANIMS.pedro) Object.assign(SPRITE_ATLAS.pedro, HD_ANIMS.pedro);
 
 export const BASE_SPRITE_HEIGHT: Record<FighterId, number> = Object.fromEntries(
   (['juraci','carlos','pedro','daniel','franciely','gabi','paula','tainara','davi'] as FighterId[]).map((id) => {
