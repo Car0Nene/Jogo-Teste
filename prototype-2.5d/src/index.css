@@ -982,11 +982,6 @@
   object-position: center top;
 }
 
-.ff-character-roster-card[data-fighter="daniel"] .ff-roster-portrait img {
-  transform: scale(1.7);
-  transform-origin: 35% top;
-}
-
 .ff-character-versus {
   display: flex;
   align-items: center;
@@ -1423,7 +1418,7 @@
   .ff-select-arcade .ff-character-roster-card,
   .ff-select-arcade .ff-roster-empty { height: auto; aspect-ratio: 1; }
   .ff-select-arcade .ff-character-roster-card { padding: 0; border: 2px solid rgb(120 100 70 / 0.55); background: #0b090f; justify-content: flex-end; overflow: hidden; }
-  .ff-select-arcade .ff-character-roster-card .ff-roster-portrait { position: absolute; inset: 0; height: 100%; width: 100%; }
+  .ff-select-arcade .ff-character-roster-card .ff-roster-portrait { position: absolute; inset: 0; height: auto; width: auto; }
   .ff-select-arcade .ff-character-roster-card .ff-roster-portrait img { object-position: center top; }
   .ff-select-arcade .ff-character-roster-name { position: relative; z-index: 1; padding: 2px 0; font-size: 9px; background: linear-gradient(0deg, rgb(0 0 0 / .85), transparent); }
   .ff-select-arcade .ff-character-roster-card.is-p1 { border-color: #fbbf24; box-shadow: 0 0 16px rgb(251 191 36 / .55), inset 0 0 12px rgb(251 191 36 / .35); }
