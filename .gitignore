@@ -12,3 +12,6 @@ Thumbs.db
 node_modules/
 dist/
 test-results/
+
+# o projeto usa bun.lock
+prototype-2.5d/package-lock.json
