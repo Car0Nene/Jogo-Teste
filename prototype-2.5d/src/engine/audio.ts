@@ -68,6 +68,7 @@ const CLIPS: Record<string, Record<string, string>> = {
   },
   carlos: {
     pizzaAmor: assetUrl('/assets/voice/generated/carlos-pedido-de-pizza-com-amor.mp3'),
+    fe: assetUrl('/assets/voice/elenco/carlos/fe.mp3'),
   },
   paula: {
     lunch: assetUrl('/assets/voice/generated/paula-super-almoco.mp3'),
