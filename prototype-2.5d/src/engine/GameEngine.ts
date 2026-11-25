@@ -17,7 +17,7 @@ import {
   ResolutionScale,
 } from '../data/settings';
 import { STAGES, StageId } from '../data/stages';
-import { CastVoiceEvent, STAGE_MUSIC, castKey, soundEngine } from './audio';
+import { CastVoiceEvent, STAGE_MUSIC, castKey, clipText, hasClip, soundEngine } from './audio';
 import {
   AnimState,
   CharacterRig,
@@ -65,6 +65,8 @@ export interface HudSnapshot {
   introLine: { speaker: 'p1' | 'p2'; name: string; text: string } | null;
   p1: HudFighterSnapshot;
   p2: HudFighterSnapshot;
+  /** Cena de especial (cut-in): quem soltou, nome do golpe; key muda a cada especial. */
+  superCutin: { slot: 'p1' | 'p2'; fighterId: FighterId; name: string; move: string; full: boolean; key: number } | null;
 }
 
 interface FighterRuntime {
@@ -95,6 +97,8 @@ interface FighterRuntime {
   roundsWon: number;
   bark: string | null;
   barkTimer: number;
+  /** Quando a última fala com áudio foi mostrada (texto e som sempre juntos). */
+  barkVoicedAt?: number;
   dogCooldown: number;
   slipTimer: number;
   hitInvuln: number;
@@ -194,6 +198,13 @@ export class GameEngine {
   private introLineTimer = 0;
 
   private hitstopTimer = 0;
+  /** Câmera do especial: aproxima de quem soltou o golpe enquanto o jogo congela. */
+  private superTimer = 0;
+  private superDuration = 0;
+  private superFocusX = 0;
+  private superCutin: HudSnapshot['superCutin'] = null;
+  private superCutinTimer = 0;
+  private superKey = 0;
   private shakeTimer = 0;
   private shakeAmp = 0;
   private worldTime = 0;
@@ -483,14 +494,30 @@ export class GameEngine {
     this.spawnFighters(p1, p2);
   }
 
-  /** Fala do elenco (ElevenLabs) para um momento da luta. */
-  private castVoice(f: FighterRuntime, event: CastVoiceEvent, throttleMs = 700) {
-    soundEngine.playClip(f.id, castKey(event), throttleMs);
+  /**
+   * Toca uma fala e mostra na tela exatamente o que foi dito. Texto e áudio saem sempre juntos:
+   * se a fala não tocar (mudo, outra fala em andamento), o texto dela também não aparece.
+   */
+  private speak(f: FighterRuntime, who: string, key: string, throttleMs = 700): boolean {
+    if (!soundEngine.playClip(who, key, throttleMs)) return false;
+    const text = clipText(who, key);
+    if (text) {
+      const SPEAKER: Record<string, string> = { franciely: 'Franciely', dada: 'Dadá', cao: 'Cão', narrator: '' };
+      f.bark = who === f.id || who === 'narrator' ? text : `${SPEAKER[who] ?? who}: ${text}`;
+      f.barkTimer = Math.max(2.2, Math.min(4, 0.9 + text.length * 0.055));
+      f.barkVoicedAt = performance.now();
+    }
+    return true;
   }
 
-  /** Especial/sub-especial: alterna entre a fala clássica do golpe e a fala nova do elenco. */
+  /** Fala do elenco (ElevenLabs) para um momento da luta. */
+  private castVoice(f: FighterRuntime, event: CastVoiceEvent, throttleMs = 700): boolean {
+    return this.speak(f, f.id, castKey(event), throttleMs);
+  }
+
+  /** Especial/sub-especial: a fala original do golpe tem prioridade; a nova só entra onde não há original. */
   private moveVoice(f: FighterRuntime, isSub: boolean, classicKey: string) {
-    if (Math.random() < 0.5) soundEngine.playClip(f.id, classicKey);
+    if (hasClip(f.id, classicKey)) this.speak(f, f.id, classicKey);
     else this.castVoice(f, isSub ? 'subSpecial' : 'special');
   }
 
@@ -498,7 +525,6 @@ export class GameEngine {
     if (!this.fighters) return;
     const f = speakerSlot === 'p1' ? this.fighters[0] : this.fighters[1];
     if (this.fighters.some((fighter) => fighter.id === 'davi') && f.id !== 'davi') return;
-    if (f.id === 'davi' && this.introQueue[this.introIndex]?.text !== 'Vamos jogar videogame.') return;
     const introClips: Partial<Record<FighterId, string[]>> = {
       franciely: ['ferrinho', 'montar', 'desarma', 'isso'],
       daniel: ['preparativos', 'praia'],
@@ -510,10 +536,15 @@ export class GameEngine {
       paula: ['lunch'],
       davi: ['videogame'],
     };
-    const old = introClips[f.id] ?? [];
-    const list = f.id === 'davi' || (old.length && Math.random() < 0.4) ? old : [castKey('intro')];
-    if (list && list.length) {
-      soundEngine.playClip(f.id, list[Math.floor(Math.random() * list.length)], 1200);
+    const list = introClips[f.id]?.length ? introClips[f.id]! : [castKey('intro')];
+    const key = list[Math.floor(Math.random() * list.length)];
+    if (soundEngine.playClip(f.id, key, 1200)) {
+      const text = clipText(f.id, key);
+      const line = this.introQueue[this.introIndex];
+      if (text && line && line.speaker === speakerSlot) {
+        line.text = text;
+        this.emitHud();
+      }
     }
   }
 
@@ -895,10 +926,46 @@ export class GameEngine {
   }
 
   private setBark(f: FighterRuntime, category: 'special' | 'subSpecial' | 'win') {
+    if (f.barkVoicedAt && performance.now() - f.barkVoicedAt < 400) return;
     const lines = FIGHTER_BARKS[f.id][category];
     if (!lines || !lines.length) return;
     f.bark = lines[Math.floor(Math.random() * lines.length)];
     f.barkTimer = 2.1;
+  }
+
+  /**
+   * Cena do especial: congela a luta, aproxima a câmera de quem soltou e mostra a faixa
+   * com retrato e nome do golpe. Sub-especial (50%) usa só um flash curto.
+   */
+  private beginSuperCutin(f: FighterRuntime, full: boolean) {
+    const fd = FIGHTERS[f.id];
+    const freeze = full ? 0.62 : 0.18;
+    this.hitstopTimer = Math.max(this.hitstopTimer, freeze);
+    this.superTimer = this.superDuration = full ? 0.95 : 0.3;
+    this.superFocusX = f.x;
+    this.superKey++;
+    this.superCutin = {
+      slot: f.index === 0 ? 'p1' : 'p2',
+      fighterId: f.id,
+      name: fd.name,
+      move: full ? this.specialMoveName(f) : fd.subSpecialName,
+      full,
+      key: this.superKey,
+    };
+    this.superCutinTimer = full ? 1.15 : 0.55;
+    if (full) { this.shakeTimer = 0.12; this.shakeAmp = 0.05; }
+    this.emitHud();
+  }
+
+  /** Nome do especial que vai sair agora (vários têm duas versões "A / B"). */
+  private specialMoveName(f: FighterRuntime): string {
+    const parts = FIGHTERS[f.id].specialName.split(' / ');
+    if (parts.length < 2) return parts[0];
+    const second =
+      (f.id === 'carlos' && f.nextCarlosForm === 'crente') ||
+      (f.id === 'pedro' && f.form === 'hulk') ||
+      (f.id === 'davi' && f.form === 'daviPurple');
+    return second ? parts[1] : parts[0];
   }
 
   private trySpecial(f: FighterRuntime, isSub: boolean) {
@@ -911,11 +978,12 @@ export class GameEngine {
       if (f.meter < cost) return;
       f.meter -= cost;
       f.daviSpecialCooldown = 1.2;
+      this.beginSuperCutin(f, !isSub);
       if (isSub) {
         soundEngine.playDaviSpecial('purple');
         this.activateTransform(f, 'daviPurple', 10);
         this.setBark(f, 'subSpecial');
-        soundEngine.playClip('davi', 'preguica', 2500);
+        this.speak(f, 'davi', 'preguica', 2500);
       } else {
         const finisher = f.form === 'daviPurple';
         soundEngine.playDaviSpecial(finisher ? 'final' : 'hearts');
@@ -923,13 +991,8 @@ export class GameEngine {
           f.form = 'daviPurple';
           f.formTimer = 8;
         }
-        if (finisher) {
-          f.bark = 'Vamos jogar videogame.';
-          f.barkTimer = 2.1;
-        } else {
-          this.setBark(f, 'special');
-        }
-        soundEngine.playClip('davi', finisher ? 'videogame' : 'outra', 2500);
+        if (!finisher) this.setBark(f, 'special');
+        this.speak(f, 'davi', finisher ? 'videogame' : 'outra', 2500);
         this.spawnSparks(f.x, f.y + 1.1, finisher ? 0x22c55e : 0xec4899, 20, !finisher);
         if (finisher) {
           this.spawnSparks(f.x, f.y + 1.1, 0xffffff, 8);
@@ -954,17 +1017,18 @@ export class GameEngine {
 
     f.meter = Math.max(0, f.meter - (actualSub ? 50 : 100));
     soundEngine.playSpecial();
+    this.beginSuperCutin(f, !actualSub);
     let moveAnim: string | undefined;
 
     if (f.id === 'juraci') {
       moveAnim = 'special';
       if (!actualSub) {
         this.setBark(f, 'special');
-        this.moveVoice(f, actualSub, 'cozinha');
+        this.castVoice(f, 'special');
         this.spawnProjectile('cake', f, 10.5, 0, 155, true, 0.44, 0);
       } else {
         this.setBark(f, 'subSpecial');
-        soundEngine.playClip('franciely', 'isso');
+        this.castVoice(f, 'subSpecial');
         this.spawnCameo('dada', f);
       }
     } else if (f.id === 'carlos') {
@@ -974,13 +1038,19 @@ export class GameEngine {
         this.activateTransform(f, next, 10);
         if (next === 'crente') {
           soundEngine.playBless();
-          soundEngine.playClip('carlos', castKey('special'));
-        } else this.moveVoice(f, actualSub, 'pizzaAmor');
-        this.setBark(f, 'special');
+          // fala própria do Modo Fé (se o arquivo existir); nunca a fala do Gordão
+          if (!this.speak(f, 'carlos', 'fe')) {
+            f.bark = 'Modo Fé ativado!';
+            f.barkTimer = 2.2;
+          }
+        } else {
+          this.setBark(f, 'special');
+          this.castVoice(f, 'special');
+        }
       } else {
         moveAnim = 'special';
         this.setBark(f, 'subSpecial');
-        this.moveVoice(f, actualSub, 'pizzaAmor');
+        this.castVoice(f, 'subSpecial');
         this.spawnProjectile('notes', f, 9.0, 0, 85, false, 0.4, 0);
       }
     } else if (f.id === 'pedro') {
@@ -988,7 +1058,7 @@ export class GameEngine {
         if (f.form === 'hulk') {
           moveAnim = 'hulkBlast';
           this.setBark(f, 'special');
-          this.moveVoice(f, actualSub, 'fumaBebe');
+          this.castVoice(f, 'special');
           this.spawnProjectile('beerBlast', f, 11.5, 0, 130, true, 0.46, 0);
         } else {
           this.activateTransform(f, 'hulk', 10);
@@ -998,7 +1068,7 @@ export class GameEngine {
       } else {
         moveAnim = 'smoke';
         this.setBark(f, 'subSpecial');
-        this.moveVoice(f, actualSub, 'combo');
+        this.castVoice(f, 'subSpecial');
         this.spawnProjectile('smoke', f, 6.2, 0, 75, false, 0.46, 0);
       }
     } else if (f.id === 'daniel') {
@@ -1009,18 +1079,18 @@ export class GameEngine {
         this.spawnCameo('dog', f);
       } else {
         moveAnim = 'dance';
-        this.moveVoice(f, actualSub, 'preparativos');
+        this.castVoice(f, 'subSpecial');
         this.setBark(f, 'subSpecial');
         this.spawnProjectile('notes', f, 9.6, 0, 78, false, 0.38, 0);
       }
     } else if (f.id === 'franciely') {
       if (!actualSub) {
         this.activateTransform(f, 'brava', 10);
-        this.moveVoice(f, actualSub, 'cuidar');
+        this.castVoice(f, 'special');
         this.setBark(f, 'special');
       } else {
         moveAnim = 'mama';
-        this.moveVoice(f, actualSub, 'ferrinho');
+        this.castVoice(f, 'subSpecial');
         this.setBark(f, 'subSpecial');
         this.spawnProjectile('milk', f, 11.8, 0, 82, false, 0.38, 0);
       }
@@ -1028,7 +1098,7 @@ export class GameEngine {
       moveAnim = 'dance';
       if (!actualSub) {
         this.setBark(f, 'special');
-        this.moveVoice(f, actualSub, 'amor');
+        this.castVoice(f, 'special');
         this.spawnProjectile('superL', f, 10.2, 0, 125, true, 0.48, 0);
         const opp = this.fighters?.[f.index === 0 ? 1 : 0];
         const targetX = opp ? opp.x : f.x + f.facing * 3.5;
@@ -1072,7 +1142,7 @@ export class GameEngine {
         }
       } else {
         this.activateTransform(f, 'paulaFury', 9.5);
-        this.moveVoice(f, actualSub, 'bar');
+        this.castVoice(f, 'subSpecial');
         this.setBark(f, 'subSpecial');
       }
     } else if (f.id === 'tainara') {
@@ -1165,10 +1235,13 @@ export class GameEngine {
     updateCameoVisual(mesh, kind === 'dog' ? 'dog_run' : kind, owner.facing);
     this.scene.add(mesh);
 
-    if (kind === 'dog') {
-      soundEngine.playClip('cao', Math.random() < 0.5 ? 'protect' : 'lick');
-    } else if (kind === 'dada') {
-      soundEngine.playClip('dada', 'reply');
+    // a participação responde logo depois da fala do dono do golpe, sem atropelar
+    const who = kind === 'dog' ? 'cao' : kind === 'dada' ? 'dada' : null;
+    if (who) {
+      const key = kind === 'dog' ? (Math.random() < 0.5 ? 'protect' : 'lick') : 'reply';
+      setTimeout(() => {
+        if (!this.disposed) this.speak(owner, who, key, 0);
+      }, 1700);
     }
 
     this.cameos.push({
@@ -1631,11 +1704,9 @@ export class GameEngine {
       f.daviSpecialCooldown = Math.max(0, f.daviSpecialCooldown - dt);
       f.daviIdleTime = f.state === 'idle' ? f.daviIdleTime + dt : 0;
       if (f.daviIdleTime >= 8 && f.daviVoiceCooldown === 0) {
-        f.bark = 'Agora tô c preguiça.';
-        f.barkTimer = 2.1;
         f.daviVoiceCooldown = 20;
         f.daviIdleTime = 0;
-        soundEngine.playClip('davi', 'preguica', 2500);
+        this.speak(f, 'davi', 'preguica', 2500);
       }
     }
     if (f.hitInvuln > 0) f.hitInvuln = Math.max(0, f.hitInvuln - dt);
@@ -1972,10 +2043,10 @@ export class GameEngine {
         tainara: 'arroz',
         davi: 'videogame',
       };
-      const wk = Math.random() < 0.6 ? castKey('win') : winClips[winId];
+      const wk = winClips[winId] ?? castKey('win');
       if (wk) {
         setTimeout(() => {
-          if (!this.disposed) soundEngine.playClip(winId, wk, 0);
+          if (!this.disposed && this.fighters) this.speak(this.fighters.find((x) => x.id === winId) ?? this.fighters[0], winId, wk, 0);
         }, 700);
       }
       soundEngine.startMusic('theme', 0.85);
@@ -2014,12 +2085,30 @@ export class GameEngine {
       sy = (Math.random() - 0.5) * this.shakeAmp;
     }
 
+    // especial: aproxima e centraliza em quem soltou o golpe, depois volta suave
+    let camX = midX;
+    let camZ = zDist;
+    if (this.superTimer > 0) {
+      this.superTimer = Math.max(0, this.superTimer - dt);
+      const p = 1 - this.superTimer / Math.max(0.001, this.superDuration);
+      const k = Math.sin(Math.min(1, p) * Math.PI);
+      camX = THREE.MathUtils.lerp(midX, this.superFocusX, 0.75 * k);
+      camZ = zDist * (1 - 0.28 * k);
+    }
+    if (this.superCutinTimer > 0) {
+      this.superCutinTimer = Math.max(0, this.superCutinTimer - dt);
+      if (this.superCutinTimer === 0) {
+        this.superCutin = null;
+        this.emitHud();
+      }
+    }
+
     this._camTarget.set(
-      midX * 0.85 + sx,
-      1.74 + maxY * 0.32 + sy + Math.max(0, zDist - 10) * 0.11,
-      zDist
+      camX * 0.85 + sx,
+      1.74 + maxY * 0.32 + sy + Math.max(0, camZ - 10) * 0.11,
+      camZ
     );
-    this._camLook.set(midX * 0.9, 1.08 + maxY * 0.25, -0.4);
+    this._camLook.set(camX * 0.9, 1.08 + maxY * 0.25, -0.4);
     this.camera.position.lerp(this._camTarget, 1 - Math.exp(-9 * dt));
     this.camera.lookAt(this._camLook);
     this.currentStage?.setParallax?.(this.camera.position.x);
@@ -2073,6 +2162,7 @@ export class GameEngine {
       timer: Math.ceil(this.roundTimer),
       winnerIndex: this.winnerIndex,
       introLine,
+      superCutin: this.superCutin,
       p1: this.snapshotFighter(f1),
       p2: this.snapshotFighter(f2),
     });

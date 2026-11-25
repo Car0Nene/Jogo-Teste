@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import { FIGHTERS, FIGHTER_LIST, FighterId } from '../../data/fighters';
 import { STAGE_LIST } from '../../data/stages';
-import { castKey, soundEngine } from '../../engine/audio';
+import { castKey, hasClip, soundEngine } from '../../engine/audio';
 import { CpuDifficulty, GameMode } from '../../engine/GameEngine';
 import { AnimatedFighterCanvas, FighterPortrait } from '../FighterBadgeSvg';
 import { SpecialSpritePreview } from './SpecialSpritePreview';
@@ -35,8 +35,19 @@ interface CharacterSelectScreenProps {
   onProceedToStages: () => void;
 }
 
-/** Fala de seleção do elenco (uma por lutador, gravada para este momento). */
-const VOICE_SELECT_CLIP = castKey('select');
+/** Fala de seleção: a original de cada um (as gravações da família) tem prioridade. */
+const VOICE_SELECT_CLIP: Record<FighterId, string> = {
+  juraci: 'cozinha',
+  carlos: 'pizzaAmor',
+  pedro: 'fumaBebe',
+  daniel: 'praia',
+  franciely: 'cuidar',
+  gabi: 'amor',
+  paula: 'lunch',
+  tainara: 'arroz',
+  davi: 'videogame',
+};
+const selectClip = (id: FighterId) => (hasClip(id, VOICE_SELECT_CLIP[id]) ? VOICE_SELECT_CLIP[id] : castKey('select'));
 
 export function CharacterSelectScreen({
   gameMode,
@@ -69,14 +80,14 @@ export function CharacterSelectScreen({
       onSelectP1(id);
       if (autoConfirm) {
         setP1Locked(true);
-        soundEngine.playClip(id, VOICE_SELECT_CLIP, 250, true);
+        soundEngine.playClip(id, selectClip(id), 250, true);
         setPickSlot('p2');
       }
     } else {
       onSelectP2(id);
       if (autoConfirm) {
         setP2Locked(true);
-        soundEngine.playClip(id, VOICE_SELECT_CLIP, 250, true);
+        soundEngine.playClip(id, selectClip(id), 250, true);
       }
     }
   };
@@ -84,7 +95,7 @@ export function CharacterSelectScreen({
   const confirmActiveSlot = () => {
     const activeId = pickSlot === 'p1' ? p1Id : p2Id;
     soundEngine.playUi('select');
-    soundEngine.playClip(activeId, VOICE_SELECT_CLIP, 250, true);
+    soundEngine.playClip(activeId, selectClip(activeId), 250, true);
     if (pickSlot === 'p1') {
       setP1Locked(true);
       setPickSlot('p2');

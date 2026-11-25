@@ -26,6 +26,29 @@ interface FightHudProps {
   onBackToSelect: () => void;
 }
 
+
+/** Faixa do especial: retrato grande, nome do lutador e do golpe, cruzando a tela. */
+function SuperCutin({ c }: { c: NonNullable<HudSnapshot['superCutin']> }) {
+  const spec = FIGHTERS[c.fighterId];
+  const right = c.slot === 'p2';
+  return (
+    <div
+      className={`ff-super ${c.full ? 'is-full' : 'is-sub'} ${right ? 'from-right' : 'from-left'}`}
+      style={{ ['--ff-accent' as string]: spec.accentHex }}
+      aria-live="polite"
+    >
+      {c.full && <div className="ff-super-dim" />}
+      <div className="ff-super-band">
+        <img className="ff-super-portrait" src={spec.portraitUrl} alt="" draggable={false} />
+        <div className="ff-super-text">
+          <div className="ff-super-who">{c.name}</div>
+          <div className="ff-super-move">{c.move}</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function FighterMeterBlock({
   f,
   align,
@@ -257,6 +280,8 @@ export function FightHud({
 
         <FighterMeterBlock f={hud.p2} align="right" compact={compact} />
       </div>
+
+      {hud.superCutin && <SuperCutin key={hud.superCutin.key} c={hud.superCutin} />}
 
       {/* Anúncios (banner, fala de abertura, fim de luta) */}
       <div className="ff-hud-center flex-1 flex flex-col items-center justify-center min-h-0">

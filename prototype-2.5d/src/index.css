@@ -1309,3 +1309,38 @@
     padding-block: 3px;
   }
 }
+
+/* ---- Especial: faixa com retrato (cut-in) ---- */
+.ff-super { position: fixed; inset: 0; pointer-events: none; z-index: 30; overflow: hidden; }
+.ff-super-dim { position: absolute; inset: 0; background: radial-gradient(ellipse at center, rgba(0,0,0,.15), rgba(0,0,0,.72)); animation: ffSuperDim 1.15s ease-out forwards; }
+.ff-super-band {
+  position: absolute; left: -10%; right: -10%; top: 30%; height: clamp(110px, 24vh, 210px);
+  transform: translateY(-50%) skewY(-6deg);
+  background: linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--ff-accent) 75%, #000) 12%, color-mix(in srgb, var(--ff-accent) 55%, #000) 88%, transparent 100%);
+  border-top: 3px solid #fde68a; border-bottom: 3px solid #fde68a;
+  box-shadow: 0 0 40px color-mix(in srgb, var(--ff-accent) 70%, transparent);
+  display: flex; align-items: center; gap: clamp(12px, 3vw, 36px); padding: 0 16%;
+  animation: ffSuperIn 1.15s cubic-bezier(.2,.9,.2,1) forwards;
+}
+.ff-super.from-right .ff-super-band { flex-direction: row-reverse; text-align: right; animation-name: ffSuperInR; }
+.ff-super-portrait { height: 150%; align-self: flex-end; transform: skewY(6deg); filter: drop-shadow(0 8px 16px rgba(0,0,0,.7)); object-fit: contain; }
+.ff-super-text { transform: skewY(6deg); }
+.ff-super-who { font-weight: 800; letter-spacing: .2em; text-transform: uppercase; color: #fde68a; font-size: clamp(12px, 1.6vw, 18px); }
+.ff-super-move { font-family: var(--font-display, inherit); font-weight: 900; font-style: italic; color: #fff; line-height: 1;
+  font-size: clamp(26px, 5.2vw, 64px); text-shadow: 0 4px 0 rgba(0,0,0,.55), 0 0 24px var(--ff-accent); }
+.ff-super.is-sub .ff-super-band { height: clamp(60px, 12vh, 110px); top: 22%; animation-duration: .55s; }
+.ff-super.is-sub .ff-super-move { font-size: clamp(18px, 3vw, 34px); }
+@keyframes ffSuperIn {
+  0% { transform: translate(-100%, -50%) skewY(-6deg); opacity: 0; }
+  18% { transform: translate(0, -50%) skewY(-6deg); opacity: 1; }
+  78% { transform: translate(3%, -50%) skewY(-6deg); opacity: 1; }
+  100% { transform: translate(110%, -50%) skewY(-6deg); opacity: 0; }
+}
+@keyframes ffSuperInR {
+  0% { transform: translate(100%, -50%) skewY(-6deg); opacity: 0; }
+  18% { transform: translate(0, -50%) skewY(-6deg); opacity: 1; }
+  78% { transform: translate(-3%, -50%) skewY(-6deg); opacity: 1; }
+  100% { transform: translate(-110%, -50%) skewY(-6deg); opacity: 0; }
+}
+@keyframes ffSuperDim { 0% { opacity: 0; } 15% { opacity: 1; } 75% { opacity: 1; } 100% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .ff-super-band, .ff-super-dim { animation-duration: .01s; } }

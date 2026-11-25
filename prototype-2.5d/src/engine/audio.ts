@@ -1,4 +1,5 @@
 import { StageId } from '../data/stages';
+import { VOICE_TEXT } from '../data/voiceText';
 import { assetUrl } from '../assetUrl';
 
 export type MusicTrackId = 'theme' | 'ff2' | 'ff3';
@@ -105,6 +106,19 @@ for (const id of CAST_IDS) {
   for (const [event, file] of Object.entries(CAST_FILES)) {
     clips[`cast_${event}`] = assetUrl(`/assets/voice/elenco/${id}/${file}.mp3`);
   }
+}
+
+/** Texto exato de uma fala (o que aparece na tela quando ela toca). */
+export function clipText(who: string, key: string): string | undefined {
+  const url = CLIPS[who]?.[key];
+  if (!url) return undefined;
+  const path = Object.keys(VOICE_TEXT).find((k) => url.endsWith(k));
+  return path ? VOICE_TEXT[path] : undefined;
+}
+
+/** A fala existe para este personagem? */
+export function hasClip(who: string, key: string): boolean {
+  return Boolean(CLIPS[who]?.[key]);
 }
 
 /** Chave da fala do elenco para usar em playClip(id, castKey(evento)). */
@@ -375,13 +389,14 @@ class SoundEngine {
     this.playVoiceFile(assetUrl(`/assets/voice/arcade/${key}.ogg`), 0.94, true);
   }
 
-  playClip(who: string, key: string, throttleMs = 700, replacePrevious = false) {
+  /** Toca uma fala; devolve true se ela começou a tocar (false se não existe, está muda ou foi barrada). */
+  playClip(who: string, key: string, throttleMs = 700, replacePrevious = false): boolean {
     const url = CLIPS[who]?.[key];
-    if (!url) return;
-    if (this.currentDaviVoice && this.activeVoices.has(this.currentDaviVoice)) return;
+    if (!url || this.muted) return false;
+    if (this.currentDaviVoice && this.activeVoices.has(this.currentDaviVoice)) return false;
     const now = performance.now();
-    if (who !== 'narrator' && now - this.lastVoiceTime < throttleMs) return;
-    if (who === 'davi' && this.activeVoices.size > 0) return;
+    if (who !== 'narrator' && now - this.lastVoiceTime < throttleMs) return false;
+    if (who === 'davi' && this.activeVoices.size > 0) return false;
     this.lastVoiceTime = now;
     if (replacePrevious) {
       for (const v of this.activeVoices) {
@@ -394,6 +409,7 @@ class SoundEngine {
     }
     const voice = this.playVoiceFile(url, who === 'narrator' ? 0.92 : 0.86, who === 'narrator');
     if (who === 'davi') this.currentDaviVoice = voice;
+    return true;
   }
 
   playUi(type: 'hover' | 'confirm' | 'select' = 'confirm') {

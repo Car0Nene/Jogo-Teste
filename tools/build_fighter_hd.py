@@ -45,8 +45,12 @@ SHEETS = {
     'aereo': {'rows': [[('jump', 4)], [('flykick', 4)], [('crouch', 2), ('guard', 2)]], 'ref': 'guard'},
     'dano': {'rows': [[('hurt', 4)], [('knockdown', 4)], [('getup', 2), ('win', 2)]], 'ref': 'win'},
 }
+# Formas com roupa própria: folhas extras <forma>-<folha>.png; as animações ganham o prefixo "<forma>:".
+FORMS = {'carlos': {'crente': ['locomocao', 'golpes']}}
 # quadros usados de cada animação (índices dentro da linha) — permite descartar um quadro ruim
 PICK = {}
+# quadros que o gerador desenhou virados para a esquerda: (lutador, animação) -> índices a espelhar
+FLIP = {}
 
 
 def load_sheet(path):
@@ -84,7 +88,10 @@ def prepare(im, factor):
 def build(fid):
     src = ROOT / 'art-source' / f'{fid}-hd'
     anims, problems = {}, []
-    for sheet, cfg in SHEETS.items():
+    jobs = [(sheet, cfg, '') for sheet, cfg in SHEETS.items()]
+    for form, sheets in FORMS.get(fid, {}).items():
+        jobs += [(f'{form}-{sh}', SHEETS[sh], f'{form}:') for sh in sheets]
+    for sheet, cfg, prefix in jobs:
         path = src / f'{sheet}.png'
         if not path.exists():
             problems.append(f'{sheet}: arquivo ausente')
@@ -108,9 +115,11 @@ def build(fid):
             continue
         factor = TARGET_H / float(np.median([f.height for f in ref]))
         for anim, frames in got.items():
-            keep = PICK.get((fid, anim))
+            keep = PICK.get((fid, prefix + anim))
             sel = [frames[k] for k in keep] if keep else frames
-            anims[anim] = [prepare(f, factor) for f in sel]
+            flip = FLIP.get((fid, prefix + anim), ())
+            sel = [f.transpose(Image.FLIP_LEFT_RIGHT) if k in flip else f for k, f in enumerate(sel)]
+            anims[prefix + anim] = [prepare(f, factor) for f in sel]
     if not anims:
         raise SystemExit(f'{fid}: nenhuma folha utilizável — ' + '; '.join(problems))
     # empacota em prateleiras (mais altos primeiro)
@@ -146,10 +155,15 @@ def build(fid):
 
 
 def write_ts():
-    data, versions = {}, {}
+    data, forms, versions = {}, {}, {}
     for f in sorted((ROOT / 'art-source').glob('*-hd/frames.json')):
         fid = f.parent.name[:-3]
-        data[fid] = json.loads(f.read_text(encoding='utf-8'))
+        allf = json.loads(f.read_text(encoding='utf-8'))
+        data[fid] = {k: v for k, v in allf.items() if ':' not in k}
+        for k, v in allf.items():
+            if ':' in k:
+                form, anim = k.split(':', 1)
+                forms.setdefault(f'{fid}@{form}', {})[anim] = v
         img = APP / 'public' / 'assets' / 'sprites' / f'{fid}-anim-hd.webp'
         versions[fid] = hashlib.sha1(img.read_bytes()).hexdigest()[:8]
     ts = ('// Gerado por tools/build_fighter_hd.py — não edite à mão.\n'
@@ -158,7 +172,10 @@ def write_ts():
           "import type { SpriteAnimMap } from './spriteAtlas';\n\n"
           f'export const HD_ANIM_VERSION: Partial<Record<FighterId, string>> = {json.dumps(versions)};\n\n'
           'export const HD_ANIMS: Partial<Record<FighterId, SpriteAnimMap>> = '
-          f'{json.dumps(data, separators=(",", ":"))} as Partial<Record<FighterId, SpriteAnimMap>>;\n')
+          f'{json.dumps(data, separators=(",", ":"))} as Partial<Record<FighterId, SpriteAnimMap>>;\n\n'
+          '/** Animações de formas com roupa própria, por "<id>@<forma>" (ex.: carlos@crente = Modo Fé). */\n'
+          'export const HD_FORM_ANIMS: Record<string, SpriteAnimMap> = '
+          f'{json.dumps(forms, separators=(",", ":"))} as Record<string, SpriteAnimMap>;\n')
     (APP / 'src' / 'data' / 'hdAnimAtlas.ts').write_text(ts, encoding='utf-8')
     print('hdAnimAtlas.ts:', ', '.join(data) or '(vazio)')
 

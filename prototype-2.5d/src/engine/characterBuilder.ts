@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { HD_ANIM_VERSION } from '../data/hdAnimAtlas';
+import { HD_ANIM_VERSION, HD_FORM_ANIMS } from '../data/hdAnimAtlas';
 import { assetUrl } from '../assetUrl';
 import { FIGHTERS, FighterId, FORMS, FormId } from '../data/fighters';
 import { STAGES, StageId } from '../data/stages';
@@ -464,7 +464,9 @@ function resolveSpritePose(
   worldTime: number,
   ctx: AnimContext
 ): PoseResult {
-  const S = SPRITE_ATLAS[id];
+  // Forma com roupa própria (ex.: Modo Fé do Carlos): as animações dela substituem as do personagem base.
+  const formAnims = ctx.form ? HD_FORM_ANIMS[`${id}@${ctx.form}`] : undefined;
+  const S = formAnims && state !== 'transform' ? { ...SPRITE_ATLAS[id], ...formAnims } : SPRITE_ATLAS[id];
   const fallback = S.idle || [];
   const pose: PoseResult = {
     frame: fallback[0] || null,
