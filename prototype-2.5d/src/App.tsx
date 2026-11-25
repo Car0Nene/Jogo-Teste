@@ -1,3 +1,4 @@
+import { Diagnostics } from './engine/diagnostics';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { FIGHTERS, FighterId } from './data/fighters';
 import {
@@ -103,6 +104,24 @@ export default function App() {
       setHud(snapshot);
     });
     engineRef.current = engine;
+    // Modo diagnóstico (?diag=1 ou F3): painel de desempenho e acesso ao motor para medições.
+    const diag = new Diagnostics(() => engineRef.current);
+    const exposeEngine = () => {
+      (window as unknown as { __ffEngine?: GameEngine; __ffDiag?: Diagnostics }).__ffEngine = engine;
+      (window as unknown as { __ffDiag?: Diagnostics }).__ffDiag = diag;
+    };
+    if (import.meta.env.DEV) exposeEngine();
+    if (Diagnostics.wanted()) {
+      exposeEngine();
+      diag.start();
+    }
+    const onDiagKey = (ev: KeyboardEvent) => {
+      if (ev.key !== 'F3') return;
+      ev.preventDefault();
+      exposeEngine();
+      diag.toggle();
+    };
+    window.addEventListener('keydown', onDiagKey);
 
     const initial = loadSettings();
     soundEngine.setVolumes({
@@ -120,6 +139,8 @@ export default function App() {
     soundEngine.startMusic('theme', 1);
 
     return () => {
+      window.removeEventListener('keydown', onDiagKey);
+      diag.stop();
       soundEngine.stopAllVoices();
       soundEngine.stopMusic();
       engine.dispose();
