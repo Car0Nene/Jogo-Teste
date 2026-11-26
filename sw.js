@@ -1,163 +1,59 @@
 /**
  * Service Worker - Família Fighter
- * Cache Busting Automático v2.1.0
- * 
- * Este Service Worker:
- * - Gerencia cache inteligente
- * - Remove caches antigos automaticamente
- * - Força atualização de index.html, manifest e sw.js
- * - Mantém assets versionados em cache
- * - Funciona offline
+ *
+ * Regra principal: o jogo nunca mostra arte, voz ou música de uma versão antiga.
+ * - Arquivos com versão no nome/URL (bundles com hash, "?v=") são imutáveis: cache primeiro.
+ * - Todo o resto (sprites, vozes, retratos, cenários, páginas) vai SEMPRE à rede primeiro;
+ *   o cache só é usado quando o aparelho está offline.
+ * - 8cf50ee91f12 é trocado a cada build, então cada publicação apaga os caches anteriores.
  */
 
-const CACHE_VERSION = 'v2.1.0-20261126';
-const CACHE_NAME = `familia-fighter-${CACHE_VERSION}`;
+const CACHE_NAME = 'familia-fighter-8cf50ee91f12';
 
-// URLs que NUNCA devem ser cacheadas (sempre fetch fresh)
-const NO_CACHE_URLS = [
-  'index.html',
-  'manifest.webmanifest',
-  'sw.js'
-];
+const isImmutable = (url) =>
+  url.searchParams.has('v') || /\/assets\/[^/]+-[A-Za-z0-9_-]{8,}\.(js|css)$/.test(url.pathname);
 
-/**
- * INSTALL EVENT
- * Instalar novo Service Worker e criar cache
- */
-self.addEventListener('install', event => {
-  console.log(`[SW] Instalando: ${CACHE_NAME}`);
-  
+self.addEventListener('install', () => {
+  self.skipWaiting();
+});
+
+self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      console.log(`[SW] Cache criado: ${CACHE_NAME}`);
-      return self.skipWaiting();
-    })
+    caches
+      .keys()
+      .then((names) => Promise.all(names.filter((n) => n !== CACHE_NAME).map((n) => caches.delete(n))))
+      .then(() => self.clients.claim())
   );
 });
 
-/**
- * ACTIVATE EVENT
- * Remover caches antigos e ativar novo Service Worker
- */
-self.addEventListener('activate', event => {
-  console.log(`[SW] Ativando: ${CACHE_NAME}`);
-  
-  event.waitUntil(
-    caches.keys().then(cacheNames => {
-      return Promise.all(
-        cacheNames.map(cacheName => {
-          if (cacheName !== CACHE_NAME) {
-            console.log(`[SW] Removendo cache antigo: ${cacheName}`);
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    }).then(() => {
-      console.log(`[SW] Tomando controle de todas as abas`);
-      return self.clients.claim();
-    })
-  );
-});
+const store = (request, response) => {
+  if (response && response.status === 200 && response.type !== 'opaque') {
+    const copy = response.clone();
+    caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
+  }
+  return response;
+};
 
-/**
- * FETCH EVENT
- * Interceptar requisições e servir do cache ou fetch
- */
-self.addEventListener('fetch', event => {
+self.addEventListener('fetch', (event) => {
   const { request } = event;
+  if (request.method !== 'GET') return;
   const url = new URL(request.url);
+  if (url.origin !== self.location.origin) return;
+  // pedidos parciais (áudio/vídeo com Range) vão direto à rede
+  if (request.headers.has('range')) return;
 
-  // 1. NUNCA cachear index.html, manifest.webmanifest, sw.js
-  // Sempre ir para o servidor
-  if (NO_CACHE_URLS.some(pattern => url.pathname.includes(pattern))) {
-    console.log(`[SW] FETCH (sem cache): ${url.pathname}`);
-    return event.respondWith(
-      fetch(request)
-        .then(response => {
-          // Se conseguiu fetch, retorna
-          if (response.status === 200) {
-            return response;
-          }
-          // Se erro, tenta cache como fallback
-          return caches.match(request).then(cached => cached || response);
-        })
-        .catch(() => {
-          // Se falhar (offline), tenta cache
-          return caches.match(request).then(cached => {
-            if (cached) {
-              console.log(`[SW] Usando cache (offline): ${url.pathname}`);
-              return cached;
-            }
-            // Sem cache e offline = erro
-            throw new Error(`Offline: ${url.pathname}`);
-          });
-        })
-    );
+  if (isImmutable(url)) {
+    event.respondWith(caches.match(request).then((hit) => hit || fetch(request).then((r) => store(request, r))));
+    return;
   }
 
-  // 2. Para assets versionados (com ?v=...), usar cache primeiro
-  // Se não estiver em cache, fetch e adicionar ao cache
   event.respondWith(
-    caches.match(request).then(cachedResponse => {
-      if (cachedResponse) {
-        console.log(`[SW] CACHE HIT: ${url.pathname}`);
-        return cachedResponse;
-      }
-
-      console.log(`[SW] FETCH (assets): ${url.pathname}`);
-      return fetch(request)
-        .then(response => {
-          // Validar resposta
-          if (!response || response.status !== 200 || response.type === 'error') {
-            return response;
-          }
-
-          // Clonar resposta para cachear
-          const responseClone = response.clone();
-          
-          caches.open(CACHE_NAME).then(cache => {
-            cache.put(request, responseClone);
-            console.log(`[SW] CACHED: ${url.pathname}`);
-          });
-
-          return response;
-        })
-        .catch(error => {
-          console.error(`[SW] FETCH ERRO: ${url.pathname}`, error);
-          
-          // Se falhar, tentar cache como fallback
-          return caches.match(request).then(cachedResponse => {
-            if (cachedResponse) {
-              console.log(`[SW] Usando cache (fallback): ${url.pathname}`);
-              return cachedResponse;
-            }
-            
-            // Sem cache e erro = offline response
-            return new Response(
-              'Recurso não disponível (offline)',
-              {
-                status: 503,
-                statusText: 'Service Unavailable',
-                headers: new Headers({
-                  'Content-Type': 'text/plain'
-                })
-              }
-            );
-          });
-        });
-    })
+    fetch(request, { cache: 'no-cache' })
+      .then((r) => store(request, r))
+      .catch(() => caches.match(request).then((hit) => hit || new Response('Offline', { status: 503 })))
   );
 });
 
-/**
- * MESSAGE EVENT
- * Permitir comunicação com cliente
- */
-self.addEventListener('message', event => {
-  if (event.data && event.data.type === 'SKIP_WAITING') {
-    console.log(`[SW] SKIP_WAITING acionado`);
-    self.skipWaiting();
-  }
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') self.skipWaiting();
 });
-
-console.log(`[SW] Service Worker carregado: ${CACHE_VERSION}`);
