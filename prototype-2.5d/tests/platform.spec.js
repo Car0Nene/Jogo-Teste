@@ -408,7 +408,8 @@ test('cast voices exist and play on select, specials, KO and victory', async ({ 
   expect(result.juraci[1]).toBe('juraci:cast_subSpecial');
   // segundo especial do Carlos é o Modo Fé: nunca a fala do Gordão
   expect(result.carlosFe).not.toContain('cast_special');
-  expect(result.ko).toBe('tainara:cast_ko');
+  // a fala de nocaute é sorteada entre a original e as variações (ko2/ko3)
+  expect(result.ko).toMatch(/^tainara:cast_ko[23]?$/);
 });
 
 test('every adult fighter has the full Pedro-standard animation set and impact sounds load', async ({ page, request }, testInfo) => {
