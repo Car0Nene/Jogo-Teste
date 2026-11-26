@@ -1,7 +1,7 @@
 {
   "name": "Família Fighter 2.5D",
   "short_name": "Família Fighter",
-  "description": "Versão 2.5D semirrealista de Família Fighter com todos os 8 lutadores, especiais icônicos, diálogos e os 5 cenários brasileiros em Three.js.",
+  "description": "Versão 2.5D semirrealista com 9 lutadores da família, especiais icônicos, diálogos em português e 5 cenários brasileiros em Three.js.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
