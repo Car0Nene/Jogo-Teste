@@ -14,12 +14,14 @@ interface ModeSelectScreenProps {
   onBack: () => void;
   onSelectMode: (mode: GameMode) => void;
   onOpenExtras: () => void;
+  onStartStory?: () => void;
 }
 
 export function ModeSelectScreen({
   onBack,
   onSelectMode,
   onOpenExtras,
+  onStartStory,
 }: ModeSelectScreenProps) {
   const [storyNotice, setStoryNotice] = React.useState(false);
 
@@ -57,16 +59,16 @@ export function ModeSelectScreen({
     {
       id: 'story',
       title: 'MODO HISTÓRIA',
-      tag: 'EM BREVE · INDISPONÍVEL',
-      accent: 'border-stone-600/50',
-      badgeColor: 'text-rose-300',
-      desc: 'Campanha narrativa por capítulos da família. Este modo ainda não foi implementado e permanece bloqueado.',
-      cta: 'Indisponível no Momento',
-      available: false,
-      icon: <Lock className="w-7 h-7 text-stone-400" />,
+      tag: 'ALMOÇO DE DOMINGO',
+      accent: 'border-amber-400/50',
+      badgeColor: 'text-amber-300',
+      desc: 'Quadrinhos animados com as vozes da família e 5 lutas pelo último pedaço de bolo da vó.',
+      cta: 'Começar História',
+      available: true,
+      icon: <BookOpen className="w-7 h-7 text-amber-300" />,
       onClick: () => {
-        soundEngine.playUi('hover');
-        setStoryNotice(true);
+        soundEngine.playUi('select');
+        onStartStory?.();
       },
     },
     {

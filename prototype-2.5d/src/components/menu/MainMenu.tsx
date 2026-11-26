@@ -48,6 +48,7 @@ interface MainMenuProps {
   onOpenModes: () => void;
   onOpenSettings: () => void;
   onOpenExtras: () => void;
+  onStartStory?: () => void;
   onOpenAccount: () => void;
 }
 
@@ -62,6 +63,7 @@ export function MainMenu({
   onOpenModes,
   onOpenSettings,
   onOpenExtras,
+  onStartStory,
   onOpenAccount,
 }: MainMenuProps) {
   const [focusedIdx, setFocusedIdx] = useState(0);
@@ -104,15 +106,13 @@ export function MainMenu({
     },
     {
       id: 'story',
-      label: 'STORY MODE',
-      sublabel: 'INDISPONÍVEL · Em breve',
-      available: false,
-      icon: <Lock className="w-5 h-5" />,
+      label: 'MODO HISTÓRIA',
+      sublabel: 'Almoço de Domingo · 5 capítulos',
+      available: true,
+      icon: <BookOpen className="w-5 h-5" />,
       action: () => {
-        soundEngine.playUi('hover');
-        setUnavailableToast(
-          'Story Mode ainda está em desenvolvimento e não está disponível nesta versão.'
-        );
+        soundEngine.playUi('select');
+        onStartStory?.();
       },
     },
     {

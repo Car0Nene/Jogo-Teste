@@ -2,7 +2,9 @@ import React from 'react';
 import { Volume2, VolumeX, Pause } from 'lucide-react';
 import { FIGHTERS } from '../data/fighters';
 import { DEFAULT_KEY_BINDINGS, formatKeyCode, HudScale, Player1KeyBindings } from '../data/settings';
-import { GameMode, HudFighterSnapshot, HudSnapshot } from '../engine/GameEngine';
+import { buttonGlyph, detectPadFamily } from '../data/commands';
+import { GameMode, HudFighterSnapshot, HudSnapshot, TrainingOptions } from '../engine/GameEngine';
+import { TrainingPanel } from './TrainingPanel';
 import { FighterPortrait } from './FighterBadgeSvg';
 import { DanielVictoryScene } from './DanielVictoryScene';
 import { TouchControls } from './TouchControls';
@@ -24,6 +26,8 @@ interface FightHudProps {
   onVirtualPress: (player: 0 | 1, action: 'light' | 'heavy' | 'special' | 'subSpecial' | 'jump' | 'taunt') => void;
   onRematch: () => void;
   onBackToSelect: () => void;
+  onTrainingOptions?: (o: Partial<TrainingOptions>) => void;
+  onTrainingReset?: (clearStats?: boolean) => void;
 }
 
 
@@ -174,23 +178,25 @@ function DesktopCommandBar({
 }) {
   const k = (code: string) => formatKeyCode(code);
   const pad = inputMode === 'gamepad';
-  const keys: Array<[string[], string]> = pad
-    ? [[['◀', '▶'], 'Mover'], [['B'], 'Pular'], [['▼'], 'Agachar'], [['A'], 'Leve'], [['X'], 'Forte'], [['Y'], 'Especial'], [['▼', 'Y'], 'Sub'], [['LB'], 'Defesa'], [['Select'], 'Provocar']]
-    : [
-        [[k(keyBindings.left), k(keyBindings.right)], 'Mover'],
-        [[k(keyBindings.up)], 'Pular'],
-        [[k(keyBindings.down)], 'Agachar'],
-        [[k(keyBindings.light)], 'Leve'],
-        [[k(keyBindings.heavy)], 'Forte'],
-        [[k(keyBindings.special)], 'Especial'],
-        [[k(keyBindings.down), k(keyBindings.special)], 'Sub'],
-        [[k(keyBindings.guard)], 'Defesa'],
-        [['Y'], 'Provocar'],
-      ];
-  // golpe cinematográfico: frente + Leve
-  const GAG_HINT: Record<string, string> = { daniel: 'Bundada', pedro: 'Cigarro', juraci: 'Chinelo', carlos: 'Pizza', franciely: 'Conta até 3', gabi: 'Selfie', paula: 'Panela', tainara: 'Arroz', davi: 'Lag' };
-  const finLabel = GAG_HINT[hud.p1.id] ?? null;
-  if (finLabel) keys.push([pad ? ['▶', 'A'] : [k(keyBindings.right), k(keyBindings.light)], finLabel]);
+  // mesmos ícones da Lista de Golpes (estrutura única em data/commands.ts)
+  const plat = pad ? detectPadFamily() : 'keyboard';
+  const g = (b: Parameters<typeof buttonGlyph>[0]) => buttonGlyph(b, plat, keyBindings);
+  const dirs = pad ? { l: '◀', r: '▶', d: '▼' } : { l: formatKeyCode(keyBindings.left), r: formatKeyCode(keyBindings.right), d: formatKeyCode(keyBindings.down) };
+  const keys: Array<[string[], string]> = [
+    [[dirs.l, dirs.r], 'Mover'],
+    [[g('jump')], 'Pular'],
+    [[dirs.d], 'Agachar'],
+    [[g('light')], 'Leve'],
+    [[g('heavy')], 'Forte'],
+    [[g('special')], 'Especial'],
+    [[dirs.d, g('special')], 'Sub'],
+    [[g('guard')], 'Defesa'],
+    [[g('taunt')], 'Provocar'],
+    [[dirs.d, g('heavy')], 'Rasteira'],
+  ];
+  // golpe cômico: frente + Leve
+  const gag = FIGHTERS[hud.p1.id].moves.gag;
+  if (gag) keys.push([[dirs.r, g('light')], gag.label]);
   const hold = (action: string) => ({
     onPointerDown: () => onVirtualHold(0, action, true),
     onPointerUp: () => onVirtualHold(0, action, false),
@@ -244,6 +250,8 @@ export function FightHud({
   onVirtualPress,
   onRematch,
   onBackToSelect,
+  onTrainingOptions,
+  onTrainingReset,
 }: FightHudProps) {
   const pf = usePlatform();
   const compact = pf.profile.hud === 'compact';
@@ -295,6 +303,16 @@ export function FightHud({
         </div>
       )}
       {hud.superCutin && <SuperCutin key={hud.superCutin.key} c={hud.superCutin} />}
+      {gameMode === 'training' && hud.training && hud.phase === 'fighting' && (
+        <TrainingPanel
+          t={hud.training}
+          fighterId={hud.p1.id}
+          keyBindings={keyBindings}
+          compact={compact}
+          onOptions={(o) => onTrainingOptions?.(o)}
+          onReset={(c) => onTrainingReset?.(c)}
+        />
+      )}
 
       {/* Anúncios (banner, fala de abertura, fim de luta) */}
       <div className="ff-hud-center flex-1 flex flex-col items-center justify-center min-h-0">

@@ -1,6 +1,6 @@
 // 2D HD Semi-Realistic Sprite Atlas + Pedro HD + Cameo Dog
 import { FighterId } from './fighters';
-import { HD_ANIMS } from './hdAnimAtlas';
+import { HD_ANIMS, HD_FORM_ANIMS } from './hdAnimAtlas';
 
 // Frame tuple: [x, y, w, h, anchorX, anchorY, atlasTier?]
 // atlasTier: 0 = fighters.webp, 1 = pedro-hd.webp, 2 = fighters-hd.webp, 3/4 = per-fighter HD atlases, 5 = Davi's atlas
@@ -336,6 +336,37 @@ if (HD_ANIMS.pedro) Object.assign(SPRITE_ATLAS.pedro, HD_ANIMS.pedro);
 if (HD_ANIMS.carlos?.medium) SPRITE_ATLAS.carlos.special = HD_ANIMS.carlos.medium;
 // Daniel: a dancinha (Modo Natal Praia) usa o rebolado da arte nova da Super Bundada
 if (HD_ANIMS.daniel?.bundada) SPRITE_ATLAS.daniel.dance = HD_ANIMS.daniel.bundada.slice(0, 4);
+
+/**
+ * Arte única: todo quadro de lutador vem do atlas novo (padrão Pedro, tier 6). As poses antigas de
+ * especiais/formas (atlas de baixa resolução) eram trocadas no meio do golpe e o personagem "voltava"
+ * para a versão velha. Cada pose característica aponta para a animação nova mais parecida.
+ */
+const MODERN_ART: Partial<Record<FighterId, Record<string, (a: SpriteAnimMap) => SpriteFrame[] | undefined>>> = {
+  juraci: { special: (a) => a.medium, subSpecial: (a) => a.win },
+  carlos: { gordao: () => HD_FORM_ANIMS['carlos@gordao']?.idle, crente: () => HD_FORM_ANIMS['carlos@crente']?.idle },
+  franciely: { brava: (a) => a.heavy && [a.heavy[0], a.heavy[2]], mama: (a) => a.light },
+  gabi: { special: (a) => a.medium, dance: (a) => a.win },
+  paula: { special: (a) => a.medium, paulaFury: (a) => a.heavy && [a.heavy[0], a.heavy[2]] },
+  tainara: { special: (a) => a.medium, ricePower: (a) => a.heavy && [a.heavy[0], a.heavy[2]] },
+  pedro: {
+    hulk: () => { const h = HD_FORM_ANIMS['pedro@hulk']; return h && [h.idle[0], h.light[2], h.heavy[2]]; },
+    hulkBlast: () => HD_FORM_ANIMS['pedro@hulk']?.heavy,
+    escape: (a) => a.run,
+    sweep: (a) => a.crouch,
+  },
+  davi: { special: (a) => a.medium, daviPurple: (a) => a.idle && [a.idle[0], a.idle[1]] },
+};
+const isModern = (fr: SpriteFrame[]) => fr.length > 0 && fr.every((f) => f[6] === 6);
+for (const id of Object.keys(HD_ANIMS) as FighterId[]) {
+  const atlas = SPRITE_ATLAS[id];
+  const hd = HD_ANIMS[id]!;
+  for (const key of Object.keys(atlas)) {
+    if (isModern(atlas[key])) continue;
+    const frames = MODERN_ART[id]?.[key]?.(hd) ?? hd[key] ?? hd.heavy;
+    if (frames && isModern(frames)) atlas[key] = frames;
+  }
+}
 
 export const BASE_SPRITE_HEIGHT: Record<FighterId, number> = Object.fromEntries(
   (['juraci','carlos','pedro','daniel','franciely','gabi','paula','tainara','davi'] as FighterId[]).map((id) => {

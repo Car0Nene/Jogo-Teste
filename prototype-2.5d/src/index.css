@@ -1478,3 +1478,48 @@
 /* flash da selfie */
 .ff-photo-flash { position: absolute; inset: 0; z-index: 45; pointer-events: none; background: #fff; animation: ffPhotoFlash .55s ease-out forwards; }
 @keyframes ffPhotoFlash { 0% { opacity: 0; } 8% { opacity: 1; } 100% { opacity: 0; } }
+
+/* ---------- Modo História (quadrinho animado) ---------- */
+.ff-story-card { background: radial-gradient(circle at 50% 40%, #3b1d0e 0%, #09070e 70%); animation: ff-story-card-in 0.5s ease-out; }
+@keyframes ff-story-card-in { from { opacity: 0; transform: scale(1.08); } to { opacity: 1; transform: none; } }
+.ff-story-panel { animation: ff-story-fade 0.45s ease-out; }
+.ff-story-panel img { transform-origin: 50% 45%; will-change: transform; }
+.ff-story-panel.motion-zoomIn img { animation: ff-kb-zoomin 9s ease-out forwards; }
+.ff-story-panel.motion-zoomOut img { animation: ff-kb-zoomout 9s ease-out forwards; }
+.ff-story-panel.motion-panLeft img { animation: ff-kb-panleft 10s ease-in-out forwards; }
+.ff-story-panel.motion-panRight img { animation: ff-kb-panright 10s ease-in-out forwards; }
+.ff-story-panel.motion-shake img { animation: ff-kb-shake 9s ease-out forwards; }
+@keyframes ff-story-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes ff-kb-zoomin { from { transform: scale(1.02); } to { transform: scale(1.16); } }
+@keyframes ff-kb-zoomout { from { transform: scale(1.18); } to { transform: scale(1.03); } }
+@keyframes ff-kb-panleft { from { transform: scale(1.14) translateX(4%); } to { transform: scale(1.14) translateX(-4%); } }
+@keyframes ff-kb-panright { from { transform: scale(1.14) translateX(-4%); } to { transform: scale(1.14) translateX(4%); } }
+@keyframes ff-kb-shake {
+  0% { transform: scale(1.12) translate(0, 0); }
+  2% { transform: scale(1.12) translate(-1.2%, 0.6%); }
+  4% { transform: scale(1.12) translate(1.2%, -0.6%); }
+  6% { transform: scale(1.12) translate(-0.8%, 0.4%); }
+  8% { transform: scale(1.12) translate(0, 0); }
+  100% { transform: scale(1.06) translate(0, 0); }
+}
+.ff-story-vignette { background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.55) 100%), linear-gradient(to top, rgba(0,0,0,0.6), transparent 35%); }
+.ff-story-balloon {
+  position: absolute; left: 50%; bottom: max(32px, 6vh); transform: translateX(-50%);
+  width: min(880px, 92vw); padding: 12px 18px 14px; background: #fffdf5; color: #111;
+  border: 3px solid #111; border-radius: 18px; box-shadow: 6px 6px 0 rgba(0,0,0,0.55);
+  animation: ff-balloon-pop 0.28s cubic-bezier(.2,1.6,.4,1);
+}
+.ff-story-balloon::after {
+  content: ''; position: absolute; left: 12%; top: -16px; border: 9px solid transparent;
+  border-bottom: 14px solid #111; transform: skewX(-18deg);
+}
+.ff-story-balloon.is-narrator { background: #fde68a; border-radius: 4px; font-style: italic; }
+.ff-story-balloon.is-narrator::after { display: none; }
+.ff-story-who {
+  display: inline-block; margin: -26px 0 4px -4px; padding: 2px 10px; background: var(--ff-accent, #fbbf24);
+  color: #111; font-weight: 800; font-size: 13px; letter-spacing: .04em; text-transform: uppercase;
+  border: 2px solid #111; border-radius: 6px; transform: rotate(-2deg);
+}
+.ff-story-text { font-size: clamp(16px, 2.3vw, 24px); font-weight: 700; line-height: 1.25; font-family: 'Comic Sans MS', 'Comic Neue', 'Bangers', system-ui, sans-serif; }
+@keyframes ff-balloon-pop { from { opacity: 0; transform: translateX(-50%) scale(0.7); } to { opacity: 1; transform: translateX(-50%) scale(1); } }
+@media (prefers-reduced-motion: reduce) { .ff-story-panel img { animation: none !important; } }

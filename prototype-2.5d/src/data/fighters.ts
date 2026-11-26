@@ -46,6 +46,8 @@ export interface MoveSpec {
   anim?: string;
   /** golpe de finalização: câmera de foco e efeitos próprios */
   finisher?: GagId;
+  /** golpe baixo: só é defendido agachado */
+  low?: boolean;
 }
 
 export interface FighterAppearance {

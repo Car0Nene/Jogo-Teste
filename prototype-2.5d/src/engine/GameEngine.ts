@@ -16,6 +16,7 @@ import {
   Player1KeyBindings,
   ResolutionScale,
 } from '../data/settings';
+import { frameAdvantage, lowMoves, moveFrames, DEFAULT_HITSTUN } from '../data/commands';
 import { FUN_LINES, type FunTrigger } from '../data/funLines';
 import { findBanter } from '../data/banter';
 import { STAGES, StageId } from '../data/stages';
@@ -59,6 +60,27 @@ export interface HudFighterSnapshot {
   bark: string | null;
 }
 
+export type PressAction = 'light' | 'heavy' | 'special' | 'subSpecial' | 'jump' | 'taunt';
+export type TrainingDummy = 'stand' | 'crouch' | 'jump' | 'guard' | 'guardAfterHit' | 'cpu';
+export interface TrainingOptions {
+  dummy: TrainingDummy;
+  /** vida volta ao máximo quando o combo termina */
+  refill: boolean;
+  /** barra de especial sempre cheia */
+  infiniteMeter: boolean;
+  /** painel de dados (frames, dano, entradas) */
+  showData: boolean;
+}
+export interface TrainingSnapshot {
+  options: TrainingOptions;
+  lastMove: { name: string; startup: number; active: number; recovery: number; damage: number; onBlock: number; onHit: number } | null;
+  lastResult: { kind: 'hit' | 'block'; advantage: number } | null;
+  combo: { hits: number; damage: number };
+  best: { hits: number; damage: number };
+  inputs: { id: number; dir: string; button: PressAction }[];
+  done: string[];
+}
+
 export interface HudSnapshot {
   phase: 'intro' | 'banner' | 'fighting' | 'ko' | 'matchOver';
   bannerText: string;
@@ -74,6 +96,8 @@ export interface HudSnapshot {
   cinematic: boolean;
   /** muda a cada flash branco de tela (selfie) */
   flashKey: number;
+  /** só no modo treino */
+  training: TrainingSnapshot | null;
 }
 
 interface FighterRuntime {
@@ -121,6 +145,14 @@ interface FighterRuntime {
   tauntCooldown: number;
   lowHpSaid: boolean;
   lastFunKey?: string;
+  /** duração do atordoamento atual (vem do golpe que acertou) */
+  stunDuration: number;
+  /** botão apertado enquanto ocupado: sai assim que der (até 0,15 s) */
+  inputBuffer: { action: PressAction; t: number } | null;
+  /** comando da Lista de Golpes que está saindo agora */
+  commandId: string | null;
+  /** defendeu agachado (golpe baixo) */
+  lowGuard: boolean;
 }
 
 interface ActiveProjectile {
@@ -197,6 +229,19 @@ export class GameEngine {
   private gameMode: GameMode = 'cpu';
   private difficulty: CpuDifficulty = 'normal';
   private paused = false;
+  private trainingOpts: TrainingOptions = { dummy: 'stand', refill: true, infiniteMeter: true, showData: true };
+  private trainingStats = {
+    lastMove: null as TrainingSnapshot['lastMove'],
+    lastResult: null as TrainingSnapshot['lastResult'],
+    combo: { hits: 0, damage: 0 },
+    best: { hits: 0, damage: 0 },
+    done: new Set<string>(),
+  };
+  private inputLog: TrainingSnapshot['inputs'] = [];
+  private inputSeq = 0;
+  private trainingCalm = 0;
+  private dummyGuardTimer = 0;
+  private dummyJumpTimer = 0;
 
   private p1Id: FighterId = 'pedro';
   private p2Id: FighterId = 'paula';
@@ -238,10 +283,6 @@ export class GameEngine {
   private superDuration = 0;
   private superFocusX = 0;
   /** câmera de golpe de finalização: aproxima baixo, entre o atacante e o alvo */
-  private finTimer = 0;
-  private finDuration = 0;
-  private finFocusX = 0;
-  private finFacing: 1 | -1 = 1;
   /** câmera lenta do golpe cinematográfico (segundos reais restantes) */
   private slowmoTimer = 0;
   private superCutin: HudSnapshot['superCutin'] = null;
@@ -540,9 +581,9 @@ export class GameEngine {
    * Toca uma fala e mostra na tela exatamente o que foi dito. Texto e áudio saem sempre juntos:
    * se a fala não tocar (mudo, outra fala em andamento), o texto dela também não aparece.
    */
-  private speak(f: FighterRuntime, who: string, key: string, throttleMs = 700): boolean {
+  private speak(f: FighterRuntime, who: string, key: string, throttleMs = 700, caption = true): boolean {
     if (!soundEngine.playClip(who, key, throttleMs)) return false;
-    const text = clipText(who, key);
+    const text = caption ? clipText(who, key) : null;
     if (text) {
       const SPEAKER: Record<string, string> = { franciely: 'Franciely', dada: 'Dadá', cao: 'Doguinho', narrator: '' };
       f.bark = who === f.id || who === 'narrator' ? text : `${SPEAKER[who] ?? who}: ${text}`;
@@ -655,6 +696,30 @@ export class GameEngine {
     }
   }
 
+  public setTrainingOptions(opts: Partial<TrainingOptions>) {
+    this.trainingOpts = { ...this.trainingOpts, ...opts };
+    this.dummyGuardTimer = 0;
+    this.emitHud();
+  }
+
+  /** Treino: volta os dois para a posição inicial, vida e barra cheias. */
+  public resetTraining(clearStats = false) {
+    if (!this.fighters) return;
+    this.clearEntities();
+    this.resetFighterPositions();
+    this.fighters[0].meter = 100;
+    this.fighters[1].meter = 100;
+    this.trainingStats.combo = { hits: 0, damage: 0 };
+    this.trainingStats.lastResult = null;
+    if (clearStats) {
+      this.trainingStats.lastMove = null;
+      this.trainingStats.best = { hits: 0, damage: 0 };
+      this.trainingStats.done.clear();
+      this.inputLog = [];
+    }
+    this.emitHud();
+  }
+
   public triggerVirtualHold(playerIndex: 0 | 1, action: string, active: boolean) {
     if (active) this.virtualHolds[playerIndex].add(action);
     else this.virtualHolds[playerIndex].delete(action);
@@ -667,18 +732,42 @@ export class GameEngine {
       return;
     }
     if (this.matchPhase !== 'fighting' || !this.fighters) return;
-    const f = this.fighters[playerIndex];
-    if (action === 'jump') {
-      this.tryJump(f);
-    } else if (action === 'taunt') {
-      this.tryTaunt(f);
-    } else if (action === 'special') {
-      this.trySpecial(f, false);
-    } else if (action === 'subSpecial') {
-      this.trySpecial(f, true);
-    } else {
-      this.tryAttack(f, action);
+    this.pressAction(this.fighters[playerIndex], action);
+  }
+
+  /**
+   * Entrada única de botão para teclado, controle e toque: registra no histórico do treino,
+   * resolve direção + botão pela estrutura de golpes e, se o lutador estiver ocupado,
+   * guarda o botão por até 0,15 s para sair no primeiro quadro livre.
+   */
+  private pressAction(f: FighterRuntime, action: PressAction) {
+    if (action === 'special' && this.isHeld(f.index, 'down')) action = 'subSpecial';
+    if (f.index === 0) this.logInput(f, action);
+    const before = [f.state, f.activeMove, f.bufferedAttack, f.meter, f.vy, f.tauntCooldown];
+    this.performAction(f, action);
+    const after = [f.state, f.activeMove, f.bufferedAttack, f.meter, f.vy, f.tauntCooldown];
+    const acted = before.some((v, i) => v !== after[i]);
+    if (!acted && ['attack', 'hitstun', 'blockstun', 'knockdown', 'transform'].includes(f.state)) {
+      f.inputBuffer = { action, t: this.worldTime };
     }
+  }
+
+  private performAction(f: FighterRuntime, action: PressAction) {
+    if (action === 'jump') this.tryJump(f);
+    else if (action === 'taunt') this.tryTaunt(f);
+    else if (action === 'special') this.trySpecial(f, false);
+    else if (action === 'subSpecial') this.trySpecial(f, true);
+    else this.tryAttack(f, action);
+  }
+
+  private logInput(f: FighterRuntime, action: PressAction) {
+    if (this.gameMode !== 'training') return;
+    const fwd = this.isHeld(f.index, f.facing === 1 ? 'right' : 'left');
+    const back = this.isHeld(f.index, f.facing === 1 ? 'left' : 'right');
+    const down = this.isHeld(f.index, 'down');
+    const dir = f.y > 0.08 ? '↑' : down ? (fwd ? '↘' : back ? '↙' : '↓') : fwd ? '→' : back ? '←' : '';
+    this.inputLog.unshift({ id: ++this.inputSeq, dir, button: action });
+    if (this.inputLog.length > 12) this.inputLog.length = 12;
   }
 
   private loadStage(stageId: StageId) {
@@ -773,6 +862,10 @@ export class GameEngine {
       noGuardTimer: 0,
       tauntCooldown: 0,
       lowHpSaid: false,
+      stunDuration: DEFAULT_HITSTUN,
+      inputBuffer: null,
+      commandId: null,
+      lowGuard: false,
     };
   }
 
@@ -806,6 +899,8 @@ export class GameEngine {
       f.noGuardTimer = 0;
       f.tauntCooldown = 0;
       f.lowHpSaid = false;
+      f.inputBuffer = null;
+      f.commandId = null;
     }
     this.syncFighterTransforms();
   }
@@ -878,6 +973,12 @@ export class GameEngine {
   }
 
   private isHeld(playerIndex: 0 | 1, action: 'left' | 'right' | 'up' | 'down' | 'guard'): boolean {
+    if (playerIndex === 1 && this.gameMode === 'training' && this.trainingOpts.dummy !== 'cpu') {
+      const d = this.trainingOpts.dummy;
+      if (action === 'down') return d === 'crouch';
+      if (action === 'guard') return d === 'guard' || (d === 'guardAfterHit' && this.dummyGuardTimer > 0);
+      return false;
+    }
     if (this.virtualHolds[playerIndex].has(action)) return true;
 
     if (playerIndex === 0) {
@@ -932,23 +1033,25 @@ export class GameEngine {
     const kb = this.keyBindings;
 
     if (code === kb.up || code === 'Space' || (solo && code === 'ArrowUp')) {
-      this.tryJump(p1);
+      this.pressAction(p1, 'jump');
     } else if (code === kb.light || (solo && code === 'KeyF')) {
-      this.tryAttack(p1, 'light');
+      this.pressAction(p1, 'light');
     } else if (code === kb.heavy || (solo && code === 'KeyG')) {
-      this.tryAttack(p1, 'heavy');
+      this.pressAction(p1, 'heavy');
     } else if (code === kb.special || (solo && code === 'KeyT')) {
-      this.trySpecial(p1, this.isHeld(0, 'down'));
+      this.pressAction(p1, 'special');
     } else if (code === 'KeyY') {
-      this.tryTaunt(p1);
+      this.pressAction(p1, 'taunt');
+    } else if (code === 'KeyR' && this.gameMode === 'training') {
+      this.resetTraining();
     }
 
     if (this.gameMode === 'versus') {
-      if (code === 'ArrowUp') this.tryJump(p2);
-      else if (code === 'KeyU' || code === 'Numpad1') this.tryAttack(p2, 'light');
-      else if (code === 'KeyP' || code === 'Numpad2') this.tryAttack(p2, 'heavy');
-      else if (code === 'Numpad3' || code === 'Slash') this.trySpecial(p2, this.isHeld(1, 'down'));
-      else if (code === 'Numpad5' || code === 'Period') this.tryTaunt(p2);
+      if (code === 'ArrowUp') this.pressAction(p2, 'jump');
+      else if (code === 'KeyU' || code === 'Numpad1') this.pressAction(p2, 'light');
+      else if (code === 'KeyP' || code === 'Numpad2') this.pressAction(p2, 'heavy');
+      else if (code === 'Numpad3' || code === 'Slash') this.pressAction(p2, 'special');
+      else if (code === 'Numpad5' || code === 'Period') this.pressAction(p2, 'taunt');
     }
   }
 
@@ -961,6 +1064,7 @@ export class GameEngine {
     if (['attack', 'hitstun', 'blockstun', 'knockdown', 'transform', 'victory'].includes(f.state)) return;
     const opp = this.fighters?.[f.index === 0 ? 1 : 0];
     f.tauntCooldown = 3.5;
+    if (this.gameMode === 'training' && f.index === 0) this.trainingStats.done.add('taunt');
     this.startAttackMove(f, {
       id: 'combo', label: 'Provocar', startup: 0.1, active: 0.1, recovery: 0.95,
       damage: 0, minRange: 0, range: 0, hitstun: 0, blockstun: 0, push: 0, hitstop: 0, anim: 'win',
@@ -976,6 +1080,8 @@ export class GameEngine {
 
   /** Fala engraçada de verdade (áudios da família) para um momento da luta; evita repetir a última. */
   private funSay(f: FighterRuntime, trigger: FunTrigger, opp?: FighterRuntime, delayMs = 0): boolean {
+    // golpes comuns (derrubada, vida baixa) falam sem legenda: legenda fica para especiais, intro, provocação e vitória
+    const caption = trigger !== 'knockdownOpp' && trigger !== 'lowHp';
     const set = FUN_LINES[f.id];
     if (!set) return false;
     let pool: string[] = [];
@@ -988,11 +1094,11 @@ export class GameEngine {
     f.lastFunKey = key;
     if (delayMs > 0) {
       setTimeout(() => {
-        if (!this.disposed && this.fighters) this.speak(f, f.id, key, 0);
+        if (!this.disposed && this.fighters) this.speak(f, f.id, key, 0, caption);
       }, delayMs);
       return true;
     }
-    return this.speak(f, f.id, key, 0);
+    return this.speak(f, f.id, key, 0, caption);
   }
 
   private tryJump(f: FighterRuntime) {
@@ -1024,18 +1130,26 @@ export class GameEngine {
     // golpe cômico cinematográfico: Frente + Leve juntos (cada lutador tem o seu)
     const fin = spec.moves.gag;
     if (btn === 'light' && f.y <= 0.08 && fin?.finisher && this.isHeld(f.index, f.facing === 1 ? 'right' : 'left')) {
-      this.startAttackMove(f, fin);
+      this.startAttackMove(f, fin, 'gag');
       return;
     }
 
     if (f.y > 0.08) {
-      this.startAttackMove(f, spec.moves.air);
+      this.startAttackMove(f, spec.moves.air, 'air');
+    } else if (this.isHeld(f.index, 'down')) {
+      // golpes baixos: só são defendidos agachado
+      const low = lowMoves(f.id);
+      this.startAttackMove(f, btn === 'light' ? low.light : low.heavy, btn === 'light' ? 'lowLight' : 'lowHeavy');
     } else {
-      this.startAttackMove(f, btn === 'light' ? spec.moves.light : spec.moves.heavy);
+      this.startAttackMove(f, btn === 'light' ? spec.moves.light : spec.moves.heavy, btn);
     }
   }
 
-  private startAttackMove(f: FighterRuntime, move: MoveSpec) {
+  private startAttackMove(f: FighterRuntime, move: MoveSpec, commandId: string | null = null) {
+    f.commandId = commandId;
+    if (this.gameMode === 'training' && f.index === 0 && move.damage > 0) {
+      this.trainingStats.lastMove = { name: move.label, ...moveFrames(move) };
+    }
     f.state = 'attack';
     f.stateTimer = 0;
     f.activeMove = move;
@@ -1087,30 +1201,11 @@ export class GameEngine {
 
   private beginFinisher(f: FighterRuntime, move: MoveSpec) {
     if (this.finishWinner === f.index) this.finishGagUsed = true;
-    const opp = this.fighters?.[f.index === 0 ? 1 : 0];
-    const total = move.startup + move.active + move.recovery;
-    this.finTimer = this.finDuration = total + 0.35;
-    this.finFocusX = opp ? f.x + (opp.x - f.x) * 0.4 : f.x;
-    this.finFacing = f.facing;
-    // preparação em câmera lenta (metade da velocidade), impacto em velocidade normal
-    this.slowmoTimer = move.startup * 2;
-    this.hitstopTimer = Math.max(this.hitstopTimer, 0.12);
-    this.superKey++;
-    this.superCutin = {
-      slot: f.index === 0 ? 'p1' : 'p2',
-      fighterId: f.id,
-      name: FIGHTERS[f.id].name,
-      move: move.label,
-      full: false,
-      key: this.superKey,
-    };
-    this.superCutinTimer = 1.0;
+    // golpe cômico é golpe comum: sem foco de câmera, câmera lenta, faixa ou legenda (isso é só dos especiais)
+    this.hitstopTimer = Math.max(this.hitstopTimer, 0.05);
     const gag = move.finisher!;
     const voiceKey = gag === 'arroz' ? 'arrozQueimado' : gag;
-    if (!this.speak(f, f.id, voiceKey, 0)) {
-      f.bark = clipText(f.id, voiceKey) ?? move.label + '!';
-      f.barkTimer = 2.2;
-    }
+    this.speak(f, f.id, voiceKey, 0, false);
     const t0 = move.startup;
     const handY = f.y + 1.4;
     f.bundadaFxDone = false;
@@ -1305,6 +1400,7 @@ export class GameEngine {
       if (f.meter < cost) return;
       f.meter -= cost;
       f.daviSpecialCooldown = 1.2;
+      if (this.gameMode === 'training' && f.index === 0) this.trainingStats.done.add(isSub ? 'subSpecial' : 'special');
       this.beginSuperCutin(f, !isSub);
       if (isSub) {
         soundEngine.playDaviSpecial('purple');
@@ -1347,6 +1443,7 @@ export class GameEngine {
     if (f.meter < (actualSub ? 50 : cost)) return;
 
     f.meter = Math.max(0, f.meter - (actualSub ? 50 : 100));
+    if (this.gameMode === 'training' && f.index === 0) this.trainingStats.done.add(actualSub ? 'subSpecial' : 'special');
     soundEngine.playSpecial();
     this.beginSuperCutin(f, !actualSub);
     let moveAnim: string | undefined;
@@ -1780,20 +1877,24 @@ export class GameEngine {
       };
       const jumpPressed = btn(1) || btn(12) || ay < -0.58;
       edge('jump', jumpPressed, () => {
-        if (this.matchPhase === 'fighting') this.tryJump(p1);
+        if (this.matchPhase === 'fighting') this.pressAction(p1, 'jump');
       });
       edge('light', btn(0), () => {
         if (this.matchPhase === 'intro') this.skipIntro();
-        else if (this.matchPhase === 'fighting') this.tryAttack(p1, 'light');
+        else if (this.matchPhase === 'fighting') this.pressAction(p1, 'light');
       });
       edge('heavy', btn(2), () => {
-        if (this.matchPhase === 'fighting') this.tryAttack(p1, 'heavy');
+        if (this.matchPhase === 'fighting') this.pressAction(p1, 'heavy');
       });
       edge('special', btn(3), () => {
-        if (this.matchPhase === 'fighting') this.trySpecial(p1, this.isHeld(0, 'down'));
+        if (this.matchPhase === 'fighting') this.pressAction(p1, 'special');
       });
       edge('taunt', btn(8), () => {
-        if (this.matchPhase === 'fighting') this.tryTaunt(p1);
+        if (this.matchPhase === 'fighting') this.pressAction(p1, 'taunt');
+      });
+      // L3 (analógico apertado): reinicia a posição no treino
+      edge('reset', btn(10), () => {
+        if (this.gameMode === 'training') this.resetTraining();
       });
     }
   }
@@ -1925,15 +2026,13 @@ export class GameEngine {
           this.resolveTimeOver();
         }
       } else {
-        // Training mode auto-regenerates health & special meter smoothly
-        f1.hp = Math.min(f1.maxHp, f1.hp + dt * 65);
-        f2.hp = Math.min(f2.maxHp, f2.hp + dt * 65);
-        f1.meter = Math.min(100, f1.meter + dt * 22);
+        this.stepTraining(dt, f1, f2);
       }
 
-      this.updateCpuAi(f2, f1, dt);
+      const p2Cpu = this.gameMode === 'cpu' || (this.gameMode === 'training' && this.trainingOpts.dummy === 'cpu');
+      if (p2Cpu) this.updateCpuAi(f2, f1, dt);
       this.stepFighter(f1, f2, dt, false);
-      this.stepFighter(f2, f1, dt, this.gameMode === 'cpu');
+      this.stepFighter(f2, f1, dt, p2Cpu);
       this.resolveBodyPush(f1, f2);
       this.stepProjectiles(dt);
       this.stepCameos(dt);
@@ -1988,6 +2087,7 @@ export class GameEngine {
     if (f.state === 'knockdown') return 'knockdown';
     if (f.state === 'hitstun') return 'hitstun';
     if (f.state === 'transform') return 'transform';
+    if (f.state === 'blockstun' && f.lowGuard) return 'crouch';
     if (f.state === 'guard' || f.state === 'blockstun') return 'guard';
     if (f.state === 'crouch') return 'crouch';
     if (f.state === 'attack' && f.activeMove) {
@@ -2002,7 +2102,7 @@ export class GameEngine {
   }
 
   private updateCpuAi(cpu: FighterRuntime, player: FighterRuntime, dt: number) {
-    if (this.gameMode !== 'cpu') return;
+    if (this.gameMode !== 'cpu' && this.gameMode !== 'training') return;
     if (['hitstun', 'blockstun', 'knockdown', 'transform', 'victory'].includes(cpu.state)) return;
 
     // Daniel's loyal golden dog passive support!
@@ -2067,6 +2167,14 @@ export class GameEngine {
     const formSpec = FORMS[f.form];
 
     f.stateTimer += dt;
+    if (f.inputBuffer) {
+      if (this.worldTime - f.inputBuffer.t > 0.15) f.inputBuffer = null;
+      else if (!['attack', 'hitstun', 'blockstun', 'knockdown', 'transform', 'victory'].includes(f.state)) {
+        const a = f.inputBuffer.action;
+        f.inputBuffer = null;
+        this.performAction(f, a);
+      }
+    }
     f.noGuardTimer = Math.max(0, f.noGuardTimer - dt);
     f.tauntCooldown = Math.max(0, f.tauntCooldown - dt);
     if (f.id === 'davi' && this.matchPhase === 'fighting') {
@@ -2115,7 +2223,10 @@ export class GameEngine {
       if (f.stateTimer >= tfDur) f.state = 'idle';
     } else if (f.state === 'hitstun' || f.state === 'blockstun') {
       f.vx *= Math.exp(-8 * dt);
-      if (f.stateTimer >= 0.28) f.state = 'idle';
+      if (f.stateTimer >= (f.stunDuration || DEFAULT_HITSTUN)) {
+        f.state = 'idle';
+        f.lowGuard = false;
+      }
     } else if (f.state === 'knockdown') {
       f.vx *= Math.exp(-6 * dt);
       if (f.stateTimer >= 0.85 && f.hp > 0) {
@@ -2163,7 +2274,7 @@ export class GameEngine {
         const dirToOpp = Math.sign(opp.x - f.x) || f.facing;
         const reach = m.range * formSpec.reach;
         if (dirToOpp === f.facing && dist >= m.minRange && dist <= reach && Math.abs(opp.y - f.y) < 1.55) {
-          this.applyHit(f, opp, m.damage * formSpec.atk, m.push * formSpec.push, m.hitstop, Boolean(m.heavy), Boolean(m.knockdown));
+          this.applyHit(f, opp, m.damage * formSpec.atk, m.push * formSpec.push, m.hitstop, Boolean(m.heavy), Boolean(m.knockdown), m);
           f.moveHitConnected = true;
         }
       }
@@ -2180,7 +2291,7 @@ export class GameEngine {
               : next === 'combo' && spec.moves.combo
               ? spec.moves.combo
               : spec.moves.heavy;
-          this.startAttackMove(f, nextMove);
+          this.startAttackMove(f, nextMove, next === 'medium' ? 'chainMedium' : 'chainHeavy');
         } else {
           f.state = 'idle';
           f.activeMove = null;
@@ -2252,7 +2363,8 @@ export class GameEngine {
     push: number,
     hitstop: number,
     heavy: boolean,
-    knockdown: boolean
+    knockdown: boolean,
+    move?: MoveSpec
   ) {
     if (def.hitInvuln > 0 || this.matchPhase !== 'fighting') return;
     if (this.finishWinner !== null) {
@@ -2261,7 +2373,7 @@ export class GameEngine {
       return;
     }
 
-    const isBlocking =
+    const standingGuard =
       def.noGuardTimer <= 0 &&
       (def.state === 'guard' ||
       def.state === 'blockstun' ||
@@ -2271,6 +2383,14 @@ export class GameEngine {
         def.state !== 'knockdown' &&
         ((def.facing === 1 && this.isHeld(def.index, 'left')) ||
           (def.facing === -1 && this.isHeld(def.index, 'right')))));
+    // golpe baixo só é defendido agachado (baixo + defesa); boneco do treino em "Defende tudo" defende qualquer um
+    const dummyAll = this.isTrainingDummy(def) && (this.trainingOpts.dummy === 'guard' || (this.trainingOpts.dummy === 'guardAfterHit' && this.dummyGuardTimer > 0));
+    const crouching = this.isHeld(def.index, 'down') || def.state === 'crouch';
+    const isBlocking =
+      (standingGuard && (!move?.low || crouching || dummyAll)) ||
+      (dummyAll && def.noGuardTimer <= 0 && def.y <= 0.02 && !['attack', 'hitstun', 'knockdown'].includes(def.state));
+    def.lowGuard = isBlocking && Boolean(move?.low);
+    def.stunDuration = Math.max(0.16, (isBlocking ? move?.blockstun : move?.hitstun) || DEFAULT_HITSTUN);
 
     const defMult = FORMS[def.form].def;
     // escala de combo (padrão de jogo de luta): a partir do 3º acerto seguido cada golpe tira 10% menos, mínimo 55%
@@ -2320,10 +2440,56 @@ export class GameEngine {
       this.funSay(def, 'lowHp', att, 350);
     }
 
+    if (this.gameMode === 'training') this.noteTrainingHit(att, def, dmg, isBlocking, move);
+
     if (def.hp <= 0 && this.gameMode !== 'training') {
       this.triggerKO(att, def);
     }
     this.emitHud();
+  }
+
+  private isTrainingDummy(f: FighterRuntime) {
+    return this.gameMode === 'training' && f.index === 1;
+  }
+
+  private noteTrainingHit(att: FighterRuntime, def: FighterRuntime, dmg: number, blocked: boolean, move?: MoveSpec) {
+    if (def.hp <= 0) def.hp = 1;
+    if (this.isTrainingDummy(def) && this.trainingOpts.dummy === 'guardAfterHit') this.dummyGuardTimer = 1.0;
+    if (att.index !== 0) return;
+    const st = this.trainingStats;
+    if (att.commandId) st.done.add(att.commandId);
+    if (move) st.lastResult = { kind: blocked ? 'block' : 'hit', advantage: move.knockdown && !blocked ? 99 : frameAdvantage(move, blocked) };
+    if (!blocked) {
+      if (att.comboCount <= 1) st.combo = { hits: 0, damage: 0 };
+      st.combo.hits = att.comboCount;
+      st.combo.damage += dmg;
+      st.best = { hits: Math.max(st.best.hits, st.combo.hits), damage: Math.max(st.best.damage, st.combo.damage) };
+    }
+    this.trainingCalm = 0;
+  }
+
+  /** Boneco do treino: o que ele segura e como se recupera. */
+  private stepTraining(dt: number, f1: FighterRuntime, f2: FighterRuntime) {
+    const o = this.trainingOpts;
+    this.dummyGuardTimer = Math.max(0, this.dummyGuardTimer - dt);
+    if (o.infiniteMeter) f1.meter = 100;
+    f2.meter = Math.min(100, f2.meter + dt * 20);
+    if (o.dummy === 'jump' && f2.y <= 0.02 && (f2.state === 'idle' || f2.state === 'move')) {
+      this.dummyJumpTimer -= dt;
+      if (this.dummyJumpTimer <= 0) {
+        this.dummyJumpTimer = 0.9;
+        this.tryJump(f2);
+      }
+    }
+    // vida volta quando ninguém está apanhando há 1 s
+    const busy = (f: FighterRuntime) => ['hitstun', 'blockstun', 'knockdown'].includes(f.state);
+    this.trainingCalm = busy(f1) || busy(f2) ? 0 : this.trainingCalm + dt;
+    if (this.trainingCalm >= 1 && o.refill) {
+      f1.hp = f1.maxHp;
+      f2.hp = f2.maxHp;
+    }
+    if (f1.state === 'guard' || f1.state === 'blockstun') this.trainingStats.done.add('guard');
+    if (f1.y > 0.3) this.trainingStats.done.add('jump');
   }
 
   private stepProjectiles(dt: number) {
@@ -2594,21 +2760,8 @@ export class GameEngine {
       camX = THREE.MathUtils.lerp(midX, this.superFocusX, 0.75 * k);
       camZ = zDist * (1 - 0.28 * k);
     }
-    let camDrop = 0;
-    let camOrbit = 0;
-    if (this.finTimer > 0 && this.superTimer <= 0) {
-      this.finTimer = Math.max(0, this.finTimer - dt);
-      const p = 1 - this.finTimer / Math.max(0.001, this.finDuration);
-      // entra rápido, segura no golpe e sai suave
-      const k = p < 0.2 ? p / 0.2 : p > 0.8 ? (1 - p) / 0.2 : 1;
-      const e = k * k * (3 - 2 * k);
-      camX = THREE.MathUtils.lerp(midX, this.finFocusX, 0.9 * e);
-      camZ = zDist * (1 - 0.46 * e);
-      camDrop = 0.6 * e;
-      // câmera gira para o lado de trás de quem ataca: enquadramento de cinema
-      camOrbit = -this.finFacing * 1.6 * e;
-      if (this.finTimer === 0) this.emitHud();
-    }
+    const camDrop = 0;
+    const camOrbit = 0;
     if (this.superCutinTimer > 0) {
       this.superCutinTimer = Math.max(0, this.superCutinTimer - dt);
       if (this.superCutinTimer === 0) {
@@ -2677,7 +2830,19 @@ export class GameEngine {
       winnerIndex: this.winnerIndex,
       introLine,
       superCutin: this.superCutin,
-      cinematic: this.finTimer > 0,
+      cinematic: false,
+      training:
+        this.gameMode === 'training'
+          ? {
+              options: { ...this.trainingOpts },
+              lastMove: this.trainingStats.lastMove,
+              lastResult: this.trainingStats.lastResult,
+              combo: { ...this.trainingStats.combo },
+              best: { ...this.trainingStats.best },
+              inputs: this.inputLog.slice(),
+              done: [...this.trainingStats.done],
+            }
+          : null,
       flashKey: this.flashKey,
       p1: this.snapshotFighter(f1),
       p2: this.snapshotFighter(f2),

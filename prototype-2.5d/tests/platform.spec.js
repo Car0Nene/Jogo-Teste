@@ -427,8 +427,40 @@ test('every adult fighter has the full Pedro-standard animation set and impact s
     const res = await request.get(`/assets/sprites/${id}-anim-hd.webp`);
     expect(res.status(), `${id} atlas`).toBe(200);
   }
+  // nenhuma animação de lutador pode cair na arte antiga (só o atlas novo, tier 6)
+  const legacy = await page.evaluate(async () => {
+    const { SPRITE_ATLAS } = await import('/src/data/spriteAtlas.ts');
+    const bad = [];
+    for (const [id, m] of Object.entries(SPRITE_ATLAS)) {
+      if (id === 'cao') continue;
+      for (const [k, fr] of Object.entries(m)) if (!fr.length || fr.some((f) => f[6] !== 6)) bad.push(`${id}.${k}`);
+    }
+    return bad;
+  });
+  expect(legacy).toEqual([]);
   for (const sfx of ['hit_light', 'hit_heavy', 'kick', 'block', 'whoosh_light', 'whoosh_heavy', 'fall']) {
     const res = await request.get(`/assets/sfx/${sfx}.mp3`);
     expect(res.status(), sfx).toBe(200);
+  }
+});
+
+test('move structure, low guard, training data and story assets', async ({ page, request }, testInfo) => {
+  test.skip(testInfo.project.name !== 'desktop-chromium');
+  await page.goto('/');
+  const r = await page.evaluate(async () => {
+    const { commandListFor, lowMoves } = await import('/src/data/commands.ts');
+    const { STORY } = await import('/src/data/story.ts');
+    const ids = ['juraci', 'carlos', 'pedro', 'daniel', 'franciely', 'gabi', 'paula', 'tainara', 'davi'];
+    const lists = ids.map((id) => commandListFor(id).map((c) => c.id));
+    return { lists, low: lowMoves('carlos').heavy, story: STORY.map((c) => ({ imgs: c.panels.map((p) => p.img), clips: c.panels.flatMap((p) => p.lines.map((l) => l.clip)) })) };
+  });
+  for (const l of r.lists) {
+    for (const id of ['light', 'heavy', 'air', 'lowLight', 'lowHeavy', 'chainMedium', 'chainHeavy', 'special', 'subSpecial', 'guard']) expect(l).toContain(id);
+  }
+  expect(r.low.low).toBe(true);
+  expect(r.low.knockdown).toBe(true);
+  for (const c of r.story) {
+    for (const img of c.imgs) expect((await request.get(`/assets/story/${img}.webp`)).status(), img).toBe(200);
+    for (const clip of c.clips) expect((await request.get(`/assets/voice/story/${clip}.mp3`)).status(), clip).toBe(200);
   }
 });

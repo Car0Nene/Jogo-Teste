@@ -16,6 +16,9 @@ import {
   HudSnapshot,
 } from './engine/GameEngine';
 import { FightHud } from './components/FightHud';
+import { MoveList } from './components/MoveList';
+import { StoryPlayer } from './components/StoryPlayer';
+import { STORY, loadStoryProgress, saveStoryProgress } from './data/story';
 import { AmbientParticles } from './components/menu/AmbientParticles';
 import { CharacterSelectScreen } from './components/menu/CharacterSelectScreen';
 import { ExtrasScreen } from './components/menu/ExtrasScreen';
@@ -31,7 +34,7 @@ import { BootIntro, shouldShowBootIntro } from './components/menu/BootIntro';
 
 const platformState = () => platform.state;
 
-type AppScreen = 'title' | 'modes' | 'select' | 'stage' | 'vs' | 'fight' | 'extras';
+type AppScreen = 'title' | 'modes' | 'select' | 'stage' | 'vs' | 'fight' | 'extras' | 'story';
 
 export default function App() {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -53,6 +56,9 @@ export default function App() {
   const [stageId, setStageId] = useState<StageId>('bar');
   const [showcaseOrbit, setShowcaseOrbit] = useState(false);
   const [paused, setPaused] = useState(false);
+  const [moveListOpen, setMoveListOpen] = useState(false);
+  /** capítulo do Modo História em andamento (null = fora da história) */
+  const [storyChapter, setStoryChapter] = useState<number | null>(null);
   const [hud, setHud] = useState<HudSnapshot | null>(null);
   const pf = usePlatform();
 
@@ -180,6 +186,7 @@ export default function App() {
   }, [showcaseOrbit]);
 
   const openTitle = useCallback(() => {
+    setStoryChapter(null);
     setShowcaseOrbit(false);
     setPaused(false);
     setScreen('title');
@@ -192,6 +199,7 @@ export default function App() {
     if (st.profile.ui === 'touch' && !st.standalone && !document.fullscreenElement) {
       document.documentElement.requestFullscreen?.({ navigationUI: 'hide' }).catch(() => {});
     }
+    setStoryChapter(null);
     setGameMode(mode);
     setShowcaseOrbit(false);
     setPaused(false);
@@ -218,6 +226,47 @@ export default function App() {
     setScreen('fight');
     engineRef.current?.startMatch(p1Id, p2Id, stageId, gameMode, difficulty);
   }, [p1Id, p2Id, stageId, gameMode, difficulty]);
+
+  // ---------- Modo História ----------
+  const startStory = useCallback((chapter?: number) => {
+    const idx = chapter ?? loadStoryProgress();
+    setStoryChapter(idx);
+    setPaused(false);
+    setShowcaseOrbit(false);
+    engineRef.current?.setScreenMode('title');
+    soundEngine.startMusic('theme', 0.45);
+    setScreen('story');
+  }, []);
+
+  const storyFight = useCallback(() => {
+    if (storyChapter === null) return;
+    const ch = STORY[storyChapter];
+    if (!ch.fight) {
+      // epílogo: história concluída, volta ao começo da próxima vez
+      saveStoryProgress(0);
+      openTitle();
+      return;
+    }
+    const { p1, p2, stage } = ch.fight;
+    setP1Id(p1);
+    setP2Id(p2);
+    setStageId(stage);
+    setGameMode('cpu');
+    recordedMatchRef.current = 'story';
+    setScreen('fight');
+    engineRef.current?.startMatch(p1, p2, stage, 'cpu', difficulty);
+  }, [storyChapter, difficulty, openTitle]);
+
+  // venceu a luta do capítulo: salva e segue para o próximo quadrinho
+  useEffect(() => {
+    if (storyChapter === null || screen !== 'fight' || hud?.phase !== 'matchOver' || hud.winnerIndex !== 0) return;
+    const t = window.setTimeout(() => {
+      const next = Math.min(STORY.length - 1, storyChapter + 1);
+      saveStoryProgress(next);
+      startStory(next);
+    }, 3800);
+    return () => window.clearTimeout(t);
+  }, [storyChapter, screen, hud?.phase, hud?.winnerIndex, startStory]);
 
   useEffect(() => {
     if (screen !== 'fight' || gameMode !== 'cpu' || hud?.phase !== 'matchOver' || recordedMatchRef.current) return;
@@ -284,6 +333,7 @@ export default function App() {
           onOpenSettings={() => setSettingsOpen(true)}
           onOpenExtras={() => setScreen('extras')}
           onOpenAccount={() => { setAccountOpen(true); void accountService.open(); }}
+          onStartStory={() => startStory()}
         />
       )}
 
@@ -293,6 +343,7 @@ export default function App() {
           onBack={openTitle}
           onSelectMode={goToSelect}
           onOpenExtras={() => setScreen('extras')}
+          onStartStory={() => startStory()}
         />
       )}
 
@@ -345,6 +396,17 @@ export default function App() {
         <ExtrasScreen onBack={openTitle} />
       )}
 
+      {/* MODO HISTÓRIA */}
+      {screen === 'story' && storyChapter !== null && !settingsOpen && (
+        <StoryPlayer
+          key={storyChapter}
+          chapter={STORY[storyChapter]}
+          volume={settings.muted ? 0 : settings.masterVolume * settings.voiceVolume}
+          onDone={storyFight}
+          onExit={openTitle}
+        />
+      )}
+
       {/* FIGHTING HUD */}
       {screen === 'fight' && hud && (
         <FightHud
@@ -361,15 +423,17 @@ export default function App() {
           onSkipIntro={() => engineRef.current?.skipIntro()}
           onVirtualHold={(p, act, down) => engineRef.current?.triggerVirtualHold(p, act, down)}
           onVirtualPress={(p, act) => engineRef.current?.triggerVirtualPress(p, act)}
-          onRematch={beginFightEngine}
-          onBackToSelect={() => goToSelect(gameMode)}
+          onRematch={storyChapter !== null ? storyFight : beginFightEngine}
+          onBackToSelect={storyChapter !== null ? openTitle : () => goToSelect(gameMode)}
+          onTrainingOptions={(o) => engineRef.current?.setTrainingOptions(o)}
+          onTrainingReset={(c) => engineRef.current?.resetTraining(c)}
         />
       )}
 
       {/* PAUSE MODAL */}
       {screen === 'fight' && paused && !settingsOpen && (
         <div className="fixed inset-0 z-30 bg-black/75 flex items-center justify-center p-4 animate-screen-in">
-          <div className="bg-[#100d18] border-2 border-amber-400/50 p-6 max-w-md w-full shadow-2xl ff-chamfer">
+          <div className={`bg-[#100d18] border-2 border-amber-400/50 p-6 w-full shadow-2xl ff-chamfer max-h-[94vh] overflow-y-auto ${moveListOpen ? 'max-w-2xl' : 'max-w-md'}`}>
             <h2 className="font-display font-extrabold text-4xl text-white text-center leading-none">
               JOGO PAUSADO
             </h2>
@@ -377,6 +441,11 @@ export default function App() {
               {p1Spec.name} vs {p2Spec.name} · {stageSpec.name}
             </p>
 
+            {moveListOpen ? (
+              <div className="mt-4">
+                <MoveList fighterId={p1Id} keyBindings={kb} />
+              </div>
+            ) : (
             <div className="mt-4 bg-[#171222] border border-white/10 p-3 text-xs text-stone-300 space-y-1.5">
               <div>
                 <strong className="text-amber-300">1P:</strong> {formatKeyCode(kb.left)}/{formatKeyCode(kb.right)} Mover · {formatKeyCode(kb.up)}/Espaço Pular · {formatKeyCode(kb.down)} Agachar · {formatKeyCode(kb.light)} Leve · {formatKeyCode(kb.heavy)} Forte · {formatKeyCode(kb.special)} Especial · ↓+{formatKeyCode(kb.special)} Sub · {formatKeyCode(kb.guard)} Defesa
@@ -387,6 +456,7 @@ export default function App() {
                 </div>
               )}
             </div>
+            )}
 
             <div className="grid grid-cols-2 gap-2.5 mt-5">
               <button
@@ -395,6 +465,13 @@ export default function App() {
                 className="col-span-2 py-2.5 min-h-[44px] bg-amber-400 hover:bg-amber-300 text-stone-950 font-bold text-sm cursor-pointer ff-chamfer-sm"
               >
                 Continuar Luta
+              </button>
+              <button
+                type="button"
+                onClick={() => setMoveListOpen((v) => !v)}
+                className="col-span-2 py-2.5 min-h-[42px] bg-[#1a1526] hover:bg-[#251e36] border border-amber-300/30 text-amber-200 font-semibold text-sm cursor-pointer"
+              >
+                {moveListOpen ? 'Fechar Lista de Golpes' : 'Lista de Golpes'}
               </button>
               <button
                 type="button"

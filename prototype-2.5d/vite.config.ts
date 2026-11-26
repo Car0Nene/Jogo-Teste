@@ -27,6 +27,12 @@ export default defineConfig(() => {
           if (fs.existsSync(distDir) && fs.existsSync(srcAssets)) {
             fs.cpSync(srcAssets, distAssets, {recursive: true, force: true});
           }
+          // cada build tem um cache próprio no service worker: publicar apaga a arte antiga dos aparelhos
+          const sw = path.resolve(distDir, 'sw.js');
+          if (fs.existsSync(sw)) {
+            const buildId = (process.env.GITHUB_SHA || String(Date.now())).slice(0, 12);
+            fs.writeFileSync(sw, fs.readFileSync(sw, 'utf8').replace(/__BUILD_ID__/g, buildId));
+          }
         },
       },
     ],

@@ -482,6 +482,7 @@ function completeFormAnims(id: FighterId, form: string, fa: SpriteAnimMap): Spri
     win: pick('heavy'),
     special: pick('heavy'),
     combo: pick('medium'),
+    hulkBlast: pick('heavy'),
   });
   Object.assign(out, fa);
   formAnimCache.set(key, out);
@@ -608,7 +609,7 @@ function resolveSpritePose(
   const big =
     ctx.form === 'gordao' && S.gordao && !formAnims
       ? { idle: S.gordao[1] || S.gordao[0], windup: S.gordao[1] || S.gordao[0], pose: S.gordao[2] || S.gordao[1], hurt: S.hurt?.[0] || S.gordao[1] }
-      : ctx.form === 'hulk' && S.hulk
+      : ctx.form === 'hulk' && S.hulk && !formAnims
       ? { idle: S.hulk[0], windup: S.hulk[0], pose: S.hulk[1] || S.hulk[0], hurt: S.hulk[0] }
       : null;
 
