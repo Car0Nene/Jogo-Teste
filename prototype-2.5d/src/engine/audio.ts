@@ -173,6 +173,8 @@ export const CAST_VARIANTS: Record<string, Partial<Record<'win' | 'ko', string[]
   gabi: { win: ['win2', 'win3'], ko: ['ko2', 'ko3'] },
   tainara: { win: ['win2', 'win3'], ko: ['ko2', 'ko3'] },
   davi: { win: ['win2', 'win3'], ko: ['ko2', 'ko3'] },
+  pedro: { win: ['win2', 'win3'], ko: ['ko2', 'ko3'] },
+  daniel: { win: ['win2', 'win3'], ko: ['ko2', 'ko3'] },
 };
 for (const [id, byEvent] of Object.entries(CAST_VARIANTS)) {
   const clips = (CLIPS[id] ??= {});
