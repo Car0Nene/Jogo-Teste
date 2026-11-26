@@ -21,7 +21,7 @@ interface FightHudProps {
   onPause: () => void;
   onSkipIntro: () => void;
   onVirtualHold: (player: 0 | 1, action: string, active: boolean) => void;
-  onVirtualPress: (player: 0 | 1, action: 'light' | 'heavy' | 'special' | 'subSpecial' | 'jump') => void;
+  onVirtualPress: (player: 0 | 1, action: 'light' | 'heavy' | 'special' | 'subSpecial' | 'jump' | 'taunt') => void;
   onRematch: () => void;
   onBackToSelect: () => void;
 }
@@ -175,7 +175,7 @@ function DesktopCommandBar({
   const k = (code: string) => formatKeyCode(code);
   const pad = inputMode === 'gamepad';
   const keys: Array<[string[], string]> = pad
-    ? [[['◀', '▶'], 'Mover'], [['B'], 'Pular'], [['▼'], 'Agachar'], [['A'], 'Leve'], [['X'], 'Forte'], [['Y'], 'Especial'], [['▼', 'Y'], 'Sub'], [['LB'], 'Defesa']]
+    ? [[['◀', '▶'], 'Mover'], [['B'], 'Pular'], [['▼'], 'Agachar'], [['A'], 'Leve'], [['X'], 'Forte'], [['Y'], 'Especial'], [['▼', 'Y'], 'Sub'], [['LB'], 'Defesa'], [['Select'], 'Provocar']]
     : [
         [[k(keyBindings.left), k(keyBindings.right)], 'Mover'],
         [[k(keyBindings.up)], 'Pular'],
@@ -185,6 +185,7 @@ function DesktopCommandBar({
         [[k(keyBindings.special)], 'Especial'],
         [[k(keyBindings.down), k(keyBindings.special)], 'Sub'],
         [[k(keyBindings.guard)], 'Defesa'],
+        [['Y'], 'Provocar'],
       ];
   // golpe cinematográfico: frente + Leve
   const GAG_HINT: Record<string, string> = { daniel: 'Bundada', pedro: 'Cigarro', juraci: 'Chinelo', carlos: 'Pizza', franciely: 'Conta até 3', gabi: 'Selfie', paula: 'Panela', tainara: 'Arroz', davi: 'Lag' };
@@ -221,6 +222,7 @@ function DesktopCommandBar({
           <button type="button" className={btn} disabled={hud.p1.meter < 50} onClick={() => onVirtualPress(0, 'subSpecial')}>Transformação (↓+{k(keyBindings.special)})</button>
         )}
         <button type="button" className={btn} {...hold('guard')}>Defesa ({k(keyBindings.guard)})</button>
+        <button type="button" className={btn} onClick={() => onVirtualPress(0, 'taunt')}>Provocar (Y)</button>
       </div>
     </div>
   );

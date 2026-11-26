@@ -16,6 +16,7 @@ import {
   Player1KeyBindings,
   ResolutionScale,
 } from '../data/settings';
+import { FUN_LINES, type FunTrigger } from '../data/funLines';
 import { STAGES, StageId } from '../data/stages';
 import { CastVoiceEvent, STAGE_MUSIC, castKey, clipText, hasClip, soundEngine } from './audio';
 import {
@@ -114,6 +115,11 @@ interface FighterRuntime {
   daviSpecialCooldown: number;
   /** Super Bundada: onda de impacto já disparada neste golpe */
   bundadaFxDone?: boolean;
+  /** especial do adversário em andamento: não consegue defender, só atacar (estilo Mortal Kombat) */
+  noGuardTimer: number;
+  tauntCooldown: number;
+  lowHpSaid: boolean;
+  lastFunKey?: string;
 }
 
 interface ActiveProjectile {
@@ -197,6 +203,8 @@ export class GameEngine {
 
   private projectiles: ActiveProjectile[] = [];
   private popTexts: PopText[] = [];
+  /** conversa no meio da luta: de vez em quando alguém solta uma das falas reais */
+  private chatterTimer = 14;
   private flashKey = 0;
   private cameos: ActiveCameo[] = [];
   private bursts: Array<{ mesh: THREE.Group; life: number; maxLife: number }> = [];
@@ -554,6 +562,9 @@ export class GameEngine {
     if (!this.fighters) return;
     const f = speakerSlot === 'p1' ? this.fighters[0] : this.fighters[1];
     if (this.fighters.some((fighter) => fighter.id === 'davi') && f.id !== 'davi') return;
+    // às vezes abre com um áudio real da família (provocação específica contra o adversário, quando tem)
+    const foe = speakerSlot === 'p1' ? this.fighters[1] : this.fighters[0];
+    if (FUN_LINES[f.id] && Math.random() < 0.55 && this.funSay(f, 'intro', foe)) return;
     const introClips: Partial<Record<FighterId, string[]>> = {
       franciely: ['ferrinho', 'montar', 'desarma', 'isso'],
       daniel: ['preparativos', 'praia'],
@@ -633,7 +644,7 @@ export class GameEngine {
     else this.virtualHolds[playerIndex].delete(action);
   }
 
-  public triggerVirtualPress(playerIndex: 0 | 1, action: 'light' | 'heavy' | 'special' | 'subSpecial' | 'jump') {
+  public triggerVirtualPress(playerIndex: 0 | 1, action: 'light' | 'heavy' | 'special' | 'subSpecial' | 'jump' | 'taunt') {
     if (this.screenMode !== 'fight' || this.paused) return;
     if (this.matchPhase === 'intro') {
       this.skipIntro();
@@ -643,6 +654,8 @@ export class GameEngine {
     const f = this.fighters[playerIndex];
     if (action === 'jump') {
       this.tryJump(f);
+    } else if (action === 'taunt') {
+      this.tryTaunt(f);
     } else if (action === 'special') {
       this.trySpecial(f, false);
     } else if (action === 'subSpecial') {
@@ -741,6 +754,9 @@ export class GameEngine {
       daviIdleTime: 0,
       daviVoiceCooldown: 0,
       daviSpecialCooldown: 0,
+      noGuardTimer: 0,
+      tauntCooldown: 0,
+      lowHpSaid: false,
     };
   }
 
@@ -771,6 +787,9 @@ export class GameEngine {
       f.daviIdleTime = 0;
       f.daviVoiceCooldown = 0;
       f.daviSpecialCooldown = 0;
+      f.noGuardTimer = 0;
+      f.tauntCooldown = 0;
+      f.lowHpSaid = false;
     }
     this.syncFighterTransforms();
   }
@@ -798,6 +817,9 @@ export class GameEngine {
       f.daviIdleTime = 0;
       f.daviVoiceCooldown = 0;
       f.daviSpecialCooldown = 0;
+      f.noGuardTimer = 0;
+      f.tauntCooldown = 0;
+      f.lowHpSaid = false;
     }
     this.roundTimer = 99;
     this.lastCountdownSec = 99;
@@ -899,6 +921,8 @@ export class GameEngine {
       this.tryAttack(p1, 'heavy');
     } else if (code === kb.special || (solo && code === 'KeyT')) {
       this.trySpecial(p1, this.isHeld(0, 'down'));
+    } else if (code === 'KeyY') {
+      this.tryTaunt(p1);
     }
 
     if (this.gameMode === 'versus') {
@@ -906,7 +930,52 @@ export class GameEngine {
       else if (code === 'KeyU' || code === 'Numpad1') this.tryAttack(p2, 'light');
       else if (code === 'KeyP' || code === 'Numpad2') this.tryAttack(p2, 'heavy');
       else if (code === 'Numpad3' || code === 'Slash') this.trySpecial(p2, this.isHeld(1, 'down'));
+      else if (code === 'Numpad5' || code === 'Period') this.tryTaunt(p2);
     }
+  }
+
+  /**
+   * Provocar: faz pose, fala uma provocação (áudio real da família quando tem) e ganha um pouco de barra.
+   * Fica aberto por ~1 s: provocar é arriscado.
+   */
+  private tryTaunt(f: FighterRuntime) {
+    if (f.y > 0.02 || f.tauntCooldown > 0) return;
+    if (['attack', 'hitstun', 'blockstun', 'knockdown', 'transform', 'victory'].includes(f.state)) return;
+    const opp = this.fighters?.[f.index === 0 ? 1 : 0];
+    f.tauntCooldown = 3.5;
+    this.startAttackMove(f, {
+      id: 'combo', label: 'Provocar', startup: 0.1, active: 0.1, recovery: 0.95,
+      damage: 0, minRange: 0, range: 0, hitstun: 0, blockstun: 0, push: 0, hitstop: 0, anim: 'win',
+    });
+    f.meter = Math.min(100, f.meter + 8);
+    if (!this.funSay(f, 'taunt', opp)) {
+      const generic = ['Vem! Tá com medo?', 'Bate mais forte, vai!', 'Só isso? Que preguiça...', 'Chama a família toda!', 'Tô nem suando!'];
+      f.bark = generic[Math.floor(Math.random() * generic.length)];
+      f.barkTimer = 2.2;
+    }
+    this.spawnPop('PROVOCOU!', f.x, f.y + 1.9, '#c4b5fd');
+    this.emitHud();
+  }
+
+  /** Fala engraçada de verdade (áudios da família) para um momento da luta; evita repetir a última. */
+  private funSay(f: FighterRuntime, trigger: FunTrigger, opp?: FighterRuntime, delayMs = 0): boolean {
+    const set = FUN_LINES[f.id];
+    if (!set) return false;
+    let pool: string[] = [];
+    if (opp && (trigger === 'intro' || trigger === 'taunt') && set.vs?.[opp.id] && Math.random() < 0.65) pool = set.vs[opp.id]!;
+    if (opp && trigger === 'win' && set.winVs?.[opp.id]) pool = set.winVs[opp.id]!;
+    if (!pool.length) pool = set.lines[trigger] ?? [];
+    if (!pool.length) return false;
+    const options = pool.length > 1 ? pool.filter((k) => k !== f.lastFunKey) : pool;
+    const key = options[Math.floor(Math.random() * options.length)];
+    f.lastFunKey = key;
+    if (delayMs > 0) {
+      setTimeout(() => {
+        if (!this.disposed && this.fighters) this.speak(f, f.id, key, 0);
+      }, delayMs);
+      return true;
+    }
+    return this.speak(f, f.id, key, 0);
   }
 
   private tryJump(f: FighterRuntime) {
@@ -1069,6 +1138,20 @@ export class GameEngine {
     this.popTexts.push({ sprite, life: 0.95 });
   }
 
+  private stepChatter(dt: number) {
+    if (!this.fighters) return;
+    this.chatterTimer -= dt;
+    if (this.chatterTimer > 0) return;
+    this.chatterTimer = 13 + Math.random() * 11;
+    const now = performance.now();
+    const quiet = this.fighters.every((x) => !x.barkVoicedAt || now - x.barkVoicedAt > 5000);
+    if (!quiet || this.fighters.some((x) => x.id === 'davi')) return;
+    const talkers = this.fighters.filter((x) => FUN_LINES[x.id] && !['knockdown', 'victory', 'transform'].includes(x.state));
+    if (!talkers.length) return;
+    const f = talkers[Math.floor(Math.random() * talkers.length)];
+    this.funSay(f, 'taunt', this.fighters[f.index === 0 ? 1 : 0]);
+  }
+
   private stepPopTexts(dt: number) {
     for (let i = this.popTexts.length - 1; i >= 0; i--) {
       const t = this.popTexts[i];
@@ -1100,6 +1183,16 @@ export class GameEngine {
    */
   private beginSuperCutin(f: FighterRuntime, full: boolean) {
     const fd = FIGHTERS[f.id];
+    // estilo Mortal Kombat: durante o especial o adversário não consegue defender, só atacar
+    const opp = this.fighters?.[f.index === 0 ? 1 : 0];
+    if (opp) {
+      opp.noGuardTimer = full ? 3.4 : 2.6;
+      if (opp.state === 'guard' || opp.state === 'blockstun') {
+        opp.state = 'idle';
+        opp.stateTimer = 0;
+      }
+      this.spawnPop('SEM DEFESA!', opp.x, opp.y + 1.85, '#f87171');
+    }
     const freeze = full ? 0.62 : 0.18;
     this.hitstopTimer = Math.max(this.hitstopTimer, freeze);
     this.superTimer = this.superDuration = full ? 0.95 : 0.3;
@@ -1355,6 +1448,7 @@ export class GameEngine {
     f.activeMoveAnim = undefined;
     soundEngine.playTransform();
     this.spawnSparks(f.x, f.y + 1.1, FORMS[form].auraHex, 16);
+    this.funSay(f, 'transform', undefined, 2600);
   }
 
   private spawnProjectile(
@@ -1625,6 +1719,9 @@ export class GameEngine {
       edge('special', btn(3), () => {
         if (this.matchPhase === 'fighting') this.trySpecial(p1, this.isHeld(0, 'down'));
       });
+      edge('taunt', btn(8), () => {
+        if (this.matchPhase === 'fighting') this.tryTaunt(p1);
+      });
     }
   }
 
@@ -1733,6 +1830,7 @@ export class GameEngine {
         if (this.phaseTimer === 0) this.bannerText = '';
       }
 
+      this.stepChatter(dt);
       if (this.gameMode !== 'training') {
         this.roundTimer = Math.max(0, this.roundTimer - dt);
         const sec = Math.ceil(this.roundTimer);
@@ -1740,6 +1838,10 @@ export class GameEngine {
           this.lastCountdownSec = sec;
           if (sec === 10 || (sec <= 5 && sec >= 1)) {
             soundEngine.playCountdown();
+          }
+          if (sec === 10 && this.fighters) {
+            const who = this.fighters.find((x) => FUN_LINES[x.id]?.lines.timeLow);
+            if (who) this.funSay(who, 'timeLow');
           }
         }
         if (this.roundTimer <= 0) {
@@ -1836,6 +1938,11 @@ export class GameEngine {
 
     const dist = Math.abs(cpu.x - player.x);
     const aggr = this.difficulty === 'hard' ? 0.85 : this.difficulty === 'normal' ? 0.58 : 0.32;
+    if (cpu.noGuardTimer > 0 && cpu.state !== 'attack') {
+      // sem defesa: a única saída é atacar para interromper o especial
+      if (dist <= 2.2) this.tryAttack(cpu, Math.random() < 0.5 ? 'light' : 'heavy');
+      else cpu.aiAction = 'approach';
+    }
     const blockChance = this.difficulty === 'hard' ? 0.72 : this.difficulty === 'normal' ? 0.45 : 0.2;
 
     cpu.aiThinkTimer -= dt;
@@ -1882,6 +1989,8 @@ export class GameEngine {
     const formSpec = FORMS[f.form];
 
     f.stateTimer += dt;
+    f.noGuardTimer = Math.max(0, f.noGuardTimer - dt);
+    f.tauntCooldown = Math.max(0, f.tauntCooldown - dt);
     if (f.id === 'davi' && this.matchPhase === 'fighting') {
       f.daviVoiceCooldown = Math.max(0, f.daviVoiceCooldown - dt);
       f.daviSpecialCooldown = Math.max(0, f.daviSpecialCooldown - dt);
@@ -2009,7 +2118,7 @@ export class GameEngine {
       const wantGuard = isCpu ? f.aiAction === 'guard' : this.isHeld(f.index, 'guard');
 
       if (f.y <= 0.02) {
-        if (wantGuard) {
+        if (wantGuard && f.noGuardTimer <= 0) {
           f.state = 'guard';
           f.vx *= Math.exp(-14 * dt);
         } else if (wantDown) {
@@ -2071,14 +2180,15 @@ export class GameEngine {
     if (def.hitInvuln > 0 || this.matchPhase !== 'fighting') return;
 
     const isBlocking =
-      def.state === 'guard' ||
+      def.noGuardTimer <= 0 &&
+      (def.state === 'guard' ||
       def.state === 'blockstun' ||
       (def.y <= 0.02 &&
         def.state !== 'attack' &&
         def.state !== 'hitstun' &&
         def.state !== 'knockdown' &&
         ((def.facing === 1 && this.isHeld(def.index, 'left')) ||
-          (def.facing === -1 && this.isHeld(def.index, 'right'))));
+          (def.facing === -1 && this.isHeld(def.index, 'right')))));
 
     const defMult = FORMS[def.form].def;
     const dmg = Math.round(rawDamage * defMult * (isBlocking ? 0.22 : 1));
@@ -2112,6 +2222,14 @@ export class GameEngine {
         this.spawnBurst((att.x + def.x) * 0.5, def.y + 1.15);
       }
       this.spawnSparks((att.x + def.x) * 0.5, def.y + 1.15, heavy ? 0xff9f1c : 0xfef08a, heavy ? 14 : 9);
+    }
+
+    if (def.hp > 0 && def.state === 'knockdown' && Math.random() < 0.45) {
+      this.funSay(att, 'knockdownOpp', def, 450);
+    }
+    if (def.hp > 0 && !def.lowHpSaid && def.hp / def.maxHp < 0.25) {
+      def.lowHpSaid = true;
+      this.funSay(def, 'lowHp', att, 350);
     }
 
     if (def.hp <= 0 && this.gameMode !== 'training') {
@@ -2258,7 +2376,8 @@ export class GameEngine {
     loser.state = 'knockdown';
     loser.stateTimer = 0;
     soundEngine.playKO();
-    this.castVoice(loser, 'ko', 0);
+    if (!this.funSay(loser, 'ko')) this.castVoice(loser, 'ko', 0);
+    if (FUN_LINES[winner.id]?.winVs?.[loser.id]) this.funSay(winner, 'win', loser, 1900);
     setTimeout(() => {
       if (!this.disposed) soundEngine.playClip('narrator', 'victory');
     }, 1100);
@@ -2307,7 +2426,11 @@ export class GameEngine {
         tainara: 'arroz',
         davi: 'videogame',
       };
-      const wk = winClips[winId] ?? castKey('win');
+      const winnerF = this.fighters[this.winnerIndex];
+      const loserF = this.fighters[this.winnerIndex === 0 ? 1 : 0];
+      const funWin = !!FUN_LINES[winId] && !!(FUN_LINES[winId]!.winVs?.[loserF.id] || FUN_LINES[winId]!.lines.win) && Math.random() < 0.6;
+      const wk = funWin ? null : winClips[winId] ?? castKey('win');
+      if (funWin) this.funSay(winnerF, 'win', loserF, 700);
       if (wk) {
         setTimeout(() => {
           if (!this.disposed && this.fighters) this.speak(this.fighters.find((x) => x.id === winId) ?? this.fighters[0], winId, wk, 0);

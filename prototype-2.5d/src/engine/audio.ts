@@ -1,5 +1,6 @@
 import { StageId } from '../data/stages';
 import { VOICE_TEXT } from '../data/voiceText';
+import { FUN_TEXT } from '../data/funLines';
 import { assetUrl } from '../assetUrl';
 
 export type MusicTrackId = 'theme' | 'ff2' | 'ff3';
@@ -50,17 +51,38 @@ const CLIPS: Record<string, Record<string, string>> = {
     cuidar: assetUrl('/assets/voice/generated/franciely-cuidar-e-lutar.mp3'),
   },
   pedro: {
+    dormindo: assetUrl('/assets/voice/familia/pedro/dormindo.mp3'),
+    instigando: assetUrl('/assets/voice/familia/pedro/instigando.mp3'),
+    barraquinha: assetUrl('/assets/voice/familia/pedro/barraquinha.mp3'),
+    peso: assetUrl('/assets/voice/familia/pedro/peso.mp3'),
+    cerveja: assetUrl('/assets/voice/familia/pedro/cerveja.mp3'),
+    bora: assetUrl('/assets/voice/familia/pedro/bora.mp3'),
+    sufoco: assetUrl('/assets/voice/familia/pedro/sufoco.mp3'),
+    naoDaTempo: assetUrl('/assets/voice/familia/pedro/naoDaTempo.mp3'),
+    daTempo: assetUrl('/assets/voice/familia/pedro/daTempo.mp3'),
+    dirigir: assetUrl('/assets/voice/familia/pedro/dirigir.mp3'),
+    tiaPaula: assetUrl('/assets/voice/familia/pedro/tiaPaula.mp3'),
+    musicaPaula: assetUrl('/assets/voice/familia/pedro/musicaPaula.mp3'),
+    vozGabi: assetUrl('/assets/voice/familia/pedro/vozGabi.mp3'),
+    lancaMusica: assetUrl('/assets/voice/familia/pedro/lancaMusica.mp3'),
+    ritmoPraia: assetUrl('/assets/voice/familia/pedro/ritmoPraia.mp3'),
+    pontoAgora: assetUrl('/assets/voice/familia/pedro/pontoAgora.mp3'),
     combo: assetUrl('/assets/voice/pedro-domingo.mp3'),
     drink: assetUrl('/assets/voice/pedro-cerveja.mp3'),
     fumaBebe: assetUrl('/assets/voice/generated/pedro-fuma-bebe-vence.mp3'),
     cigarro: assetUrl('/assets/voice/elenco/pedro/cigarro.mp3'),
   },
   daniel: {
+    eleicao: assetUrl('/assets/voice/familia/daniel/eleicao.mp3'),
+    acai: assetUrl('/assets/voice/familia/daniel/acai.mp3'),
+    trabalhar: assetUrl('/assets/voice/familia/daniel/trabalhar.mp3'),
+    coxinha: assetUrl('/assets/voice/familia/daniel/coxinha.mp3'),
     praia: assetUrl('/assets/voice/daniel-praia.mp3'),
     preparativos: assetUrl('/assets/voice/generated/daniel-preparativos-praia.mp3'),
     bundada: assetUrl('/assets/voice/elenco/daniel/bundada.mp3'),
   },
   gabi: {
+    invejosos: assetUrl('/assets/voice/familia/gabi/invejosos.mp3'),
     selfie: assetUrl('/assets/voice/elenco/gabi/selfie.mp3'),
     sing: assetUrl('/assets/voice/gabi-canto.mp3'),
     amor: assetUrl('/assets/voice/generated/gabi-amor-e-luta.mp3'),
@@ -78,6 +100,8 @@ const CLIPS: Record<string, Record<string, string>> = {
     fe: assetUrl('/assets/voice/elenco/carlos/fe.mp3'),
   },
   paula: {
+    amem: assetUrl('/assets/voice/familia/paula/amem.mp3'),
+    bebe: assetUrl('/assets/voice/familia/paula/bebe.mp3'),
     panela: assetUrl('/assets/voice/elenco/paula/panela.mp3'),
     lunch: assetUrl('/assets/voice/generated/paula-super-almoco.mp3'),
     bar: assetUrl('/assets/voice/generated/paula-bar-simone.mp3'),
@@ -123,7 +147,9 @@ export function clipText(who: string, key: string): string | undefined {
   const url = CLIPS[who]?.[key];
   if (!url) return undefined;
   const path = Object.keys(VOICE_TEXT).find((k) => url.endsWith(k));
-  return path ? VOICE_TEXT[path] : undefined;
+  if (path) return VOICE_TEXT[path];
+  const fun = Object.keys(FUN_TEXT).find((k) => url.endsWith(k));
+  return fun ? FUN_TEXT[fun] : undefined;
 }
 
 /** A fala existe para este personagem? */

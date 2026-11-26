@@ -208,6 +208,18 @@ html[data-ui="touch"] { -webkit-tap-highlight-color: transparent; }
 .ff-touch-btn[data-act="special"], .ff-touch-btn[data-act="light"] { translate: 0 -22%; }
 .ff-touch-btn[data-act="subSpecial"], .ff-touch-btn[data-act="jump"] { translate: 0 20%; }
 .ff-touch-btn[data-act="subSpecial"] { width: calc(var(--btn) * 0.82); height: calc(var(--btn) * 0.82); justify-self: center; align-self: center; font-size: max(9px, calc(var(--btn) * 0.14)); }
+/* Provocar: botãozinho em cima do arco */
+.ff-touch-btn[data-act="taunt"] {
+  position: absolute;
+  top: calc(var(--btn) * -0.42);
+  right: calc(var(--btn) * 0.05);
+  width: calc(var(--btn) * 0.92);
+  height: calc(var(--btn) * 0.46);
+  border-radius: 14px;
+  font-size: max(9px, calc(var(--btn) * 0.13));
+}
+.ff-touch-controls.is-lefty .ff-touch-btn[data-act="taunt"] { right: auto; left: calc(var(--btn) * 0.05); }
+.ff-tone-taunt { background: radial-gradient(circle at 40% 30%, #f0abfc, #a21caf 70%); }
 .ff-tone-sky { background: radial-gradient(circle at 40% 30%, #7dd3fc, #0369a1 70%); }
 .ff-tone-orange { background: radial-gradient(circle at 40% 30%, #fdba74, #c2410c 70%); }
 .ff-tone-green { background: radial-gradient(circle at 40% 30%, #86efac, #15803d 70%); }

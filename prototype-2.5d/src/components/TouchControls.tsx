@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-type PressAction = 'light' | 'heavy' | 'special' | 'subSpecial' | 'jump';
+type PressAction = 'light' | 'heavy' | 'special' | 'subSpecial' | 'jump' | 'taunt';
 
 interface TouchControlsProps {
   meter: number;
@@ -116,6 +116,7 @@ const BUTTONS: ButtonSpec[] = [
   { act: 'jump', label: 'Pulo', aria: 'Pulo', area: 'jump', tone: 'ff-tone-violet' },
   { act: 'heavy', label: 'Forte', aria: 'Forte', area: 'heavy', tone: 'ff-tone-orange' },
   { act: 'light', label: 'Leve', aria: 'Leve', area: 'light', tone: 'ff-tone-sky' },
+  { act: 'taunt', label: 'Provocar', aria: 'Provocar', area: 'auto', tone: 'ff-tone-taunt' },
 ];
 
 /**
@@ -210,7 +211,7 @@ export function TouchControls({ meter, specialCost, scale, opacity, lefty, onHol
               aria-disabled={locked}
               title={locked ? `Requer ${cost}% de energia` : undefined}
               className={`ff-touch-btn ${b.tone} ${down.has(b.act) ? 'is-down' : ''} ${locked ? 'is-locked' : ''} ${b.act === 'special' && meter >= 100 ? 'is-ready' : ''}`}
-              style={{ gridArea: b.area, ...(b.act === 'special' ? { '--meter': `${Math.min(100, meter)}%` } : {}) } as React.CSSProperties}
+              style={{ gridArea: b.area === 'auto' ? undefined : b.area, ...(b.act === 'special' ? { '--meter': `${Math.min(100, meter)}%` } : {}) } as React.CSSProperties}
             >
               {b.label}
             </button>
