@@ -19,7 +19,7 @@ import {
 import { FUN_LINES, type FunTrigger } from '../data/funLines';
 import { findBanter } from '../data/banter';
 import { STAGES, StageId } from '../data/stages';
-import { CastVoiceEvent, STAGE_MUSIC, castKey, clipText, hasClip, soundEngine } from './audio';
+import { CastVoiceEvent, STAGE_MUSIC, castKey, castKeyVariant, clipText, hasClip, soundEngine } from './audio';
 import {
   AnimState,
   CharacterRig,
@@ -554,7 +554,7 @@ export class GameEngine {
 
   /** Fala do elenco (ElevenLabs) para um momento da luta. */
   private castVoice(f: FighterRuntime, event: CastVoiceEvent, throttleMs = 700): boolean {
-    return this.speak(f, f.id, castKey(event), throttleMs);
+    return this.speak(f, f.id, castKeyVariant(f.id, event), throttleMs);
   }
 
   /** Especial/sub-especial: a fala original do golpe tem prioridade; a nova só entra onde não há original. */
@@ -2541,7 +2541,7 @@ export class GameEngine {
       const winnerF = this.fighters[this.winnerIndex];
       const loserF = this.fighters[this.winnerIndex === 0 ? 1 : 0];
       const funWin = !!FUN_LINES[winId] && !!(FUN_LINES[winId]!.winVs?.[loserF.id] || FUN_LINES[winId]!.lines.win) && Math.random() < 0.6;
-      const wk = funWin ? null : winClips[winId] ?? castKey('win');
+      const wk = funWin ? null : (winClips[winId] && Math.random() < 0.4 ? winClips[winId] : castKeyVariant(winId, 'win'));
       if (funWin) this.funSay(winnerF, 'win', loserF, 700);
       if (wk) {
         setTimeout(() => {

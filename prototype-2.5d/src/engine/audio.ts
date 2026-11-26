@@ -3,7 +3,7 @@ import { VOICE_TEXT } from '../data/voiceText';
 import { FUN_TEXT } from '../data/funLines';
 import { assetUrl } from '../assetUrl';
 
-export type MusicTrackId = 'theme' | 'ff2' | 'ff3';
+export type MusicTrackId = 'theme' | 'ff2' | 'ff3' | 'padaria' | 'quintal' | 'festa' | 'praia';
 
 export type AnnouncerKey =
   | 'round_1'
@@ -18,17 +18,22 @@ export type AnnouncerKey =
   | 'tie';
 
 export const STAGE_MUSIC: Record<StageId, MusicTrackId> = {
-  padaria: 'theme',
-  quintal: 'ff3',
-  festa: 'ff2',
+  padaria: 'padaria',
+  quintal: 'quintal',
+  festa: 'festa',
   bar: 'ff2',
-  praia: 'ff3',
+  praia: 'praia',
 };
 
 const TRACK_PATHS: Record<MusicTrackId, string> = {
   theme: assetUrl('/assets/music/bolo-da-juraci'),
   ff2: assetUrl('/assets/music/family-fighter-2'),
   ff3: assetUrl('/assets/music/family-fighter-3'),
+  // trilhas próprias dos cenários (ElevenLabs Music, instrumentais em loop)
+  padaria: assetUrl('/assets/music/estagio-padaria'),
+  quintal: assetUrl('/assets/music/estagio-quintal'),
+  festa: assetUrl('/assets/music/estagio-festa'),
+  praia: assetUrl('/assets/music/estagio-praia'),
 };
 
 /** Efeitos de impacto reais (ElevenLabs Sound Effects), em public/assets/sfx/<nome>.mp3. */
@@ -157,6 +162,30 @@ for (const id of CAST_IDS) {
   for (const [event, file] of Object.entries(CAST_FILES)) {
     clips[`cast_${event}`] = assetUrl(`/assets/voice/elenco/${id}/${file}.mp3`);
   }
+}
+
+/** Variações extras de vitória/derrota (sorteadas junto com a original). */
+export const CAST_VARIANTS: Record<string, Partial<Record<'win' | 'ko', string[]>>> = {
+  juraci: { win: ['win2', 'win3'], ko: ['ko2', 'ko3'] },
+  carlos: { win: ['win2', 'win3'], ko: ['ko2', 'ko3'] },
+  paula: { win: ['win2', 'win3'], ko: ['ko2', 'ko3'] },
+  franciely: { win: ['win2', 'win3'], ko: ['ko2', 'ko3'] },
+  gabi: { win: ['win2', 'win3'], ko: ['ko2', 'ko3'] },
+  tainara: { win: ['win2', 'win3'], ko: ['ko2', 'ko3'] },
+  davi: { win: ['win2', 'win3'], ko: ['ko2', 'ko3'] },
+};
+for (const [id, byEvent] of Object.entries(CAST_VARIANTS)) {
+  const clips = (CLIPS[id] ??= {});
+  for (const files of Object.values(byEvent)) {
+    for (const file of files ?? []) clips[`cast_${file}`] = assetUrl(`/assets/voice/elenco/${id}/${file}.mp3`);
+  }
+}
+
+/** Chave sorteada para vitória/derrota: a original ou uma das variações. */
+export function castKeyVariant(who: string, event: CastVoiceEvent): string {
+  const extra = event === 'win' || event === 'ko' ? CAST_VARIANTS[who]?.[event] ?? [] : [];
+  const pool = [event as string, ...extra];
+  return `cast_${pool[Math.floor(Math.random() * pool.length)]}`;
 }
 
 /** Texto exato de uma fala (o que aparece na tela quando ela toca). */
