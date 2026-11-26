@@ -1,75 +1,163 @@
-// O deploy substitui o número da versão pelo ID da execução do GitHub Actions.
-const CACHE_NAME = 'familia-fighter-v40';
+/**
+ * Service Worker - Família Fighter
+ * Cache Busting Automático v2.1.0
+ * 
+ * Este Service Worker:
+ * - Gerencia cache inteligente
+ * - Remove caches antigos automaticamente
+ * - Força atualização de index.html, manifest e sw.js
+ * - Mantém assets versionados em cache
+ * - Funciona offline
+ */
 
-// Baixado na instalação (o jogo abre offline). Músicas entram no cache na primeira vez que tocam.
-const APP_ASSETS = [
-  './',
-  './index.html',
-  './supabase-config.js',
-  './manifest.webmanifest',
-  './assets/icons/icon.svg',
-  './assets/icons/icon-192.png',
-  './assets/icons/icon-512.png',
+const CACHE_VERSION = 'v2.1.0-20261126';
+const CACHE_NAME = `familia-fighter-${CACHE_VERSION}`;
+
+// URLs que NUNCA devem ser cacheadas (sempre fetch fresh)
+const NO_CACHE_URLS = [
+  'index.html',
+  'manifest.webmanifest',
+  'sw.js'
 ];
 
-// Código e dados: rede primeiro (sempre a versão mais nova, todos do mesmo deploy).
-// Imagens e áudio: cache primeiro (o atlas tem ?v= no endereço, então nunca mistura versões).
-const NETWORK_FIRST = /\.(?:html|js|css|webmanifest|json)$|\/$/;
-
+/**
+ * INSTALL EVENT
+ * Instalar novo Service Worker e criar cache
+ */
 self.addEventListener('install', event => {
-  event.waitUntil((async () => {
-    const cache = await caches.open(CACHE_NAME);
-    await cache.addAll(APP_ASSETS.map(asset => new Request(asset, { cache: 'reload' })));
-    await self.skipWaiting();
-  })());
+  console.log(`[SW] Instalando: ${CACHE_NAME}`);
+  
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(cache => {
+      console.log(`[SW] Cache criado: ${CACHE_NAME}`);
+      return self.skipWaiting();
+    })
+  );
 });
 
+/**
+ * ACTIVATE EVENT
+ * Remover caches antigos e ativar novo Service Worker
+ */
 self.addEventListener('activate', event => {
-  event.waitUntil((async () => {
-    const names = await caches.keys();
-    await Promise.all(names
-      .filter(name => name.startsWith('familia-fighter-') && name !== CACHE_NAME)
-      .map(name => caches.delete(name)));
-    await self.clients.claim();
-  })());
+  console.log(`[SW] Ativando: ${CACHE_NAME}`);
+  
+  event.waitUntil(
+    caches.keys().then(cacheNames => {
+      return Promise.all(
+        cacheNames.map(cacheName => {
+          if (cacheName !== CACHE_NAME) {
+            console.log(`[SW] Removendo cache antigo: ${cacheName}`);
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    }).then(() => {
+      console.log(`[SW] Tomando controle de todas as abas`);
+      return self.clients.claim();
+    })
+  );
 });
 
-async function networkFirst(event, cacheKey) {
-  const cache = await caches.open(CACHE_NAME);
-  try {
-    const response = await fetch(event.request, { cache: 'no-cache' });
-    if (response.ok && response.type === 'basic') event.waitUntil(cache.put(cacheKey, response.clone()));
-    return response;
-  } catch (error) {
-    const cached = await cache.match(cacheKey) || await cache.match(event.request, { ignoreSearch: true });
-    if (cached) return cached;
-    throw error;
-  }
-}
-
-async function cacheFirst(event) {
-  const cache = await caches.open(CACHE_NAME);
-  const cached = await cache.match(event.request);
-  if (cached) return cached;
-  const response = await fetch(event.request);
-  // 206 (pedaço de arquivo) não pode ser guardado; só respostas completas
-  if (response.status === 200 && response.type === 'basic') event.waitUntil(cache.put(event.request, response.clone()));
-  return response;
-}
-
+/**
+ * FETCH EVENT
+ * Interceptar requisições e servir do cache ou fetch
+ */
 self.addEventListener('fetch', event => {
-  const request = event.request;
-  if (request.method !== 'GET' || request.headers.has('range')) return;
+  const { request } = event;
   const url = new URL(request.url);
-  if (url.origin !== self.location.origin) return; // Supabase/CDN nunca passam pelo cache
 
-  if (request.mode === 'navigate') {
-    event.respondWith(networkFirst(event, './index.html'));
-    return;
+  // 1. NUNCA cachear index.html, manifest.webmanifest, sw.js
+  // Sempre ir para o servidor
+  if (NO_CACHE_URLS.some(pattern => url.pathname.includes(pattern))) {
+    console.log(`[SW] FETCH (sem cache): ${url.pathname}`);
+    return event.respondWith(
+      fetch(request)
+        .then(response => {
+          // Se conseguiu fetch, retorna
+          if (response.status === 200) {
+            return response;
+          }
+          // Se erro, tenta cache como fallback
+          return caches.match(request).then(cached => cached || response);
+        })
+        .catch(() => {
+          // Se falhar (offline), tenta cache
+          return caches.match(request).then(cached => {
+            if (cached) {
+              console.log(`[SW] Usando cache (offline): ${url.pathname}`);
+              return cached;
+            }
+            // Sem cache e offline = erro
+            throw new Error(`Offline: ${url.pathname}`);
+          });
+        })
+    );
   }
-  if (NETWORK_FIRST.test(url.pathname)) {
-    event.respondWith(networkFirst(event, request));
-    return;
-  }
-  event.respondWith(cacheFirst(event));
+
+  // 2. Para assets versionados (com ?v=...), usar cache primeiro
+  // Se não estiver em cache, fetch e adicionar ao cache
+  event.respondWith(
+    caches.match(request).then(cachedResponse => {
+      if (cachedResponse) {
+        console.log(`[SW] CACHE HIT: ${url.pathname}`);
+        return cachedResponse;
+      }
+
+      console.log(`[SW] FETCH (assets): ${url.pathname}`);
+      return fetch(request)
+        .then(response => {
+          // Validar resposta
+          if (!response || response.status !== 200 || response.type === 'error') {
+            return response;
+          }
+
+          // Clonar resposta para cachear
+          const responseClone = response.clone();
+          
+          caches.open(CACHE_NAME).then(cache => {
+            cache.put(request, responseClone);
+            console.log(`[SW] CACHED: ${url.pathname}`);
+          });
+
+          return response;
+        })
+        .catch(error => {
+          console.error(`[SW] FETCH ERRO: ${url.pathname}`, error);
+          
+          // Se falhar, tentar cache como fallback
+          return caches.match(request).then(cachedResponse => {
+            if (cachedResponse) {
+              console.log(`[SW] Usando cache (fallback): ${url.pathname}`);
+              return cachedResponse;
+            }
+            
+            // Sem cache e erro = offline response
+            return new Response(
+              'Recurso não disponível (offline)',
+              {
+                status: 503,
+                statusText: 'Service Unavailable',
+                headers: new Headers({
+                  'Content-Type': 'text/plain'
+                })
+              }
+            );
+          });
+        });
+    })
+  );
 });
+
+/**
+ * MESSAGE EVENT
+ * Permitir comunicação com cliente
+ */
+self.addEventListener('message', event => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    console.log(`[SW] SKIP_WAITING acionado`);
+    self.skipWaiting();
+  }
+});
+
+console.log(`[SW] Service Worker carregado: ${CACHE_VERSION}`);

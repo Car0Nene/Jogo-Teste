@@ -1,21 +1,47 @@
 {
-  "id": "./",
-  "name": "Família Fighter — Batalha na Padaria",
+  "name": "Família Fighter 2.5D",
   "short_name": "Família Fighter",
-  "description": "Uma luta arcade divertida da família na padaria da Juju.",
-  "lang": "pt-BR",
+  "description": "Versão 2.5D semirrealista de Família Fighter com todos os 8 lutadores, especiais icônicos, diálogos e os 5 cenários brasileiros em Three.js.",
   "start_url": "./",
   "scope": "./",
-  "display": "fullscreen",
-  "display_override": ["fullscreen", "standalone"],
+  "display": "standalone",
   "orientation": "landscape",
-  "background_color": "#100d20",
   "theme_color": "#100d20",
-  "categories": ["games"],
+  "background_color": "#0e0b12",
+  "dir": "ltr",
+  "lang": "pt-BR",
+  "screenshots": [
+    {
+      "src": "./assets/screenshot-1-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "form_factor": "narrow"
+    },
+    {
+      "src": "./assets/screenshot-2-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "form_factor": "wide"
+    }
+  ],
   "icons": [
-    { "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
-    { "src": "assets/icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+    {
+      "src": "./assets/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./assets/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./assets/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ]
 }
