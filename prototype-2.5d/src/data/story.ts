@@ -30,6 +30,8 @@ export interface StoryChapter {
   id: string;
   title: string;
   subtitle: string;
+  /** vídeo de abertura em /assets/story/<video>.mp4, antes da cartela */
+  video?: string;
   panels: StoryPanel[];
   /** luta do capítulo (P1 é o jogador); sem luta = epílogo */
   fight?: { p1: FighterId; p2: FighterId; stage: StageId };
@@ -57,6 +59,7 @@ export const STORY: StoryChapter[] = [
     id: 'cap1',
     title: 'Capítulo 1',
     subtitle: 'Quem manda na cozinha',
+    video: 'abertura',
     panels: [
       { img: 'p01', motion: 'zoomIn', lines: [L('narrador', 's01a', 'Domingo. Casa da vó Juraci. Cheiro de bolo no ar.'), L('juraci', 's01b', 'Bolo de cenoura supremo, com cobertura de brigadeiro! Mas o último pedaço é só de quem merecer.')] },
       { img: 'p02', motion: 'panRight', lines: [L('narrador', 's02a', 'Bastou essa frase pra família inteira virar inimiga.'), L('pedro', 's02b', 'Ô rapaz... esse bolo tem cara de ser meu.'), L('carlos', 's02c', 'Calma, sogrão. Ninguém encosta nesse bolo antes de mim.')] },
@@ -93,6 +96,16 @@ export const STORY: StoryChapter[] = [
       { img: 'p09', motion: 'shake', lines: [L('tainara', 's09a', 'Daniel, solta! Cuidado que vai cair na areia!'), L('daniel', 's09b', 'Modo Natal Praia ativado!')] },
     ],
     fight: { p1: 'tainara', p2: 'daniel', stage: 'praia' },
+  },
+  {
+    id: 'cap4b',
+    title: 'Capítulo 5',
+    subtitle: 'Pizza contra praia',
+    panels: [
+      { img: 'p14', motion: 'panLeft', lines: [L('narrador', 's14a', 'De volta ao quintal... o bolo chegou de prancha.'), L('carlos', 's14b', 'Daniel, esse bolo é da casa da vó. Passa pra cá!')] },
+      { img: 'p15', motion: 'shake', lines: [L('daniel', 's15a', 'Calma, primo. Primeiro admira o físico... depois a gente conversa.'), L('carlos', 's15b', 'Pizza contra praia. Valendo o último pedaço!')] },
+    ],
+    fight: { p1: 'daniel', p2: 'carlos', stage: 'quintal' },
   },
   {
     id: 'cap5',

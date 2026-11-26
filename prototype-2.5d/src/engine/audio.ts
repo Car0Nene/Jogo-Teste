@@ -183,6 +183,22 @@ for (const [id, byEvent] of Object.entries(CAST_VARIANTS)) {
   }
 }
 
+/** Provocações a dois (elenco clonado): bt_<adversário> = /assets/voice/elenco/<quem>/bt-<adversário>.mp3 */
+export const BANTER_FILES: Record<string, string[]> = {
+  pedro: ['daniel', 'juraci', 'paula'],
+  daniel: ['pedro', 'tainara'],
+  juraci: ['pedro', 'paula', 'franciely', 'gabi', 'tainara'],
+  paula: ['pedro', 'juraci', 'franciely', 'gabi', 'tainara'],
+  carlos: ['franciely'],
+  franciely: ['carlos', 'gabi', 'juraci', 'paula', 'tainara'],
+  tainara: ['daniel', 'juraci', 'paula', 'franciely', 'gabi'],
+  gabi: ['franciely', 'juraci', 'paula', 'tainara'],
+};
+for (const [id, foes] of Object.entries(BANTER_FILES)) {
+  const clips = (CLIPS[id] ??= {});
+  for (const foe of foes) clips[`bt_${foe}`] = assetUrl(`/assets/voice/elenco/${id}/bt-${foe}.mp3`);
+}
+
 /** Chave sorteada para vitória/derrota: a original ou uma das variações. */
 export function castKeyVariant(who: string, event: CastVoiceEvent): string {
   const extra = event === 'win' || event === 'ko' ? CAST_VARIANTS[who]?.[event] ?? [] : [];

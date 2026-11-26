@@ -107,7 +107,7 @@ export function MainMenu({
     {
       id: 'story',
       label: 'MODO HISTÓRIA',
-      sublabel: 'Almoço de Domingo · 5 capítulos',
+      sublabel: 'Almoço de Domingo · 6 capítulos',
       available: true,
       icon: <BookOpen className="w-5 h-5" />,
       action: () => {

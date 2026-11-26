@@ -452,13 +452,22 @@ test('move structure, low guard, training data and story assets', async ({ page,
     const { STORY } = await import('/src/data/story.ts');
     const ids = ['juraci', 'carlos', 'pedro', 'daniel', 'franciely', 'gabi', 'paula', 'tainara', 'davi'];
     const lists = ids.map((id) => commandListFor(id).map((c) => c.id));
-    return { lists, low: lowMoves('carlos').heavy, story: STORY.map((c) => ({ imgs: c.panels.map((p) => p.img), clips: c.panels.flatMap((p) => p.lines.map((l) => l.clip)) })) };
+    const { BANTER } = await import('/src/data/banter.ts');
+    const { clipText } = await import('/src/engine/audio.ts');
+    const bt = BANTER.filter((b) => b.weight).flatMap((b) => b.lines.map((l) => [l.who, l.key, clipText(l.who, l.key) ?? '']));
+    return { bt, lists, low: lowMoves('carlos').heavy, story: STORY.map((c) => ({ imgs: c.panels.map((p) => p.img), clips: c.panels.flatMap((p) => p.lines.map((l) => l.clip)) })) };
   });
   for (const l of r.lists) {
     for (const id of ['light', 'heavy', 'air', 'lowLight', 'lowHeavy', 'chainMedium', 'chainHeavy', 'special', 'subSpecial', 'guard']) expect(l).toContain(id);
   }
   expect(r.low.low).toBe(true);
   expect(r.low.knockdown).toBe(true);
+  expect(r.bt.length).toBe(30);
+  for (const [who, key, text] of r.bt) {
+    expect(text, `${who}.${key}`).not.toBe('');
+    expect((await request.get(`/assets/voice/elenco/${who}/${key.replace('bt_', 'bt-')}.mp3`)).status(), `${who}.${key}`).toBe(200);
+  }
+  expect((await request.get('/assets/story/abertura.mp4')).status()).toBe(200);
   for (const c of r.story) {
     for (const img of c.imgs) expect((await request.get(`/assets/story/${img}.webp`)).status(), img).toBe(200);
     for (const clip of c.clips) expect((await request.get(`/assets/voice/story/${clip}.mp3`)).status(), clip).toBe(200);

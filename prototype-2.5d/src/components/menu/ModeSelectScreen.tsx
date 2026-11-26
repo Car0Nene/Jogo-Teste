@@ -62,7 +62,7 @@ export function ModeSelectScreen({
       tag: 'ALMOÇO DE DOMINGO',
       accent: 'border-amber-400/50',
       badgeColor: 'text-amber-300',
-      desc: 'Quadrinhos animados com as vozes da família e 5 lutas pelo último pedaço de bolo da vó.',
+      desc: 'Quadrinhos animados com as vozes da família e 6 lutas pelo último pedaço de bolo da vó.',
       cta: 'Começar História',
       available: true,
       icon: <BookOpen className="w-7 h-7 text-amber-300" />,

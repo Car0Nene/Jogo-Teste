@@ -19,7 +19,8 @@ export function StoryPlayer({
   onDone: () => void;
   onExit: () => void;
 }) {
-  const [panel, setPanel] = useState(-1); // -1 = cartela do capítulo
+  // -2 = vídeo de abertura, -1 = cartela do capítulo
+  const [panel, setPanel] = useState(chapter.video ? -2 : -1);
   const [line, setLine] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const timerRef = useRef<number | null>(null);
@@ -49,6 +50,10 @@ export function StoryPlayer({
   const advance = useCallback(() => {
     clearTimer();
     stopAudio();
+    if (panel === -2) {
+      setPanel(-1);
+      return;
+    }
     if (panel < 0) {
       setPanel(0);
       setLine(0);
@@ -118,7 +123,17 @@ export function StoryPlayer({
 
   return (
     <div className="ff-story fixed inset-0 z-40 bg-black select-none" role="dialog" aria-label={`${STORY_TITLE}: ${chapter.title}`} onClick={advance}>
-      {panel < 0 ? (
+      {panel === -2 && chapter.video ? (
+        <video
+          className="absolute inset-0 w-full h-full object-cover"
+          src={assetUrl(`/assets/story/${chapter.video}.mp4`)}
+          autoPlay
+          muted
+          playsInline
+          onEnded={advance}
+          onError={advance}
+        />
+      ) : panel < 0 ? (
         <div className="ff-story-card absolute inset-0 flex flex-col items-center justify-center text-center px-6">
           <div className="text-amber-300 font-bold tracking-[0.35em] text-xs uppercase">{STORY_TITLE}</div>
           <div className="font-display font-extrabold text-white text-5xl md:text-7xl mt-2">{chapter.title}</div>
