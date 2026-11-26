@@ -17,6 +17,7 @@ import {
   ResolutionScale,
 } from '../data/settings';
 import { FUN_LINES, type FunTrigger } from '../data/funLines';
+import { findBanter } from '../data/banter';
 import { STAGES, StageId } from '../data/stages';
 import { CastVoiceEvent, STAGE_MUSIC, castKey, clipText, hasClip, soundEngine } from './audio';
 import {
@@ -223,7 +224,11 @@ export class GameEngine {
   private bannerText = 'ROUND 1';
   private winnerIndex: 0 | 1 | null = null;
 
-  private introQueue: Array<{ speaker: 'p1' | 'p2'; text: string }> = [];
+  private introQueue: Array<{ speaker: 'p1' | 'p2'; text: string; clip?: { who: FighterId; key: string; dur: number } }> = [];
+  /** Humilhação: depois do nocaute que decide a partida, o vencedor tem alguns segundos para o golpe cômico */
+  private finishTimer = 0;
+  private finishWinner: 0 | 1 | null = null;
+  private finishGagUsed = false;
   private introIndex = 0;
   private introLineTimer = 0;
 
@@ -339,7 +344,7 @@ export class GameEngine {
     this.scene.add(this.rimLight);
 
     this.shadowTex = createContactShadowTexture();
-    this.sparkGeo = new THREE.SphereGeometry(0.08, 8, 6);
+    this.sparkGeo = new THREE.SphereGeometry(0.06, 8, 6);
     const heart = new THREE.Shape();
     heart.moveTo(0, -0.13);
     heart.bezierCurveTo(-0.3, 0.06, -0.14, 0.23, 0, 0.1);
@@ -541,7 +546,7 @@ export class GameEngine {
     if (text) {
       const SPEAKER: Record<string, string> = { franciely: 'Franciely', dada: 'Dadá', cao: 'Doguinho', narrator: '' };
       f.bark = who === f.id || who === 'narrator' ? text : `${SPEAKER[who] ?? who}: ${text}`;
-      f.barkTimer = Math.max(2.2, Math.min(4, 0.9 + text.length * 0.055));
+      f.barkTimer = Math.max(2.2, Math.min(9, 0.9 + text.length * 0.05));
       f.barkVoicedAt = performance.now();
     }
     return true;
@@ -561,6 +566,11 @@ export class GameEngine {
   private playIntroVoice(speakerSlot: 'p1' | 'p2') {
     if (!this.fighters) return;
     const f = speakerSlot === 'p1' ? this.fighters[0] : this.fighters[1];
+    const current = this.introQueue[this.introIndex];
+    if (current?.clip) {
+      soundEngine.playClip(current.clip.who, current.clip.key, 0);
+      return;
+    }
     if (this.fighters.some((fighter) => fighter.id === 'davi') && f.id !== 'davi') return;
     // às vezes abre com um áudio real da família (provocação específica contra o adversário, quando tem)
     const foe = speakerSlot === 'p1' ? this.fighters[1] : this.fighters[0];
@@ -611,6 +621,8 @@ export class GameEngine {
     this.paused = false;
     this.roundNumber = 1;
     this.winnerIndex = null;
+    this.finishWinner = null;
+    this.finishTimer = 0;
 
     if (this.fighters) {
       this.fighters[0].roundsWon = 0;
@@ -621,9 +633,13 @@ export class GameEngine {
       this.introQueue = [];
       this.beginRound(false);
     } else {
-      this.introQueue = pickIntroDialogue(p1, p2);
+      // provocação a dois (áudios reais e falas do elenco) quando a dupla tem; senão, o diálogo normal
+      const banter = p1 !== p2 ? findBanter(p1, p2) : null;
+      this.introQueue = banter
+        ? banter.lines.map((l) => ({ speaker: (l.who === p1 ? 'p1' : 'p2') as 'p1' | 'p2', text: clipText(l.who, l.key) ?? '', clip: l }))
+        : pickIntroDialogue(p1, p2);
       this.introIndex = 0;
-      this.introLineTimer = 2.2;
+      this.introLineTimer = this.introQueue[0]?.clip ? this.introQueue[0].clip.dur + 0.4 : 2.2;
       this.matchPhase = 'intro';
       this.phaseTimer = 0;
       if (this.introQueue[0]) this.playIntroVoice(this.introQueue[0].speaker);
@@ -796,6 +812,8 @@ export class GameEngine {
 
   private beginRound(showBanner: boolean) {
     this.clearEntities();
+    this.finishWinner = null;
+    this.finishTimer = 0;
     if (!this.fighters) return;
     for (const f of this.fighters) {
       f.x = f.index === 0 ? -2.4 : 2.4;
@@ -953,7 +971,6 @@ export class GameEngine {
       f.bark = generic[Math.floor(Math.random() * generic.length)];
       f.barkTimer = 2.2;
     }
-    this.spawnPop('PROVOCOU!', f.x, f.y + 1.9, '#c4b5fd');
     this.emitHud();
   }
 
@@ -1037,7 +1054,39 @@ export class GameEngine {
    * Golpe de finalização de combo (não gasta especial): câmera de foco baixa e próxima,
    * faixa com o nome do golpe, fala própria e o efeito do golpe.
    */
+  /** Fecha o TERMINA ELE!: com golpe cômico vira HUMILHAÇÃO!, senão é um nocaute normal. */
+  private endFinish(humiliation: boolean) {
+    if (!this.fighters || this.finishWinner === null) return;
+    const winner = this.fighters[this.finishWinner];
+    const loser = this.fighters[this.finishWinner === 0 ? 1 : 0];
+    this.finishWinner = null;
+    this.finishTimer = 0;
+    loser.state = 'knockdown';
+    loser.stateTimer = 0;
+    loser.noGuardTimer = 0;
+    loser.rig.hitFlashTimer = 0.15;
+    winner.state = 'victory';
+    winner.stateTimer = 0;
+    winner.activeMove = null;
+    winner.activeMoveAnim = undefined;
+    this.matchPhase = 'ko';
+    this.phaseTimer = humiliation ? 3.0 : 2.0;
+    this.shakeTimer = 0.25;
+    this.shakeAmp = 0.18;
+    soundEngine.playHit(true, false);
+    if (humiliation) {
+      this.bannerText = 'HUMILHAÇÃO!';
+      soundEngine.playClip('narrator', 'humilhacao', 0);
+      this.spawnSparks(loser.x, loser.y + 1.6, 0xfde047, 14);
+    } else {
+      this.bannerText = 'K.O.!';
+    }
+    this.setBark(winner, 'win');
+    this.emitHud();
+  }
+
   private beginFinisher(f: FighterRuntime, move: MoveSpec) {
+    if (this.finishWinner === f.index) this.finishGagUsed = true;
     const opp = this.fighters?.[f.index === 0 ? 1 : 0];
     const total = move.startup + move.active + move.recovery;
     this.finTimer = this.finDuration = total + 0.35;
@@ -1084,13 +1133,11 @@ export class GameEngine {
         this.spawnProjectile('pizza', f, 9.5, 0, 76, true, 0.44, 0, undefined, handY + 0.05, t0);
         break;
       case 'conta3':
-        this.spawnPop('UM...', f.x, f.y + 1.75, '#facc15');
         this.spawnProjectile('count1', f, 7, 0, 12, false, 0.4, 0, undefined, handY, t0);
         this.spawnProjectile('count2', f, 7, 0, 12, false, 0.42, 0, undefined, handY, t0 + 0.45);
         this.spawnProjectile('count3', f, 8.5, 0, 56, true, 0.5, 0, undefined, handY, t0 + 0.9);
         break;
       case 'selfie':
-        this.spawnPop('SORRIA!', f.x + f.facing * 0.4, f.y + 1.75, '#f9a8d4');
         break;
       case 'panela': {
         const p = this.spawnProjectile('pan', f, 0, -1, 74, true, 0.45, 26, undefined, undefined, t0);
@@ -1098,7 +1145,6 @@ export class GameEngine {
         break;
       }
       case 'arroz':
-        this.spawnPop('QUEIMOU!', f.x + f.facing * 0.5, f.y + 1.75, '#f97316');
         this.spawnSparks(f.x + f.facing * 0.8, handY, 0x292524, 10);
         for (let i = 0; i < 10; i++) {
           this.spawnProjectile('rice', f, 8 + Math.random() * 4.5, 0.8 + Math.random() * 3.8, 8, false, 0.2, 9, undefined, handY - 0.1 + Math.random() * 0.3, t0 + i * 0.03);
@@ -1132,17 +1178,44 @@ export class GameEngine {
   }
 
   private spawnPop(text: string, x: number, y: number, color: string) {
+    // uma onomatopeia por vez: a nova substitui a anterior (tela limpa)
+    for (const t of this.popTexts) this.scene.remove(t.sprite);
+    this.popTexts = [];
     const sprite = buildPopText(text, color);
     sprite.position.set(x, y, 0.3);
     this.scene.add(sprite);
     this.popTexts.push({ sprite, life: 0.95 });
   }
 
+  private stepFinish(dt: number, f1: FighterRuntime, f2: FighterRuntime) {
+    const winner = this.finishWinner === 0 ? f1 : f2;
+    const loser = this.finishWinner === 0 ? f2 : f1;
+    this.finishTimer -= dt;
+    loser.state = 'hitstun';
+    loser.stateTimer = -99;
+    loser.vx *= Math.exp(-8 * dt);
+    if (Math.random() < dt * 3) this.spawnSparks(loser.x, loser.y + 2.05, 0xfde047, 2);
+    // CPU vencedora: chega perto (se o golpe for corpo a corpo) e solta o golpe cômico
+    if (this.gameMode === 'cpu' && winner.index === 1 && winner.state !== 'attack' && this.finishTimer < 3.8) {
+      const gag = FIGHTERS[winner.id].moves.gag;
+      const melee = gag?.finisher === 'bundada' || gag?.finisher === 'selfie';
+      const dist = Math.abs(winner.x - loser.x);
+      if (gag && (!melee || dist <= 2.2)) this.startAttackMove(winner, gag);
+      else winner.aiAction = 'approach';
+    }
+    this.stepFighter(winner, loser, dt, this.gameMode === 'cpu' && winner.index === 1);
+    this.resolveBodyPush(f1, f2);
+    this.stepProjectiles(dt);
+    this.stepCameos(dt);
+    this.stepPopTexts(dt);
+    if (this.finishTimer <= 0 && this.finishWinner !== null) this.endFinish(false);
+  }
+
   private stepChatter(dt: number) {
     if (!this.fighters) return;
     this.chatterTimer -= dt;
     if (this.chatterTimer > 0) return;
-    this.chatterTimer = 13 + Math.random() * 11;
+    this.chatterTimer = 22 + Math.random() * 12;
     const now = performance.now();
     const quiet = this.fighters.every((x) => !x.barkVoicedAt || now - x.barkVoicedAt > 5000);
     if (!quiet || this.fighters.some((x) => x.id === 'davi')) return;
@@ -1159,7 +1232,7 @@ export class GameEngine {
       t.sprite.position.y += dt * 0.4;
       const k = Math.min(1, (0.95 - t.life) / 0.12);
       const s = 0.6 + 0.4 * k + Math.max(0, 0.15 * Math.sin(k * Math.PI));
-      t.sprite.scale.set(1.9 * s, 1.9 * (180 / 512) * s, 1);
+      t.sprite.scale.set(1.45 * s, 1.45 * (180 / 512) * s, 1);
       (t.sprite.material as THREE.SpriteMaterial).opacity = Math.min(1, t.life / 0.3);
       if (t.life <= 0) {
         this.scene.remove(t.sprite);
@@ -1809,8 +1882,9 @@ export class GameEngine {
         if (this.introIndex >= this.introQueue.length) {
           this.beginRound(true);
         } else {
-          this.introLineTimer = 2.2;
-          this.playIntroVoice(this.introQueue[this.introIndex].speaker);
+          const nextLine = this.introQueue[this.introIndex];
+          this.introLineTimer = nextLine.clip ? nextLine.clip.dur + 0.4 : 2.2;
+          this.playIntroVoice(nextLine.speaker);
           this.emitHud();
         }
       }
@@ -1830,6 +1904,9 @@ export class GameEngine {
         if (this.phaseTimer === 0) this.bannerText = '';
       }
 
+      if (this.finishWinner !== null) {
+        this.stepFinish(dt, f1, f2);
+      } else {
       this.stepChatter(dt);
       if (this.gameMode !== 'training') {
         this.roundTimer = Math.max(0, this.roundTimer - dt);
@@ -1861,6 +1938,7 @@ export class GameEngine {
       this.stepProjectiles(dt);
       this.stepCameos(dt);
       this.stepPopTexts(dt);
+      }
     } else if (this.matchPhase === 'ko') {
       this.phaseTimer -= dt;
       if (this.phaseTimer <= 0) {
@@ -2057,7 +2135,6 @@ export class GameEngine {
         soundEngine.playShutter();
         this.flashKey++;
         this.emitHud();
-        this.spawnPop('CLICK!', f.x + f.facing * 0.6, f.y + 1.7, '#ffffff');
         const d = (opp.x - f.x) * f.facing;
         if (d > 0 && d < 6.5 && Math.abs(opp.y - f.y) < 1.6) {
           this.applyHit(f, opp, 48, 1.2, 0.1, true, false);
@@ -2178,6 +2255,11 @@ export class GameEngine {
     knockdown: boolean
   ) {
     if (def.hitInvuln > 0 || this.matchPhase !== 'fighting') return;
+    if (this.finishWinner !== null) {
+      // durante o TERMINA ELE! só o vencedor bate, e o golpe encerra a partida
+      if (att.index === this.finishWinner) this.endFinish(this.finishGagUsed);
+      return;
+    }
 
     const isBlocking =
       def.noGuardTimer <= 0 &&
@@ -2191,9 +2273,13 @@ export class GameEngine {
           (def.facing === -1 && this.isHeld(def.index, 'right')))));
 
     const defMult = FORMS[def.form].def;
-    const dmg = Math.round(rawDamage * defMult * (isBlocking ? 0.22 : 1));
+    // escala de combo (padrão de jogo de luta): a partir do 3º acerto seguido cada golpe tira 10% menos, mínimo 55%
+    const comboScale = isBlocking ? 1 : Math.max(0.55, 1 - Math.max(0, att.comboCount - 1) * 0.1);
+    const dmg = Math.round(rawDamage * defMult * comboScale * (isBlocking ? 0.22 : 1));
     def.hp = Math.max(0, def.hp - dmg);
     def.vx = att.facing * push * (isBlocking ? 0.65 : 1);
+    // defesa empurra os dois: quem defende não fica preso na parede de golpes
+    if (isBlocking && Math.abs(att.x - def.x) < 2.4) att.vx = -att.facing * push * 0.45;
 
     att.meter = Math.min(100, att.meter + (isBlocking ? 7 : 15));
     def.meter = Math.min(100, def.meter + 8);
@@ -2202,7 +2288,7 @@ export class GameEngine {
       def.state = 'blockstun';
       def.stateTimer = 0;
       soundEngine.playHit(heavy, true);
-      this.spawnSparks((att.x + def.x) * 0.5, def.y + 1.15, 0x93c5fd, 7);
+      this.spawnSparks(def.x - att.facing * 0.25, def.y + 1.15, 0x93c5fd, 4);
     } else {
       def.rig.hitFlashTimer = 0.11;
       att.comboCount++;
@@ -2215,13 +2301,15 @@ export class GameEngine {
       def.activeMove = null;
       def.activeMoveAnim = undefined;
       soundEngine.playHit(heavy, false);
-      this.hitstopTimer = hitstop;
-      this.shakeTimer = heavy ? 0.2 : 0.1;
-      this.shakeAmp = heavy ? 0.22 : 0.1;
-      if (heavy) {
-        this.spawnBurst((att.x + def.x) * 0.5, def.y + 1.15);
+      this.hitstopTimer = Math.max(this.hitstopTimer, hitstop);
+      // tremor só em golpe forte/derrubada; golpe leve fica limpo (o flash branco já marca o acerto)
+      if (heavy || knockdown) {
+        this.shakeTimer = knockdown ? 0.16 : 0.1;
+        this.shakeAmp = knockdown ? 0.14 : 0.08;
       }
-      this.spawnSparks((att.x + def.x) * 0.5, def.y + 1.15, heavy ? 0xff9f1c : 0xfef08a, heavy ? 14 : 9);
+      const hx = def.x - att.facing * 0.25;
+      if (knockdown) this.spawnBurst(hx, def.y + 1.15);
+      this.spawnSparks(hx, def.y + 1.15, heavy ? 0xffb347 : 0xfef3c7, heavy ? 7 : 4);
     }
 
     if (def.hp > 0 && def.state === 'knockdown' && Math.random() < 0.45) {
@@ -2365,6 +2453,30 @@ export class GameEngine {
   }
 
   private triggerKO(winner: FighterRuntime, loser: FighterRuntime) {
+    // nocaute que decide a partida: TERMINA ELE! (o perdedor fica tonto e o vencedor pode humilhar)
+    if (this.finishWinner === null && winner.roundsWon + 1 >= 2 && this.gameMode !== 'training') {
+      winner.roundsWon++;
+      this.finishWinner = winner.index;
+      this.finishTimer = 4.8;
+      this.finishGagUsed = false;
+      loser.hp = 0;
+      loser.state = 'hitstun';
+      loser.stateTimer = -99;
+      loser.vx = 0;
+      loser.activeMove = null;
+      loser.activeMoveAnim = undefined;
+      loser.noGuardTimer = 99;
+      this.projectiles.forEach((p) => this.removeFx(p.mesh));
+      this.projectiles = [];
+      this.bannerText = 'TERMINA ELE!';
+      this.phaseTimer = 0;
+      soundEngine.playKO();
+      soundEngine.playClip('narrator', 'termina', 0);
+      if (!this.funSay(loser, 'ko')) this.castVoice(loser, 'ko', 0);
+      this.slowmoTimer = 0.5;
+      this.emitHud();
+      return;
+    }
     this.matchPhase = 'ko';
     this.bannerText = 'K.O.!';
     this.phaseTimer = 2.3;

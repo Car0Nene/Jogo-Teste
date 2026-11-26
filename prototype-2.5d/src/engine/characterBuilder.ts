@@ -820,7 +820,7 @@ export function applyRigFormAndFlash(
   const auraMat = rig.auraRing.material as THREE.MeshBasicMaterial;
   if (activeAura) {
     auraMat.color.setHex(f.auraHex);
-    auraMat.opacity = 0.58 + Math.sin(time * 8) * 0.2;
+    auraMat.opacity = 0.32 + Math.sin(time * 8) * 0.1;
     const pulse = 1 + Math.sin(time * 7) * 0.1;
     rig.auraRing.scale.set(pulse, pulse, 1);
     rig.auraLight.color.setHex(f.auraHex);

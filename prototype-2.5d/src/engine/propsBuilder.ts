@@ -284,7 +284,7 @@ function buildCanvasProjectile(kind: Exclude<CanvasKind, 'cigarette'>): THREE.Gr
   quad.name = 'spriteQuad';
   g.add(quad);
   if (vis.glowHex) {
-    const aura = new THREE.Sprite(new THREE.SpriteMaterial({ map: getSharedGlowTexture(), color: vis.glowHex, transparent: true, opacity: 0.45, blending: THREE.AdditiveBlending, depthWrite: false }));
+    const aura = new THREE.Sprite(new THREE.SpriteMaterial({ map: getSharedGlowTexture(), color: vis.glowHex, transparent: true, opacity: 0.25, blending: THREE.AdditiveBlending, depthWrite: false }));
     aura.scale.set(w * 1.5, h * 1.5, 1);
     aura.position.z = -0.05;
     g.add(aura);

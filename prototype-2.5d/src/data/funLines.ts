@@ -51,6 +51,10 @@ export const FUN_LINES: Partial<Record<FighterId, FunLineSet>> = {
   gabi: {
     lines: { taunt: ['invejosos'], win: ['invejosos'] },
   },
+  juraci: {
+    // mensagem de voz inteira: a vó contando fofoca no meio da luta
+    lines: { taunt: ['fofoca'], intro: ['fofoca'] },
+  },
   paula: {
     lines: { win: ['amem'], intro: ['amem'], taunt: ['bebe'], knockdownOpp: ['bebe'] },
   },
@@ -79,6 +83,7 @@ export const FUN_TEXT: Record<string, string> = {
   '/assets/voice/familia/daniel/trabalhar.mp3': 'Você não vai parar de trabalhar só pra receber a sua família, fi?',
   '/assets/voice/familia/daniel/coxinha.mp3': 'Aê, Pedrão, vai dormir de coxinha hoje!',
   '/assets/voice/familia/gabi/invejosos.mp3': 'Vocês são todos invejosos, tá? Que vocês não têm essa voz aqui!',
+  '/assets/voice/familia/juraci/fofoca.mp3': 'Só Deus, fofo! Aí a tia Luísa falou assim: "Ah, eu vou arrumar pra ele." Aí a Luísa falou: "Saca, Fran, viu?" É, depois você fala pra ele, mostra pra ele como que tava, tá bom? Deus abençoe!',
   '/assets/voice/familia/paula/amem.mp3': 'Amém. Deus abençoe.',
   '/assets/voice/familia/paula/bebe.mp3': 'E o bebê, tá bem?',
 };

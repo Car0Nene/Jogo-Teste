@@ -43,6 +43,64 @@ export const PAINTED_STAGES: Partial<Record<StageId, PaintedStageLayout>> = {
       { obj: 6, x: -9.8, z: 3.2, h: 1.4 }, // lousa (primeiro plano)
     ],
   },
+  // Cenários novos: objetos só nas laterais/fundo (nada na frente da luta) e fundo levemente
+  // mais escuro que os lutadores, para a ação ficar legível.
+  padaria: {
+    bg: { z: -14, width: 33, tint: 0xe4dfe0 },
+    floorRepeat: [2.4, 2.2],
+    floorTint: 0xc9bdb6,
+    floorMirror: true,
+    props: [
+      { obj: 0, x: -8.2, z: -5, h: 1.5 }, // mesinha com café e bolo
+      { obj: 1, x: 12.8, z: -6.5, h: 2.6 }, // prateleira de pães
+      { obj: 2, x: 8.6, z: -5.2, h: 1.5 }, // vitrine com bolo
+      { obj: 3, x: -13, z: -4.2, h: 1.0 }, // sacos de farinha
+      { obj: 4, x: -15.5, z: -6.5, h: 2.0 }, // vaso de planta
+      { obj: 5, x: 15.2, z: -3.6, h: 0.9 }, // caixote de ovos e leite
+    ],
+  },
+  quintal: {
+    bg: { z: -14, width: 33, tint: 0xe2ddd6 },
+    floorRepeat: [2.2, 2.0],
+    floorTint: 0xc8bba9,
+    floorMirror: true,
+    props: [
+      { obj: 0, x: -8.4, z: -5, h: 1.4 }, // mesa e cadeiras de plástico
+      { obj: 1, x: 9.6, z: -6, h: 1.6 }, // churrasqueira
+      { obj: 2, x: -13.4, z: -5.5, h: 2.2 }, // bananeira no vaso
+      { obj: 3, x: 13.6, z: -3.8, h: 0.8 }, // tanquinho
+      { obj: 4, x: -16, z: -3.6, h: 1.0 }, // carrinho de mão
+      { obj: 5, x: 16.2, z: -6.5, h: 1.3 }, // casinha do Doguinho
+    ],
+  },
+  festa: {
+    bg: { z: -14, width: 33, tint: 0xd9d4de },
+    floorRepeat: [2.2, 2.0],
+    floorTint: 0xb9aa9b,
+    floorMirror: true,
+    props: [
+      { obj: 0, x: 11.5, z: -6.5, h: 1.3 }, // fogueira
+      { obj: 1, x: -9.2, z: -5.2, h: 1.0 }, // fardos de feno
+      { obj: 2, x: -13.6, z: -4.2, h: 1.0 }, // banco com milho
+      { obj: 3, x: 14.6, z: -4, h: 1.3 }, // panela de quentão
+      { obj: 4, x: 8.4, z: -5.6, h: 1.3 }, // carrinho de pipoca
+      { obj: 5, x: -16.4, z: -6.8, h: 2.3 }, // espantalho
+    ],
+  },
+  praia: {
+    bg: { z: -14, width: 33, tint: 0xe6e3e2 },
+    floorRepeat: [2.4, 2.2],
+    floorTint: 0xc2c0c2,
+    floorMirror: true,
+    props: [
+      { obj: 0, x: -9, z: -5.4, h: 1.9 }, // guarda-sol com cadeira
+      { obj: 1, x: 8.6, z: -4.6, h: 0.9 }, // caixa térmica com cocos
+      { obj: 2, x: -14.6, z: -6.6, h: 3.4 }, // coqueiro
+      { obj: 3, x: 13.4, z: -5.8, h: 2.0 }, // prancha de surfe
+      { obj: 4, x: 16.4, z: -4, h: 1.6 }, // arvorezinha de Natal
+      { obj: 5, x: -16.8, z: -3.8, h: 1.1 }, // bicicleta
+    ],
+  },
 };
 
 type Track = <T extends { dispose: () => void }>(item: T) => T;

@@ -37,12 +37,15 @@ type SfxSample = (typeof SFX_SAMPLES)[number];
 
 const CLIPS: Record<string, Record<string, string>> = {
   davi: {
+    vsCarlos: assetUrl('/assets/voice/elenco/davi/vsCarlos.mp3'),
     controle: assetUrl('/assets/voice/elenco/davi/controle.mp3'),
     outra: assetUrl('/assets/voice/davi-outra.wav'),
     preguica: assetUrl('/assets/voice/davi-preguica.wav'),
     videogame: assetUrl('/assets/voice/davi-videogame.wav'),
   },
   franciely: {
+    vsCarlos: assetUrl('/assets/voice/elenco/franciely/vsCarlos.mp3'),
+    vsGabi: assetUrl('/assets/voice/elenco/franciely/vsGabi.mp3'),
     conta3: assetUrl('/assets/voice/elenco/franciely/conta3.mp3'),
     isso: assetUrl('/assets/voice/franciely-isso.mp3'),
     ferrinho: assetUrl('/assets/voice/franciely-ferrinho.mp3'),
@@ -82,6 +85,7 @@ const CLIPS: Record<string, Record<string, string>> = {
     bundada: assetUrl('/assets/voice/elenco/daniel/bundada.mp3'),
   },
   gabi: {
+    vsFranciely: assetUrl('/assets/voice/elenco/gabi/vsFranciely.mp3'),
     invejosos: assetUrl('/assets/voice/familia/gabi/invejosos.mp3'),
     selfie: assetUrl('/assets/voice/elenco/gabi/selfie.mp3'),
     sing: assetUrl('/assets/voice/gabi-canto.mp3'),
@@ -91,15 +95,24 @@ const CLIPS: Record<string, Record<string, string>> = {
     reply: assetUrl('/assets/voice/generated/dada-aviso-chao-molhado.mp3'),
   },
   juraci: {
+    vsCarlos: assetUrl('/assets/voice/elenco/juraci/vsCarlos.mp3'),
+    vsPaula: assetUrl('/assets/voice/elenco/juraci/vsPaula.mp3'),
+    fofoca: assetUrl('/assets/voice/familia/juraci/fofoca.mp3'),
     chinelo: assetUrl('/assets/voice/elenco/juraci/chinelo.mp3'),
     cozinha: assetUrl('/assets/voice/generated/juraci-mandando-na-cozinha.mp3'),
   },
   carlos: {
+    vsJuraci: assetUrl('/assets/voice/elenco/carlos/vsJuraci.mp3'),
+    vsFranciely: assetUrl('/assets/voice/elenco/carlos/vsFranciely.mp3'),
+    vsDavi: assetUrl('/assets/voice/elenco/carlos/vsDavi.mp3'),
+    vsPedro: assetUrl('/assets/voice/elenco/carlos/vsPedro.mp3'),
     pizza: assetUrl('/assets/voice/elenco/carlos/pizza.mp3'),
     pizzaAmor: assetUrl('/assets/voice/generated/carlos-pedido-de-pizza-com-amor.mp3'),
     fe: assetUrl('/assets/voice/elenco/carlos/fe.mp3'),
   },
   paula: {
+    vsPedro: assetUrl('/assets/voice/elenco/paula/vsPedro.mp3'),
+    vsJuraci: assetUrl('/assets/voice/elenco/paula/vsJuraci.mp3'),
     amem: assetUrl('/assets/voice/familia/paula/amem.mp3'),
     bebe: assetUrl('/assets/voice/familia/paula/bebe.mp3'),
     panela: assetUrl('/assets/voice/elenco/paula/panela.mp3'),
@@ -107,6 +120,8 @@ const CLIPS: Record<string, Record<string, string>> = {
     bar: assetUrl('/assets/voice/generated/paula-bar-simone.mp3'),
   },
   tainara: {
+    vsDaniel: assetUrl('/assets/voice/elenco/tainara/vsDaniel.mp3'),
+    vsPedro: assetUrl('/assets/voice/elenco/tainara/vsPedro.mp3'),
     arrozQueimado: assetUrl('/assets/voice/elenco/tainara/arroz.mp3'),
     trabalho: assetUrl('/assets/voice/tainara-trabalho.mp3'),
     cuidado: assetUrl('/assets/voice/generated/tainara-cuidado-em-dobro.mp3'),
@@ -119,6 +134,8 @@ const CLIPS: Record<string, Record<string, string>> = {
   },
   narrator: {
     victory: assetUrl('/assets/voice/narrator/vitoria-na-luta.mp3'),
+    termina: assetUrl('/assets/voice/narrator/termina.mp3'),
+    humilhacao: assetUrl('/assets/voice/narrator/humilhacao.mp3'),
   },
 };
 

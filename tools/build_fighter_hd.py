@@ -46,23 +46,46 @@ SHEETS = {
     'dano': {'rows': [[('hurt', 4)], [('knockdown', 4)], [('getup', 2), ('win', 2)]], 'ref': 'win'},
 }
 # Formas com roupa própria: folhas extras <forma>-<folha>.png; as animações ganham o prefixo "<forma>:".
-FORMS = {'carlos': {'crente': ['locomocao', 'golpes'], 'gordao': ['locomocao', 'golpes']}}
+FORMS = {'carlos': {'crente': ['locomocao', 'golpes'], 'gordao': ['locomocao', 'golpes']},
+         'pedro': {'hulk': ['locomocao', 'golpes']}}
 # Folhas extras opcionais de golpes especiais (uma animação pode ocupar várias linhas, em ordem).
 # ref_n: só os primeiros N quadros da régua contam (ex.: os quadros "normais" antes da deformação);
 # anchor_low: fração da altura a partir da qual se calcula a âncora X (0.85 = só os pés).
 EXTRA = {
     'daniel': {'bundada': {'rows': [[('bundada', 4)], [('bundada', 4)], [('bundada', 4)]],
                            'ref': 'bundada', 'ref_n': 4, 'anchor_low': 0.85}},
+    # Pedro: bebendo, virando Monstrão (cresce de propósito: régua só nos quadros normais) e soltando a fumaça
+    'pedro': {'especiais': {'rows': [[('drink', 4)], [('hulkPower', 4)], [('smoke', 4)]],
+                            'ref': 'drink', 'ref_n': 4, 'anchor_low': 0.85}},
 }
 # quadros usados de cada animação (índices dentro da linha) — permite descartar um quadro ruim
-PICK = {}
+PICK = {('pedro', 'drink'): (1,), ('pedro', 'smoke'): (1, 2), ('pedro', 'hulk:run'): (0, 1, 3)}  # o jogo usa 1 quadro bebendo e 2 da fumaça
 # quadros que o gerador desenhou virados para a esquerda: (lutador, animação) -> índices a espelhar
 FLIP = {('daniel', 'bundada'): (9, 10)}  # bundada saiu com o bumbum para a esquerda
 
 
-def load_sheet(path):
+def key_by_distance(rgb):
+    """Recorte para personagem VERDE (Monstrão): mede a distância até a cor do fundo (amostrada nas
+    bordas) em vez de remover tudo que é verde, e não neutraliza o verde da pele."""
+    a = rgb.astype(np.float32)
+    border = np.concatenate([a[:6].reshape(-1, 3), a[-6:].reshape(-1, 3), a[:, :6].reshape(-1, 3), a[:, -6:].reshape(-1, 3)])
+    bg = np.median(border, axis=0)
+    dist = np.sqrt(((a - bg) ** 2).sum(-1))
+    alpha = np.clip((dist - 38.0) / 42.0, 0.0, 1.0)
+    # só tira o reflexo do fundo nas bordas semitransparentes
+    edge = (alpha < 0.98)[..., None]
+    g2 = np.where(edge[..., 0], np.minimum(a[..., 1], np.maximum(a[..., 0], a[..., 2]) + 30.0), a[..., 1])
+    out = np.stack([a[..., 0], g2, a[..., 2], alpha * 255.0], axis=-1)
+    return np.clip(out, 0, 255).astype(np.uint8)
+
+
+# folhas que usam o recorte por distância (o personagem é verde)
+KEY_BY_DISTANCE = {('pedro', 'hulk-locomocao'), ('pedro', 'hulk-golpes'), ('pedro', 'especiais')}
+
+
+def load_sheet(path, by_distance=False):
     rgb = np.array(Image.open(path).convert('RGB'))
-    rgba = cut.key_green(rgb)
+    rgba = key_by_distance(rgb) if by_distance else cut.key_green(rgb)
     min_area = max(2500, int(rgb.shape[0] * rgb.shape[1] * 0.0035))
     lab, boxes = cut.components(rgba[..., 3], min_area)
     rows = []
@@ -106,7 +129,7 @@ def build(fid):
                 continue
             problems.append(f'{sheet}: arquivo ausente')
             continue
-        rows = load_sheet(path)
+        rows = load_sheet(path, (fid, sheet) in KEY_BY_DISTANCE)
         if len(rows) != len(cfg['rows']):
             problems.append(f'{sheet}: {len(rows)} linhas encontradas, esperado {len(cfg["rows"])}')
         got = {}

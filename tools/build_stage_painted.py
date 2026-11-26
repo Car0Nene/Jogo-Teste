@@ -41,7 +41,9 @@ def load_props(path):
 
 
 # chão tirado da própria pintura do fundo (faixa de calçada), para casar cor e luz com a fachada
-FLOOR_FROM_BACKGROUND = {'bar': (705, 880)}
+FLOOR_FROM_BACKGROUND = {'bar': (705, 880), 'padaria': (845, 955), 'quintal': (660, 950), 'festa': (670, 950), 'praia': (765, 895)}
+# linha onde a pintura do fundo é cortada (o resto vira o chão da luta)
+BG_CUT = {'padaria': 838, 'quintal': 640, 'festa': 650, 'praia': 752}
 
 
 def build(sid):
@@ -49,7 +51,12 @@ def build(sid):
     dst = APP / 'public' / 'assets' / 'stages' / 'painted' / sid
     dst.mkdir(parents=True, exist_ok=True)
 
-    bg = Image.open(src / 'fundo.png').convert('RGB')
+    if sid in BG_CUT:
+        orig_bg = Image.open(src / 'fundo-original.png').convert('RGB')
+        bg = orig_bg.crop((0, 0, orig_bg.width, BG_CUT[sid]))
+        bg.save(src / 'fundo.png')
+    else:
+        bg = Image.open(src / 'fundo.png').convert('RGB')
     bg.save(dst / 'fundo.webp', 'WEBP', quality=88, method=6)
 
     band = FLOOR_FROM_BACKGROUND.get(sid)
