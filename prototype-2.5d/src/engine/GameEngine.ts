@@ -43,6 +43,15 @@ import {
 } from './propsBuilder';
 import { BuiltStage, buildStage } from './stageBuilder';
 import { AiWorld, FighterAI, HoldAction } from './ai/FighterAI';
+import {
+  ATTACKER_PUSHBACK_RANGE,
+  ATTACKER_PUSHBACK_RATIO,
+  BLOCK_PUSH_RATIO,
+  METER_GAIN,
+  hitDamage,
+  resolveGuard,
+  stunDuration,
+} from './combat/rules';
 
 export type ScreenMode = 'title' | 'select' | 'fight';
 /** online = 2P controlado pela rede (P2 só por entradas virtuais vindas do convidado) */
@@ -2427,36 +2436,31 @@ export class GameEngine {
       return;
     }
 
-    const standingGuard =
-      def.noGuardTimer <= 0 &&
-      (def.state === 'guard' ||
-      def.state === 'blockstun' ||
-      (def.y <= 0.02 &&
-        def.state !== 'attack' &&
-        def.state !== 'hitstun' &&
-        def.state !== 'knockdown' &&
-        ((def.facing === 1 && this.isHeld(def.index, 'left')) ||
-          (def.facing === -1 && this.isHeld(def.index, 'right')))));
-    // golpe baixo só é defendido agachado (baixo + defesa); boneco do treino em "Defende tudo" defende qualquer um
+    // regras puras em engine/combat/rules.ts; aqui só se aplica o resultado
     const dummyAll = this.isTrainingDummy(def) && (this.trainingOpts.dummy === 'guard' || (this.trainingOpts.dummy === 'guardAfterHit' && this.dummyGuardTimer > 0));
-    const crouching = this.isHeld(def.index, 'down') || def.state === 'crouch';
-    const isBlocking =
-      (standingGuard && (!move?.low || crouching || dummyAll)) ||
-      (dummyAll && def.noGuardTimer <= 0 && def.y <= 0.02 && !['attack', 'hitstun', 'knockdown'].includes(def.state));
-    def.lowGuard = isBlocking && Boolean(move?.low);
-    def.stunDuration = Math.max(0.16, (isBlocking ? move?.blockstun : move?.hitstun) || DEFAULT_HITSTUN);
+    const guard = resolveGuard(
+      {
+        state: def.state,
+        y: def.y,
+        noGuardTimer: def.noGuardTimer,
+        holdingBack: this.isHeld(def.index, def.facing === 1 ? 'left' : 'right'),
+        holdingDown: this.isHeld(def.index, 'down'),
+        dummyBlocksAll: dummyAll,
+      },
+      move
+    );
+    const isBlocking = guard.blocked;
+    def.lowGuard = guard.lowGuard;
+    def.stunDuration = stunDuration(isBlocking, move);
 
-    const defMult = FORMS[def.form].def;
-    // escala de combo (padrão de jogo de luta): a partir do 3º acerto seguido cada golpe tira 10% menos, mínimo 55%
-    const comboScale = isBlocking ? 1 : Math.max(0.55, 1 - Math.max(0, att.comboCount - 1) * 0.1);
-    const dmg = Math.round(rawDamage * defMult * comboScale * (isBlocking ? 0.22 : 1));
+    const dmg = hitDamage(rawDamage, FORMS[def.form].def, att.comboCount, isBlocking);
     def.hp = Math.max(0, def.hp - dmg);
-    def.vx = att.facing * push * (isBlocking ? 0.65 : 1);
+    def.vx = att.facing * push * (isBlocking ? BLOCK_PUSH_RATIO : 1);
     // defesa empurra os dois: quem defende não fica preso na parede de golpes
-    if (isBlocking && Math.abs(att.x - def.x) < 2.4) att.vx = -att.facing * push * 0.45;
+    if (isBlocking && Math.abs(att.x - def.x) < ATTACKER_PUSHBACK_RANGE) att.vx = -att.facing * push * ATTACKER_PUSHBACK_RATIO;
 
-    att.meter = Math.min(100, att.meter + (isBlocking ? 7 : 15));
-    def.meter = Math.min(100, def.meter + 8);
+    att.meter = Math.min(100, att.meter + (isBlocking ? METER_GAIN.blocked : METER_GAIN.hit));
+    def.meter = Math.min(100, def.meter + METER_GAIN.defender);
 
     if (isBlocking) {
       def.state = 'blockstun';

@@ -1,3 +1,4 @@
+import { STYLE_TUNING, tuneMove } from './balance';
 /**
  * Estrutura de golpes: fonte única dos comandos de cada lutador.
  *
@@ -97,6 +98,12 @@ export function lowMoves(id: FighterId): { light: MoveSpec; heavy: MoveSpec } {
     low: true,
   };
   const out = { light, heavy };
+  const lt = STYLE_TUNING[id]?.lows;
+  if (lt) {
+    // estilo próprio nos golpes baixos (ex.: Paula, pressão baixa)
+    Object.assign(light, tuneMove(light, lt.lowLight));
+    Object.assign(heavy, tuneMove(heavy, lt.lowHeavy));
+  }
   lowCache.set(id, out);
   return out;
 }

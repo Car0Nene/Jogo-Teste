@@ -1,3 +1,4 @@
+import { applyStyleTuning } from './balance';
 import { assetUrl } from '../assetUrl';
 
 export type FighterId =
@@ -625,6 +626,9 @@ export const FIGHTERS: Record<FighterId, FighterSpec> = {
     },
   },
 };
+
+// identidade de combate de cada um (ponto forte + ponto fraco) — ver data/balance.ts
+applyStyleTuning(FIGHTERS as unknown as Parameters<typeof applyStyleTuning>[0]);
 
 export const FIGHTER_LIST: FighterSpec[] = [
   FIGHTERS.juraci,
