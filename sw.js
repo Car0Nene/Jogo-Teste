@@ -5,10 +5,10 @@
  * - Arquivos com versão no nome/URL (bundles com hash, "?v=") são imutáveis: cache primeiro.
  * - Todo o resto (sprites, vozes, retratos, cenários, páginas) vai SEMPRE à rede primeiro;
  *   o cache só é usado quando o aparelho está offline.
- * - 3099cfa7ab72 é trocado a cada build, então cada publicação apaga os caches anteriores.
+ * - e307d664ba71 é trocado a cada build, então cada publicação apaga os caches anteriores.
  */
 
-const CACHE_NAME = 'familia-fighter-3099cfa7ab72';
+const CACHE_NAME = 'familia-fighter-e307d664ba71';
 
 const isImmutable = (url) =>
   url.searchParams.has('v') || /\/assets\/[^/]+-[A-Za-z0-9_-]{8,}\.(js|css)$/.test(url.pathname);
