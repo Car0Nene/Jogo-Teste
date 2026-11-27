@@ -3,12 +3,17 @@
  *
  * Regra principal: o jogo nunca mostra arte, voz ou música de uma versão antiga.
  * - Arquivos com versão no nome/URL (bundles com hash, "?v=") são imutáveis: cache primeiro.
- * - Todo o resto (sprites, vozes, retratos, cenários, páginas) vai SEMPRE à rede primeiro;
- *   o cache só é usado quando o aparelho está offline.
- * - a63ad44cf078 é trocado a cada build, então cada publicação apaga os caches anteriores.
+ * - Mídia estática da publicação (vozes, músicas, sprites, retratos, cenários, vídeo): cache
+ *   primeiro DENTRO desta publicação. Como 3e8da3f67cde muda a cada build e a ativação apaga os
+ *   caches anteriores, nunca aparece mídia de versão antiga — e no celular cada fala/sprite não
+ *   vai mais à rede toda vez (era isso que engasgava as falas no 4G).
+ * - Páginas, scripts sem hash e configuração vão SEMPRE à rede primeiro; cache só offline.
  */
 
-const CACHE_NAME = 'familia-fighter-a63ad44cf078';
+const CACHE_NAME = 'familia-fighter-3e8da3f67cde';
+
+const isBuildMedia = (url) =>
+  /\/assets\/.+\.(mp3|ogg|m4a|wav|webp|png|jpg|jpeg|gif|svg|mp4|webm|json|glb|ktx2)$/i.test(url.pathname);
 
 const isImmutable = (url) =>
   url.searchParams.has('v') || /\/assets\/[^/]+-[A-Za-z0-9_-]{8,}\.(js|css)$/.test(url.pathname);
@@ -42,7 +47,7 @@ self.addEventListener('fetch', (event) => {
   // pedidos parciais (áudio/vídeo com Range) vão direto à rede
   if (request.headers.has('range')) return;
 
-  if (isImmutable(url)) {
+  if (isImmutable(url) || isBuildMedia(url)) {
     event.respondWith(caches.match(request).then((hit) => hit || fetch(request).then((r) => store(request, r))));
     return;
   }
