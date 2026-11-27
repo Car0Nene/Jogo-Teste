@@ -1,3 +1,4 @@
+import { soundEngine } from '../engine/audio';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { FastForward, X } from 'lucide-react';
 import { assetUrl } from '../assetUrl';
@@ -22,7 +23,7 @@ export function StoryPlayer({
   // -2 = vídeo de abertura, -1 = cartela do capítulo
   const [panel, setPanel] = useState(chapter.video ? -2 : -1);
   const [line, setLine] = useState(0);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const audioRef = useRef<(() => void) | null>(null);
   const timerRef = useRef<number | null>(null);
   const doneRef = useRef(false);
 
@@ -31,11 +32,7 @@ export function StoryPlayer({
     timerRef.current = null;
   };
   const stopAudio = () => {
-    const a = audioRef.current;
-    if (a) {
-      a.onended = null;
-      a.pause();
-    }
+    audioRef.current?.();
     audioRef.current = null;
   };
 
@@ -79,25 +76,26 @@ export function StoryPlayer({
     if (panel < 0) return;
     const l = chapter.panels[panel]?.lines[line];
     if (!l) return;
-    const a = new Audio(assetUrl(`/assets/voice/story/${l.clip}.mp3`));
-    a.volume = Math.max(0, Math.min(1, volume));
-    audioRef.current = a;
     const next = (ms: number) => {
       clearTimer();
       timerRef.current = window.setTimeout(advance, ms);
     };
-    a.onended = () => next(450);
-    // sem som (mudo/bloqueado): tempo de leitura
+    // tempo de leitura: usado sem som e como rede de segurança se o áudio não começar/terminar
     const readMs = 1200 + l.text.length * 55;
-    if (volume <= 0) next(readMs);
-    else
-      a.play().catch(() => {
-        next(readMs);
-      });
+    let ended = false;
+    const stop = volume > 0
+      ? soundEngine.playLine(assetUrl(`/assets/voice/story/${l.clip}.mp3`), Math.max(0, Math.min(1, volume)), () => {
+          ended = true;
+          next(450);
+        })
+      : null;
+    audioRef.current = stop;
+    // sem som, bloqueado ou travado na rede: a história nunca fica parada esperando
+    next(stop ? readMs + 6000 : readMs);
     return () => {
       clearTimer();
-      a.onended = null;
-      a.pause();
+      if (!ended) stop?.();
+      audioRef.current = null;
     };
   }, [panel, line, chapter, volume, advance]);
 
@@ -116,6 +114,11 @@ export function StoryPlayer({
   }, [advance, finish]);
 
   useEffect(() => () => { clearTimer(); stopAudio(); }, []);
+
+  // decodifica as falas do capítulo enquanto passa o vídeo/cartela
+  useEffect(() => {
+    soundEngine.preloadUrls(chapter.panels.flatMap((p) => p.lines.map((l) => assetUrl(`/assets/voice/story/${l.clip}.mp3`))));
+  }, [chapter]);
 
   const p = panel >= 0 ? chapter.panels[panel] : null;
   const l = p?.lines[line];

@@ -128,7 +128,7 @@ export const VOICE_TEXT: Record<string, string> = {
   "/assets/voice/elenco/gabi/bt-franciely.mp3": "Oi, Fran, fofa! Deixa eu ficar só uma semana com o Mateus? Depois te devolvo.",
   "/assets/voice/elenco/franciely/bt-gabi.mp3": "Claro, fofa. Dia trinta de fevereiro eu mando ele.",
   "/assets/voice/elenco/juraci/bt-paula.mp3": "Paula, fofa, quem fez esse tempero aí?",
-  "/assets/voice/elenco/paula/bt-juraci.mp3": "Fui eu, fofa. Aprendi com a melhor, mãe.",
+  "/assets/voice/elenco/paula/bt-juraci.mp3": "Fui eu, fofa. Aprendi com a melhor sogra.",
   "/assets/voice/elenco/juraci/bt-franciely.mp3": "Fran, fofa, vem dar um abraço na vó... antes de apanhar!",
   "/assets/voice/elenco/franciely/bt-juraci.mp3": "Ai, vó, fofa, a senhora não muda.",
   "/assets/voice/elenco/juraci/bt-gabi.mp3": "Gabi, fofa, para de cantar e vem lavar a louça!",

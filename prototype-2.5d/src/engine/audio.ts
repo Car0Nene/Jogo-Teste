@@ -36,6 +36,21 @@ const TRACK_PATHS: Record<MusicTrackId, string> = {
   praia: assetUrl('/assets/music/estagio-praia'),
 };
 
+const ANNOUNCER_KEYS: AnnouncerKey[] = ['round_1', 'round_2', 'round_3', 'final_round', 'fight', 'combo', 'time', 'you_win', 'you_lose', 'tie'];
+const announcerUrl = (key: AnnouncerKey) => assetUrl(`/assets/voice/arcade/${key}.mp3`);
+
+/**
+ * Uma fala tocando. Pode ser Web Audio (buffer já decodificado: sem atraso, sem engasgo) ou,
+ * enquanto o buffer não está pronto, um <audio> comum.
+ */
+interface VoiceHandle {
+  url: string;
+  stop(): void;
+}
+
+/** Orçamento de memória das falas decodificadas (PCM). Acima disso, as menos usadas saem. */
+const VOICE_BUDGET_BYTES = 48 * 1024 * 1024;
+
 /** Efeitos de impacto reais (ElevenLabs Sound Effects), em public/assets/sfx/<nome>.mp3. */
 const SFX_SAMPLES = ['hit_light', 'hit_heavy', 'kick', 'block', 'whoosh_light', 'whoosh_heavy', 'fall'] as const;
 type SfxSample = (typeof SFX_SAMPLES)[number];
@@ -238,9 +253,15 @@ class SoundEngine {
   private currentTrack: MusicTrackId | null = null;
   private trackLevel = 1;
   private musicPaused = false;
-  private activeVoices = new Set<HTMLAudioElement>();
-  private currentAnnouncer: HTMLAudioElement | null = null;
-  private currentDaviVoice: HTMLAudioElement | null = null;
+  private activeVoices = new Set<VoiceHandle>();
+  private currentAnnouncer: VoiceHandle | null = null;
+  private currentDaviVoice: VoiceHandle | null = null;
+  /** falas já decodificadas (Map em ordem de uso = LRU) */
+  private voiceBuffers = new Map<string, AudioBuffer>();
+  private voiceBytes = 0;
+  private voiceLoading = new Map<string, Promise<AudioBuffer | null>>();
+  private preloadQueue: string[] = [];
+  private preloadRunning = false;
   private lastVoiceTime = 0;
 
   constructor() {
@@ -426,67 +447,199 @@ class SoundEngine {
   }
 
   stopAllVoices() {
-    if (this.currentAnnouncer) {
-      this.currentAnnouncer.pause();
-      this.currentAnnouncer.src = '';
-      this.currentAnnouncer = null;
-    }
-    for (const v of this.activeVoices) {
-      v.pause();
-      v.src = '';
-    }
+    this.currentAnnouncer?.stop();
+    this.currentAnnouncer = null;
+    for (const v of [...this.activeVoices]) v.stop();
     this.activeVoices.clear();
     this.currentDaviVoice = null;
   }
 
-  private playVoiceFile(url: string, volume = 0.85, isAnnouncer = false): HTMLAudioElement | null {
+  // ------------------------------------------------------------------ falas (Web Audio)
+
+  private decode(ctx: AudioContext, data: ArrayBuffer): Promise<AudioBuffer> {
+    return new Promise((resolve, reject) => {
+      // Safari antigo só aceita a forma com callbacks
+      const r = ctx.decodeAudioData(data, resolve, reject) as Promise<AudioBuffer> | undefined;
+      if (r && typeof r.then === 'function') r.then(resolve, reject);
+    });
+  }
+
+  /** Baixa e decodifica uma fala (uma vez); fica num cache LRU com orçamento de memória. */
+  private loadVoiceBuffer(url: string): Promise<AudioBuffer | null> {
+    const hit = this.voiceBuffers.get(url);
+    if (hit) {
+      this.voiceBuffers.delete(url);
+      this.voiceBuffers.set(url, hit);
+      return Promise.resolve(hit);
+    }
+    const pending = this.voiceLoading.get(url);
+    if (pending) return pending;
+    const ctx = this.ensureContext();
+    if (!ctx || typeof fetch !== 'function') return Promise.resolve(null);
+    const job = fetch(url)
+      .then((r) => (r.ok ? r.arrayBuffer() : Promise.reject(new Error(String(r.status)))))
+      .then((data) => this.decode(ctx, data))
+      .then((buf) => {
+        this.voiceBuffers.set(url, buf);
+        this.voiceBytes += buf.length * buf.numberOfChannels * 4;
+        for (const [key, old] of this.voiceBuffers) {
+          if (this.voiceBytes <= VOICE_BUDGET_BYTES) break;
+          if (key === url) continue;
+          this.voiceBuffers.delete(key);
+          this.voiceBytes -= old.length * old.numberOfChannels * 4;
+        }
+        return buf;
+      })
+      .catch(() => null)
+      .finally(() => this.voiceLoading.delete(url));
+    this.voiceLoading.set(url, job);
+    return job;
+  }
+
+  /** Decodifica a fila aos poucos (uma fala por vez) para não disputar o quadro com a luta. */
+  private async pumpPreload() {
+    if (this.preloadRunning) return;
+    this.preloadRunning = true;
+    try {
+      while (this.preloadQueue.length) {
+        const url = this.preloadQueue.shift()!;
+        if (!this.voiceBuffers.has(url)) await this.loadVoiceBuffer(url);
+        await new Promise((r) => setTimeout(r, 12));
+      }
+    } finally {
+      this.preloadRunning = false;
+    }
+  }
+
+  private queuePreload(urls: string[], front = false) {
+    const fresh = urls.filter((u) => !this.voiceBuffers.has(u) && !this.preloadQueue.includes(u));
+    this.preloadQueue = front ? [...fresh, ...this.preloadQueue] : [...this.preloadQueue, ...fresh];
+    void this.pumpPreload();
+  }
+
+  /** quantas falas já estão prontas para tocar sem atraso (diagnóstico/testes) */
+  voiceCacheInfo() {
+    return { decoded: this.voiceBuffers.size, bytes: this.voiceBytes, queued: this.preloadQueue.length };
+  }
+
+  private playVoiceFile(
+    url: string,
+    volume = 0.85,
+    isAnnouncer = false,
+    opts: { absoluteVolume?: boolean; onEnd?: () => void } = {}
+  ): VoiceHandle | null {
     if (this.muted || typeof window === 'undefined') return null;
     if (this.currentDaviVoice && this.activeVoices.has(this.currentDaviVoice)) return null;
-    const scaledVol = Math.max(0, Math.min(1, volume * this.masterVolume * this.voiceVolume));
+    const scaledVol = Math.max(0, Math.min(1, opts.absoluteVolume ? volume : volume * this.masterVolume * this.voiceVolume));
     if (scaledVol <= 0.005) return null;
 
     if (isAnnouncer && this.currentAnnouncer) {
-      this.currentAnnouncer.pause();
-      this.currentAnnouncer.src = '';
-      this.activeVoices.delete(this.currentAnnouncer);
+      this.currentAnnouncer.stop();
       this.currentAnnouncer = null;
     }
 
-    const el = new Audio(url);
-    el.preload = 'auto';
-    el.volume = scaledVol;
-    this.activeVoices.add(el);
-    if (isAnnouncer) this.currentAnnouncer = el;
-
+    let handle: VoiceHandle;
+    let done = false;
     const cleanup = () => {
-      if (this.currentAnnouncer === el) this.currentAnnouncer = null;
-      if (!this.activeVoices.delete(el)) return;
-      el.onended = null;
-      el.onerror = null;
+      if (done) return;
+      done = true;
+      if (this.currentAnnouncer === handle) this.currentAnnouncer = null;
+      if (this.currentDaviVoice === handle) this.currentDaviVoice = null;
+      this.activeVoices.delete(handle);
     };
-    el.onended = cleanup;
-    el.onerror = cleanup;
-    setTimeout(cleanup, 12000);
-    el.play().catch(cleanup);
-    return el;
+
+    const buf = this.voiceBuffers.get(url);
+    const ctx = this.ctx;
+    if (buf && ctx && ctx.state === 'running') {
+      // caminho rápido: buffer pronto, toca na hora e sem criar player de mídia
+      const src = ctx.createBufferSource();
+      src.buffer = buf;
+      const gain = ctx.createGain();
+      gain.gain.value = scaledVol;
+      src.connect(gain).connect(ctx.destination);
+      src.onended = () => {
+        cleanup();
+        opts.onEnd?.();
+      };
+      handle = {
+        url,
+        stop: () => {
+          src.onended = null;
+          try {
+            src.stop();
+          } catch {
+            /* já parou */
+          }
+          src.disconnect();
+          cleanup();
+        },
+      };
+      src.start();
+      // LRU: fala usada agora vai para o fim da fila de descarte
+      this.voiceBuffers.delete(url);
+      this.voiceBuffers.set(url, buf);
+    } else {
+      // ainda não decodificada: toca como <audio> e já prepara para a próxima vez
+      const el = new Audio(url);
+      el.preload = 'auto';
+      el.volume = scaledVol;
+      const finish = () => {
+        el.onended = null;
+        el.onerror = null;
+        const wasActive = !done;
+        cleanup();
+        if (wasActive) opts.onEnd?.();
+      };
+      el.onended = finish;
+      el.onerror = finish;
+      handle = {
+        url,
+        stop: () => {
+          el.onended = null;
+          el.onerror = null;
+          el.pause();
+          // solta o arquivo sem disparar um novo carregamento
+          if (typeof el.removeAttribute === 'function') el.removeAttribute('src');
+          cleanup();
+        },
+      };
+      el.play().catch(finish);
+      void this.loadVoiceBuffer(url);
+    }
+    this.activeVoices.add(handle);
+    if (isAnnouncer) this.currentAnnouncer = handle;
+    window.setTimeout(cleanup, 15000);
+    return handle;
   }
 
-  private preloaded = new Set<string>();
-
-  /** Baixa antes da luta as falas dos lutadores, para tocarem sem atraso. */
+  /**
+   * Antes da luta: baixa e decodifica as falas dos lutadores e do narrador, uma por vez em segundo
+   * plano. No celular isso evita o engasgo de abrir um player de mídia (e ir à rede) a cada fala.
+   */
   preloadFighterVoices(ids: string[]) {
     if (typeof window === 'undefined' || typeof fetch !== 'function') return;
-    for (const id of ids) {
-      for (const url of Object.values(CLIPS[id] ?? {})) {
-        if (this.preloaded.has(url)) continue;
-        this.preloaded.add(url);
-        fetch(url).catch(() => this.preloaded.delete(url));
-      }
-    }
+    const urls: string[] = [];
+    if (ids.includes('narrator')) urls.push(...ANNOUNCER_KEYS.map(announcerUrl));
+    for (const id of ids) urls.push(...Object.values(CLIPS[id] ?? {}));
+    this.queuePreload([...new Set(urls)], true);
+  }
+
+  /**
+   * Fala avulsa (Modo História): mesmo motor das falas da luta. Volume já final (0..1).
+   * onEnd é chamado quando termina sozinha. Devolve a função para parar, ou null se não tocou.
+   */
+  playLine(url: string, volume: number, onEnd: () => void): (() => void) | null {
+    const h = this.playVoiceFile(url, volume, false, { absoluteVolume: true, onEnd });
+    return h ? () => h.stop() : null;
+  }
+
+  /** Falas específicas (ex.: diálogo de abertura da luta) furam a fila. */
+  preloadUrls(urls: string[]) {
+    this.queuePreload(urls, true);
   }
 
   playAnnouncer(key: AnnouncerKey) {
-    this.playVoiceFile(assetUrl(`/assets/voice/arcade/${key}.ogg`), 0.94, true);
+    this.playVoiceFile(announcerUrl(key), 0.94, true);
   }
 
   /** Toca uma fala; devolve true se ela começou a tocar (false se não existe, está muda ou foi barrada). */
@@ -499,12 +652,8 @@ class SoundEngine {
     if (who === 'davi' && this.activeVoices.size > 0) return false;
     this.lastVoiceTime = now;
     if (replacePrevious) {
-      for (const v of this.activeVoices) {
-        if (v !== this.currentAnnouncer) {
-          v.pause();
-          v.src = '';
-          this.activeVoices.delete(v);
-        }
+      for (const v of [...this.activeVoices]) {
+        if (v !== this.currentAnnouncer) v.stop();
       }
     }
     const voice = this.playVoiceFile(url, who === 'narrator' ? 0.92 : 0.86, who === 'narrator');

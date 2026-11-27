@@ -85,13 +85,60 @@ function getFighterHd3Texture(id: FighterId, anisotropy: number): THREE.Texture 
   return tex;
 }
 
+// ---------------------------------------------------------------- qualidade/memória dos atlas
+/**
+ * Tamanho real dos atlas -anim-hd (as coordenadas dos quadros são nesse tamanho). A versão "md"
+ * (celular / GPU com limite de 4096 px) é a mesma arte reduzida para no máximo 3072 px: cabe em
+ * qualquer GPU sem o navegador ter de reduzir 20 MP na hora (engasgo) e ocupa ~40% da memória.
+ */
+const HD_ANIM_FULL_SIZE: Partial<Record<FighterId, [number, number]>> = {"carlos": [4096, 4945], "daniel": [3072, 3893], "davi": [2560, 3812], "franciely": [2560, 3731], "gabi": [2560, 4090], "juraci": [2560, 3885], "paula": [2560, 3578], "pedro": [4096, 4083], "tainara": [2560, 3514]};
+
+let atlasProfile: 'full' | 'mobile' = 'full';
+/** Quantos lutadores mantêm atlas na memória (os dois em cena + os últimos vistos). */
+let atlasKeep = 9;
+const atlasRecent: FighterId[] = [];
+
+/** Chamado pelo motor no início: celular ou GPU limitada usam os atlas "md" e guardam menos. */
+export function setAtlasProfile(profile: 'full' | 'mobile') {
+  atlasProfile = profile;
+  atlasKeep = profile === 'mobile' ? 3 : 9;
+}
+
+function touchFighterAtlas(id: FighterId) {
+  const i = atlasRecent.indexOf(id);
+  if (i >= 0) atlasRecent.splice(i, 1);
+  atlasRecent.push(id);
+}
+
+/**
+ * Libera da GPU/memória os atlas de lutadores que não estão em cena e saíram da lista dos
+ * últimos vistos. Sem isso, passear pela seleção no celular empilhava ~9 atlas enormes.
+ */
+export function releaseUnusedFighterAtlases(inScene: FighterId[]) {
+  inScene.forEach(touchFighterAtlas);
+  const keep = new Set<FighterId>([...inScene, ...atlasRecent.slice(-atlasKeep)]);
+  for (const cache of [sharedFighterHd6Tex, sharedFighterHd4Tex, sharedFighterHd3Tex]) {
+    for (const id of Object.keys(cache) as FighterId[]) {
+      if (keep.has(id)) continue;
+      cache[id]?.dispose();
+      delete cache[id];
+    }
+  }
+}
+
 /** Atlas de animação completa (padrão Pedro), gerado por tools/build_fighter_hd.py. */
 function getFighterHd6Texture(id: FighterId, anisotropy: number): THREE.Texture | undefined {
   const version = HD_ANIM_VERSION[id];
   if (!version) return undefined;
+  touchFighterAtlas(id);
   if (sharedFighterHd6Tex[id]) return sharedFighterHd6Tex[id];
   const loader = new THREE.TextureLoader();
-  const tex = configureSpriteTexture(loader.load(assetUrl(`/assets/sprites/${id}-anim-hd.webp?v=${version}`)), anisotropy);
+  const size = HD_ANIM_FULL_SIZE[id];
+  const useMd = atlasProfile === 'mobile' && !!size;
+  const file = useMd ? `${id}-anim-md.webp` : `${id}-anim-hd.webp`;
+  const tex = configureSpriteTexture(loader.load(assetUrl(`/assets/sprites/${file}?v=${version}`)), anisotropy);
+  // coordenadas dos quadros continuam no tamanho original
+  if (useMd && size) tex.userData.srcSize = size;
   sharedFighterHd6Tex[id] = tex;
   return tex;
 }
@@ -159,13 +206,12 @@ export interface CharacterRig {
   auraRing: THREE.Mesh;
   auraLight: THREE.PointLight;
   contactShadow: THREE.Mesh;
-  atlasTex: THREE.Texture;
-  atlasHdTex: THREE.Texture;
-  atlasHd2Tex: THREE.Texture;
-  atlasHd3Tex?: THREE.Texture;
-  atlasHd4Tex?: THREE.Texture;
+  anisotropy: number;
   atlasHd6Tex?: THREE.Texture;
-  daviTex?: THREE.Texture;
+  /** textura de um tier do atlas, carregada sob demanda */
+  getTex(tier: 0 | 1 | 2 | 3 | 4 | 5 | 6): THREE.Texture | undefined;
+  /** texturas já carregadas por este boneco (pré-envio à GPU) */
+  loadedTextures(): THREE.Texture[];
   atlasTier: 0 | 1 | 2 | 3 | 4 | 5 | 6;
   baseScale: number;
   baseShadowOpacity: number;
@@ -206,14 +252,11 @@ export function buildCharacterRig(
   shadowTex?: THREE.Texture
 ): CharacterRig {
   const spec = FIGHTERS[id];
-  const atlasTex = getAtlasTexture(0, anisotropy);
-  const atlasHdTex = getAtlasTexture(1, anisotropy);
-  const atlasHd2Tex = getAtlasTexture(2, anisotropy);
-  const atlasHd3Tex = getFighterHd3Texture(id, anisotropy);
+  // Só o atlas moderno (tier 6) é carregado já; os antigos (0–5) só se algum quadro pedir.
   const atlasHd6Tex = getFighterHd6Texture(id, anisotropy);
-  const atlasHd4Tex = getFighterHd4Texture(id, anisotropy);
-  const daviTex = id === 'davi' ? getDaviTexture(anisotropy) : undefined;
+  const atlasTex = atlasHd6Tex ?? getAtlasTexture(0, anisotropy);
 
+  const loaded = new Set<THREE.Texture>([atlasTex]);
   const root = new THREE.Group();
 
   const contactShadow = new THREE.Mesh(
@@ -389,14 +432,26 @@ export function buildCharacterRig(
     auraRing,
     auraLight,
     contactShadow,
-    atlasTex,
-    atlasHdTex,
-    atlasHd2Tex,
-    atlasHd3Tex,
+    anisotropy,
     atlasHd6Tex,
-    atlasHd4Tex,
-    daviTex,
-    atlasTier: 0,
+    getTex(tier) {
+      const t =
+        tier === 6
+          ? getFighterHd6Texture(id, anisotropy)
+          : tier === 5
+          ? id === 'davi'
+            ? getDaviTexture(anisotropy)
+            : undefined
+          : tier === 4
+          ? getFighterHd4Texture(id, anisotropy)
+          : tier === 3
+          ? getFighterHd3Texture(id, anisotropy)
+          : getAtlasTexture(tier as 0 | 1 | 2, anisotropy);
+      if (t) loaded.add(t);
+      return t;
+    },
+    loadedTextures: () => [...loaded],
+    atlasTier: atlasHd6Tex ? 6 : 0,
     baseScale: CHAR_SPRITE_SCALE[id] || 1.2,
     baseShadowOpacity: 0.46,
     hitFlashTimer: 0,
@@ -890,20 +945,8 @@ export function animateCharacterRig(
   const [sx, sy, sw, sh, ax, ay, hdFlag] = frame;
   const tier: 0 | 1 | 2 | 3 | 4 | 5 | 6 =
     hdFlag === 6 ? 6 : hdFlag === 5 ? 5 : hdFlag === 4 ? 4 : hdFlag === 3 ? 3 : hdFlag === 2 ? 2 : hdFlag === 1 ? 1 : 0;
-  const tex =
-    tier === 6
-      ? rig.atlasHd6Tex
-      : tier === 5
-      ? rig.daviTex
-      : tier === 4 && rig.atlasHd4Tex
-      ? rig.atlasHd4Tex
-      : tier === 3 && rig.atlasHd3Tex
-      ? rig.atlasHd3Tex
-      : tier === 2
-      ? rig.atlasHd2Tex
-      : tier === 1
-      ? rig.atlasHdTex
-      : rig.atlasTex;
+  // tiers 3/4 podem não existir para o lutador: cai no atlas geral, como antes
+  const tex = rig.getTex(tier) ?? (tier === 3 || tier === 4 ? rig.getTex(0) : undefined);
   if (!tex) {
     rig.spriteMesh.visible = false;
     return;
@@ -911,7 +954,8 @@ export function animateCharacterRig(
   const img = tex.image as { width?: number; height?: number } | undefined;
 
   if (!img || !img.width || !img.height) {
-    rig.spriteMesh.visible = false;
+    // atlas ainda carregando: segura o último quadro em vez de piscar (só some se nunca desenhou)
+    if (!rig.spriteMesh.userData.drawn) rig.spriteMesh.visible = false;
     return;
   }
 
@@ -928,9 +972,12 @@ export function animateCharacterRig(
   }
 
   rig.spriteMesh.visible = true;
+  rig.spriteMesh.userData.drawn = true;
 
-  const texW = img.width;
-  const texH = img.height;
+  // atlas reduzido (celular): quadros em coordenadas do tamanho original
+  const src = tex.userData.srcSize as [number, number] | undefined;
+  const texW = src ? src[0] : img.width;
+  const texH = src ? src[1] : img.height;
   const ad =
     tier === 6
       ? ATLAS_HD_SCALE
@@ -973,8 +1020,8 @@ export function animateCharacterRig(
   rig.spriteGeo.computeBoundingSphere();
 
   // Half-texel inset prevents atlas bleeding
-  const padU = 0.5 / texW;
-  const padV = 0.5 / texH;
+  const padU = 0.5 / img.width;
+  const padV = 0.5 / img.height;
   const uMin = sx / texW + padU;
   const uMax = (sx + sw) / texW - padU;
   const vTop = 1 - sy / texH - padV;

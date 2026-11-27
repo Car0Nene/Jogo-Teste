@@ -2,9 +2,9 @@
  * Modo História "Almoço de Domingo": quadrinhos animados (arte Kling) com falas nas vozes
  * clonadas da família, intercalados com lutas. Cada capítulo = cenas + uma luta.
  *
- * A família: Juraci e Dadá são os avós; Paula é filha deles e casada com o Pedro (padrasto
- * da Franciely, pai da Gabi e do Davi). Carlos é marido da Franciely; Daniel é marido da
- * Tainara, prima da garotada; Gabi namora o Vinícius.
+ * A família: Juraci e Dadá são os avós; Pedro é filho deles e casado com a Paula (Juraci é
+ * SOGRA da Paula). Pedro é pai da Gabi e do Davi e padrasto da Franciely. Carlos é marido da
+ * Franciely; Daniel é marido da Tainara, prima da garotada; Gabi namora o Vinícius.
  */
 import type { FighterId } from './fighters';
 import type { StageId } from './stages';
@@ -63,7 +63,7 @@ export const STORY: StoryChapter[] = [
     panels: [
       { img: 'p01', motion: 'zoomIn', lines: [L('narrador', 's01a', 'Domingo. Casa da vó Juraci. Cheiro de bolo no ar.'), L('juraci', 's01b', 'Bolo de cenoura supremo, com cobertura de brigadeiro! Mas o último pedaço é só de quem merecer.')] },
       { img: 'p02', motion: 'panRight', lines: [L('narrador', 's02a', 'Bastou essa frase pra família inteira virar inimiga.'), L('pedro', 's02b', 'Ô rapaz... esse bolo tem cara de ser meu.'), L('carlos', 's02c', 'Calma, sogrão. Ninguém encosta nesse bolo antes de mim.')] },
-      { img: 'p03', motion: 'shake', lines: [L('paula', 's03a', 'Mãe, quem fez o almoço inteiro fui eu. O bolo é meu!'), L('juraci', 's03b', 'Filha, enquanto eu tiver chinelo, quem manda na cozinha sou eu.')] },
+      { img: 'p03', motion: 'shake', lines: [L('paula', 's03a', 'Sogra, quem fez o almoço inteiro fui eu. O bolo é meu!'), L('juraci', 's03b', 'Nora, enquanto eu tiver chinelo, quem manda na cozinha sou eu.')] },
     ],
     fight: { p1: 'paula', p2: 'juraci', stage: 'padaria' },
   },
@@ -122,7 +122,7 @@ export const STORY: StoryChapter[] = [
     title: 'Epílogo',
     subtitle: 'Todo domingo tem mais',
     panels: [
-      { img: 'p12', motion: 'zoomOut', lines: [L('juraci', 's12a', 'Calma, gente. A vó sempre faz dois bolos!'), L('paula', 's12b', 'Mãe, você é demais.')] },
+      { img: 'p12', motion: 'zoomOut', lines: [L('juraci', 's12a', 'Calma, gente. A vó sempre faz dois bolos!'), L('paula', 's12b', 'Sogrinha, você é demais.')] },
       { img: 'p13', motion: 'zoomIn', lines: [L('gabi', 's13a', 'Todo mundo junto! Família Fighter!'), L('narrador', 's13b', 'Fim. Ou até o próximo domingo.')] },
     ],
   },

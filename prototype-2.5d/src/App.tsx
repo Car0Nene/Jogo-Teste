@@ -240,10 +240,12 @@ export default function App() {
   }, []);
 
   const launchMatchIntro = useCallback(() => {
+    // vozes começam a decodificar durante a apresentação, para a luta abrir sem engasgo
+    soundEngine.preloadFighterVoices([p1Id, p2Id, 'narrator']);
     setShowcaseOrbit(false);
     setPaused(false);
     setScreen('vs');
-  }, []);
+  }, [p1Id, p2Id]);
 
   const beginFightEngine = useCallback(() => {
     recordedMatchRef.current = null;
@@ -274,6 +276,7 @@ export default function App() {
       return;
     }
     const { p1, p2, stage } = ch.fight;
+    soundEngine.preloadFighterVoices([p1, p2, 'narrator']);
     setP1Id(p1);
     setP2Id(p2);
     setStageId(stage);
@@ -329,6 +332,7 @@ export default function App() {
     if (!onlineSession.canStart()) return;
     const f = onlineSession.hostStartFight(false);
     if (!f) return;
+    soundEngine.preloadFighterVoices([f.p1, f.p2, 'narrator']);
     setP1Id(f.p1);
     setP2Id(f.p2);
     setStageId(f.stage);

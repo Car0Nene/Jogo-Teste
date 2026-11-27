@@ -273,3 +273,18 @@ html[data-ui="touch"] { -webkit-tap-highlight-color: transparent; }
 }
 [data-platform="mobile"][data-orientation="landscape"] .ff-menu-nav > button { min-height: 44px; padding-block: 0.35rem; }
 [data-platform="mobile"][data-orientation="landscape"] .ff-menu-nav > button.translate-x-2 { translate: none; }
+/* cabe sempre na largura: itens da grade podem encolher, rótulos longos não empurram a coluna */
+[data-platform="mobile"][data-orientation="landscape"] .ff-menu-rail > * { min-width: 0; }
+[data-platform="mobile"][data-orientation="landscape"] .ff-menu-nav > button { min-width: 0; overflow: hidden; padding-inline: 0.6rem; gap: 0.4rem; }
+[data-platform="mobile"][data-orientation="landscape"] .ff-menu-nav > button .font-display {
+  font-size: clamp(0.9rem, 2.05vw, 1.2rem);
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+[data-platform="mobile"][data-orientation="landscape"] .ff-menu-nav > button svg:last-child { flex-shrink: 0; }
+
+.ff-label-short { display: none; }
+[data-platform="mobile"][data-orientation="landscape"] .ff-label-full { display: none; }
+[data-platform="mobile"][data-orientation="landscape"] .ff-label-short { display: inline; }

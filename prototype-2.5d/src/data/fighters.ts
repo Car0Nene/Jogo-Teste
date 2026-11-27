@@ -687,13 +687,13 @@ const INTRO_MATCHUPS: Record<string, DialogueExchange[][]> = {
   'juraci>pedro': [
     [
       { speaker: 'p1', text: 'Pedro, apaga esse cigarro na minha padaria!' },
-      { speaker: 'p2', text: 'Só mais uma tragada, vó...' },
+      { speaker: 'p2', text: 'Só mais uma tragada, mãe...' },
       { speaker: 'p1', text: 'Vai é levar bolada!' },
     ],
   ],
   'pedro>juraci': [
     [
-      { speaker: 'p1', text: 'Vó, a senhora viu minha Heineken?' },
+      { speaker: 'p1', text: 'Mãe, a senhora viu minha Heineken?' },
       { speaker: 'p2', text: 'Joguei fora, Pedro!' },
       { speaker: 'p1', text: 'Aí a senhora pegou pesado!' },
     ],

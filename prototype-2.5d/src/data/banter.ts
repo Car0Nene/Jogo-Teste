@@ -10,7 +10,7 @@ export const BANTER: Array<{ a: FighterId; b: FighterId; weight?: number; lines:
   { a: 'carlos', b: 'franciely', weight: 2, lines: [{ who: 'carlos', key: 'bt_franciely', dur: 2.43 }, { who: 'franciely', key: 'bt_carlos', dur: 4.55 }] },
   { a: 'daniel', b: 'tainara', weight: 2, lines: [{ who: 'daniel', key: 'bt_tainara', dur: 2.48 }, { who: 'tainara', key: 'bt_daniel', dur: 1.12 }] },
   { a: 'gabi', b: 'franciely', weight: 2, lines: [{ who: 'gabi', key: 'bt_franciely', dur: 7.47 }, { who: 'franciely', key: 'bt_gabi', dur: 2.98 }] },
-  { a: 'juraci', b: 'paula', weight: 2, lines: [{ who: 'juraci', key: 'bt_paula', dur: 1.8 }, { who: 'paula', key: 'bt_juraci', dur: 2.12 }] },
+  { a: 'juraci', b: 'paula', weight: 2, lines: [{ who: 'juraci', key: 'bt_paula', dur: 1.8 }, { who: 'paula', key: 'bt_juraci', dur: 2.69 }] },
   { a: 'juraci', b: 'franciely', weight: 2, lines: [{ who: 'juraci', key: 'bt_franciely', dur: 2.59 }, { who: 'franciely', key: 'bt_juraci', dur: 1.7 }] },
   { a: 'juraci', b: 'gabi', weight: 2, lines: [{ who: 'juraci', key: 'bt_gabi', dur: 2.51 }, { who: 'gabi', key: 'bt_juraci', dur: 2.51 }] },
   { a: 'juraci', b: 'tainara', weight: 2, lines: [{ who: 'juraci', key: 'bt_tainara', dur: 2.04 }, { who: 'tainara', key: 'bt_juraci', dur: 1.96 }] },

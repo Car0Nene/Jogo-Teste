@@ -28,6 +28,8 @@ import {
   applyRigFormAndFlash,
   applyStageLightingToRig,
   buildCharacterRig,
+  releaseUnusedFighterAtlases,
+  setAtlasProfile,
 } from './characterBuilder';
 import { createContactShadowTexture } from './proceduralTextures';
 import {
@@ -339,6 +341,14 @@ export class GameEngine {
       powerPreference: 'high-performance',
     });
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
+    // celular / GPU com limite de textura baixo: atlas reduzidos e menos atlas guardados
+    {
+      const pfState = platform.state;
+      const maxTex = this.renderer.capabilities.maxTextureSize;
+      const mem = (navigator as Navigator & { deviceMemory?: number }).deviceMemory ?? 8;
+      const mobile = pfState.profile.ui === 'touch' || maxTex < 8192 || mem <= 4;
+      setAtlasProfile(mobile ? 'mobile' : 'full');
+    }
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 1.12;
     this.renderer.setPixelRatio(this.getEffectivePixelRatio());
@@ -830,6 +840,7 @@ export class GameEngine {
     applyStageLightingToRig(r2, this.currentStageId);
     this.scene.add(r1.root);
     this.scene.add(r2.root);
+    releaseUnusedFighterAtlases([p1, p2]);
 
     this.fighters = [
       this.makeRuntime(0, p1, r1, -2.2, 1),
@@ -1806,7 +1817,8 @@ export class GameEngine {
     const texs: (THREE.Texture | undefined)[] = [];
     for (const f of this.fighters) {
       const r = f.rig;
-      texs.push(r.atlasTex, r.atlasHdTex, r.atlasHd2Tex, r.atlasHd3Tex, r.atlasHd4Tex, r.atlasHd6Tex, r.daviTex);
+      // só o que o boneco já usa (atlas moderno); tiers antigos carregam sob demanda
+      texs.push(...r.loadedTextures());
     }
     const upload = (tex: THREE.Texture, tries: number) => {
       const img = tex.image as { complete?: boolean; width?: number } | undefined;

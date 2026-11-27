@@ -32,6 +32,8 @@ export type MainMenuAction =
 interface MenuEntry {
   id: string;
   label: string;
+  /** rótulo curto para telas estreitas (celular deitado) */
+  shortLabel?: string;
   sublabel: string;
   available: boolean;
   icon: React.ReactNode;
@@ -121,6 +123,7 @@ export function MainMenu({
     {
       id: 'story',
       label: 'MODO HISTÓRIA',
+      shortLabel: 'HISTÓRIA',
       sublabel: 'Almoço de Domingo · 6 capítulos',
       available: true,
       icon: <BookOpen className="w-5 h-5" />,
@@ -322,7 +325,14 @@ export function MainMenu({
                           0{idx + 1}
                         </span>
                         <span className="font-display font-extrabold text-xl md:text-2xl tracking-wide leading-none">
-                          {entry.label}
+                          {entry.shortLabel ? (
+                            <>
+                              <span className="ff-label-full">{entry.label}</span>
+                              <span className="ff-label-short">{entry.shortLabel}</span>
+                            </>
+                          ) : (
+                            entry.label
+                          )}
                         </span>
                       </div>
                       <div

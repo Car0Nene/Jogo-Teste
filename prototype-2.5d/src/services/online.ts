@@ -843,6 +843,7 @@ class OnlineSession {
       const f = m.fight as OnlineFight;
       if (!isFighter(f.p1) || !isFighter(f.p2) || !isStage(f.stage)) return;
       soundEngine.stopAllVoices();
+      soundEngine.preloadFighterVoices([f.p1, f.p2, 'narrator']);
       this.set({ phase: 'fight', fight: f, remoteHud: null, rematch: { me: false, peer: false }, notice: '' });
       this.trackLobby();
     } else if (m.t === 'hud' && m.h) {
