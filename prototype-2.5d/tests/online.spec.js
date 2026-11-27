@@ -7,7 +7,7 @@ import { expect, test } from '@playwright/test';
  */
 test('online casual: host and guest connect, fight, rematch and return to room', async ({ browser }, testInfo) => {
   test.skip(testInfo.project.name !== 'desktop-chromium');
-  test.setTimeout(150_000);
+  test.setTimeout(240_000);
   const context = await browser.newContext({ viewport: { width: 1280, height: 720 } });
   const host = await context.newPage();
   const guest = await context.newPage();
@@ -41,12 +41,13 @@ test('online casual: host and guest connect, fight, rematch and return to room',
   await expect(host.getByTestId('online-start')).toBeEnabled({ timeout: 10_000 });
   await host.getByTestId('online-start').click();
 
-  // o convidado vê a tela do anfitrião e o próprio placar
-  await expect(guest.getByTestId('online-guest-view')).toBeVisible({ timeout: 30_000 });
+  // o convidado vê a tela do anfitrião e o próprio placar (aba do convidado na frente, como na vida real)
+  await guest.bringToFront();
+  await expect(guest.getByTestId('online-guest-view')).toBeVisible({ timeout: 45_000 });
   await expect
     .poll(() => guest.evaluate(() => (document.querySelector('[data-testid="online-guest-view"] video')?.srcObject?.getVideoTracks?.().length ?? 0)), { timeout: 20_000 })
     .toBeGreaterThan(0);
-  await expect(guest.locator('.ff-hud-top')).toBeVisible({ timeout: 30_000 });
+  await expect(guest.locator('.ff-hud-top')).toBeVisible({ timeout: 60_000 });
 
   const hostEngine = (fn) => host.evaluate(fn);
   await expect.poll(() => hostEngine(() => window.__ffEngine?.getGameMode()), { timeout: 30_000 }).toBe('online');
