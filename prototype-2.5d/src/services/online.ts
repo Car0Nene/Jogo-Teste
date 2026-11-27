@@ -223,7 +223,9 @@ function localTransport(topic: string, selfId: string): Transport {
     const now = Date.now();
     let changed = false;
     for (const [id, p] of peers) {
-      if (now - p.at > 4500) {
+      // aba em segundo plano tem timers atrasados pelo navegador: só some depois de 15 s calado
+      // (quem fecha a aba manda 'leave' na hora)
+      if (now - p.at > 15000) {
         peers.delete(id);
         changed = true;
       }
