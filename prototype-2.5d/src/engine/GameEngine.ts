@@ -42,7 +42,8 @@ import {
 import { BuiltStage, buildStage } from './stageBuilder';
 
 export type ScreenMode = 'title' | 'select' | 'fight';
-export type GameMode = 'cpu' | 'versus' | 'training';
+/** online = 2P controlado pela rede (P2 só por entradas virtuais vindas do convidado) */
+export type GameMode = 'cpu' | 'versus' | 'training' | 'online';
 export type CpuDifficulty = 'easy' | 'normal' | 'hard';
 
 export interface HudFighterSnapshot {
@@ -557,6 +558,21 @@ export class GameEngine {
   public setShowcaseOrbit(enabled: boolean) {
     this.showcaseOrbit = enabled;
     if (!enabled) this.showcaseAngle = 0;
+  }
+
+  private renderSuspended = false;
+  /** Online (convidado): a tela mostra o vídeo do anfitrião, então não precisa desenhar a cena local. */
+  public setRenderSuspended(suspended: boolean) {
+    this.renderSuspended = suspended;
+  }
+
+  /** Canvas WebGL (o anfitrião do online transmite este quadro para o convidado). */
+  public getCanvas(): HTMLCanvasElement {
+    return this.renderer.domElement;
+  }
+
+  public getGameMode(): GameMode {
+    return this.gameMode;
   }
 
   public setPaused(paused: boolean) {
@@ -1810,7 +1826,7 @@ export class GameEngine {
       const dt = Math.min(rawDt, 0.05);
 
       this.step(dt);
-      this.renderer.render(this.scene, this.camera);
+      if (!this.renderSuspended) this.renderer.render(this.scene, this.camera);
 
       if (this.isSoftwareGl) {
         this.afterDraw(tick);

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { assetUrl } from '../../assetUrl';
 import { FIGHTERS, FighterId } from '../../data/fighters';
 import { STAGES, StageId } from '../../data/stages';
@@ -25,12 +25,22 @@ export function MatchIntroOverlay({
   const p2 = FIGHTERS[p2Id];
   const stage = STAGES[stageId];
 
+  // o pai pode recriar onComplete a cada render (placar online, ping…): os timers não podem reiniciar por isso
+  const doneRef = useRef(onComplete);
+  doneRef.current = onComplete;
+  const finishedRef = useRef(false);
+  const finish = () => {
+    if (finishedRef.current) return;
+    finishedRef.current = true;
+    doneRef.current();
+  };
+
   useEffect(() => {
     soundEngine.playRoundBell();
     const p1Timer = window.setTimeout(() => setPhase('p1'), 360);
     const p2Timer = window.setTimeout(() => setPhase('p2'), 980);
     const versusTimer = window.setTimeout(() => setPhase('versus'), 1600);
-    const timer = window.setTimeout(onComplete, 2500);
+    const timer = window.setTimeout(finish, 2500);
 
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.code === 'Enter' || e.code === 'Space' || e.code === 'Escape') {
@@ -39,7 +49,7 @@ export function MatchIntroOverlay({
         window.clearTimeout(p1Timer);
         window.clearTimeout(p2Timer);
         window.clearTimeout(versusTimer);
-        onComplete();
+        finish();
       }
     };
     window.addEventListener('keydown', onKeyDown);
@@ -50,11 +60,12 @@ export function MatchIntroOverlay({
       window.clearTimeout(versusTimer);
       window.removeEventListener('keydown', onKeyDown);
     };
-  }, [onComplete]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div
-      onClick={onComplete}
+      onClick={finish}
       role="dialog"
       aria-label="Apresentação da luta"
       aria-live="polite"
@@ -72,7 +83,7 @@ export function MatchIntroOverlay({
       {/* Top Arena Banner */}
       <div className="ff-intro-heading relative z-10 text-center px-4">
         <div className="text-xs font-mono-num uppercase tracking-[0.26em] text-amber-300">
-          {phase === 'arena' ? 'APRESENTANDO ARENA' : phase === 'versus' ? (gameMode === 'training' ? 'TREINO LIVRE' : gameMode === 'versus' ? 'VERSUS LOCAL' : 'MODO ARCADE') : phase === 'p1' ? 'DESAFIANTE' : 'RIVAL'}
+          {phase === 'arena' ? 'APRESENTANDO ARENA' : phase === 'versus' ? (gameMode === 'training' ? 'TREINO LIVRE' : gameMode === 'versus' ? 'VERSUS LOCAL' : gameMode === 'online' ? 'ONLINE CASUAL' : 'MODO ARCADE') : phase === 'p1' ? 'DESAFIANTE' : 'RIVAL'}
         </div>
         <div className="ff-intro-stage-title font-display font-extrabold text-3xl sm:text-4xl text-white mt-0.5">
           {stage.name.toUpperCase()} · {stage.timeOfDay.toUpperCase()}
@@ -123,7 +134,7 @@ export function MatchIntroOverlay({
           <div className="mt-3 flex items-end justify-between flex-row-reverse">
             <div>
               <div className="text-[11px] font-mono-num font-bold text-sky-300">
-                {gameMode === 'versus' ? '2P · RIVAL' : 'CPU · RIVAL'}
+                {gameMode === 'versus' || gameMode === 'online' ? '2P · RIVAL' : 'CPU · RIVAL'}
               </div>
               <div className="ff-intro-name font-display font-extrabold text-4xl text-white leading-none">
                 {p2.name}

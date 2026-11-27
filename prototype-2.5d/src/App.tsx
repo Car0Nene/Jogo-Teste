@@ -1,5 +1,5 @@
 import { Diagnostics } from './engine/diagnostics';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { FIGHTERS, FighterId } from './data/fighters';
 import {
   formatKeyCode,
@@ -29,12 +29,25 @@ import { SettingsModal } from './components/menu/SettingsModal';
 import { StageSelectScreen } from './components/menu/StageSelectScreen';
 import { accountService } from './services/account';
 import { AccountModal } from './components/AccountModal';
+import { OnlineScreen } from './components/menu/OnlineScreen';
+import { OnlineGuestView } from './components/OnlineGuestView';
+import { onlineSession, OnlineFight } from './services/online';
+import type { PressAction } from './engine/GameEngine';
 import { platform, usePlatform } from './platform/platform';
 import { BootIntro, shouldShowBootIntro } from './components/menu/BootIntro';
 
 const platformState = () => platform.state;
 
-type AppScreen = 'title' | 'modes' | 'select' | 'stage' | 'vs' | 'fight' | 'extras' | 'story';
+type AppScreen = 'title' | 'modes' | 'select' | 'stage' | 'vs' | 'fight' | 'extras' | 'story' | 'online' | 'onlineGuest';
+
+const readInviteCode = (): string | null => {
+  try {
+    const code = new URLSearchParams(location.search).get('sala');
+    return code && /^[A-Za-z]{4}$/.test(code) ? code.toUpperCase() : null;
+  } catch {
+    return null;
+  }
+};
 
 export default function App() {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -61,6 +74,11 @@ export default function App() {
   const [storyChapter, setStoryChapter] = useState<number | null>(null);
   const [hud, setHud] = useState<HudSnapshot | null>(null);
   const pf = usePlatform();
+  // ---------- Online casual ----------
+  const online = useSyncExternalStore(onlineSession.subscribe, onlineSession.getSnapshot, onlineSession.getSnapshot);
+  const [inviteCode, setInviteCode] = useState<string | null>(readInviteCode);
+  const [onlineMenuOpen, setOnlineMenuOpen] = useState(false);
+  const guestRecordedRef = useRef<number | null>(null);
 
   // Perfil da plataforma → motor: enquadramento da luta e densidade de pixels.
   // (O combate não muda; só câmera e resolução.)
@@ -110,8 +128,16 @@ export default function App() {
     if (!el) return;
     const engine = new GameEngine(el, (snapshot) => {
       setHud(snapshot);
+      onlineSession.relayHud(snapshot);
     });
     engineRef.current = engine;
+    // online: o anfitrião transmite o canvas e aplica no 2P os comandos que chegam do convidado
+    onlineSession.setCanvasProvider(() => engineRef.current?.getCanvas() ?? null);
+    onlineSession.hostInput = {
+      hold: (action, down) => engineRef.current?.triggerVirtualHold(1, action, down),
+      press: (action: PressAction) => engineRef.current?.triggerVirtualPress(1, action),
+      clear: () => ['left', 'right', 'up', 'down', 'guard'].forEach((a) => engineRef.current?.triggerVirtualHold(1, a, false)),
+    };
     // Modo diagnóstico (?diag=1 ou F3): painel de desempenho e acesso ao motor para medições.
     const diag = new Diagnostics(() => engineRef.current);
     const exposeEngine = () => {
@@ -269,12 +295,118 @@ export default function App() {
   }, [storyChapter, screen, hud?.phase, hud?.winnerIndex, startStory]);
 
   useEffect(() => {
-    if (screen !== 'fight' || gameMode !== 'cpu' || hud?.phase !== 'matchOver' || recordedMatchRef.current) return;
+    if (screen !== 'fight' || (gameMode !== 'cpu' && gameMode !== 'online') || hud?.phase !== 'matchOver' || recordedMatchRef.current) return;
     recordedMatchRef.current = `${Date.now()}-${hud.p1.id}-${hud.winnerIndex}`;
-    void accountService.recordMatch(hud.winnerIndex === 0 ? 'win' : hud.winnerIndex === 1 ? 'loss' : 'draw', hud.p1.id);
+    const outcome = hud.winnerIndex === 0 ? 'win' : hud.winnerIndex === 1 ? 'loss' : 'draw';
+    void accountService.recordMatch(outcome, hud.p1.id, {
+      mode: gameMode === 'online' ? 'online' : 'cpu',
+      opponentFighter: hud.p2.id,
+      opponentName: gameMode === 'online' ? onlineSession.getSnapshot().room?.guest?.nick ?? null : null,
+    });
   }, [screen, gameMode, hud]);
 
+  // ---------- Online casual ----------
+  const openOnline = useCallback(() => {
+    setStoryChapter(null);
+    setShowcaseOrbit(false);
+    setPaused(false);
+    setOnlineMenuOpen(false);
+    setScreen('online');
+    engineRef.current?.setRenderSuspended(false);
+    engineRef.current?.setScreenMode('title');
+  }, []);
+
+  /** anfitrião: começa (ou recomeça) a luta com as escolhas da sala */
+  const startOnlineEngine = useCallback((f: OnlineFight) => {
+    recordedMatchRef.current = null;
+    setOnlineMenuOpen(false);
+    setPaused(false);
+    setScreen('fight');
+    engineRef.current?.startMatch(f.p1, f.p2, f.stage, 'online', 'normal');
+  }, []);
+
+  const hostStartOnline = useCallback(() => {
+    if (!onlineSession.canStart()) return;
+    const f = onlineSession.hostStartFight(false);
+    if (!f) return;
+    setP1Id(f.p1);
+    setP2Id(f.p2);
+    setStageId(f.stage);
+    setGameMode('online');
+    setScreen('vs');
+  }, []);
+
+  useEffect(() => {
+    onlineSession.onRematch = () => {
+      const f = onlineSession.hostStartFight(true);
+      if (f) startOnlineEngine(f);
+    };
+    onlineSession.onFightEnd = (reason) => {
+      setOnlineMenuOpen(false);
+      setPaused(false);
+      soundEngine.stopAllVoices();
+      engineRef.current?.setRenderSuspended(false);
+      engineRef.current?.setScreenMode('title');
+      soundEngine.startMusic('theme', 0.8);
+      if (reason) onlineSession.note(reason);
+      setScreen('online');
+    };
+    return () => {
+      onlineSession.onRematch = null;
+      onlineSession.onFightEnd = null;
+    };
+  }, [startOnlineEngine]);
+
+  // link de convite (?sala=ABCD) abre direto a tela online
+  useEffect(() => {
+    if (inviteCode) setScreen('online');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // convidado: o anfitrião começou a luta
+  useEffect(() => {
+    const f = online.fight;
+    if (online.role !== 'guest' || online.phase !== 'fight' || !f) return;
+    if (f.rematch && screen === 'onlineGuest') return;
+    // o convidado não monta cenário nem lutadores: a imagem vem do anfitrião
+    setGameMode('online');
+    setOnlineMenuOpen(false);
+    setScreen(f.rematch ? 'onlineGuest' : 'vs');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [online.fight?.seq, online.role, online.phase]);
+
+  // convidado não desenha a própria cena durante a luta (a imagem vem do anfitrião)
+  useEffect(() => {
+    engineRef.current?.setRenderSuspended(screen === 'onlineGuest' || (screen === 'vs' && online.role === 'guest'));
+  }, [screen, online.role]);
+
+  // convidado: grava o próprio resultado (ele é o 2P)
+  useEffect(() => {
+    const h = online.remoteHud;
+    const f = online.fight;
+    if (online.role !== 'guest' || !f || h?.phase !== 'matchOver' || guestRecordedRef.current === f.seq) return;
+    guestRecordedRef.current = f.seq;
+    void accountService.recordMatch(h.winnerIndex === 1 ? 'win' : h.winnerIndex === 0 ? 'loss' : 'draw', f.p2, {
+      mode: 'online',
+      opponentFighter: f.p1,
+      opponentName: online.room?.host.nick ?? null,
+    });
+  }, [online.role, online.fight, online.remoteHud, online.room]);
+
+  const leaveOnlineFight = useCallback(() => {
+    setOnlineMenuOpen(false);
+    onlineSession.endFight('');
+    if (onlineSession.getSnapshot().role === 'guest') {
+      // o anfitrião confirma com "end"; enquanto isso já volta para a sala
+      setScreen('online');
+    }
+  }, []);
+
   const togglePause = useCallback(() => {
+    if (onlineSession.getSnapshot().phase === 'fight') {
+      setOnlineMenuOpen((v) => !v);
+      return;
+    }
     setPaused((prev) => {
       const next = !prev;
       engineRef.current?.setPaused(next);
@@ -290,7 +422,7 @@ export default function App() {
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (settingsOpen) return;
-      if (screen === 'fight') {
+      if (screen === 'fight' || screen === 'onlineGuest') {
         if (e.code === 'Escape' || (e.code === 'KeyP' && gameMode !== 'versus')) {
           e.preventDefault();
           togglePause();
@@ -334,6 +466,41 @@ export default function App() {
           onOpenExtras={() => setScreen('extras')}
           onOpenAccount={() => { setAccountOpen(true); void accountService.open(); }}
           onStartStory={() => startStory()}
+          onOpenOnline={openOnline}
+        />
+      )}
+
+      {/* ONLINE CASUAL: saguão e sala */}
+      {screen === 'online' && !settingsOpen && (
+        <OnlineScreen
+          inviteCode={inviteCode}
+          onInviteConsumed={() => {
+            setInviteCode(null);
+            try {
+              const url = new URL(location.href);
+              url.searchParams.delete('sala');
+              history.replaceState(null, '', url.toString());
+            } catch {
+              /* ok */
+            }
+          }}
+          onBack={openTitle}
+          onHostStart={hostStartOnline}
+          onOpenAccount={() => { setAccountOpen(true); void accountService.open(); }}
+        />
+      )}
+
+      {/* ONLINE CASUAL: tela do convidado */}
+      {screen === 'onlineGuest' && (
+        <OnlineGuestView
+          stream={online.remoteStream}
+          hud={online.remoteHud}
+          settings={settings}
+          pingMs={online.pingMs}
+          rematch={online.rematch}
+          hostNick={online.room?.host.nick ?? 'o anfitrião'}
+          onToggleMute={toggleMute}
+          onMenu={() => setOnlineMenuOpen((v) => !v)}
         />
       )}
 
@@ -383,11 +550,23 @@ export default function App() {
       {/* MATCH INTRODUCTION VS SPLASH */}
       {screen === 'vs' && (
         <MatchIntroOverlay
-          p1Id={p1Id}
-          p2Id={p2Id}
-          stageId={stageId}
+          p1Id={online.role === 'guest' && online.fight ? online.fight.p1 : p1Id}
+          p2Id={online.role === 'guest' && online.fight ? online.fight.p2 : p2Id}
+          stageId={online.role === 'guest' && online.fight ? online.fight.stage : stageId}
           gameMode={gameMode}
-          onComplete={beginFightEngine}
+          onComplete={() => {
+            if (gameMode !== 'online') {
+              beginFightEngine();
+              return;
+            }
+            const os = onlineSession.getSnapshot();
+            if (os.phase !== 'fight') {
+              setScreen('online');
+              return;
+            }
+            if (os.role === 'guest') setScreen('onlineGuest');
+            else beginFightEngine();
+          }}
         />
       )}
 
@@ -423,8 +602,9 @@ export default function App() {
           onSkipIntro={() => engineRef.current?.skipIntro()}
           onVirtualHold={(p, act, down) => engineRef.current?.triggerVirtualHold(p, act, down)}
           onVirtualPress={(p, act) => engineRef.current?.triggerVirtualPress(p, act)}
-          onRematch={storyChapter !== null ? storyFight : beginFightEngine}
-          onBackToSelect={storyChapter !== null ? openTitle : () => goToSelect(gameMode)}
+          rematchState={gameMode === 'online' ? online.rematch : undefined}
+          onRematch={gameMode === 'online' ? () => onlineSession.requestRematch() : storyChapter !== null ? storyFight : beginFightEngine}
+          onBackToSelect={gameMode === 'online' ? () => onlineSession.endFight('') : storyChapter !== null ? openTitle : () => goToSelect(gameMode)}
           onTrainingOptions={(o) => engineRef.current?.setTrainingOptions(o)}
           onTrainingReset={(c) => engineRef.current?.resetTraining(c)}
         />
@@ -503,6 +683,27 @@ export default function App() {
                 className="py-2.5 min-h-[42px] bg-[#14101d] hover:bg-[#20192e] border border-white/10 text-stone-300 text-xs font-semibold cursor-pointer"
               >
                 Menu Principal
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MENU DA LUTA ONLINE (não pausa: a luta segue para os dois) */}
+      {onlineMenuOpen && (screen === 'fight' || screen === 'onlineGuest') && (
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/70 p-4">
+          <div className="ff-chamfer w-full max-w-sm border-2 border-amber-400/50 bg-[#100d18] p-6 text-center">
+            <h2 className="font-display text-3xl font-extrabold text-white">LUTA ONLINE</h2>
+            <p className="mt-1 text-xs text-stone-400">O jogo não pausa no online — a luta continua enquanto este menu está aberto.</p>
+            <div className="mt-5 grid gap-2.5">
+              <button type="button" onClick={() => setOnlineMenuOpen(false)} className="min-h-[44px] bg-amber-400 font-bold text-stone-950">
+                Voltar para a luta
+              </button>
+              <button type="button" onClick={leaveOnlineFight} className="min-h-[42px] border border-white/15 bg-[#1a1526] text-sm font-semibold">
+                Encerrar e voltar à sala
+              </button>
+              <button type="button" onClick={() => setSettingsOpen(true)} className="min-h-[42px] border border-white/15 bg-[#1a1526] text-sm font-semibold text-amber-300">
+                Configurações
               </button>
             </div>
           </div>

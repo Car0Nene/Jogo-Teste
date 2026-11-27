@@ -9,19 +9,65 @@ const VALID_FIGHTERS = new Set([
   'juraci', 'carlos', 'pedro', 'daniel', 'franciely', 'gabi', 'paula', 'tainara', 'davi',
 ]);
 
-type MatchOutcome = 'win' | 'loss' | 'draw';
+export type MatchOutcome = 'win' | 'loss' | 'draw';
+export type MatchMode = 'cpu' | 'story' | 'online';
 
 interface PendingMatch {
   matchId: string;
   userId: string;
   outcome: MatchOutcome;
   fighterId: FighterId;
+  mode?: MatchMode;
+  opponentFighter?: FighterId | null;
+  opponentName?: string | null;
+}
+
+export interface MatchOptions {
+  mode?: MatchMode;
+  opponentFighter?: FighterId | null;
+  opponentName?: string | null;
+  /** mesmo id nos dois aparelhos não é preciso: cada jogador grava o seu */
+  matchId?: string;
+}
+
+export interface ProfileStats {
+  nickname: string;
+  selectedFighter: FighterId;
+  matchesPlayed: number;
+  wins: number;
+  losses: number;
+  draws: number;
+  onlineWins: number;
+  onlineLosses: number;
+  onlineDraws: number;
+}
+
+export interface LeaderboardRow {
+  nickname: string;
+  selected_fighter: FighterId;
+  matches_played: number;
+  wins: number;
+  losses: number;
+  draws: number;
+  online_wins: number;
+  online_losses: number;
+}
+
+export interface RecentMatch {
+  outcome: MatchOutcome;
+  selected_fighter: FighterId;
+  mode: MatchMode;
+  opponent_fighter: FighterId | null;
+  opponent_name: string | null;
+  created_at: string;
 }
 
 export interface AccountSnapshot {
   configured: boolean;
   email: string | null;
+  userId: string | null;
   nickname: string | null;
+  stats: ProfileStats | null;
   progress: string;
   status: string;
   syncStatus: string;
@@ -36,7 +82,9 @@ declare global {
 const INITIAL_STATE: AccountSnapshot = {
   configured: false,
   email: null,
+  userId: null,
   nickname: null,
+  stats: null,
   progress: '',
   status: 'Verificando a conexão com a conta…',
   syncStatus: '',
@@ -65,7 +113,12 @@ class AccountService {
 
   private setUser(user: User | null) {
     this.user = user;
-    this.update({ email: user?.email ?? null, nickname: user ? this.state.nickname : null });
+    this.update({
+      email: user?.email ?? null,
+      userId: user?.id ?? null,
+      nickname: user ? this.state.nickname : null,
+      stats: user ? this.state.stats : null,
+    });
   }
 
   private async loadRuntimeConfig(): Promise<{ url: string; anonKey: string } | null> {
@@ -245,21 +298,61 @@ class AccountService {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
       this.setUser(null);
-      this.update({ progress: '', status: 'Você saiu da conta. O jogo continua disponível neste aparelho.' });
+      this.update({ progress: '', stats: null, status: 'Você saiu da conta. O jogo continua disponível neste aparelho.' });
     } catch (error) {
       this.update({ status: `Não foi possível sair: ${this.friendly(error)}` });
       throw error;
     }
   }
 
-  async recordMatch(outcome: MatchOutcome, fighterId: FighterId) {
+  /** Cliente Supabase compartilhado (o online usa o Realtime dele). Null se não houver configuração. */
+  async realtimeClient(): Promise<SupabaseClient | null> {
+    try {
+      return await this.client();
+    } catch {
+      return null;
+    }
+  }
+
+  /** Nome mostrado no online: apelido da conta, senão o apelido local de convidado. */
+  displayName(): string {
+    return (this.state.nickname || localStorage.getItem('ff-guest-nick') || '').trim();
+  }
+
+  async leaderboard(limit = 20): Promise<LeaderboardRow[]> {
+    const supabase = await this.client();
+    const { data, error } = await supabase.rpc('family_fighter_leaderboard', { p_limit: limit });
+    if (error) throw new Error(this.friendly(error));
+    return (data ?? []) as LeaderboardRow[];
+  }
+
+  async recentMatches(limit = 8): Promise<RecentMatch[]> {
+    if (!this.user) return [];
+    const supabase = await this.client();
+    const { data, error } = await supabase
+      .from('family_fighter_match_events')
+      .select('outcome, selected_fighter, mode, opponent_fighter, opponent_name, created_at')
+      .eq('user_id', this.user.id)
+      .order('created_at', { ascending: false })
+      .limit(limit);
+    if (error) throw new Error(this.friendly(error));
+    return (data ?? []) as RecentMatch[];
+  }
+
+  async recordMatch(outcome: MatchOutcome, fighterId: FighterId, options: MatchOptions = {}) {
     if (!this.state.configured || !VALID_OUTCOMES.has(outcome) || !VALID_FIGHTERS.has(fighterId)) return;
     if (!this.user) {
       this.update({ syncStatus: 'Entre em Minha Conta para guardar seu histórico de lutas.' });
       return;
     }
     const match: PendingMatch = {
-      matchId: crypto.randomUUID(), userId: this.user.id, outcome, fighterId,
+      matchId: options.matchId ?? crypto.randomUUID(),
+      userId: this.user.id,
+      outcome,
+      fighterId,
+      mode: options.mode ?? 'cpu',
+      opponentFighter: options.opponentFighter && VALID_FIGHTERS.has(options.opponentFighter) ? options.opponentFighter : null,
+      opponentName: options.opponentName ? options.opponentName.slice(0, 32) : null,
     };
     this.writeQueue([...this.readQueue(), match]);
     if (!navigator.onLine) {
@@ -279,6 +372,7 @@ class AccountService {
       this.writeQueue(this.readQueue().filter((item) => item.matchId !== match.matchId));
       this.update({ syncStatus: 'Resultado salvo na sua conta ✓' });
       await this.flush();
+      if (this.user) await this.loadProgress(this.user);
     } catch (error) {
       this.update({ syncStatus: `Resultado guardado neste aparelho para enviar depois (${this.friendly(error)}).` });
     }
@@ -288,7 +382,7 @@ class AccountService {
     const supabase = await this.client();
     const { data, error } = await supabase
       .from('family_fighter_profiles')
-      .select('nickname, selected_fighter, matches_played, wins, losses, draws')
+      .select('nickname, selected_fighter, matches_played, wins, losses, draws, online_wins, online_losses, online_draws')
       .eq('user_id', user.id)
       .maybeSingle();
     if (error) throw error;
@@ -296,16 +390,30 @@ class AccountService {
     const rate = data.matches_played ? Math.round((data.wins / data.matches_played) * 100) : 0;
     this.update({
       nickname: data.nickname,
+      stats: {
+        nickname: data.nickname,
+        selectedFighter: data.selected_fighter as FighterId,
+        matchesPlayed: data.matches_played,
+        wins: data.wins,
+        losses: data.losses,
+        draws: data.draws,
+        onlineWins: data.online_wins ?? 0,
+        onlineLosses: data.online_losses ?? 0,
+        onlineDraws: data.online_draws ?? 0,
+      },
       progress: `Lutador favorito: ${this.fighterName(data.selected_fighter)}\nLutas: ${data.matches_played} · Vitórias: ${data.wins} · Derrotas: ${data.losses} · Empates: ${data.draws}\nAproveitamento: ${rate}%`,
     });
   }
 
   private async send(match: PendingMatch) {
     const supabase = await this.client();
-    const { error } = await supabase.rpc('record_family_fighter_match', {
+    const { error } = await supabase.rpc('record_family_fighter_match_v2', {
       p_match_id: match.matchId,
       p_outcome: match.outcome,
       p_selected_fighter: match.fighterId,
+      p_mode: match.mode ?? 'cpu',
+      p_opponent_fighter: match.opponentFighter ?? null,
+      p_opponent_name: match.opponentName ?? null,
     });
     if (error) throw error;
   }
@@ -361,6 +469,8 @@ class AccountService {
     if (/email not confirmed/i.test(message)) return 'confirme o e-mail antes de entrar.';
     if (/already registered/i.test(message)) return 'este e-mail já tem conta. Use Entrar.';
     if (/failed to fetch|network/i.test(message)) return 'falha de rede. Verifique a internet.';
+    if (/rate limit/i.test(message)) return 'muitas tentativas seguidas. Espere alguns minutos e tente de novo.';
+    if (/password should be/i.test(message)) return 'a senha precisa ter pelo menos 6 caracteres.';
     return message.slice(0, 200);
   }
 }

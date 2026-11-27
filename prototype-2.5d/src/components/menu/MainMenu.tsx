@@ -5,6 +5,7 @@ import {
   Compass,
   Dumbbell,
   Gamepad2,
+  Globe,
   Lock,
   Maximize2,
   Minimize2,
@@ -50,6 +51,7 @@ interface MainMenuProps {
   onOpenExtras: () => void;
   onStartStory?: () => void;
   onOpenAccount: () => void;
+  onOpenOnline?: () => void;
 }
 
 export function MainMenu({
@@ -65,6 +67,7 @@ export function MainMenu({
   onOpenExtras,
   onStartStory,
   onOpenAccount,
+  onOpenOnline,
 }: MainMenuProps) {
   const [focusedIdx, setFocusedIdx] = useState(0);
   const [featuredIdx, setFeaturedIdx] = useState(2); // Pedro featured initially
@@ -102,6 +105,17 @@ export function MainMenu({
       action: () => {
         soundEngine.playUi('select');
         onStartMode('versus');
+      },
+    },
+    {
+      id: 'online',
+      label: 'ONLINE',
+      sublabel: 'Casual · Sala com código para a família',
+      available: true,
+      icon: <Globe className="w-5 h-5" />,
+      action: () => {
+        soundEngine.playUi('select');
+        onOpenOnline?.();
       },
     },
     {

@@ -28,6 +28,10 @@ interface FightHudProps {
   onBackToSelect: () => void;
   onTrainingOptions?: (o: Partial<TrainingOptions>) => void;
   onTrainingReset?: (clearStats?: boolean) => void;
+  /** online: de qual lado está quem olha esta tela (o convidado é o 2P) */
+  meSlot?: 'p1' | 'p2';
+  /** online: quem já pediu revanche */
+  rematchState?: { me: boolean; peer: boolean };
 }
 
 
@@ -252,7 +256,11 @@ export function FightHud({
   onBackToSelect,
   onTrainingOptions,
   onTrainingReset,
+  meSlot = 'p1',
+  rematchState,
 }: FightHudProps) {
+  const online = gameMode === 'online';
+  const mine = meSlot === 'p2' ? hud.p2 : hud.p1;
   const pf = usePlatform();
   const compact = pf.profile.hud === 'compact';
   // controles de toque aparecem quando o jogador está tocando; somem com teclado/controle
@@ -353,11 +361,17 @@ export function FightHud({
               {hud.winnerIndex === 0 ? FIGHTERS[hud.p1.id].quote : FIGHTERS[hud.p2.id].quote}
             </p>
             <div className="flex items-center justify-center gap-3 mt-5">
-              <button type="button" onClick={onRematch} className="px-5 py-2.5 min-h-[44px] rounded-lg bg-amber-400 hover:bg-amber-300 text-stone-950 font-bold text-sm transition-colors cursor-pointer">
-                Revanche
+              <button
+                type="button"
+                onClick={onRematch}
+                disabled={online && rematchState?.me}
+                className="px-5 py-2.5 min-h-[44px] rounded-lg bg-amber-400 hover:bg-amber-300 text-stone-950 font-bold text-sm transition-colors cursor-pointer disabled:opacity-60"
+                data-testid="hud-rematch"
+              >
+                {online && rematchState?.me ? 'Esperando o outro…' : online && rematchState?.peer ? 'Revanche! (o outro topou)' : 'Revanche'}
               </button>
               <button type="button" onClick={onBackToSelect} className="px-5 py-2.5 min-h-[44px] rounded-lg bg-stone-800 hover:bg-stone-700 text-stone-100 border border-white/15 font-semibold text-sm transition-colors cursor-pointer">
-                Trocar Lutadores
+                {online ? 'Voltar à sala' : 'Trocar Lutadores'}
               </button>
             </div>
           </div>
@@ -368,8 +382,8 @@ export function FightHud({
       {showTouch ? (
         hud.phase !== 'matchOver' && (
           <TouchControls
-            meter={hud.p1.meter}
-            specialCost={hud.p1.id === 'davi' ? 100 : 50}
+            meter={mine.meter}
+            specialCost={mine.id === 'davi' ? 100 : 50}
             scale={touchScale * pf.profile.touchScale}
             opacity={touchOpacity}
             lefty={touchLefty}
@@ -379,7 +393,7 @@ export function FightHud({
         )
       ) : (
         <DesktopCommandBar
-          hud={hud}
+          hud={meSlot === 'p2' ? { ...hud, p1: hud.p2 } : hud}
           keyBindings={keyBindings}
           inputMode={pf.inputMode}
           onVirtualHold={onVirtualHold}
