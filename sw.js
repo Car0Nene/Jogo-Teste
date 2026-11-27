@@ -4,13 +4,13 @@
  * Regra principal: o jogo nunca mostra arte, voz ou música de uma versão antiga.
  * - Arquivos com versão no nome/URL (bundles com hash, "?v=") são imutáveis: cache primeiro.
  * - Mídia estática da publicação (vozes, músicas, sprites, retratos, cenários, vídeo): cache
- *   primeiro DENTRO desta publicação. Como 3e8da3f67cde muda a cada build e a ativação apaga os
+ *   primeiro DENTRO desta publicação. Como 07f31877e67e muda a cada build e a ativação apaga os
  *   caches anteriores, nunca aparece mídia de versão antiga — e no celular cada fala/sprite não
  *   vai mais à rede toda vez (era isso que engasgava as falas no 4G).
  * - Páginas, scripts sem hash e configuração vão SEMPRE à rede primeiro; cache só offline.
  */
 
-const CACHE_NAME = 'familia-fighter-3e8da3f67cde';
+const CACHE_NAME = 'familia-fighter-07f31877e67e';
 
 const isBuildMedia = (url) =>
   /\/assets\/.+\.(mp3|ogg|m4a|wav|webp|png|jpg|jpeg|gif|svg|mp4|webm|json|glb|ktx2)$/i.test(url.pathname);
