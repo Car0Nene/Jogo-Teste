@@ -83,10 +83,37 @@ interface Transport {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Msg = { t: string; from?: string; to?: string; [key: string]: any };
 
-const ICE_SERVERS: RTCIceServer[] = [
+const STUN_SERVERS: RTCIceServer[] = [
   { urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302'] },
   { urls: 'stun:stun.cloudflare.com:3478' },
 ];
+
+/**
+ * Credenciais TURN temporárias (Cloudflare Realtime) vindas de um Worker que guarda a chave.
+ * TURN retransmite a conexão quando a rede bloqueia a ligação direta (Wi-Fi de empresa, 4G com NAT
+ * restrito). Se o serviço não responder, segue só com STUN (conexão direta), como antes.
+ */
+const TURN_ENDPOINT = 'https://familia-fighter-turn.familia-fighter.workers.dev';
+let iceCache: { servers: RTCIceServer[]; until: number } | null = null;
+
+async function iceServers(useTurn: boolean): Promise<RTCIceServer[]> {
+  if (!useTurn) return STUN_SERVERS;
+  if (iceCache && iceCache.until > Date.now()) return iceCache.servers;
+  try {
+    const ctl = new AbortController();
+    const timer = window.setTimeout(() => ctl.abort(), 2500);
+    const r = await fetch(TURN_ENDPOINT, { signal: ctl.signal, cache: 'no-store' });
+    window.clearTimeout(timer);
+    if (!r.ok) throw new Error(String(r.status));
+    const data = (await r.json()) as { iceServers?: RTCIceServer[] };
+    if (!data.iceServers?.length) throw new Error('sem servidores');
+    // credenciais valem 3 h; renova com folga
+    iceCache = { servers: [...STUN_SERVERS, ...data.iceServers], until: Date.now() + 2 * 3600 * 1000 };
+    return iceCache.servers;
+  } catch {
+    return STUN_SERVERS;
+  }
+}
 
 const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
 const FIGHTER_IDS = Object.keys(FIGHTERS) as FighterId[];
@@ -643,9 +670,10 @@ class OnlineSession {
 
   // ------------------------------------------------ conexão direta (WebRTC)
 
-  private newPeer(): RTCPeerConnection {
+  private async newPeer(): Promise<RTCPeerConnection> {
     this.closePeer();
-    const pc = new RTCPeerConnection({ iceServers: ICE_SERVERS });
+    const servers = await iceServers(this.state.transport === 'supabase');
+    const pc = new RTCPeerConnection({ iceServers: servers });
     this.pc = pc;
     this.pendingIce = [];
     const other = () => (this.state.role === 'host' ? this.state.room?.guest?.id : this.state.room?.host.id);
@@ -672,7 +700,7 @@ class OnlineSession {
     const guestId = this.state.room?.guest?.id;
     if (!guestId) return;
     this.set({ link: 'connecting' });
-    const pc = this.newPeer();
+    const pc = await this.newPeer();
     const dc = pc.createDataChannel('game', { ordered: true });
     this.bindChannel(dc);
     const canvas = this.canvasProvider?.() ?? null;
@@ -713,7 +741,10 @@ class OnlineSession {
   private async acceptOffer(offer: RTCSessionDescriptionInit) {
     const hostId = this.state.room?.host.id;
     this.set({ link: 'connecting' });
-    const pc = this.newPeer();
+    const pending = this.pendingIce;
+    const pc = await this.newPeer();
+    // candidatos que chegaram enquanto buscávamos as credenciais TURN
+    this.pendingIce = pending;
     pc.ondatachannel = (e) => this.bindChannel(e.channel);
     pc.ontrack = (e) => {
       try {

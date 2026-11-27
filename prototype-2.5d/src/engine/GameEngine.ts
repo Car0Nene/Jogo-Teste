@@ -43,6 +43,8 @@ import {
 } from './propsBuilder';
 import { BuiltStage, buildStage } from './stageBuilder';
 import { AiWorld, FighterAI, HoldAction } from './ai/FighterAI';
+import { HitEffects } from './fx/HitEffects';
+import { frameFight } from './camera/fightCamera';
 import {
   ATTACKER_PUSHBACK_RANGE,
   ATTACKER_PUSHBACK_RATIO,
@@ -207,15 +209,6 @@ interface ActiveCameo {
   wetZoneX?: number;
 }
 
-interface SparkParticle {
-  mesh: THREE.Mesh;
-  vx: number;
-  vy: number;
-  vz: number;
-  life: number;
-  maxLife: number;
-}
-
 const ARENA_HALF_W = 7.4;
 const MAX_HP = 1000;
 
@@ -264,13 +257,9 @@ export class GameEngine {
   private chatterTimer = 14;
   private flashKey = 0;
   private cameos: ActiveCameo[] = [];
-  private bursts: Array<{ mesh: THREE.Group; life: number; maxLife: number }> = [];
-  private sparks: SparkParticle[] = [];
-  private sparkMats = new Map<string, THREE.MeshBasicMaterial>();
-  private sparkPool: THREE.Mesh[] = [];
+  /** faíscas, corações e estouros de impacto (engine/fx/HitEffects.ts) */
+  private fx!: HitEffects;
   private fxKeepAlive: THREE.Group | null = null;
-  private sparkGeo: THREE.SphereGeometry;
-  private heartGeo: THREE.ShapeGeometry;
 
   private matchPhase: 'intro' | 'banner' | 'fighting' | 'ko' | 'matchOver' = 'intro';
   private phaseTimer = 0;
@@ -404,12 +393,7 @@ export class GameEngine {
     this.scene.add(this.rimLight);
 
     this.shadowTex = createContactShadowTexture();
-    this.sparkGeo = new THREE.SphereGeometry(0.06, 8, 6);
-    const heart = new THREE.Shape();
-    heart.moveTo(0, -0.13);
-    heart.bezierCurveTo(-0.3, 0.06, -0.14, 0.23, 0, 0.1);
-    heart.bezierCurveTo(0.14, 0.23, 0.3, 0.06, 0, -0.13);
-    this.heartGeo = new THREE.ShapeGeometry(heart);
+    this.fx = new HitEffects(this.scene);
 
     this.loadStage('bar');
     this.spawnFighters('pedro', 'paula');
@@ -865,7 +849,7 @@ export class GameEngine {
   private disposeRig(root: THREE.Object3D) {
     root.traverse((obj) => {
       const mesh = obj as THREE.Mesh;
-      if (mesh.geometry && mesh.geometry !== this.sparkGeo && mesh.geometry !== this.heartGeo) mesh.geometry.dispose();
+      if (mesh.geometry && !this.fx.isShared(mesh.geometry)) mesh.geometry.dispose();
       const mats = Array.isArray(mesh.material) ? mesh.material : mesh.material ? [mesh.material] : [];
       for (const m of mats) m.dispose();
     });
@@ -1016,10 +1000,7 @@ export class GameEngine {
     this.projectiles = [];
     for (const c of this.cameos) this.removeFx(c.mesh);
     this.cameos = [];
-    for (const b of this.bursts) this.removeFx(b.mesh);
-    this.bursts = [];
-    for (const s of this.sparks) this.releaseSpark(s.mesh);
-    this.sparks = [];
+    this.fx.clear();
   }
 
   private syncFighterTransforms() {
@@ -1752,37 +1733,16 @@ export class GameEngine {
   }
 
   private spawnBurst(x: number, y: number) {
-    const mesh = buildBurstMesh();
-    mesh.position.set(x, y, 0.25);
-    this.scene.add(mesh);
-    this.bursts.push({ mesh, life: 0.24, maxLife: 0.24 });
+    this.fx.spawnBurst(x, y);
   }
 
   private sparkMaterial(colorHex: number, hearts: boolean): THREE.MeshBasicMaterial {
-    const key = `${colorHex}:${hearts ? 1 : 0}`;
-    let mat = this.sparkMats.get(key);
-    if (!mat) {
-      mat = new THREE.MeshBasicMaterial({ color: colorHex, side: hearts ? THREE.DoubleSide : THREE.FrontSide });
-      this.sparkMats.set(key, mat);
-    }
-    return mat;
-  }
-
-  private releaseSpark(m: THREE.Mesh) {
-    this.scene.remove(m);
-    if (this.sparkPool.length < 160) this.sparkPool.push(m);
+    return this.fx.sparkMaterial(colorHex, hearts);
   }
 
   /** Tira um efeito de cena e libera geometria/material (texturas são compartilhadas e ficam). */
   private removeFx(obj: THREE.Object3D) {
-    this.scene.remove(obj);
-    obj.traverse((o) => {
-      const mesh = o as THREE.Mesh;
-      if (!mesh.isMesh) return;
-      if (mesh.geometry && mesh.geometry !== this.sparkGeo && mesh.geometry !== this.heartGeo) mesh.geometry.dispose();
-      const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
-      for (const m of mats) m?.dispose();
-    });
+    this.fx.removeFx(obj);
   }
 
   /**
@@ -1794,8 +1754,8 @@ export class GameEngine {
     holder.position.set(0, -50, 0);
     holder.add(buildBurstMesh());
     for (const k of kinds) holder.add(buildProjectileMesh(k));
-    for (const hex of [0x93c5fd, 0xff9f1c, 0xfef08a]) holder.add(new THREE.Mesh(this.sparkGeo, this.sparkMaterial(hex, false)));
-    holder.add(new THREE.Mesh(this.heartGeo, this.sparkMaterial(0xec4899, true)));
+    for (const hex of [0x93c5fd, 0xff9f1c, 0xfef08a]) holder.add(new THREE.Mesh(this.fx.sparkGeo, this.sparkMaterial(hex, false)));
+    holder.add(new THREE.Mesh(this.fx.heartGeo, this.sparkMaterial(0xec4899, true)));
     this.scene.add(holder);
     try {
       this.renderer.compile(this.scene, this.camera);
@@ -1838,27 +1798,7 @@ export class GameEngine {
   }
 
   private spawnSparks(x: number, y: number, colorHex: number, count = 10, hearts = false) {
-    const mat = this.sparkMaterial(colorHex, hearts);
-    const geo = hearts ? this.heartGeo : this.sparkGeo;
-    for (let i = 0; i < count; i++) {
-      const pooled = this.sparkPool.pop();
-      const m = pooled ?? new THREE.Mesh(geo, mat);
-      m.geometry = geo;
-      m.material = mat;
-      m.scale.setScalar(1);
-      m.position.set(x, y, (Math.random() - 0.5) * 0.4);
-      this.scene.add(m);
-      const a = Math.random() * Math.PI * 2;
-      const spd = 2.5 + Math.random() * 5.2;
-      this.sparks.push({
-        mesh: m,
-        vx: Math.cos(a) * spd,
-        vy: Math.sin(a) * spd + 1.5,
-        vz: (Math.random() - 0.5) * 2.5,
-        life: 0.36 + Math.random() * 0.18,
-        maxLife: 0.5,
-      });
-    }
+    this.fx.spawnSparks(x, y, colorHex, count, hearts);
   }
 
   private startLoop() {
@@ -1978,7 +1918,7 @@ export class GameEngine {
       this.updateFightSimulation(dt);
     }
 
-    this.updateSparks(dt);
+    this.fx.update(dt);
   }
 
   private updateTitleScene(dt: number) {
@@ -2783,23 +2723,7 @@ export class GameEngine {
   private updateFightCamera(dt: number) {
     if (!this.fighters) return;
     const [f1, f2] = this.fighters;
-    const midX = (f1.x + f2.x) * 0.5;
-    const span = Math.abs(f1.x - f2.x);
-    const fr = this.framing;
-    const w = Math.max(1, this.container.clientWidth);
-    const h = Math.max(1, this.container.clientHeight);
-    const maxY = Math.max(f1.y, f2.y);
-    const baseDistance = fr.minDistance - 0.4 + span * 0.68;
-    // escala da imagem é a da tela inteira (o deslocamento não muda o zoom)
-    const tan = Math.tan(THREE.MathUtils.degToRad(this.baseFov * 0.5));
-    const horizontalViewTangent = (tan * w) / h;
-    const desiredWidth = span + fr.sideMargin;
-    const fitDistance = desiredWidth / (2 * Math.max(0.01, horizontalViewTangent));
-    // altura: corpo + pulo cabem na área útil (entre HUD e controles)
-    const usefulH = Math.max(0.25, 1 - fr.top - fr.bottom);
-    const fitHeight = (3.1 + maxY) / (2 * tan * usefulH);
-    const zDist = THREE.MathUtils.clamp(Math.max(baseDistance, fitDistance, fitHeight), fr.minDistance, 60);
-
+    // tremor e timers ficam aqui; o enquadramento é engine/camera/fightCamera.ts
     let sx = 0;
     let sy = 0;
     if (this.shakeTimer > 0) {
@@ -2807,19 +2731,11 @@ export class GameEngine {
       sx = (Math.random() - 0.5) * this.shakeAmp;
       sy = (Math.random() - 0.5) * this.shakeAmp;
     }
-
-    // especial: aproxima e centraliza em quem soltou o golpe, depois volta suave
-    let camX = midX;
-    let camZ = zDist;
+    let superFocus: { progress: number; x: number } | null = null;
     if (this.superTimer > 0) {
       this.superTimer = Math.max(0, this.superTimer - dt);
-      const p = 1 - this.superTimer / Math.max(0.001, this.superDuration);
-      const k = Math.sin(Math.min(1, p) * Math.PI);
-      camX = THREE.MathUtils.lerp(midX, this.superFocusX, 0.75 * k);
-      camZ = zDist * (1 - 0.28 * k);
+      superFocus = { progress: 1 - this.superTimer / Math.max(0.001, this.superDuration), x: this.superFocusX };
     }
-    const camDrop = 0;
-    const camOrbit = 0;
     if (this.superCutinTimer > 0) {
       this.superCutinTimer = Math.max(0, this.superCutinTimer - dt);
       if (this.superCutinTimer === 0) {
@@ -2827,44 +2743,21 @@ export class GameEngine {
         this.emitHud();
       }
     }
-
-    this._camTarget.set(
-      camX * 0.85 + sx + camOrbit,
-      1.74 + maxY * 0.32 + sy + Math.max(0, camZ - 10) * 0.11 - camDrop,
-      camZ
-    );
-    this._camLook.set(camX * 0.9, 1.08 + maxY * 0.25, -0.4);
+    const shot = frameFight({
+      x1: f1.x,
+      x2: f2.x,
+      maxY: Math.max(f1.y, f2.y),
+      framing: this.framing,
+      viewW: this.container.clientWidth,
+      viewH: this.container.clientHeight,
+      fovDeg: this.baseFov,
+      superFocus,
+    });
+    this._camTarget.set(shot.x + sx, shot.y + sy, shot.z);
+    this._camLook.set(shot.lookX, shot.lookY, shot.lookZ);
     this.camera.position.lerp(this._camTarget, 1 - Math.exp(-9 * dt));
     this.camera.lookAt(this._camLook);
     this.currentStage?.setParallax?.(this.camera.position.x);
-  }
-
-  private updateSparks(dt: number) {
-    for (let i = this.bursts.length - 1; i >= 0; i--) {
-      const b = this.bursts[i];
-      b.life -= dt;
-      const t = 1 - Math.max(0, b.life / b.maxLife);
-      const sc = 0.7 + Math.sin(t * Math.PI) * 0.55;
-      b.mesh.scale.setScalar(sc);
-      if (b.life <= 0) {
-        this.removeFx(b.mesh);
-        this.bursts.splice(i, 1);
-      }
-    }
-    for (let i = this.sparks.length - 1; i >= 0; i--) {
-      const s = this.sparks[i];
-      s.life -= dt;
-      s.vy -= 14 * dt;
-      s.mesh.position.x += s.vx * dt;
-      s.mesh.position.y += s.vy * dt;
-      s.mesh.position.z += s.vz * dt;
-      const sc = Math.max(0.01, s.life / s.maxLife);
-      s.mesh.scale.setScalar(sc);
-      if (s.life <= 0) {
-        this.releaseSpark(s.mesh);
-        this.sparks.splice(i, 1);
-      }
-    }
   }
 
   public emitHud() {
@@ -2939,10 +2832,8 @@ export class GameEngine {
     this.clearEntities();
     this.currentStage?.dispose();
     this.shadowTex.dispose();
-    this.sparkGeo.dispose();
-    for (const m of this.sparkMats.values()) m.dispose();
     if (this.fxKeepAlive) this.removeFx(this.fxKeepAlive);
-    this.heartGeo.dispose();
+    this.fx.dispose();
     this.renderer.dispose();
     if (this.renderer.domElement.parentNode === this.container) {
       this.container.removeChild(this.renderer.domElement);
