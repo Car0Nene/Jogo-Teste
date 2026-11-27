@@ -41,7 +41,10 @@ test('online casual: host and guest connect, fight, rematch and return to room',
   await expect(host.getByTestId('online-start')).toBeEnabled({ timeout: 10_000 });
   await host.getByTestId('online-start').click();
 
-  // o convidado vê a tela do anfitrião e o próprio placar (aba do convidado na frente, como na vida real)
+  // a luta começa primeiro no anfitrião (aba dele na frente até o motor entrar em luta)
+  await host.bringToFront();
+  await expect.poll(() => host.evaluate(() => window.__ffEngine?.getGameMode()), { timeout: 90_000 }).toBe('online');
+  // depois o convidado vê a tela do anfitrião e o próprio placar
   await guest.bringToFront();
   await expect(guest.getByTestId('online-guest-view')).toBeVisible({ timeout: 45_000 });
   await expect
@@ -50,7 +53,6 @@ test('online casual: host and guest connect, fight, rematch and return to room',
   await expect(guest.locator('.ff-hud-top')).toBeVisible({ timeout: 60_000 });
 
   const hostEngine = (fn) => host.evaluate(fn);
-  await expect.poll(() => hostEngine(() => window.__ffEngine?.getGameMode()), { timeout: 30_000 }).toBe('online');
   expect(await hostEngine(() => [window.__ffEngine.fighters[0].id, window.__ffEngine.fighters[1].id])).toEqual(['carlos', 'pedro']);
 
   // Enter do convidado pula a apresentação na luta do anfitrião
