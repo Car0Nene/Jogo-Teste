@@ -235,24 +235,18 @@ test('Davi uses meter, timed transformation and damaging specials', async ({ pag
       pickIntroDialogue('davi', relative),
       pickIntroDialogue(relative, 'davi'),
     ]);
-    const cpu = { id: 'davi', state: 'idle', meter: 100, form: 'normal', x: 0, aiThinkTimer: 0, aiAction: 'idle' };
-    const player = { x: 1.5, state: 'idle' };
+    // IA da CPU (engine/ai/FighterAI.ts): Davi usa o especial de perto, se transforma de longe e bate sem barra
+    const { FighterAI } = await import('/src/engine/ai/FighterAI.ts');
+    const view = (o) => ({ id: 'davi', x: 0, y: 0, vy: 0, facing: 1, hp: 1000, maxHp: 1000, meter: 0, form: 'normal', state: 'idle', move: null, moveElapsed: 0, moveHitConnected: false, noGuardTimer: 0, gag: null, ...o });
     const choices = [];
-    engine.trySpecial = (_fighter, sub) => choices.push(sub ? 'transform' : 'special');
-    engine.tryAttack = (_fighter, attack) => choices.push(attack);
-    const random = Math.random;
-    try {
-      Math.random = () => 0;
-      engine.updateCpuAi(cpu, player, 0.3);
-      cpu.meter = 50;
-      player.x = 4;
-      engine.updateCpuAi(cpu, player, 0.3);
-      cpu.meter = 0;
-      player.x = 1.5;
-      engine.updateCpuAi(cpu, player, 0.3);
-    } finally {
-      Math.random = random;
-    }
+    const out = { setHolds: () => {}, press: (a) => choices.push(a === 'subSpecial' ? 'transform' : a) };
+    const decide = (meter, oppX) => {
+      const ai = new FighterAI('davi', 'hard', () => 0);
+      ai.update(0.3, { me: view({ meter }), opp: view({ id: 'pedro', x: oppX }), arenaHalfW: 7.4, incomingProjectile: null }, out);
+    };
+    decide(100, 1.5);
+    decide(50, 2.8);
+    decide(0, 1.5);
     return { insufficient, transformed, expired, superMove, finalMove, cooldownMeter, hits, dialogues, choices };
   });
 

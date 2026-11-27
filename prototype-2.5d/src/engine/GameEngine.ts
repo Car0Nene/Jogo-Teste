@@ -40,6 +40,7 @@ import {
   updateCameoVisual,
 } from './propsBuilder';
 import { BuiltStage, buildStage } from './stageBuilder';
+import { AiWorld, FighterAI, HoldAction } from './ai/FighterAI';
 
 export type ScreenMode = 'title' | 'select' | 'fight';
 /** online = 2P controlado pela rede (P2 só por entradas virtuais vindas do convidado) */
@@ -134,8 +135,6 @@ interface FighterRuntime {
   dogCooldown: number;
   slipTimer: number;
   hitInvuln: number;
-  aiThinkTimer: number;
-  aiAction: 'approach' | 'retreat' | 'guard' | 'idle';
   daviIdleTime: number;
   daviVoiceCooldown: number;
   daviSpecialCooldown: number;
@@ -664,6 +663,9 @@ export class GameEngine {
   ) {
     this.gameMode = mode;
     this.difficulty = difficulty;
+    // IA nova a cada partida (os hábitos aprendidos valem só para a luta em curso)
+    this.cpuAi = null;
+    this.cpuAiFor = null;
     this.loadStage(stageId);
     this.spawnFighters(p1, p2);
     this.clearEntities();
@@ -713,7 +715,9 @@ export class GameEngine {
   }
 
   public setTrainingOptions(opts: Partial<TrainingOptions>) {
+    const wasCpu = this.isP2Cpu();
     this.trainingOpts = { ...this.trainingOpts, ...opts };
+    if (wasCpu && !this.isP2Cpu()) this.setCpuHolds(1, new Set());
     this.dummyGuardTimer = 0;
     this.emitHud();
   }
@@ -815,8 +819,10 @@ export class GameEngine {
 
   private spawnFighters(p1: FighterId, p2: FighterId) {
     if (this.fighters) {
-      this.scene.remove(this.fighters[0].rig.root);
-      this.scene.remove(this.fighters[1].rig.root);
+      for (const f of this.fighters) {
+        this.scene.remove(f.rig.root);
+        this.disposeRig(f.rig.root);
+      }
     }
     const r1 = buildCharacterRig(p1, this.maxAnisotropy, this.shadowTex);
     const r2 = buildCharacterRig(p2, this.maxAnisotropy, this.shadowTex);
@@ -830,6 +836,19 @@ export class GameEngine {
       this.makeRuntime(1, p2, r2, 2.2, -1),
     ];
     this.syncFighterTransforms();
+  }
+
+  /**
+   * Libera a geometria e os materiais de um boneco que saiu de cena (antes vazavam ~6 geometrias por
+   * partida/troca na seleção). As texturas (atlas de animação) ficam: são compartilhadas em cache.
+   */
+  private disposeRig(root: THREE.Object3D) {
+    root.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (mesh.geometry && mesh.geometry !== this.sparkGeo && mesh.geometry !== this.heartGeo) mesh.geometry.dispose();
+      const mats = Array.isArray(mesh.material) ? mesh.material : mesh.material ? [mesh.material] : [];
+      for (const m of mats) m.dispose();
+    });
   }
 
   private makeRuntime(
@@ -870,8 +889,6 @@ export class GameEngine {
       dogCooldown: id === 'daniel' ? 7 : Infinity,
       slipTimer: 0,
       hitInvuln: 0,
-      aiThinkTimer: 0.2,
-      aiAction: 'approach',
       daviIdleTime: 0,
       daviVoiceCooldown: 0,
       daviSpecialCooldown: 0,
@@ -952,6 +969,10 @@ export class GameEngine {
     }
     this.roundTimer = 99;
     this.lastCountdownSec = 99;
+    if (this.isP2Cpu()) {
+      this.cpuAi?.resetRound();
+      this.setCpuHolds(1, new Set());
+    }
     if (showBanner) {
       this.matchPhase = 'banner';
       this.bannerText = this.roundNumber >= 3 ? 'FINAL ROUND!' : `ROUND ${this.roundNumber}`;
@@ -1311,10 +1332,12 @@ export class GameEngine {
       const gag = FIGHTERS[winner.id].moves.gag;
       const melee = gag?.finisher === 'bundada' || gag?.finisher === 'selfie';
       const dist = Math.abs(winner.x - loser.x);
-      if (gag && (!melee || dist <= 2.2)) this.startAttackMove(winner, gag);
-      else winner.aiAction = 'approach';
+      if (gag && (!melee || dist <= 2.2)) {
+        this.setCpuHolds(1, new Set());
+        this.startAttackMove(winner, gag);
+      } else this.setCpuHolds(1, new Set<HoldAction>([loser.x > winner.x ? 'right' : 'left']));
     }
-    this.stepFighter(winner, loser, dt, this.gameMode === 'cpu' && winner.index === 1);
+    this.stepFighter(winner, loser, dt);
     this.resolveBodyPush(f1, f2);
     this.stepProjectiles(dt);
     this.stepCameos(dt);
@@ -2045,10 +2068,10 @@ export class GameEngine {
         this.stepTraining(dt, f1, f2);
       }
 
-      const p2Cpu = this.gameMode === 'cpu' || (this.gameMode === 'training' && this.trainingOpts.dummy === 'cpu');
-      if (p2Cpu) this.updateCpuAi(f2, f1, dt);
-      this.stepFighter(f1, f2, dt, false);
-      this.stepFighter(f2, f1, dt, p2Cpu);
+      const p2Cpu = this.isP2Cpu();
+      if (p2Cpu) this.runCpuAi(f2, f1, dt);
+      this.stepFighter(f1, f2, dt);
+      this.stepFighter(f2, f1, dt);
       this.resolveBodyPush(f1, f2);
       this.stepProjectiles(dt);
       this.stepCameos(dt);
@@ -2117,68 +2140,68 @@ export class GameEngine {
     return 'idle';
   }
 
-  private updateCpuAi(cpu: FighterRuntime, player: FighterRuntime, dt: number) {
-    if (this.gameMode !== 'cpu' && this.gameMode !== 'training') return;
-    if (['hitstun', 'blockstun', 'knockdown', 'transform', 'victory'].includes(cpu.state)) return;
+  /** IA da CPU (2P): joga pelos mesmos comandos do jogador — ver engine/ai/FighterAI.ts */
+  private cpuAi: FighterAI | null = null;
 
-    // Daniel's loyal golden dog passive support!
-    if (cpu.id === 'daniel') {
-      cpu.dogCooldown -= dt;
-      if (cpu.dogCooldown <= 0) {
-        cpu.dogCooldown = 14;
-        this.spawnCameo('dog', cpu);
-      }
-    }
-
-    const dist = Math.abs(cpu.x - player.x);
-    const aggr = this.difficulty === 'hard' ? 0.85 : this.difficulty === 'normal' ? 0.58 : 0.32;
-    if (cpu.noGuardTimer > 0 && cpu.state !== 'attack') {
-      // sem defesa: a única saída é atacar para interromper o especial
-      if (dist <= 2.2) this.tryAttack(cpu, Math.random() < 0.5 ? 'light' : 'heavy');
-      else cpu.aiAction = 'approach';
-    }
-    const blockChance = this.difficulty === 'hard' ? 0.72 : this.difficulty === 'normal' ? 0.45 : 0.2;
-
-    cpu.aiThinkTimer -= dt;
-    if (cpu.aiThinkTimer <= 0) {
-      cpu.aiThinkTimer = this.difficulty === 'hard' ? 0.14 : this.difficulty === 'normal' ? 0.24 : 0.42;
-
-      if (player.state === 'attack' && dist < 2.6 && Math.random() < blockChance) {
-        cpu.aiAction = 'guard';
-      } else if (dist > 2.3) {
-        cpu.aiAction = Math.random() < aggr ? 'approach' : 'idle';
-      } else if (dist < 1.2 && Math.random() < 0.25) {
-        cpu.aiAction = 'retreat';
-      } else {
-        cpu.aiAction = 'idle';
-      }
-
-      if (cpu.state !== 'attack') {
-        if (cpu.id === 'davi' && cpu.meter >= 100 && dist < 2.7 && Math.random() < aggr * 0.6) {
-          this.trySpecial(cpu, false);
-        } else if (cpu.id === 'davi' && cpu.form === 'normal' && cpu.meter >= 50 && dist > 2.5 && Math.random() < aggr * 0.22) {
-          this.trySpecial(cpu, true);
-        } else if (cpu.id !== 'davi' && cpu.meter >= 100 && dist > 2.2 && Math.random() < aggr * 0.6) {
-          this.trySpecial(cpu, false);
-        } else if (cpu.id !== 'davi' && cpu.meter >= 50 && dist > 1.8 && Math.random() < aggr * 0.32) {
-          this.trySpecial(cpu, true);
-        } else if (
-          FIGHTERS[cpu.id].moves.gag &&
-          (['bundada', 'selfie'].includes(FIGHTERS[cpu.id].moves.gag!.finisher!) ? dist <= 2.4 : dist > 2.4 && dist < 7.5) &&
-          Math.random() < aggr * 0.1
-        ) {
-          // golpe cômico da CPU (bundada/selfie de perto, os arremessos de longe)
-          this.startAttackMove(cpu, FIGHTERS[cpu.id].moves.gag!);
-        } else if (dist <= 2.15 && Math.random() < aggr) {
-          this.tryAttack(cpu, Math.random() < 0.55 ? 'light' : 'heavy');
-        } else if (dist > 3.2 && Math.random() < 0.12 * aggr) {
-          this.tryJump(cpu);
-        }
-      }
-    }
+  private aiView(f: FighterRuntime) {
+    const gag = FIGHTERS[f.id].moves.gag;
+    return {
+      id: f.id,
+      x: f.x,
+      y: f.y,
+      vy: f.vy,
+      facing: f.facing,
+      hp: f.hp,
+      maxHp: f.maxHp,
+      meter: f.meter,
+      form: f.form,
+      state: f.state,
+      move: f.activeMove,
+      moveElapsed: f.moveElapsed,
+      moveHitConnected: f.moveHitConnected,
+      noGuardTimer: f.noGuardTimer,
+      gag: gag?.finisher ? { melee: gag.finisher === 'bundada' || gag.finisher === 'selfie' } : null,
+    };
   }
 
-  private stepFighter(f: FighterRuntime, opp: FighterRuntime, dt: number, isCpu: boolean) {
+  private setCpuHolds(index: 0 | 1, holds: ReadonlySet<HoldAction>) {
+    for (const a of ['left', 'right', 'up', 'down', 'guard'] as const) this.triggerVirtualHold(index, a, holds.has(a));
+  }
+
+  private runCpuAi(cpu: FighterRuntime, player: FighterRuntime, dt: number) {
+    if (!this.cpuAi || this.cpuAiFor !== cpu.id) {
+      this.cpuAi = new FighterAI(cpu.id, this.difficulty);
+      this.cpuAiFor = cpu.id;
+    }
+    this.cpuAi.setDifficulty(this.difficulty);
+    let incoming: number | null = null;
+    for (const p of this.projectiles) {
+      if (p.ownerIndex === cpu.index || (p.delay ?? 0) > 0) continue;
+      const towards = Math.sign(p.vx) === Math.sign(cpu.x - p.x);
+      const d = Math.abs(cpu.x - p.x);
+      if (towards && (incoming === null || d < incoming)) incoming = d;
+    }
+    const world: AiWorld = { me: this.aiView(cpu), opp: this.aiView(player), arenaHalfW: ARENA_HALF_W, incomingProjectile: incoming };
+    const out = {
+      setHolds: (h: ReadonlySet<HoldAction>) => this.setCpuHolds(cpu.index, h),
+      press: (a: PressAction) => this.pressAction(cpu, a),
+    };
+    this.cpuAi.update(dt, world, out);
+    if (cpu.y > 0.3) this.cpuAi.airAttack(world, out);
+  }
+
+  private cpuAiFor: FighterId | null = null;
+
+  private isP2Cpu() {
+    return this.gameMode === 'cpu' || (this.gameMode === 'training' && this.trainingOpts.dummy === 'cpu');
+  }
+
+  /** para depuração/treino: o que a IA está pensando */
+  public getCpuAiDebug() {
+    return this.cpuAi?.getDebug() ?? null;
+  }
+
+  private stepFighter(f: FighterRuntime, opp: FighterRuntime, dt: number) {
     const spec = FIGHTERS[f.id];
     const formSpec = FORMS[f.form];
 
@@ -2219,8 +2242,8 @@ export class GameEngine {
       }
     }
 
-    // Daniel's golden dog passive support for P1 as well!
-    if (!isCpu && f.id === 'daniel' && this.matchPhase === 'fighting') {
+    // Daniel: o cão fiel entra para ajudar de tempos em tempos (jogador ou CPU)
+    if (f.id === 'daniel' && this.matchPhase === 'fighting') {
       f.dogCooldown -= dt;
       if (f.dogCooldown <= 0) {
         f.dogCooldown = 14;
@@ -2316,10 +2339,11 @@ export class GameEngine {
       }
     } else if (f.state !== 'victory') {
       // Normal movement / crouch / guard
-      const wantLeft = isCpu ? f.aiAction === (f.facing === 1 ? 'retreat' : 'approach') : this.isHeld(f.index, 'left');
-      const wantRight = isCpu ? f.aiAction === (f.facing === 1 ? 'approach' : 'retreat') : this.isHeld(f.index, 'right');
-      const wantDown = !isCpu && this.isHeld(f.index, 'down');
-      const wantGuard = isCpu ? f.aiAction === 'guard' : this.isHeld(f.index, 'guard');
+      // jogador, CPU (IA) e convidado online passam todos pelo mesmo caminho de entrada
+      const wantLeft = this.isHeld(f.index, 'left');
+      const wantRight = this.isHeld(f.index, 'right');
+      const wantDown = this.isHeld(f.index, 'down');
+      const wantGuard = this.isHeld(f.index, 'guard');
 
       if (f.y <= 0.02) {
         if (wantGuard && f.noGuardTimer <= 0) {
@@ -2383,6 +2407,8 @@ export class GameEngine {
     move?: MoveSpec
   ) {
     if (def.hitInvuln > 0 || this.matchPhase !== 'fighting') return;
+    // padrão de jogo de luta: quem está caído não pode ser golpeado (sem "OTG"/rasteira infinita no chão)
+    if (def.state === 'knockdown' && this.finishWinner === null) return;
     if (this.finishWinner !== null) {
       // durante o TERMINA ELE! só o vencedor bate, e o golpe encerra a partida
       if (att.index === this.finishWinner) this.endFinish(this.finishGagUsed);
