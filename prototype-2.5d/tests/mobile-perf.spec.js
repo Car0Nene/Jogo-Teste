@@ -56,7 +56,11 @@ test('mobile uses reduced atlases with correct frame mapping and frees unused on
       await new Promise((res) => setTimeout(res, 1500));
     }
     e.skipIntro();
-    await new Promise((res) => setTimeout(res, 800));
+    // atlas pode demorar numa máquina lenta: espera os dois aparecerem (até 20 s)
+    const t0 = performance.now();
+    while (performance.now() - t0 < 20000 && !e.fighters.every((f) => f.rig.spriteMesh.visible && f.rig.spriteMesh.userData.drawn)) {
+      await new Promise((res) => setTimeout(res, 200));
+    }
     const out = [];
     for (const f of e.fighters) {
       const uv = f.rig.spriteGeo.getAttribute('uv').array;

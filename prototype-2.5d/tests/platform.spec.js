@@ -124,10 +124,11 @@ test('loads the game and accepts fight controls at this viewport', async ({ page
   await page.getByRole('button', { name: /INICIAR COMBATE/ }).click();
   const introPortraits = page.locator('.ff-match-intro .ff-intro-portrait img');
   await expect(introPortraits).toHaveCount(2);
-  await expect.poll(() => introPortraits.first().evaluate((img) => img.complete && img.naturalWidth > 0)).toBeTruthy();
-  await expect.poll(() => introPortraits.first().evaluate((img) => getComputedStyle(img).objectFit)).toBe('contain');
-  await expect.poll(() => introPortraits.last().evaluate((img) => getComputedStyle(img).objectFit)).toBe('contain');
-  await page.keyboard.press('Enter');
+  // a apresentação fecha sozinha em ~2,5 s: lê tudo de uma vez, sem depender da velocidade da máquina
+  const intro = await introPortraits.evaluateAll((imgs) => imgs.map((img) => ({ fit: getComputedStyle(img).objectFit, src: img.currentSrc || img.src })));
+  expect(intro.map((i) => i.fit)).toEqual(['contain', 'contain']);
+  for (const { src } of intro) expect((await page.request.get(src)).status(), src).toBe(200);
+  if (await page.locator('.ff-match-intro').count()) await page.keyboard.press('Enter');
   await expect(page.locator('.ff-match-intro')).toHaveCount(0);
 
   const lightAttack = page.getByRole('button', { name: /Leve/ });
