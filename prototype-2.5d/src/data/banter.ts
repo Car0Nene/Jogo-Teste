@@ -4,11 +4,11 @@ import type { FighterId } from './fighters';
 export interface BanterLine { who: FighterId; key: string; dur: number }
 export const BANTER: Array<{ a: FighterId; b: FighterId; weight?: number; lines: BanterLine[] }> = [
   // reações da família (vozes clonadas): entre as mulheres todo mundo é "fofa"
-  { a: 'pedro', b: 'daniel', weight: 2, lines: [{ who: 'pedro', key: 'bt_daniel', dur: 1.96 }, { who: 'daniel', key: 'bt_pedro', dur: 1.67 }] },
+  { a: 'pedro', b: 'daniel', weight: 2, lines: [{ who: 'pedro', key: 'bt_daniel', dur: 1.96 }, { who: 'daniel', key: 'bt_pedro', dur: 1.78 }] },
   { a: 'juraci', b: 'pedro', weight: 2, lines: [{ who: 'juraci', key: 'bt_pedro', dur: 2.72 }, { who: 'pedro', key: 'bt_juraci', dur: 1.18 }] },
   { a: 'pedro', b: 'paula', weight: 2, lines: [{ who: 'pedro', key: 'bt_paula', dur: 1.49 }, { who: 'paula', key: 'bt_pedro', dur: 4.78 }] },
   { a: 'carlos', b: 'franciely', weight: 2, lines: [{ who: 'carlos', key: 'bt_franciely', dur: 2.43 }, { who: 'franciely', key: 'bt_carlos', dur: 4.55 }] },
-  { a: 'daniel', b: 'tainara', weight: 2, lines: [{ who: 'daniel', key: 'bt_tainara', dur: 2.48 }, { who: 'tainara', key: 'bt_daniel', dur: 1.31 }] },
+  { a: 'daniel', b: 'tainara', weight: 2, lines: [{ who: 'daniel', key: 'bt_tainara', dur: 2.69 }, { who: 'tainara', key: 'bt_daniel', dur: 1.31 }] },
   { a: 'gabi', b: 'franciely', weight: 2, lines: [{ who: 'gabi', key: 'bt_franciely', dur: 7.47 }, { who: 'franciely', key: 'bt_gabi', dur: 2.98 }] },
   { a: 'juraci', b: 'paula', weight: 2, lines: [{ who: 'juraci', key: 'bt_paula', dur: 1.8 }, { who: 'paula', key: 'bt_juraci', dur: 2.69 }] },
   { a: 'juraci', b: 'franciely', weight: 2, lines: [{ who: 'juraci', key: 'bt_franciely', dur: 2.59 }, { who: 'franciely', key: 'bt_juraci', dur: 1.7 }] },
