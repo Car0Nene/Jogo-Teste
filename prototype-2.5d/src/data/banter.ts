@@ -24,7 +24,7 @@ export const BANTER: Array<{ a: FighterId; b: FighterId; weight?: number; lines:
   { a: 'franciely', b: 'carlos', lines: [{ who: 'franciely', key: 'vsCarlos', dur: 2.35 }, { who: 'carlos', key: 'vsFranciely', dur: 1.99 }] },
   { a: 'tainara', b: 'daniel', lines: [{ who: 'tainara', key: 'vsDaniel', dur: 3.71 }, { who: 'daniel', key: 'trabalhar', dur: 2.80 }] },
   { a: 'juraci', b: 'paula', lines: [{ who: 'juraci', key: 'vsPaula', dur: 2.85 }, { who: 'paula', key: 'vsJuraci', dur: 2.87 }] },
-  { a: 'davi', b: 'carlos', lines: [{ who: 'davi', key: 'vsCarlos', dur: 2.53 }, { who: 'carlos', key: 'vsDavi', dur: 1.52 }] },
+  { a: 'davi', b: 'carlos', lines: [{ who: 'davi', key: 'vsCarlos', dur: 2.66 }, { who: 'carlos', key: 'vsDavi', dur: 1.52 }] },
   { a: 'gabi', b: 'franciely', lines: [{ who: 'gabi', key: 'vsFranciely', dur: 2.17 }, { who: 'franciely', key: 'vsGabi', dur: 1.70 }] },
   { a: 'tainara', b: 'pedro', lines: [{ who: 'tainara', key: 'vsPedro', dur: 2.93 }, { who: 'pedro', key: 'cerveja', dur: 2.09 }] },
   { a: 'carlos', b: 'pedro', lines: [{ who: 'carlos', key: 'vsPedro', dur: 2.59 }, { who: 'pedro', key: 'instigando', dur: 1.28 }] },
